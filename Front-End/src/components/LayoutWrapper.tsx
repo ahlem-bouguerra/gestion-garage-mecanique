@@ -14,6 +14,8 @@ const pagesWithoutLayout = [
   "/500",
   "/auth/sign-in",
   "/auth/sign-up",
+  "/auth/forgot-password",
+  "/auth/reset-password",
   // Ajoutez d'autres routes ici selon vos besoins
 ];
 

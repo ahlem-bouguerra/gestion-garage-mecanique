@@ -4,7 +4,8 @@ import {login} from "../controllers/loginController.js";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 import passport from "../config/passport.js";
-
+import { forgotPassword } from "../controllers/ForgotPassword.js";
+import { resetPassword } from "../controllers/ResetPassword.js";
 
 
 const router = express.Router();
@@ -46,6 +47,9 @@ router.get(
     res.redirect("http://localhost:3000/dashboard");
   }
 );
+
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 
 

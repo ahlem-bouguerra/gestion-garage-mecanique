@@ -38,6 +38,8 @@ const userSchema = new mongoose.Schema({
   sparse: true,  // pour autoriser plusieurs documents sans googleId
   default: null,
 },
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpires: { type: Date, default: null }
 
 }, {
   timestamps: true
