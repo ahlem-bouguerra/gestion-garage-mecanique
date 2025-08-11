@@ -28,7 +28,7 @@ export default function ForgotPassword() {
 
       {/* Main Container - Plus grand cadre */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-[95vw] xl:max-w-[1000px]">
+        <div>
           {/* Cadre principal englobant */}
           <div className="bg-slate-800/30 backdrop-blur-sm border-2 border-orange-500/40 rounded-3xl p-6 shadow-2xl shadow-orange-500/20">
              <ResetPasswordForm/>

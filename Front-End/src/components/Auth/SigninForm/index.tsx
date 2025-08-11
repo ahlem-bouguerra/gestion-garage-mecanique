@@ -103,7 +103,7 @@ export default function SigninWithPassword() {
 
       localStorage.setItem("token", response.data.token);
       toast.success("Connexion réussie !");
-      router.push("/profil");
+      router.push("/auth/complete-profile");
 
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Erreur lors de la connexion");

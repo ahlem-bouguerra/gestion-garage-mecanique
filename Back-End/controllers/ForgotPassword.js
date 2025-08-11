@@ -30,7 +30,7 @@ export const forgotPassword = async(req,res) =>{
         await sendForgotPasswordMailer(email, token);
         console.log("📧 Email de mot de passe oublié  envoyé à :", email);
             
-        res.status(201).json({ message: "Inscription réussie. Vérifie ton email." });
+        res.status(201).json({ message: "Vérification réussie. Vérifie ton email." });
 
     }catch (err) {
     console.error(err);

@@ -6,6 +6,8 @@ import { User } from "../models/User.js";
 import passport from "../config/passport.js";
 import { forgotPassword } from "../controllers/ForgotPassword.js";
 import { resetPassword } from "../controllers/ResetPassword.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
+import { completeProfile ,getProfile} from "../controllers/ProfileContoller.js";
 
 
 const router = express.Router();
@@ -50,6 +52,8 @@ router.get(
 
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
+router.post("/complete-profile", authMiddleware, completeProfile);
+router.get("/get-profile", authMiddleware, getProfile);
 
 
 
