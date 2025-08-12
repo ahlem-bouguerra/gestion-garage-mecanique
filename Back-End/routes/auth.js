@@ -36,90 +36,169 @@ router.post("/login", login);
 
 // 🔥 SOLUTION 1: Modifier les routes Google pour gérer les tokens
 
-// Démarrer auth Google - ajouter state pour la sécurité
-router.get("/google", (req, res, next) => {
-  // Générer un state random pour la sécurité
-  const state = Math.random().toString(36).substring(2, 15);
-  req.session.googleState = state;
-  
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-    state: state
-  })(req, res, next);
-});
+// Code Backend corrigé
 
-// Callback Google - générer token JWT et rediriger avec token
+// Route Google OAuth initiale
+router.get("/google", 
+  passport.authenticate("google", { 
+    scope: ["profile", "email"],
+    prompt: "select_account" // Force la sélection de compte
+  })
+);
+
+// Callback Google - Version corrigée avec gestion d'erreurs améliorée
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "http://localhost:3000/auth/sign-in?error=google_auth_failed" }),
+  passport.authenticate("google", { 
+    failureRedirect: "http://localhost:3000/auth/sign-in?error=google_auth_failed",
+    session: false // Important : pas de session si vous utilisez JWT
+  }),
   async (req, res) => {
     try {
-      // L'utilisateur est maintenant dans req.user grâce à Passport
+      console.log('📥 Callback Google reçu');
       const user = req.user;
-      
+
       if (!user) {
+        console.error('❌ Utilisateur non trouvé dans req.user');
         return res.redirect("http://localhost:3000/auth/sign-in?error=no_user");
+      }
+
+      console.log('👤 Utilisateur authentifié:', {
+        id: user._id,
+        email: user.email,
+        isVerified: user.isVerified
+      });
+
+      // Vérifier que JWT_SECRET est défini
+      if (!process.env.JWT_SECRET) {
+        console.error('❌ JWT_SECRET non défini');
+        return res.redirect("http://localhost:3000/auth/sign-in?error=server_config_error");
       }
 
       // Générer un token JWT pour cet utilisateur
       const token = jwt.sign(
-        { 
+        {
           userId: user._id,
           email: user.email,
-          isVerified: user.isVerified 
+          isVerified: user.isVerified || true // Google users are considered verified
         },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
 
-      // Rediriger vers le frontend avec le token dans l'URL
-      // Le frontend va récupérer ce token et le sauvegarder
-      res.redirect(`http://localhost:3000/auth/sign-in?token=${token}&google_success=true`);
-      
+      console.log('🔐 Token JWT généré');
+
+      // Vérifier complétude du profil avec validation stricte des placeholders
+      console.log('📋 Vérification complétude profil:', {
+        username: user.username,
+        phone: user.phone,
+        city: user.city,
+        location: user.location,
+        coordinates: user.location?.coordinates
+      });
+
+      // Validation stricte : rejeter les valeurs vides, nulles ou de placeholder
+      const hasUsername = user.username && 
+                         user.username.trim() !== "" && 
+                         user.username.trim() !== "undefined";
+
+      const hasPhone = user.phone && 
+                      user.phone.trim() !== "" && 
+                      user.phone.trim() !== "undefined" &&
+                      user.phone.length >= 8; // Au minimum 8 chiffres pour un numéro valide
+
+      const hasCity = user.city && 
+                     user.city.trim() !== "" && 
+                     user.city.trim() !== "undefined" &&
+                     user.city.length >= 2; // Au minimum 2 caractères pour une ville
+
+      // Validation géolocalisation : rejeter les coordonnées [0,0] qui sont des placeholders
+      const hasValidLocation = user.location && 
+                              Array.isArray(user.location.coordinates) &&
+                              user.location.coordinates.length === 2 &&
+                              // Rejeter explicitement les coordonnées [0,0] (placeholder)
+                              !(user.location.coordinates[0] === 0 && user.location.coordinates[1] === 0) &&
+                              // Vérifier que les coordonnées sont dans des plages valides
+                              user.location.coordinates[0] !== null &&
+                              user.location.coordinates[1] !== null &&
+                              user.location.coordinates[0] >= -180 && user.location.coordinates[0] <= 180 &&
+                              user.location.coordinates[1] >= -90 && user.location.coordinates[1] <= 90;
+
+      const isComplete = hasUsername && hasPhone && hasCity && hasValidLocation;
+
+      console.log('✅ État du profil:', {
+        hasUsername,
+        hasPhone,
+        hasCity,
+        hasValidLocation,
+        isComplete
+      });
+
+      // Construire l'URL de redirection
+      let redirectUrl;
+      if (isComplete) {
+        // Profil complet, redirection vers la page d'accueil
+        redirectUrl = `http://localhost:3000/?token=${token}&google_success=true`;
+        console.log('🏠 Redirection vers accueil - profil complet');
+      } else {
+        // Profil incomplet, redirection vers compléter profil
+        redirectUrl = `http://localhost:3000/auth/complete-profile?token=${token}&google_success=true`;
+        console.log('📝 Redirection vers compléter profil - profil incomplet');
+      }
+
+      console.log('🔗 URL de redirection:', redirectUrl);
+      return res.redirect(redirectUrl);
+
     } catch (error) {
-      console.error("Erreur callback Google:", error);
-      res.redirect("http://localhost:3000/auth/sign-in?error=callback_error");
+      console.error("❌ Erreur callback Google:", error);
+      
+      // Log détaillé de l'erreur
+      if (error.name === 'JsonWebTokenError') {
+        console.error('🔐 Erreur JWT:', error.message);
+        return res.redirect("http://localhost:3000/auth/sign-in?error=token_generation_failed");
+      }
+      
+      if (error.name === 'ValidationError') {
+        console.error('📝 Erreur validation:', error.message);
+        return res.redirect("http://localhost:3000/auth/sign-in?error=validation_error");
+      }
+
+      return res.redirect("http://localhost:3000/auth/sign-in?error=callback_error");
     }
   }
 );
 
-// 🔥 SOLUTION ALTERNATIVE: Route API pour traiter le callback côté frontend
-router.post("/auth/google/token", async (req, res) => {
+// Route pour vérifier le token (optionnelle mais utile pour débugger)
+router.get("/verify-token", async (req, res) => {
   try {
-    const { googleToken } = req.body;
+    const token = req.headers.authorization?.replace('Bearer ', '');
     
-    // Ici tu pourrais vérifier le token Google côté serveur
-    // et créer/trouver l'utilisateur correspondant
-    
-    // Pour l'exemple, on suppose que tu as déjà l'utilisateur
-    const user = req.user; // Récupéré via une autre méthode
-    
-    const token = jwt.sign(
-      { 
-        userId: user._id,
-        email: user.email,
-        isVerified: user.isVerified 
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    if (!token) {
+      return res.status(401).json({ error: 'Token manquant' });
+    }
 
-    res.json({ 
-      success: true, 
-      token,
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+
+    res.json({
+      valid: true,
       user: {
         id: user._id,
         email: user.email,
-        username: user.username
+        username: user.username,
+        isVerified: user.isVerified
       }
     });
-    
+
   } catch (error) {
-    console.error("Erreur génération token Google:", error);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    console.error('Erreur vérification token:', error);
+    res.status(401).json({ error: 'Token invalide' });
   }
 });
-
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post("/complete-profile", authMiddleware, completeProfile);

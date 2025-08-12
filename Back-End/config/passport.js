@@ -28,7 +28,14 @@ passport.use(new GoogleStrategy({
         username: profile.displayName.replace(/\s+/g, '').toLowerCase(),
         email: profile.emails[0].value,
         googleId: profile.id,
-        isVerified: true
+        phone: "",
+        isVerified: true,
+        city: "",
+        location: {
+          type: "Point",
+          coordinates: [0, 0] // placeholder valide pour éviter l'erreur
+        }
+
       });
     }
     return done(null, user);
