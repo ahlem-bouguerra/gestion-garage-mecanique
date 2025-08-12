@@ -1,42 +1,76 @@
 // controllers/userController.js
 import { User } from "../models/User.js";
 
-
-
-
 export const getProfile = async (req, res) => {
   try {
-    if (!req.user) {
-      return res.status(404).json({ message: "Utilisateur introuvable" });
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
-    res.json(req.user);
+
+    // PROBLÈME CORRIGÉ: Vérifier si location existe et a des coordonnées
+    let location = null;
+    if (user.location && 
+        user.location.coordinates && 
+        Array.isArray(user.location.coordinates) && 
+        user.location.coordinates.length === 2) {
+      // MongoDB GeoJSON: coordinates = [lng, lat] → Leaflet: [lat, lng]
+      location = [user.location.coordinates[1], user.location.coordinates[0]];
+    }
+
+    return res.json({
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      city: user.city,
+      location,  // soit un tableau [lat, lng], soit null
+    });
   } catch (err) {
-    res.status(500).json({ message: "Erreur serveur", error: err.message });
+    console.error(err);
+    return res.status(500).json({ message: "Erreur serveur" });
   }
 };
 
-
-
-// POST /api/complete-profile
 export const completeProfile = async (req, res) => {
   try {
-    const updates = {};
-    const allowedFields = ['username','email', 'phone', 'city', 'location'];
+    const userId = req.user._id;
+    const { username, email, phone, city, location } = req.body;
 
-    allowedFields.forEach(field => {
-      if (req.body[field] !== undefined && req.body[field] !== '') {
-        updates[field] = req.body[field];
-      }
-    });
+    // PROBLÈME CORRIGÉ: Construction correcte de l'objet de mise à jour
+    const updateData = {
+      username,
+      email,
+      phone,
+      city,
+    };
+
+    // Ajouter location seulement si elle est fournie
+    if (location && Array.isArray(location) && location.length === 2) {
+      // location = [lat, lng] côté client → GeoJSON [lng, lat]
+      updateData.location = { 
+        type: "Point", 
+        coordinates: [location[1], location[0]] 
+      };
+    }
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
-      { $set: updates },
-      { new: true }
+      userId, 
+      updateData,
+      { new: true, runValidators: true }
     );
 
-    res.json({ message: 'Profil mis à jour', user: updatedUser });
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    res.json({ message: "Profil mis à jour avec succès" });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur' });
+    console.error("Erreur completeProfile:", err);
+    res.status(500).json({ 
+      message: "Erreur serveur", 
+      error: err.message 
+    });
   }
 };

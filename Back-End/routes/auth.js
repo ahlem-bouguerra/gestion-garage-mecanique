@@ -46,7 +46,7 @@ router.get(
   (req, res) => {
     // Ici, l'authentification est réussie
     // Tu peux rediriger vers ton frontend avec un token JWT par ex.
-    res.redirect("http://localhost:3000/dashboard");
+    res.redirect("http://localhost:3000/auth/complete-profile");
   }
 );
 

@@ -10,6 +10,7 @@ import InputGroup from "../../FormElements/InputGroup";
 import { Checkbox } from "../../FormElements/checkbox";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
+import Cookies from "js-cookie";
 
 
 // Icône Google SVG
@@ -102,6 +103,7 @@ export default function SigninWithPassword() {
       });
 
       localStorage.setItem("token", response.data.token);
+      Cookies.set("token", response.data.token, { expires: 7, path: "/" });
       toast.success("Connexion réussie !");
       router.push("/auth/complete-profile");
 
@@ -123,7 +125,7 @@ export default function SigninWithPassword() {
 
       localStorage.setItem("token", result.data.token);
       toast.success("Connexion Google réussie !");
-      router.push("/profil");
+      router.push("/auth/complete-profile");
 
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Erreur lors de la connexion Google");

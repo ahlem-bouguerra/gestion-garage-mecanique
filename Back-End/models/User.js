@@ -1,5 +1,3 @@
-// Dans votre modèle User.js, ajoutez le champ isVerified
-
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -13,36 +11,60 @@ const userSchema = new mongoose.Schema({
     unique: true
   },
   password: {
-  type: String,
-  required: function() {
-    return !this.googleId;
-  }
+    type: String,
+    required: function() {
+      return !this.googleId;
+    }
   },
   phone: {
-  type: String,
-  required: function() {
-    return !this.googleId;
-  }
-},
+    type: String,
+    required: function() {
+      return !this.googleId;
+    }
+  },
   token: {
     type: String,
     default: null
   },
   isVerified: {
     type: Boolean,
-    default: false  // Par défaut, le compte n'est pas vérifié
+    default: false
   },
   googleId: {
-  type: String,
-  unique: true,
-  sparse: true,  // pour autoriser plusieurs documents sans googleId
-  default: null,
-},
-  resetPasswordToken: { type: String, default: null },
-  resetPasswordExpires: { type: Date, default: null }
-
+    type: String,
+    unique: true,
+    sparse: true,
+    default: null,
+  },
+  resetPasswordToken: { 
+    type: String, 
+    default: null 
+  },
+  resetPasswordExpires: { 
+    type: Date, 
+    default: null 
+  },
+  city: {
+    type: String,
+    default: "",
+  },
+  // PROBLÈME CORRIGÉ: location optionnel avec structure GeoJSON correcte
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      default: undefined
+    }
+  }
 }, {
   timestamps: true
 });
+
+// Index géospatial pour les requêtes de géolocalisation
+userSchema.index({ location: '2dsphere' });
 
 export const User = mongoose.model("User", userSchema);

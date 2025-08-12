@@ -1,7 +1,8 @@
 
 import { createTimeFrameExtractor } from "@/utils/timeframe-extractor";
 import { Metadata } from "next";
-import CompleteProfilePage from "@/components/Auth/complete-profile/indes";
+import CompleteProfilePage from "@/components/Auth/complete-profile/index";
+
 
 export const metadata: Metadata = {
   title: "Basic Chart",
@@ -19,11 +20,11 @@ export default async function Page(props: PropsType) {
 
   return (
     <>
-    
-<div>
+
+      <div>
 
         <div className="col-span-12 xl:col-span-5">
-          <CompleteProfilePage/>
+          <CompleteProfilePage />
         </div>
       </div>
     </>

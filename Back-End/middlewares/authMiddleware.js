@@ -13,12 +13,13 @@ export const authMiddleware = async (req, res, next) => {
 
     // Remplace 'id' si nécessaire par la clé correcte
     const userId = decoded.userId;
-
+//exclut le champ password pour des raisons de sécurité.
     const user = await User.findById(userId).select("-password");
+    //Si le token est valide mais que l’utilisateur n’existe pas (supprimé par ex.) → accès refusé.
     if (!user) {
       return res.status(401).json({ message: "Utilisateur non trouvé" });
     }
-
+//Stocke l’objet user dans req.user pour que les routes suivantes y aient accès (profil, etc.).
     req.user = user;
     next();
   } catch (err) {
