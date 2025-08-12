@@ -39,6 +39,7 @@ export default function CompleteProfile() {
         const user = response.data;
         console.log("Profil récupéré :", user);
         
+        
         setUsername(user.username || "");
         setEmail(user.email || "");
         setPhone(user.phone || "");
@@ -52,13 +53,6 @@ export default function CompleteProfile() {
         
       } catch (err: any) {
         console.error("Erreur récupération profil", err.response?.data || err.message);
-        
-        // Si le token est invalide, rediriger vers login
-        if (err.response?.status === 401) {
-          localStorage.removeItem("token");
-          router.push("/auth/sign-in");
-          return;
-        }
         
         setError("Erreur lors du chargement du profil");
         setLocation([36.8065, 10.1815]);
@@ -76,11 +70,11 @@ export default function CompleteProfile() {
     setMessage("");
     setError("");
     
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/auth/sign-in");
-      return;
-    }
+   const token = localStorage.getItem("token");
+if (!token) {
+  router.push("/auth/sign-in");  // ← Cette ligne peut causer le problème
+  return;
+}
 
     const finalLocation = location || [36.8065, 10.1815];
     const loadingToast = toast.loading('Mise à jour du profil...');
@@ -106,6 +100,7 @@ export default function CompleteProfile() {
   duration: 4000,
 });
       setMessage("Profil mis à jour avec succès  🎉");
+      router.push("/"); 
       setError("");
     } catch (err: any) {
       console.error("Erreur de mise à jour", err.response?.data || err.message);

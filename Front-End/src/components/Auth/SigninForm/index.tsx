@@ -12,7 +12,6 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Cookies from "js-cookie";
 
-
 // Icône Google SVG
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -49,8 +48,54 @@ export default function SigninWithPassword() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  // 🔥 Gérer le retour de Google OAuth - Version corrigée
+  useEffect(() => {
+    console.log("🔍 Checking Google callback...");
+    
+    // Utiliser useSearchParams pour une meilleure compatibilité Next.js
+    const token = searchParams.get('token');
+    const googleSuccess = searchParams.get('google_success');
+    const error = searchParams.get('error');
 
+    console.log("📊 Search Params:", { token: token ? "present" : "absent", googleSuccess, error });
 
+    if (error) {
+      console.error('❌ Erreur OAuth Google:', error);
+      toast.error(`Erreur Google: ${error}`);
+      return;
+    }
+
+    // Si on a un token Google dans l'URL
+    if (token && googleSuccess === 'true') {
+      console.log("✅ Token Google détecté, traitement...");
+      
+      try {
+        // Vérifier que le token n'est pas déjà sauvegardé pour éviter les boucles
+        const existingToken = localStorage.getItem("token");
+        if (existingToken === token) {
+          console.log("ℹ️ Token déjà traité, ignore");
+          return;
+        }
+
+        // Sauvegarder le token
+        localStorage.setItem("token", token);
+        Cookies.set("token", token, { expires: 7, path: "/" });
+        
+        console.log("💾 Token Google sauvegardé");
+        toast.success("Connexion Google réussie !");
+        
+        // Rediriger vers complete-profile SANS nettoyer l'URL d'abord
+        console.log("🚀 Redirection vers complete-profile");
+        router.replace("/auth/complete-profile");
+        
+      } catch (error) {
+        console.error('❌ Erreur traitement token Google:', error);
+        toast.error("Erreur lors du traitement du token");
+      }
+    } else {
+      console.log("ℹ️ Pas de callback Google détecté");
+    }
+  }, [searchParams, router]); // Utiliser searchParams comme dépendance
 
   useEffect(() => {
     if (verified === "true") {
@@ -59,30 +104,6 @@ export default function SigninWithPassword() {
       toast.error("❌ Échec de la vérification de l'email.");
     }
   }, [verified]);
-
-  // Charger le script Google API
-  useEffect(() => {
-    const initializeGoogleSignIn = () => {
-      if (typeof window !== "undefined" && window.google) {
-        window.google.accounts.id.initialize({
-          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-          callback: handleGoogleCallback,
-        });
-      }
-    };
-
-    // Charger le script Google si pas déjà chargé
-    if (!document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
-      const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.onload = initializeGoogleSignIn;
-      document.body.appendChild(script);
-    } else {
-      initializeGoogleSignIn();
-    }
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setData({
@@ -102,48 +123,36 @@ export default function SigninWithPassword() {
         password: data.password,
       });
 
-      localStorage.setItem("token", response.data.token);
-      Cookies.set("token", response.data.token, { expires: 7, path: "/" });
-      toast.success("Connexion réussie !");
-      router.push("/auth/complete-profile");
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        Cookies.set("token", response.data.token, { expires: 7, path: "/" });
+        toast.success("Connexion réussie !");
+        router.push("/auth/complete-profile");
+      } else {
+        throw new Error("Token non reçu");
+      }
 
     } catch (error: any) {
+      console.error('Erreur login:', error);
       toast.error(error.response?.data?.message || "Erreur lors de la connexion");
     } finally {
       setLoading(false);
     }
   };
 
-  // Callback pour Google Sign-In
-  const handleGoogleCallback = async (response: any) => {
-    setGoogleLoading(true);
-    try {
-      // Envoyer le token Google à votre backend
-      const result = await axios.post("http://localhost:5000/api/auth/google", {
-        credential: response.credential,
-      });
-
-      localStorage.setItem("token", result.data.token);
-      toast.success("Connexion Google réussie !");
-      router.push("/auth/complete-profile");
-
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Erreur lors de la connexion Google");
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
   // Déclencher la connexion Google
   const handleGoogleSignIn = () => {
-      setGoogleLoading(true);
-    // Rediriger vers le backend qui lance l'auth Google
-    window.location.href = "http://localhost:5000/api/google";
+    console.log("🔄 Démarrage connexion Google...");
+    setGoogleLoading(true);
+    
+    const googleAuthUrl = "http://localhost:5000/api/google";
+    console.log("🔗 Redirection vers:", googleAuthUrl);
+    
+    window.location.href = googleAuthUrl;
   };
 
   return (
     <div className="w-full">
-      
       {/* Formulaire classique */}
       <form onSubmit={handleSubmit}>
         <InputGroup
@@ -189,33 +198,35 @@ export default function SigninWithPassword() {
             )}
           </button>
         </div>
-           {/* Séparateur */}
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-orange-300/20"></div>
+
+        {/* Séparateur */}
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-orange-300/20"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-gradient-to-br from-orange-900 via-red-900 to-pink-900 text-orange-200">
+              ou continuer avec
+            </span>
+          </div>
         </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-gradient-to-br from-orange-900 via-red-900 to-pink-900 text-orange-200">
-            ou continuer avec
-          </span>
-        </div>
-      </div>
+
         {/* Bouton Google Sign-In */}
-      <div className="mb-6">
-        <button
-          type="button"
-          onClick={handleGoogleSignIn}
-          disabled={googleLoading}
-          className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-lg border border-orange-200/20 bg-white/5 p-4 font-medium text-orange-100 transition hover:bg-white/10 hover:border-orange-300/30 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
-        >
-          {googleLoading ? (
-            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-orange-300 border-t-transparent" />
-          ) : (
-            <GoogleIcon />
-          )}
-          {googleLoading ? "Connexion en cours..." : "Continue with Google" }
-        </button>
-      </div>
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={googleLoading}
+            className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-lg border border-orange-200/20 bg-white/5 p-4 font-medium text-orange-100 transition hover:bg-white/10 hover:border-orange-300/30 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
+          >
+            {googleLoading ? (
+              <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-orange-300 border-t-transparent" />
+            ) : (
+              <GoogleIcon />
+            )}
+            {googleLoading ? "Connexion en cours..." : "Continue with Google"}
+          </button>
+        </div>
 
         {/* Sign-up Link */}
         <div className="text-center pt-4 border-t border-orange-500/20">
@@ -236,14 +247,6 @@ export default function SigninWithPassword() {
           </p>
         </div>
       </form>
-      
     </div>
   );
-}
-
-// Types pour TypeScript
-declare global {
-  interface Window {
-    google: any;
-  }
 }
