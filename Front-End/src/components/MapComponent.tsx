@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Popup } from "re
 import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import LocationSelector from "./LocationSelector";
+
 
 // Configuration de l'icône du marqueur avec une couleur personnalisée
 const markerIcon = new L.Icon({
@@ -92,7 +92,7 @@ export default function MapComponent({ location, setLocation }: MapComponentProp
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const defaultPosition: [number, number] = [36.8065, 10.1815];
+  const defaultPosition: [number, number] = [0, 0];
   const mapCenter = location || defaultPosition;
 
   const handleLocationSelect = (coordinates: [number, number], details: any) => {
@@ -198,97 +198,11 @@ export default function MapComponent({ location, setLocation }: MapComponentProp
 
   return (
     <div style={{ marginTop: 20 }}>
-      {/* Sélecteur de localisation hiérarchique */}
-      <LocationSelector 
-        onLocationSelect={handleLocationSelect}
-        initialLocation={location}
-      />
+     
       
       {/* Barre de recherche géographique */}
       <div style={{ position: 'relative', marginBottom: 15 }}>
-        <div style={{ position: 'relative' }}>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="🔍 Rechercher une adresse, rue, lieu... (ex: Avenue Habib Bourguiba, Sfax)"
-            style={{
-              width: '100%',
-              padding: '12px 50px 12px 40px',
-              border: '2px solid #e0e0e0',
-              borderRadius: 25,
-              fontSize: 14,
-              outline: 'none',
-              transition: 'border-color 0.3s',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = '#2196f3';
-              if (searchResults.length > 0) setShowSearchResults(true);
-            }}
-            onBlur={() => {
-              // Délai pour permettre le clic sur les résultats
-              setTimeout(() => setShowSearchResults(false), 200);
-            }}
-          />
-          
-          {/* Icône de recherche */}
-          <div style={{
-            position: 'absolute',
-            left: 12,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: '#666',
-            fontSize: 16
-          }}>
-            🔍
-          </div>
-          
-          {/* Bouton de nettoyage */}
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => {
-                setSearchQuery("");
-                setSearchResults([]);
-                setShowSearchResults(false);
-              }}
-              style={{
-                position: 'absolute',
-                right: 12,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 18,
-                color: '#999',
-                padding: 0,
-                width: 24,
-                height: 24,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              ✕
-            </button>
-          )}
-          
-          {/* Indicateur de chargement */}
-          {isSearching && (
-            <div style={{
-              position: 'absolute',
-              right: 40,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#2196f3'
-            }}>
-              ⏳
-            </div>
-          )}
-        </div>
+        
 
         {/* Résultats de recherche */}
         {showSearchResults && searchResults.length > 0 && (
@@ -336,27 +250,7 @@ export default function MapComponent({ location, setLocation }: MapComponentProp
           </div>
         )}
 
-        {/* Message si aucun résultat */}
-        {showSearchResults && !isSearching && searchResults.length === 0 && searchQuery.length >= 3 && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-            backgroundColor: 'white',
-            border: '1px solid #e0e0e0',
-            borderRadius: 8,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            padding: 16,
-            textAlign: 'center',
-            color: '#666'
-          }}>
-            🔍 Aucun résultat trouvé pour "{searchQuery}"
-            <br />
-            <small>Essayez avec un nom de rue, quartier ou ville</small>
-          </div>
-        )}
+   
       </div>
       
       {/* Boutons d'aide */}
@@ -366,68 +260,12 @@ export default function MapComponent({ location, setLocation }: MapComponentProp
         marginBottom: 15, 
         flexWrap: 'wrap' 
       }}>
-        <button
-          type="button"
-          onClick={handleGetCurrentLocation}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#2196f3',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-            fontSize: 14,
-            fontWeight: 'bold'
-          }}
-        >
-          📱 Utiliser ma position GPS
-        </button>
         
-        <button
-          type="button"
-          onClick={() => setShowInstructions(!showInstructions)}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#ff9800',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-            fontSize: 14,
-            fontWeight: 'bold'
-          }}
-        >
-          {showInstructions ? '👁️ Masquer aide' : '❓ Afficher aide'}
-        </button>
+        
       </div>
 
       {/* Instructions conditionnelles */}
-      {showInstructions && (
-        <div style={{ 
-          marginBottom: 15, 
-          padding: 15, 
-          backgroundColor: '#e3f2fd', 
-          border: '1px solid #2196f3', 
-          borderRadius: 6,
-          fontSize: 14
-        }}>
-          <h4 style={{ margin: '0 0 10px 0', color: '#1565c0' }}>
-            🎯 Comment préciser votre localisation :
-          </h4>
-          <div style={{ display: 'grid', gap: 8 }}>
-            <div><strong>Étape 1:</strong> Sélectionnez gouvernorat → ville → quartier dans les menus</div>
-            <div><strong>Étape 2:</strong> 
-              <span style={{ color: '#d32f2f', fontWeight: 'bold' }}> CLIQUEZ directement sur la carte</span> 
-              pour ajuster la position exacte
-            </div>
-            <div><strong>Alternative:</strong> 
-              <span style={{ color: '#1976d2', fontWeight: 'bold' }}> GLISSEZ le marqueur rouge</span> 
-              vers l'endroit précis
-            </div>
-            <div><strong>Option GPS:</strong> Utilisez le bouton bleu pour votre position actuelle</div>
-          </div>
-        </div>
-      )}
+      
 
       {/* Carte interactive avec zoom plus élevé */}
       <MapContainer
@@ -455,50 +293,6 @@ export default function MapComponent({ location, setLocation }: MapComponentProp
         />
       </MapContainer>
 
-      {/* Affichage des coordonnées avec plus de détails */}
-      {location && (
-        <div style={{ 
-          marginTop: 15, 
-          padding: 15,
-          backgroundColor: isManuallySet ? '#e8f5e8' : '#fff3e0',
-          border: `2px solid ${isManuallySet ? '#4caf50' : '#ff9800'}`,
-          borderRadius: 6,
-          fontSize: 14 
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <strong>📍 Position finale:</strong> {location[0].toFixed(6)}, {location[1].toFixed(6)}
-              <br />
-              <small style={{ color: '#666' }}>
-                {isManuallySet ? '✅ Position ajustée manuellement' : '🎯 Position automatique du quartier'}
-              </small>
-            </div>
-            <div style={{ 
-              backgroundColor: isManuallySet ? '#4caf50' : '#ff9800',
-              color: 'white',
-              padding: '4px 8px',
-              borderRadius: 4,
-              fontSize: 12,
-              fontWeight: 'bold'
-            }}>
-              {isManuallySet ? 'PRÉCISE' : 'GÉNÉRALE'}
-            </div>
-          </div>
-          
-          {!isManuallySet && (
-            <div style={{ 
-              marginTop: 10, 
-              padding: 8, 
-              backgroundColor: '#fff8e1', 
-              borderRadius: 4,
-              fontSize: 12,
-              color: '#e65100'
-            }}>
-              💡 <strong>Conseil:</strong> Cliquez sur la carte ou utilisez le GPS pour une position plus précise
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Légende des contrôles */}
       <div style={{ 

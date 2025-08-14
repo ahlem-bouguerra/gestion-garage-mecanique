@@ -48,168 +48,7 @@ export default function SigninWithPassword() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // 🔥 Gérer le retour de Google OAuth avec logs détaillés
-  useEffect(() => {
-    const token = searchParams.get('token');
-    const googleSuccess = searchParams.get('google_success');
-    const error = searchParams.get('error');
-    
-    // URL complète pour débogage
-    const currentUrl = window.location.href;
-    console.log('🌐 URL complète:', currentUrl);
-    console.log('🔍 Paramètres URL détaillés:', { 
-      token: token ? `${token.substring(0, 20)}...` : null,
-      googleSuccess, 
-      error 
-    });
-
-    // Gérer les erreurs
-    if (error) {
-      let errorMessage = "Erreur de connexion Google";
-      switch (error) {
-        case 'google_auth_failed':
-          errorMessage = "Échec de l'authentification Google";
-          break;
-        case 'no_user':
-          errorMessage = "Utilisateur non trouvé";
-          break;
-        case 'callback_error':
-          errorMessage = "Erreur lors du traitement de la connexion";
-          break;
-        default:
-          errorMessage = `Erreur: ${error}`;
-      }
-      
-      console.log('❌ Erreur détectée:', errorMessage);
-      toast.error(errorMessage);
-      
-      // Nettoyer l'URL après avoir affiché l'erreur
-      const url = new URL(window.location.href);
-      url.searchParams.delete('error');
-      window.history.replaceState({}, '', url.toString());
-      console.log('🧹 URL nettoyée après erreur');
-      return;
-    }
-
-    // Gérer le succès de connexion Google
-    if (token && googleSuccess === 'true') {
-      console.log('✅ Token Google reçu, traitement en cours...');
-      
-      // Vérifier si nous sommes sur la bonne page
-      const currentPath = window.location.pathname;
-      console.log('📍 Page actuelle:', currentPath);
-      
-      // Si nous sommes sur complete-profile, ne pas traiter ici
-      if (currentPath === '/auth/complete-profile') {
-        console.log('📝 Sur page complete-profile, laisser cette page gérer le token');
-        return;
-      }
-      
-      // Éviter le double traitement
-      const currentToken = localStorage.getItem("token");
-      if (currentToken === token) {
-        console.log('⏭️ Token déjà traité, ignorer');
-        return;
-      }
-
-      // Stocker le token
-      localStorage.setItem("token", token);
-      Cookies.set("token", token, { expires: 7, path: "/" });
-      console.log('💾 Token stocké localement');
-      
-      toast.success("Connexion Google réussie !");
-
-      // Vérifier le profil utilisateur
-      console.log('👤 Récupération du profil utilisateur...');
-      axios.get("http://localhost:5000/api/get-profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(response => {
-        console.log('👤 Réponse profil complète:', response.data);
-        const user = response.data;
-        
-        // Debug des données utilisateur
-        console.log('🔍 Analyse des données utilisateur:', {
-          username: user.username,
-          phone: user.phone,
-          city: user.city,
-          location: user.location,
-          coordinates: user.location?.coordinates
-        });
-        
-        // Vérifier si le profil est complet avec validation stricte
-        const hasUsername = user.username && 
-                           user.username.trim() !== "" && 
-                           user.username.trim() !== "undefined";
-
-        const hasPhone = user.phone && 
-                        user.phone.trim() !== "" && 
-                        user.phone.trim() !== "undefined" &&
-                        user.phone.length >= 8;
-
-        const hasCity = user.city && 
-                       user.city.trim() !== "" && 
-                       user.city.trim() !== "undefined" &&
-                       user.city.length >= 2;
-
-        const hasValidLocation = user.location &&
-                                Array.isArray(user.location.coordinates) &&
-                                user.location.coordinates.length === 2 &&
-                                // Rejeter les coordonnées [0,0] qui sont des placeholders
-                                !(user.location.coordinates[0] === 0 && user.location.coordinates[1] === 0) &&
-                                user.location.coordinates[0] !== null &&
-                                user.location.coordinates[1] !== null &&
-                                user.location.coordinates[0] >= -180 && user.location.coordinates[0] <= 180 &&
-                                user.location.coordinates[1] >= -90 && user.location.coordinates[1] <= 90;
-
-        const isComplete = hasUsername && hasPhone && hasCity && hasValidLocation;
-
-        console.log('✅ Validation du profil Frontend:', {
-          hasUsername: hasUsername,
-          hasPhone: hasPhone,
-          hasCity: hasCity,
-          hasValidLocation: hasValidLocation,
-          isComplete: isComplete
-        });
-
-        // Nettoyer l'URL avant la redirection
-        const url = new URL(window.location.href);
-        url.searchParams.delete('token');
-        url.searchParams.delete('google_success');
-        window.history.replaceState({}, '', url.toString());
-        console.log('🧹 URL nettoyée avant redirection');
-
-        // Redirection selon l'état du profil
-        if (isComplete) {
-          console.log('🏠 Profil complet → Redirection vers accueil');
-          router.push("/");
-        } else {
-          console.log('📝 Profil incomplet → Redirection vers complete-profile');
-          router.push("/auth/complete-profile");
-        }
-      })
-      .catch(error => {
-        console.error('❌ Erreur récupération profil complète:', error);
-        console.error('❌ Response data:', error.response?.data);
-        console.error('❌ Status:', error.response?.status);
-        
-        toast.error("Erreur lors de la récupération du profil");
-        
-        // Nettoyer les tokens en cas d'erreur
-        localStorage.removeItem("token");
-        Cookies.remove("token");
-        
-        // Nettoyer l'URL
-        const url = new URL(window.location.href);
-        url.searchParams.delete('token');
-        url.searchParams.delete('google_success');
-        window.history.replaceState({}, '', url.toString());
-        
-        console.log('🧹 Tokens et URL nettoyés après erreur');
-      });
-    }
-  }, [searchParams, router]);
-
+  
   useEffect(() => {
     if (verified === "true") {
       toast.success("✅ Email vérifié avec succès !");
@@ -241,6 +80,7 @@ export default function SigninWithPassword() {
       localStorage.setItem("token", token);
       Cookies.set("token", token, { expires: 7, path: "/" });
       toast.success("Connexion réussie !");
+      
 
       // Récupérer le profil pour vérifier la complétion
       const profileResponse = await axios.get("http://localhost:5000/api/get-profile", {
@@ -248,6 +88,7 @@ export default function SigninWithPassword() {
       });
 
       const user = profileResponse.data;
+      localStorage.setItem("user", JSON.stringify(user));
       const isComplete = user.username && user.phone && user.city;
 
       if (isComplete) {
@@ -255,6 +96,8 @@ export default function SigninWithPassword() {
       } else {
         router.push("/auth/complete-profile");  // Profil incomplet, compléter
       }
+       console.log("💾 Token dans localStorage:", localStorage.getItem("token"));
+      console.log("💾 User dans localStorage:", localStorage.getItem("user"));
 
     } else {
       throw new Error("Token non reçu");

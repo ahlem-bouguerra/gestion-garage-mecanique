@@ -8,6 +8,9 @@ import { forgotPassword } from "../controllers/ForgotPassword.js";
 import { resetPassword } from "../controllers/ResetPassword.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { completeProfile, getProfile } from "../controllers/ProfileContoller.js";
+import { enhancedLocationRoutes } from "../apiDataFetcher.js"; 
+
+
 
 const router = express.Router();
 
@@ -50,124 +53,63 @@ router.get("/google",
 router.get(
   "/google/callback",
   passport.authenticate("google", { 
-    failureRedirect: "http://localhost:3000/auth/sign-in?error=google_auth_failed",
-    session: false // Important : pas de session si vous utilisez JWT
+    failureRedirect: "http://localhost:3000/auth/google-callback?error=google_auth_failed",
+    session: false
   }),
   async (req, res) => {
     try {
-      console.log('📥 Callback Google reçu');
+      console.log('📥 Google Callback - Début traitement');
       const user = req.user;
 
       if (!user) {
-        console.error('❌ Utilisateur non trouvé dans req.user');
-        return res.redirect("http://localhost:3000/auth/sign-in?error=no_user");
+        console.error('❌ Pas d\'utilisateur dans req.user');
+        return res.redirect("http://localhost:3000/auth/google-callback?error=no_user");
       }
 
-      console.log('👤 Utilisateur authentifié:', {
+      console.log('👤 Utilisateur Google authentifié:', {
         id: user._id,
         email: user.email,
-        isVerified: user.isVerified
+        username: user.username
       });
 
-      // Vérifier que JWT_SECRET est défini
+      // Vérifier JWT_SECRET
       if (!process.env.JWT_SECRET) {
         console.error('❌ JWT_SECRET non défini');
-        return res.redirect("http://localhost:3000/auth/sign-in?error=server_config_error");
+        return res.redirect("http://localhost:3000/auth/google-callback?error=server_config_error");
       }
 
-      // Générer un token JWT pour cet utilisateur
+      // Générer token JWT
       const token = jwt.sign(
         {
           userId: user._id,
           email: user.email,
-          isVerified: user.isVerified || true // Google users are considered verified
+          isVerified: user.isVerified || true
         },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
 
-      console.log('🔐 Token JWT généré');
+      console.log('🔐 Token JWT généré pour Google OAuth');
 
-      // Vérifier complétude du profil avec validation stricte des placeholders
-      console.log('📋 Vérification complétude profil:', {
-        username: user.username,
-        phone: user.phone,
-        city: user.city,
-        location: user.location,
-        coordinates: user.location?.coordinates
-      });
-
-      // Validation stricte : rejeter les valeurs vides, nulles ou de placeholder
-      const hasUsername = user.username && 
-                         user.username.trim() !== "" && 
-                         user.username.trim() !== "undefined";
-
-      const hasPhone = user.phone && 
-                      user.phone.trim() !== "" && 
-                      user.phone.trim() !== "undefined" &&
-                      user.phone.length >= 8; // Au minimum 8 chiffres pour un numéro valide
-
-      const hasCity = user.city && 
-                     user.city.trim() !== "" && 
-                     user.city.trim() !== "undefined" &&
-                     user.city.length >= 2; // Au minimum 2 caractères pour une ville
-
-      // Validation géolocalisation : rejeter les coordonnées [0,0] qui sont des placeholders
-      const hasValidLocation = user.location && 
-                              Array.isArray(user.location.coordinates) &&
-                              user.location.coordinates.length === 2 &&
-                              // Rejeter explicitement les coordonnées [0,0] (placeholder)
-                              !(user.location.coordinates[0] === 0 && user.location.coordinates[1] === 0) &&
-                              // Vérifier que les coordonnées sont dans des plages valides
-                              user.location.coordinates[0] !== null &&
-                              user.location.coordinates[1] !== null &&
-                              user.location.coordinates[0] >= -180 && user.location.coordinates[0] <= 180 &&
-                              user.location.coordinates[1] >= -90 && user.location.coordinates[1] <= 90;
-
-      const isComplete = hasUsername && hasPhone && hasCity && hasValidLocation;
-
-      console.log('✅ État du profil:', {
-        hasUsername,
-        hasPhone,
-        hasCity,
-        hasValidLocation,
-        isComplete
-      });
-
-      // Construire l'URL de redirection
-      let redirectUrl;
-      if (isComplete) {
-        // Profil complet, redirection vers la page d'accueil
-        redirectUrl = `http://localhost:3000/?token=${token}&google_success=true`;
-        console.log('🏠 Redirection vers accueil - profil complet');
-      } else {
-        // Profil incomplet, redirection vers compléter profil
-        redirectUrl = `http://localhost:3000/auth/complete-profile?token=${token}&google_success=true`;
-        console.log('📝 Redirection vers compléter profil - profil incomplet');
-      }
-
-      console.log('🔗 URL de redirection:', redirectUrl);
+      // Redirection vers la page de callback dédiée
+      const redirectUrl = `http://localhost:3000/auth/google-callback?token=${token}&google_success=true`;
+      
+      console.log('🔗 Redirection vers callback page');
       return res.redirect(redirectUrl);
 
     } catch (error) {
-      console.error("❌ Erreur callback Google:", error);
+      console.error("❌ Erreur dans callback Google:", error);
       
-      // Log détaillé de l'erreur
+      // Log détaillé selon le type d'erreur
       if (error.name === 'JsonWebTokenError') {
         console.error('🔐 Erreur JWT:', error.message);
-        return res.redirect("http://localhost:3000/auth/sign-in?error=token_generation_failed");
+        return res.redirect("http://localhost:3000/auth/google-callback?error=token_error");
       }
       
-      if (error.name === 'ValidationError') {
-        console.error('📝 Erreur validation:', error.message);
-        return res.redirect("http://localhost:3000/auth/sign-in?error=validation_error");
-      }
-
-      return res.redirect("http://localhost:3000/auth/sign-in?error=callback_error");
+      return res.redirect("http://localhost:3000/auth/google-callback?error=callback_error");
     }
   }
 );
-
 // Route pour vérifier le token (optionnelle mais utile pour débugger)
 router.get("/verify-token", async (req, res) => {
   try {
@@ -203,5 +145,19 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post("/complete-profile", authMiddleware, completeProfile);
 router.get("/get-profile", authMiddleware, getProfile);
+
+
+
+// Gouvernorats
+router.get('/governorates',enhancedLocationRoutes.getAllGovernoratesWithCount);
+
+// Villes selon gouvernorat
+router.get('/cities/:governorateId', enhancedLocationRoutes.getCitiesWithCoordinates);
+
+// Recherche auto-complétion
+router.get('/locations/search/:query', enhancedLocationRoutes.searchLocations);
+router.get('/locations/autocomplete', enhancedLocationRoutes.autocomplete);
+
+
 
 export default router;

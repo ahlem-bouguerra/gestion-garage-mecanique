@@ -16,6 +16,8 @@ const pagesWithoutLayout = [
   "/auth/sign-up",
   "/auth/forgot-password",
   "/auth/reset-password",
+  "/auth/complete-profile",
+  "/auth/google-callback"
   // Ajoutez d'autres routes ici selon vos besoins
 ];
 

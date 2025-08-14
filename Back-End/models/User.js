@@ -44,10 +44,12 @@ const userSchema = new mongoose.Schema({
     type: Date, 
     default: null 
   },
-  city: {
-    type: String,
-    default: "",
-  },
+
+    // Localisation
+  governorateId: { type: mongoose.Schema.Types.ObjectId, ref: "Governorate" },
+  cityId: { type: mongoose.Schema.Types.ObjectId, ref: "City" },
+  streetId: { type: mongoose.Schema.Types.ObjectId, ref: "Street", default: null },
+
   // PROBLÈME CORRIGÉ: location optionnel avec structure GeoJSON correcte
   location: {
     type: {
