@@ -20,6 +20,12 @@ export const NAV_DATA = [
         icon: Icons.Calendar,
         items: [],
       },
+       {
+        title: "FicheClient",
+        url: "/FicheCLient",
+        icon: Icons.User,
+        items: [],
+      },
       {
         title: "Profile",
         url: "/profile",

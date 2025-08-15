@@ -48,20 +48,19 @@ const userSchema = new mongoose.Schema({
     // Localisation
   governorateId: { type: mongoose.Schema.Types.ObjectId, ref: "Governorate" },
   cityId: { type: mongoose.Schema.Types.ObjectId, ref: "City" },
-  streetId: { type: mongoose.Schema.Types.ObjectId, ref: "Street", default: null },
+  streetAddress: String,
 
   // PROBLÈME CORRIGÉ: location optionnel avec structure GeoJSON correcte
   location: {
-    type: {
-      type: String,
-      enum: ['Point'],
-      default: 'Point'
-    },
-    coordinates: {
-      type: [Number], // [longitude, latitude]
-      default: undefined
-    }
+  type: {
+    type: String,
+    enum: ['Point']
+  },
+  coordinates: {
+    type: [Number] // [longitude, latitude]
   }
+}
+
 }, {
   timestamps: true
 });

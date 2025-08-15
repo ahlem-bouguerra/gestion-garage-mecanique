@@ -1,3 +1,4 @@
+// CompleteProfile.tsx - Version optimisée
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -6,6 +7,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from 'sonner';
 import Cookies from "js-cookie";
 
+// Import dynamique du MapComponent
+const MapComponent = dynamic(() => import("../../MapComponent"), {
+  ssr: false,
+  loading: () => <p>Chargement de la carte...</p>
+});
+
 export default function CompleteProfile() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -13,18 +20,20 @@ export default function CompleteProfile() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [governorateId, setGovernorateId] = useState("");  // ✅ Corrigé
-  const [cityId, setCityId] = useState("");                // ✅ Corrigé
-  const [streetId, setStreetId] = useState("");            // ✅ Corrigé
+  const [governorateId, setGovernorateId] = useState("");
+  const [cityId, setCityId] = useState("");
+  const [streetAddress, setStreetAddress] = useState(""); // ✅ Changé en texte libre
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
 
-  const [governoratesList, setGovernoratesList] = useState<string[]>([]);
-  const [citiesList, setCitiesList] = useState<string[]>([]);
-  const [streetsList, setStreetsList] = useState<string[]>([]);
-  const [cityLocation, setCityLocation] = useState(null);  // ✅ Location de la ville sélectionnée
+  const [governoratesList, setGovernoratesList] = useState<any[]>([]);
+  const [citiesList, setCitiesList] = useState<any[]>([]);
+  
+  // ✅ Position précise du mécanicien (coordinates GPS)
+  const [mechanicLocation, setMechanicLocation] = useState<[number, number] | null>(null);
+  const [cityBaseLocation, setCityBaseLocation] = useState<[number, number] | null>(null);
 
   // --- Récupération profil et token ---
   useEffect(() => {
@@ -42,7 +51,9 @@ export default function CompleteProfile() {
         url.searchParams.delete('token');
         url.searchParams.delete('google_success');
         window.history.replaceState({}, '', url.toString());
-        if (searchParams.get('google_success') === 'true') toast.success("Connexion Google réussie ! Veuillez compléter votre profil.");
+        if (searchParams.get('google_success') === 'true') {
+          toast.success("Connexion Google réussie ! Veuillez compléter votre profil.");
+        }
       }
 
       try {
@@ -53,16 +64,22 @@ export default function CompleteProfile() {
         setUsername(user.username || "");
         setEmail(user.email || "");
         setPhone(user.phone || "");
-        setGovernorateId(user.governorateId || "");  // ✅ Corrigé
-        setCityId(user.cityId || "");                // ✅ Corrigé
-        setStreetId(user.streetId || "");            // ✅ Corrigé
-        setCityLocation(user.location || null);      // ✅ Location existante
+        setGovernorateId(user.governorateId || "");
+        setCityId(user.cityId || "");
+        setStreetAddress(user.streetAddress || ""); // ✅ Récupérer l'adresse texte
+        
+        // ✅ Récupérer la position précise existante
+        if (user.location?.coordinates) {
+          setMechanicLocation([user.location.coordinates[1], user.location.coordinates[0]]);
+        }
       } catch (err: any) {
         if (err.response?.status === 401) {
           localStorage.removeItem("token");
           Cookies.remove("token");
           router.push("/auth/sign-in");
-        } else setError("Erreur lors du chargement du profil");
+        } else {
+          setError("Erreur lors du chargement du profil");
+        }
       } finally {
         setIsPageLoading(false);
       }
@@ -76,7 +93,6 @@ export default function CompleteProfile() {
     const fetchGovernorate = async () => {
       try {
         const govRes = await axios.get("http://localhost:5000/api/governorates");
-        console.log("✅ Gouvernorats reçus:", govRes.data);
         setGovernoratesList(govRes.data);
       } catch (err) {
         console.error("❌ Erreur gouvernorats:", err);
@@ -94,7 +110,6 @@ export default function CompleteProfile() {
       }
       try {
         const cityRes = await axios.get(`http://localhost:5000/api/cities/${governorateId}`);
-        console.log("✅ Villes reçues:", cityRes.data);
         setCitiesList(cityRes.data);
       } catch (err) {
         console.error("❌ Erreur villes:", err);
@@ -103,40 +118,67 @@ export default function CompleteProfile() {
     fetchCities();
   }, [governorateId]);
 
-  // --- Récupération Rues selon ville ---
+  // ✅ Géocodage automatique quand ville + adresse changent
   useEffect(() => {
-    const fetchStreets = async () => {
-      if (!cityId) {
-        setStreetsList([]);
-        return;
-      }
+    const geocodeAddress = async () => {
+      if (!cityId || !streetAddress.trim()) return;
+
+      const selectedCity = citiesList.find((c: any) => c._id === cityId);
+      if (!selectedCity) return;
+
+      const fullAddress = `${streetAddress}, ${selectedCity.name}, Tunisia`;
+      
       try {
-        const streetRes = await axios.get(`http://localhost:5000/api/streets/${cityId}`);
-        console.log("✅ Rues reçues:", streetRes.data);
-        setStreetsList(streetRes.data);
-      } catch (err) {
-        console.error("❌ Erreur rues:", err);
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(fullAddress)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.length > 0) {
+          const newLocation: [number, number] = [
+            parseFloat(data[0].lat),
+            parseFloat(data[0].lon)
+          ];
+          setMechanicLocation(newLocation);
+          toast.success("Position trouvée automatiquement ! Vérifiez sur la carte.");
+        } else {
+          // Fallback sur la position de la ville
+          if (selectedCity.location?.coordinates) {
+            const cityCoords: [number, number] = [
+              selectedCity.location.coordinates[1],
+              selectedCity.location.coordinates[0]
+            ];
+            setMechanicLocation(cityCoords);
+            setCityBaseLocation(cityCoords);
+            toast.info("Position centrée sur la ville. Ajustez manuellement sur la carte.");
+          }
+        }
+      } catch (error) {
+        console.error("Erreur géocodage:", error);
       }
     };
-    fetchStreets();
-  }, [cityId]);
 
-  // ✅ Handler pour changement de ville (récupère la location)
+    // Délai pour éviter trop de requêtes
+    const timer = setTimeout(geocodeAddress, 1000);
+    return () => clearTimeout(timer);
+  }, [cityId, streetAddress, citiesList]);
+
+  // ✅ Handler pour changement de ville
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCityId = e.target.value;
     setCityId(selectedCityId);
     
-    // Trouver la ville sélectionnée et récupérer sa location
-    const selectedCityObj = citiesList.find((c: any) => c._id === selectedCityId);
-    
-    if (selectedCityObj?.location?.coordinates) {
-      setCityLocation({
-        type: 'Point',
-        coordinates: selectedCityObj.location.coordinates
-      });
-      console.log("📍 Location de la ville sélectionnée:", selectedCityObj.location);
-    } else {
-      setCityLocation(null);
+    const selectedCity = citiesList.find((c: any) => c._id === selectedCityId);
+    if (selectedCity?.location?.coordinates) {
+      const cityCoords: [number, number] = [
+        selectedCity.location.coordinates[1],
+        selectedCity.location.coordinates[0]
+      ];
+      setCityBaseLocation(cityCoords);
+      
+      // Si pas d'adresse spécifique, centrer sur la ville
+      if (!streetAddress.trim()) {
+        setMechanicLocation(cityCoords);
+      }
     }
   };
 
@@ -159,8 +201,8 @@ export default function CompleteProfile() {
       return;
     }
 
-    if (!cityLocation) {
-      setError("Aucune localisation trouvée pour cette ville");
+    if (!mechanicLocation) {
+      setError("Veuillez définir votre position sur la carte");
       setIsLoading(false);
       return;
     }
@@ -168,19 +210,26 @@ export default function CompleteProfile() {
     const loadingToast = toast.loading('Mise à jour du profil...');
 
     try {
+      // ✅ Format GeoJSON pour MongoDB
+      const locationData = {
+        type: 'Point',
+        coordinates: [mechanicLocation[1], mechanicLocation[0]] // [lng, lat] pour GeoJSON
+      };
+
       await axios.post(
         "http://localhost:5000/api/complete-profile",
         {
           username: username.trim(),
           email,
           phone: phone.trim(),
-          governorateId,     // ✅ Corrigé: envoie l'ID
-          cityId,           // ✅ Corrigé: envoie l'ID
-          streetId,         // ✅ Corrigé: envoie l'ID
-          location: cityLocation // ✅ Location de la ville sélectionnée
+          governorateId,
+          cityId,
+          streetAddress: streetAddress.trim(), // ✅ Adresse texte libre
+          location: locationData // ✅ Position précise
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       toast.dismiss(loadingToast);
       toast.success('Profil mis à jour avec succès ! 🎉');
       setMessage("Profil mis à jour avec succès ! Redirection...");
@@ -196,88 +245,152 @@ export default function CompleteProfile() {
   if (isPageLoading) return <div>Chargement du profil...</div>;
 
   return (
-    <div style={{ padding: 20, maxWidth: 800, margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: 30 }}>📝 Compléter votre profil</h1>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+    <div style={{ padding: 20, maxWidth: 1000, margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
+      <h1 style={{ textAlign: 'center', marginBottom: 30 }}>🔧 Compléter votre profil de mécanicien</h1>
+      
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {/* Informations personnelles */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 15 }}>
           <div>
             <label>Nom d'utilisateur *</label>
-            <input value={username} onChange={e => setUsername(e.target.value)} required />
+            <input 
+              value={username} 
+              onChange={e => setUsername(e.target.value)} 
+              required 
+              style={{ padding: 10, border: '1px solid #ddd', borderRadius: 4, width: '100%' }}
+            />
           </div>
 
           <div>
             <label>Email</label>
-            <input value={email} disabled />
+            <input 
+              value={email} 
+              disabled 
+              style={{ padding: 10, border: '1px solid #ddd', borderRadius: 4, width: '100%', backgroundColor: '#f5f5f5' }}
+            />
           </div>
 
           <div>
             <label>Téléphone *</label>
-            <input value={phone} onChange={e => setPhone(e.target.value)} required />
-          </div>
-
-          <div>
-            <label>Gouvernorat *</label>
-            <select
-              value={governorateId}                           // ✅ Corrigé
-              onChange={e => setGovernorateId(e.target.value)} // ✅ Corrigé
-              required
-            >
-              <option value="">Sélectionner un gouvernorat</option>
-              {governoratesList.map((g: { _id: string; name: string }) => (
-                <option key={g._id} value={g._id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label>Ville *</label>
-            <select
-              value={cityId}        // ✅ Corrigé: value binding
-              onChange={handleCityChange}
-              required
-            >
-              <option value="">-- Choisir une ville --</option>
-              {citiesList.map((c: any) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label>Rue (optionnel)</label>
-            <select
-              value={streetId}                          // ✅ Corrigé
-              onChange={e => setStreetId(e.target.value)} // ✅ Corrigé
-              disabled={!cityId}
-            >
-              <option value="">-- Pas de rue spécifique --</option>
-              {streetsList.map((s: { _id: string; name: string }) => (
-                <option key={s._id} value={s._id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            <input 
+              value={phone} 
+              onChange={e => setPhone(e.target.value)} 
+              required 
+              style={{ padding: 10, border: '1px solid #ddd', borderRadius: 4, width: '100%' }}
+            />
           </div>
         </div>
 
-        {/* ✅ Debug info */}
-        {cityLocation && (
-          <div style={{ padding: 10, backgroundColor: '#f0f8ff', borderRadius: 5 }}>
-            📍 <strong>Localisation de la ville :</strong> {cityLocation.coordinates.join(', ')}
-          </div>
-        )}
+        {/* Localisation */}
+        <div style={{ 
+          border: '2px solid #2196f3', 
+          borderRadius: 8, 
+          padding: 20, 
+          backgroundColor: '#f8f9ff' 
+        }}>
+          <h3>📍 Localisation de votre garage</h3>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 15, marginBottom: 15 }}>
+            <div>
+              <label>Gouvernorat *</label>
+              <select
+                value={governorateId}
+                onChange={e => setGovernorateId(e.target.value)}
+                required
+                style={{ padding: 10, border: '1px solid #ddd', borderRadius: 4, width: '100%' }}
+              >
+                <option value="">Sélectionner un gouvernorat</option>
+                {governoratesList.map((g: any) => (
+                  <option key={g._id} value={g._id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <button type="submit" disabled={isLoading}>
+            <div>
+              <label>Ville *</label>
+              <select
+                value={cityId}
+                onChange={handleCityChange}
+                required
+                style={{ padding: 10, border: '1px solid #ddd', borderRadius: 4, width: '100%' }}
+              >
+                <option value="">-- Choisir une ville --</option>
+                {citiesList.map((c: any) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label>Adresse / Rue (optionnel)</label>
+              <input
+                type="text"
+                value={streetAddress}
+                onChange={e => setStreetAddress(e.target.value)}
+                placeholder="Ex: Avenue Habib Bourguiba, Khezema..."
+                style={{ padding: 10, border: '1px solid #ddd', borderRadius: 4, width: '100%' }}
+              />
+              <small style={{ color: '#666', fontSize: 12 }}>
+                💡 Plus c'est précis, plus la localisation sera exacte
+              </small>
+            </div>
+          </div>
+
+          {/* Carte interactive */}
+          {mechanicLocation && (
+            <MapComponent 
+              location={mechanicLocation}
+              setLocation={setMechanicLocation}
+            />
+          )}
+          
+          <div style={{ 
+            marginTop: 10, 
+            padding: 10, 
+            backgroundColor: '#e3f2fd', 
+            borderRadius: 4, 
+            fontSize: 13 
+          }}>
+            <strong>📌 Instructions :</strong> 
+            <br />• Sélectionnez d'abord votre gouvernorat et ville
+            <br />• Entrez votre adresse pour une localisation automatique
+            <br />• Ajustez manuellement le marqueur sur la carte si nécessaire
+            <br />• Cette position sera visible par vos clients
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          disabled={isLoading}
+          style={{
+            padding: 15,
+            backgroundColor: isLoading ? '#ccc' : '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: 8,
+            fontSize: 16,
+            fontWeight: 'bold',
+            cursor: isLoading ? 'not-allowed' : 'pointer'
+          }}
+        >
           {isLoading ? "⏳ Enregistrement..." : "💾 Finaliser mon profil"}
         </button>
       </form>
 
-      {message && <div style={{ color: 'green' }}>✅ {message}</div>}
-      {error && <div style={{ color: 'red' }}>⚠️ {error}</div>}
+      {message && (
+        <div style={{ color: 'green', marginTop: 15, padding: 10, backgroundColor: '#e8f5e8', borderRadius: 4 }}>
+          ✅ {message}
+        </div>
+      )}
+      {error && (
+        <div style={{ color: 'red', marginTop: 15, padding: 10, backgroundColor: '#ffeaea', borderRadius: 4 }}>
+          ⚠️ {error}
+        </div>
+      )}
     </div>
   );
 }

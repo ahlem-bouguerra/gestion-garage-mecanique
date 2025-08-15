@@ -89,7 +89,7 @@ export default function SigninWithPassword() {
 
       const user = profileResponse.data;
       localStorage.setItem("user", JSON.stringify(user));
-      const isComplete = user.username && user.phone && user.city;
+      const isComplete = user.username && user.phone && user.governorateId;
 
       if (isComplete) {
         router.push("/");  // Profil complet, vers accueil
@@ -120,6 +120,7 @@ export default function SigninWithPassword() {
     
     // Ouvrir dans la même fenêtre pour une meilleure UX
     window.location.href = googleAuthUrl;
+    
   };
 
   return (

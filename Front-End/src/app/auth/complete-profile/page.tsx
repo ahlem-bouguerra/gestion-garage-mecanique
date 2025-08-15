@@ -1,7 +1,7 @@
 
 import { createTimeFrameExtractor } from "@/utils/timeframe-extractor";
 import { Metadata } from "next";
-import CompleteProfilePage from "@/components/Auth/complete-profile/index";
+import CompleteProfilePage from "@/components/Auth/complete-profile";
 
 
 export const metadata: Metadata = {

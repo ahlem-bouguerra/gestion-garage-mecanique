@@ -16,7 +16,7 @@ export const getProfile = async (req, res) => {
       phone: user.phone || "",
       governorateId: user.governorateId || "", // ✅ Corrigé: governorateId
       cityId: user.cityId || "",               // ✅ Corrigé: cityId
-      streetId: user.streetId || "",           // ✅ Corrigé: streetId
+      streetAddress: user.streetAddress || "",           // ✅ Corrigé: streetAddress
       location: user.location,                 // ✅ Coordonnées de la ville
       isVerified: user.isVerified,
       createdAt: user.createdAt,
@@ -29,7 +29,7 @@ export const getProfile = async (req, res) => {
       hasPhone: !!userProfile.phone,
       governorateId: userProfile.governorateId,
       cityId: userProfile.cityId,
-      streetId: userProfile.streetId,
+      streetAddress: userProfile.streetAddress,
       hasLocation: !!userProfile.location
     });
 
@@ -43,7 +43,7 @@ export const getProfile = async (req, res) => {
 export const completeProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { username, email, phone, governorateId, cityId, streetId, location } = req.body; // ✅ IDs corrects
+    const { username, email, phone, governorateId, cityId, streetAddress, location } = req.body; // ✅ IDs corrects
 
     console.log('📥 Données reçues pour completeProfile:', {
       username,
@@ -51,7 +51,7 @@ export const completeProfile = async (req, res) => {
       phone,
       governorateId,
       cityId,
-      streetId,
+      streetAddress,
       location
     });
 
@@ -64,9 +64,9 @@ export const completeProfile = async (req, res) => {
       cityId,        // ✅ ObjectId de la ville
     };
 
-    // ✅ Ajouter streetId seulement s'il n'est pas vide
-    if (streetId && streetId.trim() !== '') {
-      updateData.streetId = streetId;
+    // ✅ Ajouter streetAddress seulement s'il n'est pas vide
+    if (streetAddress && streetAddress.trim() !== '') {
+      updateData.streetAddress = streetAddress;
     }
 
     // Ajouter location seulement si elle est fournie (coordonnées de la ville)
@@ -108,7 +108,7 @@ export const completeProfile = async (req, res) => {
         phone: updatedUser.phone,
         governorateId: updatedUser.governorateId,
         cityId: updatedUser.cityId,
-        streetId: updatedUser.streetId,
+        streetAddress: updatedUser.streetAddress,
         location: updatedUser.location
       }
     });

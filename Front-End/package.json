@@ -24,6 +24,7 @@
     "jsvectormap": "^1.6.0",
     "leaflet": "^1.9.4",
     "libphonenumber-js": "^1.12.10",
+    "lucide-react": "^0.539.0",
     "mongoose": "^8.17.0",
     "next": "15.1.6",
     "next-auth": "^4.24.11",
