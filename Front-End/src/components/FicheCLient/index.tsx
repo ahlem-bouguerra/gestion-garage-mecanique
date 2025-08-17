@@ -52,7 +52,7 @@ export default function ClientForm() {
     email: "",
     vehiculeAssocie: "",
   });
-  
+
   const [clients, setClients] = useState<Client[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -61,11 +61,39 @@ export default function ClientForm() {
   const [filterType, setFilterType] = useState<string>("tous");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [telephoneError, setTelephoneError] = useState("");
+
 
   // Charger tous les clients au montage du composant
   useEffect(() => {
     fetchAllClients();
   }, []);
+
+
+  // Validation simple pour numéros tunisiens
+  const validateTunisianPhone = (phone: string) => {
+    const cleaned = phone.replace(/[\s\-]/g, ''); // Enlever espaces et tirets
+
+    // Vérifier format tunisien: 8 chiffres commençant par 2,4,5,7,9
+    const tunisianPattern = /^[24579]\d{7}$/;
+
+    if (!cleaned) return "Numéro requis";
+    if (!tunisianPattern.test(cleaned)) return "Numéro tunisien invalide (ex: 20123456)";
+    return "";
+  };
+
+  const handleTelephoneChange = (e: { target: { value: string; }; }) => {
+    let value = e.target.value.replace(/[^\d\s\-]/g, ''); // Seulement chiffres, espaces, tirets
+
+    // Limiter à 10 caractères (8 chiffres + 2 espaces/tirets)
+    if (value.length > 10) return;
+
+    setFormData({ ...formData, telephone: value });
+
+    // Validation en temps réel
+    const error = validateTunisianPhone(value);
+    setTelephoneError(error);
+  };
 
   const filteredClients = useMemo(() => {
     return clients.filter(client => {
@@ -106,13 +134,16 @@ export default function ClientForm() {
     }
   };
 
-  // Créer un nouveau client
-  const createClient = async (clientData: FormData): Promise<any> => {
+  // service
+  const createClient = async (clientData: any): Promise<any> => {
     try {
       const response = await axios.post(`${API_BASE_URL}/Creation`, clientData);
       return response.data;
-    } catch (error) {
-      throw error;
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.error) {
+        throw new Error(error.response.data.error); // On renvoie le message backend
+      }
+      throw new Error("Erreur lors de la création du client");
     }
   };
 
@@ -121,11 +152,11 @@ export default function ClientForm() {
     try {
       console.log("🔄 Frontend updateClient - ID reçu:", id);
       console.log("🔄 Frontend updateClient - Données:", clientData);
-      
+
       if (!id) {
         throw new Error("ID du client non défini");
       }
-      
+
       // CORRECTION: Ajouter les données dans le body de la requête PUT
       const response = await axios.put(`${API_BASE_URL}/updateOne/${id}`, clientData);
       console.log("✅ Réponse serveur:", response.data);
@@ -139,7 +170,7 @@ export default function ClientForm() {
   // Supprimer un client
   const deleteClient = async (id: string | number): Promise<void> => {
     console.log("🗑️ Frontend - Suppression du client avec ID:", id);
-    
+
     if (!id) {
       console.error("❌ ID undefined dans deleteClient");
       alert("Erreur: ID du client non défini");
@@ -171,10 +202,10 @@ export default function ClientForm() {
     setModalType(type);
     if (client) {
       // CORRECTION: Utiliser _id en priorité, puis id comme fallback
-      const clientId = client._id ;
+      const clientId = client._id;
       console.log("🆔 ID utilisé:", clientId);
       console.log("🔍 Client original:", JSON.stringify(client, null, 2));
-      
+
       if (type === "view" || type === "edit") {
         const fullClient = await fetchClientById(clientId);
         console.log("📋 Client complet récupéré:", JSON.stringify(fullClient, null, 2));
@@ -232,13 +263,13 @@ export default function ClientForm() {
         alert("Client ajouté avec succès !");
       } else if (modalType === "edit" && selectedClient) {
         // CORRECTION: Utiliser _id en priorité pour la mise à jour
-        const clientId = selectedClient._id ;
+        const clientId = selectedClient._id;
         console.log("✏️ Modification du client avec ID:", clientId);
         console.log("📝 Données à envoyer:", formData);
         await updateClient(clientId, formData);
         alert("Client modifié avec succès !");
       }
-      
+
       // Recharger la liste des clients
       await fetchAllClients();
       closeModal();
@@ -327,8 +358,8 @@ export default function ClientForm() {
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">{client.nom}</h3>
                         <span className={`inline-block px-2 py-1 text-xs rounded-full ${client.type === "professionnel"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-green-100 text-green-800"
                           }`}>
                           {client.type === "professionnel" ? "Professionnel" : "Particulier"}
                         </span>
@@ -565,10 +596,29 @@ export default function ClientForm() {
                         type="tel"
                         name="telephone"
                         value={formData.telephone}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        onChange={(e) => {
+                          // Accepter seulement chiffres, espaces et tirets
+                          let value = e.target.value.replace(/[^\d\s\-]/g, '');
+                          if (value.length > 8) return; // Limiter la longueur
+
+                          handleChange({ target: { name: 'telephone', value } });
+
+                          // Validation simple
+                          const cleaned = value.replace(/[\s\-]/g, '');
+                          const isValid = /^[24579]\d{7}$/.test(cleaned);
+
+                          if (cleaned && !isValid) {
+                            setError("Numéro tunisien invalide");
+                          } else {
+                            setError("");
+                          }
+                        }}
+                        placeholder="Ex: 20123456"
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${error ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         required
                       />
+                      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>

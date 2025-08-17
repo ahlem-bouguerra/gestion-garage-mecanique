@@ -6,9 +6,14 @@ export const createFicheClient = async (req, res) => {
     await fiche.save();
     res.status(201).json(fiche);
   } catch (error) {
+    // Gestion des erreurs d'unicité
+    if (error.code === 11000) {
+      return res.status(400).json({ error: "Téléphone ou email ou nom déjà utilisé" });
+    }
     res.status(400).json({ error: error.message });
   }
 };
+
 
 export const getFicheClients = async (req, res) => {
   try {
@@ -27,6 +32,19 @@ export const getFicheClientById = async (req, res) => {
     if (!fiche) return res.status(404).json({ error: "client non trouvé" });
     console.log("📋 Client trouvé:", fiche.nom);
     res.json(fiche);
+  } catch (error) {
+    console.error("❌ Erreur:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getFicheClientNoms = async (req, res) => {
+  try {
+    // GARDER l'_id car le frontend en a besoin !
+    const clients = await FicheClient.find({}, { nom: 1, type: 1, _id: 1 }); 
+    // Retourne : [ { _id: "abc123", nom: "Ahlem", type: "particulier" }, ... ]
+   
+    res.json(clients);
   } catch (error) {
     console.error("❌ Erreur:", error.message);
     res.status(500).json({ error: error.message });

@@ -2,9 +2,11 @@
 import mongoose from "mongoose";
 
 const FicheClientSchema = new mongoose.Schema({
+
     nom: {
     type: String,
     required: true,
+    unique: true,
   },
     type: {
     type: String,
@@ -18,6 +20,7 @@ const FicheClientSchema = new mongoose.Schema({
    telephone: {
     type: String,
     required: true,
+    unique: true,
   },
   email: {
     type: String,

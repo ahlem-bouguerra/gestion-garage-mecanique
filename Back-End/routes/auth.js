@@ -9,8 +9,8 @@ import { resetPassword } from "../controllers/ResetPassword.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { completeProfile, getProfile } from "../controllers/ProfileContoller.js";
 import { enhancedLocationRoutes } from "../apiDataFetcher.js"; 
-import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient} from "../controllers/FicheClient.js";
-
+import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient,getFicheClientNoms} from "../controllers/FicheClient.js";
+import {getAllVehicules,getVehiculeById,createVehicule,updateVehicule,deleteVehicule,getVehiculesByProprietaire} from '../controllers/vehiculeController.js';
 
 
 const router = express.Router();
@@ -163,6 +163,15 @@ router.get("/GetAll", getFicheClients);
 router.get("/GetOne/:_id", getFicheClientById);         
 router.put("/updateOne/:_id", updateFicheClient);    
 router.delete("/deleteOne/:_id", deleteFicheClient); 
+router.get("/clients/noms", getFicheClientNoms);
+
+
+router.get('/vehicules', getAllVehicules);
+router.get('/vehicules/:id', getVehiculeById);
+router.post('/vehicules', createVehicule);
+router.put('/vehicules/:id', updateVehicule);
+router.delete('/vehicules/:id', deleteVehicule);
+router.get('/vehicules/proprietaire/:clientId', getVehiculesByProprietaire);
 
 
 

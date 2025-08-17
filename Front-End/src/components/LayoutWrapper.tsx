@@ -19,6 +19,7 @@ const pagesWithoutLayout = [
   "/auth/complete-profile",
   "/auth/google-callback",
   "/Auth/SigninForm",
+  
   // Ajoutez d'autres routes ici selon vos besoins
 ];
 
