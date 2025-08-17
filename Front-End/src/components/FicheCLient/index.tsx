@@ -1,118 +1,202 @@
 "use client";
-import React, { useState, useMemo } from 'react';
+
+import { useState, useMemo, useEffect } from "react";
 import { Search, Filter, Plus, User, Building2, Calendar, Car, Phone, Mail, MapPin, Eye, Edit, Trash2 } from 'lucide-react';
+import axios from "axios";
 
-const ClientManagement = () => {
-  const [clients, setClients] = useState([
-    {
-      id: 1,
-      nom: "Martin Dupont",
-      type: "particulier",
-      adresse: "123 Rue de la Paix, 75001 Paris",
-      telephone: "01 23 45 67 89",
-      email: "martin.dupont@email.com",
-      derniereVisite: "2024-08-10",
-      vehiculeAssocie: "Renault Clio - AB-123-CD",
-      contactsSecondaires: [
-        { nom: "Marie Dupont", relation: "Épouse", telephone: "01 23 45 67 90", email: "marie.dupont@email.com" }
-      ],
-      historiqueVisites: [
-        { date: "2024-08-10", service: "Révision complète", montant: "250€" },
-        { date: "2024-06-15", service: "Changement pneus", montant: "320€" }
-      ]
-    },
-    {
-      id: 2,
-      nom: "Entreprise LogiTrans SARL",
-      type: "professionnel",
-      adresse: "456 Avenue des Affaires, 69000 Lyon",
-      telephone: "04 12 34 56 78",
-      email: "contact@logitrans.com",
-      derniereVisite: "2024-08-05",
-      vehiculeAssocie: "Flotte de 15 véhicules utilitaires",
-      contactsSecondaires: [
-        { nom: "Jean Moreau", relation: "Responsable flotte", telephone: "04 12 34 56 79", email: "j.moreau@logitrans.com" },
-        { nom: "Sophie Bernard", relation: "Chauffeur/Livreur", telephone: "04 12 34 56 80", email: "s.bernard@logitrans.com" },
-        { nom: "Marc Dubois", relation: "Commercial", telephone: "04 12 34 56 81", email: "m.dubois@logitrans.com" }
-      ],
-      historiqueVisites: [
-        { date: "2024-08-05", service: "Entretien flotte", montant: "2850€" },
-        { date: "2024-07-20", service: "Réparation urgente", montant: "450€" }
-      ]
-    },
-    {
-      id: 3,
-      nom: "Claire Leblanc",
-      type: "particulier",
-      adresse: "789 Boulevard du Soleil, 13000 Marseille",
-      telephone: "04 91 23 45 67",
-      email: "claire.leblanc@email.com",
-      derniereVisite: "2024-07-28",
-      vehiculeAssocie: "Peugeot 308 - CD-456-EF",
-      contactsSecondaires: [],
-      historiqueVisites: [
-        { date: "2024-07-28", service: "Contrôle technique", montant: "80€" },
-        { date: "2024-05-10", service: "Vidange", montant: "65€" }
-      ]
-    },
-    {
-      id: 4,
-      nom: "Ahmed Ben Ali",
-      type: "particulier", 
-      adresse: "15 Avenue Habib Bourguiba, 1000 Tunis",
-      telephone: "71 123 456",
-      email: "ahmed.benali@email.com",
-      derniereVisite: "2024-08-12",
-      vehiculeAssocie: "Toyota Corolla - TN-1234-AB (Ahmed) + Peugeot 207 - TN-5678-CD (Épouse)",
-      contactsSecondaires: [
-        { nom: "Fatma Ben Ali", relation: "Épouse", telephone: "71 123 457", email: "fatma.benali@email.com" },
-        { nom: "Mohamed Ben Ali", relation: "Fils", telephone: "71 123 458", email: "mohamed.benali@email.com" }
-      ],
-      historiqueVisites: [
-        { date: "2024-08-12", service: "Révision Toyota Corolla (Ahmed)", montant: "180€" },
-        { date: "2024-08-01", service: "Réparation Peugeot 207 (Épouse)", montant: "320€" },
-        { date: "2024-07-15", service: "Vidange Toyota (Fils)", montant: "75€" }
-      ]
-    }
-    ]);
+const API_BASE_URL = "http://localhost:5000/api";
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState("tous");
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("view");
-  const [formData, setFormData] = useState({
+// Définition des types TypeScript
+interface ContactSecondaire {
+  nom: string;
+  relation: string;
+  telephone: string;
+  email?: string;
+}
+
+interface HistoriqueVisite {
+  date: string;
+  service: string;
+  montant: string;
+}
+
+interface Client {
+  _id: string;
+  id?: string | number;  // Optionnel car on utilise _id comme principal
+  nom: string;
+  type: "particulier" | "professionnel";
+  adresse: string;
+  telephone: string;
+  email: string;
+  vehiculeAssocie: string;
+  derniereVisite?: string;
+  contactsSecondaires?: ContactSecondaire[];
+  historiqueVisites?: HistoriqueVisite[];
+}
+
+interface FormData {
+  nom: string;
+  type: "particulier" | "professionnel";
+  adresse: string;
+  telephone: string;
+  email: string;
+  vehiculeAssocie: string;
+}
+
+export default function ClientForm() {
+  const [formData, setFormData] = useState<FormData>({
     nom: "",
     type: "particulier",
     adresse: "",
     telephone: "",
     email: "",
-    vehiculeAssocie: ""
+    vehiculeAssocie: "",
   });
+  
+  const [clients, setClients] = useState<Client[]>([]);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [modalType, setModalType] = useState<"view" | "add" | "edit">("view");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [filterType, setFilterType] = useState<string>("tous");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+
+  // Charger tous les clients au montage du composant
+  useEffect(() => {
+    fetchAllClients();
+  }, []);
 
   const filteredClients = useMemo(() => {
     return clients.filter(client => {
       const matchesSearch = client.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          client.vehiculeAssocie.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          client.email.toLowerCase().includes(searchTerm.toLowerCase());
+        client.vehiculeAssocie.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = filterType === "tous" || client.type === filterType;
       return matchesSearch && matchesType;
     });
   }, [clients, searchTerm, filterType]);
 
-  const openModal = (type, client = null) => {
+  // Récupérer tous les clients
+  const fetchAllClients = async (): Promise<void> => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_BASE_URL}/GetAll`);
+      setClients(response.data);
+      setError("");
+    } catch (error) {
+      console.error("Erreur lors de la récupération des clients:", error);
+      setError("Erreur lors du chargement des clients");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Récupérer un client par ID
+  const fetchClientById = async (id: string | number): Promise<Client | null> => {
+    try {
+      console.log("🔍 Récupération du client avec ID:", id);
+      const response = await axios.get(`${API_BASE_URL}/GetOne/${id}`);
+      console.log("📥 Client récupéré:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Erreur lors de la récupération du client:", error);
+      setError("Erreur lors du chargement du client");
+      return null;
+    }
+  };
+
+  // Créer un nouveau client
+  const createClient = async (clientData: FormData): Promise<any> => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/Creation`, clientData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // Mettre à jour un client
+  const updateClient = async (id: string | number, clientData: FormData): Promise<any> => {
+    try {
+      console.log("🔄 Frontend updateClient - ID reçu:", id);
+      console.log("🔄 Frontend updateClient - Données:", clientData);
+      
+      if (!id) {
+        throw new Error("ID du client non défini");
+      }
+      
+      // CORRECTION: Ajouter les données dans le body de la requête PUT
+      const response = await axios.put(`${API_BASE_URL}/updateOne/${id}`, clientData);
+      console.log("✅ Réponse serveur:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Erreur dans updateClient:", error);
+      throw error;
+    }
+  };
+
+  // Supprimer un client
+  const deleteClient = async (id: string | number): Promise<void> => {
+    console.log("🗑️ Frontend - Suppression du client avec ID:", id);
+    
+    if (!id) {
+      console.error("❌ ID undefined dans deleteClient");
+      alert("Erreur: ID du client non défini");
+      return;
+    }
+
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce client ?")) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API_BASE_URL}/deleteOne/${id}`);
+      // CORRECTION: Utiliser _id au lieu de id pour la comparaison
+      setClients(clients.filter(client => client._id !== id && client.id !== id));
+      alert("Client supprimé avec succès !");
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      alert("Erreur lors de la suppression : " + errorMessage);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const openModal = async (type: "view" | "add" | "edit", client: Client | null = null): Promise<void> => {
+    console.log("🎯 Ouverture modal:", type, "pour client:", client);
     setModalType(type);
     if (client) {
-      setSelectedClient(client);
-      setFormData({
-        nom: client.nom,
-        type: client.type,
-        adresse: client.adresse,
-        telephone: client.telephone,
-        email: client.email,
-        vehiculeAssocie: client.vehiculeAssocie
-      });
+      // CORRECTION: Utiliser _id en priorité, puis id comme fallback
+      const clientId = client._id ;
+      console.log("🆔 ID utilisé:", clientId);
+      console.log("🔍 Client original:", JSON.stringify(client, null, 2));
+      
+      if (type === "view" || type === "edit") {
+        const fullClient = await fetchClientById(clientId);
+        console.log("📋 Client complet récupéré:", JSON.stringify(fullClient, null, 2));
+        if (fullClient) {
+          setSelectedClient(fullClient);
+          if (type === "edit") {
+            console.log("✏️ Remplissage du formulaire avec:", fullClient);
+            setFormData({
+              nom: fullClient.nom,
+              type: fullClient.type,
+              adresse: fullClient.adresse,
+              telephone: fullClient.telephone,
+              email: fullClient.email,
+              vehiculeAssocie: fullClient.vehiculeAssocie
+            });
+          }
+        }
+      } else {
+        setSelectedClient(client);
+      }
     } else {
+      // Nouveau client
       setFormData({
         nom: "",
         type: "particulier",
@@ -121,38 +205,49 @@ const ClientManagement = () => {
         email: "",
         vehiculeAssocie: ""
       });
+      setSelectedClient(null);
     }
     setShowModal(true);
   };
 
-  const closeModal = () => {
+  const closeModal = (): void => {
     setShowModal(false);
     setSelectedClient(null);
+    setError("");
   };
 
-  const handleSubmit = () => {
-    if (modalType === "add") {
-      const newClient = {
-        id: clients.length + 1,
-        ...formData,
-        derniereVisite: new Date().toISOString().split('T')[0],
-        contactsSecondaires: [],
-        historiqueVisites: []
-      };
-      setClients([...clients, newClient]);
-    } else if (modalType === "edit") {
-      setClients(clients.map(client =>
-        client.id === selectedClient.id
-          ? { ...client, ...formData }
-          : client
-      ));
-    }
-    closeModal();
-  };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-  const deleteClient = (id) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce client ?")) {
-      setClients(clients.filter(client => client.id !== id));
+    console.log("📝 Soumission du formulaire - Type:", modalType);
+    console.log("📝 Client sélectionné:", selectedClient);
+
+    try {
+      if (modalType === "add") {
+        // Créer un nouveau client
+        console.log("➕ Création d'un nouveau client:", formData);
+        await createClient(formData);
+        alert("Client ajouté avec succès !");
+      } else if (modalType === "edit" && selectedClient) {
+        // CORRECTION: Utiliser _id en priorité pour la mise à jour
+        const clientId = selectedClient._id ;
+        console.log("✏️ Modification du client avec ID:", clientId);
+        console.log("📝 Données à envoyer:", formData);
+        await updateClient(clientId, formData);
+        alert("Client modifié avec succès !");
+      }
+      
+      // Recharger la liste des clients
+      await fetchAllClients();
+      closeModal();
+    } catch (error) {
+      console.error("Erreur lors de la soumission:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      setError("Erreur : " + errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -165,12 +260,20 @@ const ClientManagement = () => {
             <h1 className="text-3xl font-bold text-gray-900">Gestion des Clients</h1>
             <button
               onClick={() => openModal("add")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
             >
               <Plus className="w-4 h-4" />
               <span>Nouveau Client</span>
             </button>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+              {error}
+            </div>
+          )}
 
           {/* Search and Filters */}
           <div className="flex flex-col lg:flex-row gap-4">
@@ -199,94 +302,116 @@ const ClientManagement = () => {
           </div>
         </div>
 
+        {/* Loading State */}
+        {loading && !showModal && (
+          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-500">Chargement...</p>
+          </div>
+        )}
+
         {/* Clients List */}
         <div className="grid gap-6 lg:grid-cols-1 xl:grid-cols-2">
-          {filteredClients.map((client) => (
-            <div key={client.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    {client.type === "professionnel" ? (
-                      <Building2 className="w-8 h-8 text-blue-600" />
-                    ) : (
-                      <User className="w-8 h-8 text-green-600" />
-                    )}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{client.nom}</h3>
-                      <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                        client.type === "professionnel" 
-                          ? "bg-blue-100 text-blue-800" 
-                          : "bg-green-100 text-green-800"
-                      }`}>
-                        {client.type === "professionnel" ? "Professionnel" : "Particulier"}
-                      </span>
+          {filteredClients.map((client) => {
+            console.log("🏷️ Rendu client:", client.nom, "avec _id:", client._id, "et id:", client.id);
+            return (
+              <div key={client._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      {client.type === "professionnel" ? (
+                        <Building2 className="w-8 h-8 text-blue-600" />
+                      ) : (
+                        <User className="w-8 h-8 text-green-600" />
+                      )}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{client.nom}</h3>
+                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${client.type === "professionnel"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                          }`}>
+                          {client.type === "professionnel" ? "Professionnel" : "Particulier"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          console.log("🔍 Clic sur Voir pour:", client.nom, "ID:", client._id || client.id);
+                          openModal("view", client);
+                        }}
+                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Voir détails"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          console.log("✏️ Clic sur Modifier pour:", client.nom, "ID:", client._id || client.id);
+                          openModal("edit", client);
+                        }}
+                        className="p-2 text-gray-500 hover:text-orange-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Modifier"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          const clientId = client._id;
+                          console.log("🗑️ Clic sur Supprimer pour:", client.nom, "ID:", clientId);
+                          deleteClient(clientId);
+                        }}
+                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Supprimer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => openModal("view", client)}
-                      className="p-2 text-gray-500 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
-                      title="Voir détails"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => openModal("edit", client)}
-                      className="p-2 text-gray-500 hover:text-orange-600 hover:bg-gray-100 rounded-lg transition-colors"
-                      title="Modifier"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => deleteClient(client.id)}
-                      className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
-                      title="Supprimer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
 
-                <div className="space-y-2 text-sm text-gray-600">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="w-4 h-4" />
-                    <span>{client.adresse}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Phone className="w-4 h-4" />
-                    <span>{client.telephone}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Mail className="w-4 h-4" />
-                    <span>{client.email}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Car className="w-4 h-4" />
-                    <span>{client.vehiculeAssocie}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>Dernière visite: {new Date(client.derniereVisite).toLocaleDateString('fr-FR')}</span>
-                  </div>
-                </div>
-
-                {client.contactsSecondaires.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Conducteurs autorisés:</h4>
-                    {client.contactsSecondaires.map((contact, index) => (
-                      <div key={index} className="text-xs text-gray-500 mb-1 flex items-center justify-between">
-                        <span>{contact.nom} ({contact.relation})</span>
-                        <span className="text-blue-600">{contact.telephone}</span>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <div className="flex items-center space-x-2">
+                      <MapPin className="w-4 h-4" />
+                      <span>{client.adresse}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Phone className="w-4 h-4" />
+                      <span>{client.telephone}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Mail className="w-4 h-4" />
+                      <span>{client.email}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Car className="w-4 h-4" />
+                      <span>{client.vehiculeAssocie}</span>
+                    </div>
+                    {client.derniereVisite && (
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="w-4 h-4" />
+                        <span>Dernière visite: {new Date(client.derniereVisite).toLocaleDateString('fr-FR')}</span>
                       </div>
-                    ))}
+                    )}
                   </div>
-                )}
+
+                  {client.contactsSecondaires && client.contactsSecondaires.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Conducteurs autorisés:</h4>
+                      {client.contactsSecondaires.map((contact, index) => (
+                        <div key={index} className="text-xs text-gray-500 mb-1 flex items-center justify-between">
+                          <span>{contact.nom} ({contact.relation})</span>
+                          <span className="text-blue-600">{contact.telephone}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {filteredClients.length === 0 && (
+        {filteredClients.length === 0 && !loading && (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
             <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun client trouvé</h3>
@@ -308,42 +433,49 @@ const ClientManagement = () => {
                 </h2>
                 <button
                   onClick={closeModal}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
                 >
                   ×
                 </button>
               </div>
+
+              {/* Error Message in Modal */}
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
 
               {modalType === "view" ? (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                      <p className="text-gray-900">{selectedClient.nom}</p>
+                      <p className="text-gray-900">{selectedClient?.nom}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                      <p className="text-gray-900 capitalize">{selectedClient.type}</p>
+                      <p className="text-gray-900 capitalize">{selectedClient?.type}</p>
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                      <p className="text-gray-900">{selectedClient.adresse}</p>
+                      <p className="text-gray-900">{selectedClient?.adresse}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-                      <p className="text-gray-900">{selectedClient.telephone}</p>
+                      <p className="text-gray-900">{selectedClient?.telephone}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                      <p className="text-gray-900">{selectedClient.email}</p>
+                      <p className="text-gray-900">{selectedClient?.email}</p>
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Véhicule associé</label>
-                      <p className="text-gray-900">{selectedClient.vehiculeAssocie}</p>
+                      <p className="text-gray-900">{selectedClient?.vehiculeAssocie}</p>
                     </div>
                   </div>
 
-                  {selectedClient.contactsSecondaires.length > 0 && (
+                  {selectedClient?.contactsSecondaires && selectedClient.contactsSecondaires.length > 0 && (
                     <div>
                       <h3 className="text-lg font-medium text-gray-900 mb-3">Conducteurs autorisés / Contacts famille</h3>
                       <div className="space-y-3">
@@ -368,39 +500,36 @@ const ClientManagement = () => {
                           </div>
                         ))}
                       </div>
-                      <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                        <p className="text-xs text-blue-700">
-                          💡 <strong>Ces personnes sont autorisées à :</strong> déposer/récupérer les véhicules, 
-                          prendre des décisions d'entretien, et recevoir les communications du garage.
-                        </p>
-                      </div>
                     </div>
                   )}
 
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-3">Historique des visites</h3>
-                    <div className="space-y-2">
-                      {selectedClient.historiqueVisites.map((visite, index) => (
-                        <div key={index} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">{visite.service}</p>
-                            <p className="text-sm text-gray-600">{new Date(visite.date).toLocaleDateString('fr-FR')}</p>
+                  {selectedClient?.historiqueVisites && selectedClient.historiqueVisites.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-3">Historique des visites</h3>
+                      <div className="space-y-2">
+                        {selectedClient.historiqueVisites.map((visite, index) => (
+                          <div key={index} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
+                            <div>
+                              <p className="font-medium">{visite.service}</p>
+                              <p className="text-sm text-gray-600">{new Date(visite.date).toLocaleDateString('fr-FR')}</p>
+                            </div>
+                            <p className="font-bold text-green-600">{visite.montant}</p>
                           </div>
-                          <p className="font-bold text-green-600">{visite.montant}</p>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               ) : (
-                <div className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
                       <input
                         type="text"
+                        name="nom"
                         value={formData.nom}
-                        onChange={(e) => setFormData({...formData, nom: e.target.value})}
+                        onChange={handleChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         required
                       />
@@ -408,8 +537,9 @@ const ClientManagement = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                       <select
+                        name="type"
                         value={formData.type}
-                        onChange={(e) => setFormData({...formData, type: e.target.value})}
+                        onChange={handleChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="particulier">Particulier</option>
@@ -421,8 +551,9 @@ const ClientManagement = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
                     <input
                       type="text"
+                      name="adresse"
                       value={formData.adresse}
-                      onChange={(e) => setFormData({...formData, adresse: e.target.value})}
+                      onChange={handleChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       required
                     />
@@ -432,8 +563,9 @@ const ClientManagement = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
                       <input
                         type="tel"
+                        name="telephone"
                         value={formData.telephone}
-                        onChange={(e) => setFormData({...formData, telephone: e.target.value})}
+                        onChange={handleChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         required
                       />
@@ -442,8 +574,9 @@ const ClientManagement = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                       <input
                         type="email"
+                        name="email"
                         value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        onChange={handleChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         required
                       />
@@ -453,8 +586,9 @@ const ClientManagement = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Véhicule associé</label>
                     <input
                       type="text"
+                      name="vehiculeAssocie"
                       value={formData.vehiculeAssocie}
-                      onChange={(e) => setFormData({...formData, vehiculeAssocie: e.target.value})}
+                      onChange={handleChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       placeholder="Ex: Renault Clio - AB-123-CD"
                       required
@@ -464,19 +598,21 @@ const ClientManagement = () => {
                     <button
                       type="button"
                       onClick={closeModal}
-                      className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      disabled={loading}
+                      className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
                     >
                       Annuler
                     </button>
                     <button
-                      type="button"
-                      onClick={handleSubmit}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                      type="submit"
+                      disabled={loading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 flex items-center space-x-2"
                     >
-                      {modalType === "add" ? "Ajouter" : "Sauvegarder"}
+                      {loading && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
+                      <span>{modalType === "add" ? "Ajouter" : "Sauvegarder"}</span>
                     </button>
                   </div>
-                </div>
+                </form>
               )}
             </div>
           </div>
@@ -484,6 +620,4 @@ const ClientManagement = () => {
       )}
     </div>
   );
-};
-
-export default ClientManagement;
+}
