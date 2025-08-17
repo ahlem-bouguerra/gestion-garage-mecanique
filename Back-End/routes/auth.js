@@ -9,6 +9,7 @@ import { resetPassword } from "../controllers/ResetPassword.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { completeProfile, getProfile } from "../controllers/ProfileContoller.js";
 import { enhancedLocationRoutes } from "../apiDataFetcher.js"; 
+import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient} from "../controllers/FicheClient.js";
 
 
 
@@ -146,8 +147,6 @@ router.post("/reset-password", resetPassword);
 router.post("/complete-profile", authMiddleware, completeProfile);
 router.get("/get-profile", authMiddleware, getProfile);
 
-
-
 // Gouvernorats
 router.get('/governorates',enhancedLocationRoutes.getAllGovernoratesWithCount);
 
@@ -157,6 +156,14 @@ router.get('/cities/:governorateId', enhancedLocationRoutes.getCitiesWithCoordin
 // Recherche auto-complétion
 router.get('/locations/search/:query', enhancedLocationRoutes.searchLocations);
 router.get('/locations/autocomplete', enhancedLocationRoutes.autocomplete);
+
+//creation de client , modif,getbyid, get all , delete 
+router.post("/Creation", createFicheClient);      
+router.get("/GetAll", getFicheClients); 
+router.get("/GetOne/:_id", getFicheClientById);         
+router.put("/updateOne/:_id", updateFicheClient);    
+router.delete("/deleteOne/:_id", deleteFicheClient); 
+
 
 
 

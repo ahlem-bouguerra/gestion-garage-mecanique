@@ -1,7 +1,7 @@
 
 import { createTimeFrameExtractor } from "@/utils/timeframe-extractor";
 import { Metadata } from "next";
-import CompleteProfile from "@/components/Auth/complete-profile";
+import ClientForm from "@/components/FicheCLient";
 
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ export default async function Page(props: PropsType) {
       <div>
 
         <div className="col-span-12 xl:col-span-5">
-          <CompleteProfile />
+          <ClientForm />
         </div>
       </div>
     </>

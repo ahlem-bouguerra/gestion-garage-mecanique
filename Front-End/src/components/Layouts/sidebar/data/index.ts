@@ -22,7 +22,7 @@ export const NAV_DATA = [
       },
        {
         title: "FicheClient",
-        url: "/FicheCLient",
+        url: "/fiche-client",
         icon: Icons.User,
         items: [],
       },
