@@ -1,9 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Car, Plus, Edit, Trash2, User, Building2, Calendar, Phone, UserCheck } from 'lucide-react';
+import { Car, Plus, Edit, Trash2, User, Building2, Calendar, Phone, UserCheck, AlertTriangle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
-// Simulation d'axios pour la démo
-
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -25,8 +23,8 @@ interface Client {
     _id: string;
     nom: string;
     type: "particulier" | "professionnel";
-    telephone: string;
-    email: string;
+    telephone?: string;
+    email?: string;
 }
 
 interface Visite {
@@ -37,7 +35,7 @@ interface Visite {
     conducteurTelephone?: string;
     conducteurRelation: string;
     dateVisite: Date;
-    kilometrageVisite?: number; // Kilométrage au moment de la visite
+    kilometrageVisite?: number;
     services: string[];
     montantTotal: number;
     statut: "en_cours" | "terminee" | "annulee";
@@ -47,7 +45,7 @@ interface Visite {
 interface VehiculeFormData {
     proprietaireId: string;
     marque: string;
-    kilometrage: string; // String dans le form, converti en number lors de l'envoi
+    kilometrage: string;
     modele: string;
     immatriculation: string;
     annee: string;
@@ -66,6 +64,366 @@ interface VisiteFormData {
     notes: string;
 }
 
+// ✅ NOUVELLES INTERFACES POUR LA VALIDATION
+interface ValidationError {
+    field: string;
+    message: string;
+    type: 'error' | 'warning' | 'success';
+}
+
+interface FieldValidation {
+    isValid: boolean;
+    message: string;
+    type: 'error' | 'warning' | 'success';
+}
+
+interface CountryImmatRule {
+    code: string;
+    name: string;
+    patterns: RegExp[];
+    examples: string[];
+    description: string;
+}
+
+class SmartImmatriculationValidator {
+    private static countries: CountryImmatRule[] = [
+        {
+            code: 'TN',
+            name: 'Tunisie',
+            patterns: [
+                /^[0-9]{1,4}TUN[0-9]{1,4}$/,           // 123TUN456
+                /^TUN[0-9]{3,6}$/,                      // TUN12345
+                /^[0-9]{1,4}-TUN-[0-9]{1,4}$/,         // 123-TUN-456
+                /^[0-9]{6,8}$/                          // 12345678 (ancien format)
+            ],
+            examples: ['123TUN456', 'TUN12345', '123-TUN-456'],
+            description: 'Format tunisien'
+        },
+        {
+            code: 'FR',
+            name: 'France',
+            patterns: [
+                /^[A-Z]{2}[0-9]{3}[A-Z]{2}$/,          // AB123CD (nouveau)
+                /^[0-9]{1,4}[A-Z]{2,3}[0-9]{1,3}$/,    // 1234AB12 (ancien)
+                /^[A-Z]{2}-[0-9]{3}-[A-Z]{2}$/,        // AB-123-CD
+                /^[0-9]{1,4}-[A-Z]{2,3}-[0-9]{1,3}$/   // 1234-AB-12
+            ],
+            examples: ['AB123CD', 'AB-123-CD', '1234AB12'],
+            description: 'Format français'
+        }
+    ];
+
+    static validateImmatriculationFlexible(immat: string, countryCode?: 'TN' | 'FR' | 'OTHER'): FieldValidation {
+        if (!immat.trim()) {
+            return { isValid: false, message: 'Immatriculation obligatoire', type: 'error' };
+        }
+
+        const cleanImmat = immat.trim().toUpperCase().replace(/[\s]/g, '');
+
+        // Si pays spécifique TN ou FR, validation stricte
+        if (countryCode === 'TN' || countryCode === 'FR') {
+            const country = this.countries.find(c => c.code === countryCode);
+            if (!country) {
+                return { isValid: false, message: 'Pays non supporté', type: 'error' };
+            }
+
+            const isValid = country.patterns.some(pattern => pattern.test(cleanImmat));
+            return {
+                isValid,
+                message: isValid 
+                    ? `Format ${country.description} valide` 
+                    : `Format ${country.description} invalide. Exemples: ${country.examples.join(', ')}`,
+                type: isValid ? 'success' : 'error'
+            };
+        }
+
+        // Si "OTHER" ou pas de pays, validation flexible
+        // Vérifier d'abord si ça correspond à TN ou FR
+        for (const country of this.countries) {
+            const isValid = country.patterns.some(pattern => pattern.test(cleanImmat));
+            if (isValid) {
+                return {
+                    isValid: true,
+                    message: `Format ${country.description} détecté`,
+                    type: 'success'
+                };
+            }
+        }
+
+        // Si pas TN ou FR, accepter comme texte libre avec validation basique
+        if (cleanImmat.length < 3) {
+            return { isValid: false, message: 'Immatriculation trop courte (min 3 caractères)', type: 'error' };
+        }
+        
+        if (cleanImmat.length > 15) {
+            return { isValid: false, message: 'Immatriculation trop longue (max 15 caractères)', type: 'error' };
+        }
+
+        // Accepter seulement lettres, chiffres et tirets
+        if (!/^[A-Z0-9-]+$/.test(cleanImmat)) {
+            return { isValid: false, message: 'Caractères invalides (seulement lettres, chiffres, tirets)', type: 'error' };
+        }
+
+        return { 
+            isValid: true, 
+            message: 'Format libre accepté', 
+            type: 'success' 
+        };
+    }
+
+    static detectCountryFromImmatriculation(immat: string): 'TN' | 'FR' | 'OTHER' {
+        const cleanImmat = immat.trim().toUpperCase().replace(/[\s]/g, '');
+
+        for (const country of this.countries) {
+            const matches = country.patterns.some(pattern => pattern.test(cleanImmat));
+            if (matches) {
+                return country.code as 'TN' | 'FR';
+            }
+        }
+        return 'OTHER';
+    }
+}
+
+
+// ✅ CLASSE DE VALIDATION
+class FormValidator {
+    // Validation email
+    static validateEmail(email: string): FieldValidation {
+        if (!email.trim()) {
+            return { isValid: true, message: '', type: 'success' }; // Email optionnel
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = emailRegex.test(email.trim());
+        
+        return {
+            isValid,
+            message: isValid ? 'Email valide' : 'Format d\'email invalide (ex: nom@domaine.com)',
+            type: isValid ? 'success' : 'error'
+        };
+    }
+
+    // Validation téléphone (français et tunisien)
+    static validatePhone(phone: string): FieldValidation {
+        if (!phone.trim()) {
+            return { isValid: true, message: '', type: 'success' }; // Téléphone optionnel
+        }
+
+        // Nettoyer le numéro (enlever espaces, tirets, points)
+        const cleanPhone = phone.replace(/[\s\-\.]/g, '');
+        
+        // Formats acceptés:
+        // France: 01234567890, +33123456789, 0033123456789
+        // Tunisie: 12345678, 21612345678, +21612345678, 0021612345678
+        const phoneRegexes = [
+            /^[2-9]\d{7}$/, // Format tunisien 8 chiffres
+            /^(\+216|00216|216)[2-9]\d{7}$/ // Format tunisien international
+        ];
+
+        const isValid = phoneRegexes.some(regex => regex.test(cleanPhone));
+        
+        return {
+            isValid,
+            message: isValid ? 'Numéro valide' : 'Format invalide (ex: 12 345 678)',
+            type: isValid ? 'success' : 'error'
+        };
+    }
+
+
+
+     static validateImmatriculation(immat: string, selectedCountry?: 'TN' | 'FR' | 'OTHER'): FieldValidation {
+        return SmartImmatriculationValidator.validateImmatriculationFlexible(immat, selectedCountry);
+    }
+
+    // ✅ AJOUTER CETTE NOUVELLE MÉTHODE
+    static detectImmatriculationCountry(immat: string): 'TN' | 'FR' | 'OTHER' {
+        return SmartImmatriculationValidator.detectCountryFromImmatriculation(immat);
+    }
+
+
+
+    // Validation longueur champs texte
+    static validateTextLength(text: string, minLength: number, maxLength: number, fieldName: string): FieldValidation {
+        const trimmedText = text.trim();
+        const length = trimmedText.length;
+        
+        if (length === 0) {
+            return { isValid: false, message: `${fieldName} obligatoire`, type: 'error' };
+        }
+        
+        if (length < minLength) {
+            return { isValid: false, message: `${fieldName} trop court (min ${minLength} caractères)`, type: 'error' };
+        }
+        
+        if (length > maxLength) {
+            return { isValid: false, message: `${fieldName} trop long (max ${maxLength} caractères)`, type: 'error' };
+        }
+        
+        return { isValid: true, message: `${length}/${maxLength} caractères`, type: 'success' };
+    }
+
+    // Validation année
+    static validateYear(year: string): FieldValidation {
+        if (!year.trim()) {
+            return { isValid: true, message: 'Optionnel', type: 'success' };
+        }
+
+        const yearNum = parseInt(year);
+        const currentYear = new Date().getFullYear();
+        
+        if (isNaN(yearNum)) {
+            return { isValid: false, message: 'Année doit être un nombre', type: 'error' };
+        }
+        
+        if (yearNum < 1900) {
+            return { isValid: false, message: 'Année trop ancienne (min 1900)', type: 'error' };
+        }
+        
+        if (yearNum > currentYear + 1) {
+            return { isValid: false, message: `Année future non autorisée (max ${currentYear + 1})`, type: 'error' };
+        }
+        
+        return { isValid: true, message: 'Année valide', type: 'success' };
+    }
+
+
+
+   
+    // Validation montant
+    static validateAmount(amount: string): FieldValidation {
+        if (!amount.trim()) {
+            return { isValid: false, message: 'Montant obligatoire', type: 'error' };
+        }
+
+        const amountNum = parseFloat(amount);
+        
+        if (isNaN(amountNum)) {
+            return { isValid: false, message: 'Doit être un nombre', type: 'error' };
+        }
+        
+        if (amountNum < 0) {
+            return { isValid: false, message: 'Ne peut pas être négatif', type: 'error' };
+        }
+        
+        if (amountNum > 50000) {
+            return { 
+                isValid: true, 
+                message: 'Montant très élevé, vérifiez', 
+                type: 'warning' 
+            };
+        }
+            // 5️⃣ Formatage avec points pour milliers et 3 décimales
+    const formattedAmount = amountNum
+        .toFixed(3)                         // 3 décimales
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // point tous les 3 chiffres
+
+    return { 
+        isValid: true, 
+        message: `${formattedAmount} TND`, 
+        type: 'success' 
+    };
+    }
+}
+
+// ✅ COMPOSANT DE CHAMP AVEC VALIDATION
+interface ValidatedFieldProps {
+    label: string;
+    type?: string;
+    value: string;
+    onChange: (value: string) => void;
+    validation?: FieldValidation;
+    required?: boolean;
+    placeholder?: string;
+    maxLength?: number;
+    children?: React.ReactNode; // Pour les selects
+}
+
+const ValidatedField: React.FC<ValidatedFieldProps> = ({
+    label,
+    type = "text",
+    value,
+    onChange,
+    validation,
+    required = false,
+    placeholder,
+    maxLength,
+    children
+}) => {
+    const getValidationColor = () => {
+        if (!validation) return 'border-gray-300';
+        
+        switch (validation.type) {
+            case 'error': return 'border-red-500 focus:ring-red-500';
+            case 'warning': return 'border-yellow-500 focus:ring-yellow-500';
+            case 'success': return 'border-green-500 focus:ring-green-500';
+            default: return 'border-gray-300';
+        }
+    };
+
+    const getValidationIcon = () => {
+        if (!validation || !validation.message) return null;
+        
+        switch (validation.type) {
+            case 'error': return <AlertTriangle className="w-4 h-4 text-red-500" />;
+            case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+            case 'success': return <CheckCircle className="w-4 h-4 text-green-500" />;
+            default: return null;
+        }
+    };
+
+    const getValidationTextColor = () => {
+        if (!validation) return 'text-gray-600';
+        
+        switch (validation.type) {
+            case 'error': return 'text-red-600';
+            case 'warning': return 'text-yellow-600';
+            case 'success': return 'text-green-600';
+            default: return 'text-gray-600';
+        }
+    };
+
+    return (
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+                {label} {required && <span className="text-red-500">*</span>}
+            </label>
+            
+            <div className="relative">
+                {children ? (
+                    <select
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${getValidationColor()}`}
+                    >
+                        {children}
+                    </select>
+                ) : (
+                    <input
+                        type={type}
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent pr-10 ${getValidationColor()}`}
+                        placeholder={placeholder}
+                        maxLength={maxLength}
+                    />
+                )}
+                
+                {/* Icône de validation */}
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    {getValidationIcon()}
+                </div>
+            </div>
+            
+            {/* Message de validation */}
+            {validation?.message && (
+                <p className={`text-xs mt-1 flex items-center space-x-1 ${getValidationTextColor()}`}>
+                    <span>{validation.message}</span>
+                </p>
+            )}
+        </div>
+    );
+};
+
 export default function VehiculeManagement() {
     const [vehicules, setVehicules] = useState<Vehicule[]>([]);
     const [clients, setClients] = useState<Client[]>([]);
@@ -76,6 +434,10 @@ export default function VehiculeManagement() {
     const [modalType, setModalType] = useState<"add" | "edit" | "visit">("add");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [selectedCountry, setSelectedCountry] = useState<'TN' | 'FR' | 'OTHER'>('OTHER');
+
+    // ✅ ÉTAT POUR SUIVRE LES IMMATRICULATIONS EXISTANTES
+    const [existingImmatriculations, setExistingImmatriculations] = useState<string[]>([]);
 
     const [vehiculeForm, setVehiculeForm] = useState<VehiculeFormData>({
         proprietaireId: "",
@@ -99,46 +461,160 @@ export default function VehiculeManagement() {
         notes: ""
     });
 
+    // ✅ ÉTAT POUR LES VALIDATIONS EN TEMPS RÉEL
+    const [vehiculeValidations, setVehiculeValidations] = useState<{[key: string]: FieldValidation}>({});
+    const [visiteValidations, setVisiteValidations] = useState<{[key: string]: FieldValidation}>({});
+
     useEffect(() => {
         fetchClients();
         fetchVehicules();
         fetchVisites();
     }, []);
 
+    // ✅ MISE À JOUR DES IMMATRICULATIONS EXISTANTES
+    useEffect(() => {
+        const immatriculations = vehicules.map(v => v.immatriculation.toUpperCase());
+        setExistingImmatriculations(immatriculations);
+    }, [vehicules]);
 
+    // ✅ VALIDATION EN TEMPS RÉEL DU FORMULAIRE VÉHICULE
+    useEffect(() => {
+        const newValidations: {[key: string]: FieldValidation} = {};
 
+        // Validation propriétaire
+        if (!vehiculeForm.proprietaireId) {
+            newValidations.proprietaireId = { isValid: false, message: 'Propriétaire obligatoire', type: 'error' };
+        } else {
+            newValidations.proprietaireId = { isValid: true, message: 'Propriétaire sélectionné', type: 'success' };
+        }
 
-    // Fonction utilitaire pour formater l'affichage
-    const formatKilometrage = (km: number | undefined): string => {
-        if (!km) return "Non renseigné";
-        return `${km.toLocaleString('fr-FR')} km`;
-    };
+        // Validation marque
+        newValidations.marque = FormValidator.validateTextLength(vehiculeForm.marque, 2, 50, 'Marque');
 
-    // Fonction utilitaire pour parser l'input
-    const parseKilometrage = (input: string): number | undefined => {
-        const cleaned = input.replace(/[^0-9]/g, ''); // Enlever tout sauf les chiffres
-        const parsed = parseInt(cleaned, 10);
-        return isNaN(parsed) ? undefined : parsed;
-    };
+        // Validation modèle
+        newValidations.modele = FormValidator.validateTextLength(vehiculeForm.modele, 1, 50, 'Modèle');
 
-const fetchClients = async () => {
-    try {
-        const response = await axios.get(`${API_BASE_URL}/clients/noms`);
-        console.log("🔍 Données reçues:", response.data);
+          const immatValidation = FormValidator.validateImmatriculation(vehiculeForm.immatriculation, selectedCountry);
         
-        // Plus besoin de transformation, utilisez directement les données
-        setClients(response.data);
-    } catch (error) {
-        console.error("Erreur lors du chargement des clients:", error);
-    }
-};
+        // Auto-détection si pas de pays sélectionné
+        if (selectedCountry === 'OTHER' && vehiculeForm.immatriculation.length > 5) {
+            const detectedCountry = FormValidator.detectImmatriculationCountry(vehiculeForm.immatriculation);
+            if (detectedCountry !== 'OTHER') {
+                immatValidation.message += ` (${detectedCountry === 'TN' ? 'Tunisie' : 'France'} détecté)`;
+            }
+        }
+
+        // Vérifier unicité (garder ce code existant)
+        if (immatValidation.isValid) {
+            const cleanImmat = vehiculeForm.immatriculation.trim().toUpperCase().replace(/[\s\-]/g, '');
+            const currentVehiculeImmat = selectedVehicule?.immatriculation.toUpperCase().replace(/[\s\-]/g, '');
+            
+            if (existingImmatriculations.includes(cleanImmat) && cleanImmat !== currentVehiculeImmat) {
+                newValidations.immatriculation = { 
+                    isValid: false, 
+                    message: 'Cette immatriculation existe déjà', 
+                    type: 'error' 
+                };
+            } else {
+                newValidations.immatriculation = immatValidation;
+            }
+        } else {
+            newValidations.immatriculation = immatValidation;
+        }
+
+
+        // Validation année
+        newValidations.annee = FormValidator.validateYear(vehiculeForm.annee);
+
+        // Validation couleur (optionnelle)
+        if (vehiculeForm.couleur.trim()) {
+            newValidations.couleur = FormValidator.validateTextLength(vehiculeForm.couleur, 2, 30, 'Couleur');
+        } else {
+            newValidations.couleur = { isValid: true, message: 'Optionnel', type: 'success' };
+        }
+
+
+      
+
+        setVehiculeValidations(newValidations);
+    }, [vehiculeForm, existingImmatriculations, selectedVehicule,selectedCountry]);
+
+    // ✅ VALIDATION EN TEMPS RÉEL DU FORMULAIRE VISITE
+    useEffect(() => {
+        const newValidations: {[key: string]: FieldValidation} = {};
+
+        // Validation conducteur
+        newValidations.conducteurNom = FormValidator.validateTextLength(visiteForm.conducteurNom, 2, 100, 'Nom conducteur');
+
+        // Validation téléphone
+        newValidations.conducteurTelephone = FormValidator.validatePhone(visiteForm.conducteurTelephone);
+
+        // Validation services
+        if (!visiteForm.services.trim()) {
+            newValidations.services = { isValid: false, message: 'Services obligatoires', type: 'error' };
+        } else {
+            const servicesArray = visiteForm.services.split(',').map(s => s.trim()).filter(s => s);
+            newValidations.services = { 
+                isValid: true, 
+                message: `${servicesArray.length} service(s)`, 
+                type: 'success' 
+            };
+        }
+
+        // Validation montant
+        newValidations.montantTotal = FormValidator.validateAmount(visiteForm.montantTotal);
+
+        // Validation notes (optionnelles)
+        if (visiteForm.notes.trim() && visiteForm.notes.length > 500) {
+            newValidations.notes = { 
+                isValid: true, 
+                message: 'Notes très longues', 
+                type: 'warning' 
+            };
+        }
+
+        setVisiteValidations(newValidations);
+    }, [visiteForm]);
+
+    // Fonction pour afficher les erreurs
+    const showError = (message: string) => {
+        console.error("❌ Erreur:", message);
+        setError(typeof message === 'string' ? message : 'Une erreur est survenue');
+        setTimeout(() => setError(""), 5000);
+    };
+
+    const showSuccess = (message: string) => {
+        console.log("✅ Succès:", message);
+        alert(typeof message === 'string' ? message : 'Opération réussie');
+    };
+
+    const fetchClients = async () => {
+        try {
+            setError("");
+            const response = await axios.get(`${API_BASE_URL}/clients/noms`);
+            console.log("🔍 Clients reçus:", response.data);
+            
+            if (Array.isArray(response.data)) {
+                setClients(response.data);
+                console.log("✅ Clients chargés:", response.data.length);
+            } else {
+                console.error("❌ Format de données incorrect:", response.data);
+                showError("Format de données clients incorrect");
+            }
+        } catch (error: any) {
+            console.error("❌ Erreur lors du chargement des clients:", error);
+            showError(`Erreur chargement clients: ${error.response?.data?.error || error.message}`);
+        }
+    };
 
     const fetchVehicules = async () => {
         try {
+            setError("");
             const response = await axios.get(`${API_BASE_URL}/vehicules`);
             setVehicules(response.data);
-        } catch (error) {
-            console.error("Erreur lors du chargement des véhicules:", error);
+        } catch (error: any) {
+            console.error("❌ Erreur lors du chargement des véhicules:", error);
+            showError(`Erreur chargement véhicules: ${error.response?.data?.error || error.message}`);
         }
     };
 
@@ -146,35 +622,96 @@ const fetchClients = async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/visites`);
             setVisites(response.data);
-        } catch (error) {
-            console.error("Erreur lors du chargement des visites:", error);
+        } catch (error: any) {
+            console.error("❌ Erreur lors du chargement des visites:", error);
+            showError(`Erreur chargement visites: ${error.response?.data?.error || error.message}`);
         }
     };
 
-    const getClientName = (clientId: string) => {
+    const getClientName = (clientData: string | any) => {
+        console.log("🔍 Recherche client ID/Data:", clientData);
+        console.log("🔍 Clients disponibles:", clients.length);
+        
+        if (typeof clientData === 'object' && clientData?.nom) {
+            console.log("🔍 Client trouvé directement:", clientData.nom);
+            return clientData.nom;
+        }
+        
+        const clientId = typeof clientData === 'object' ? clientData?._id : clientData;
         const client = clients.find(c => c._id === clientId);
+        console.log("🔍 Client trouvé:", client?.nom || 'Non trouvé');
+        
         return client ? client.nom : "Client inconnu";
     };
 
-    const getClientType = (clientId: string) => {
+    const getClientType = (clientData: string | any) => {
+        if (typeof clientData === 'object' && clientData?.type) {
+            return clientData.type;
+        }
+        
+        const clientId = typeof clientData === 'object' ? clientData?._id : clientData;
         const client = clients.find(c => c._id === clientId);
         return client ? client.type : "particulier";
     };
 
+    const getClientNumero = (clientData: string | any) => {
+        if (typeof clientData === 'object' && clientData?.telephone) {
+            return clientData.telephone;
+        }
+        
+        const clientId = typeof clientData === 'object' ? clientData?._id : clientData;
+        const client = clients.find(c => c._id === clientId);
+        return client ? client.type : "telephone inconnu";
+    };
+
+    // ✅ VÉRIFICATION SI LE FORMULAIRE EST VALIDE
+    const isVehiculeFormValid = () => {
+        const requiredFields = ['proprietaireId', 'marque', 'modele', 'immatriculation'];
+        
+        // Vérifier que tous les champs requis sont remplis
+        for (const field of requiredFields) {
+            if (!vehiculeForm[field as keyof VehiculeFormData].trim()) {
+                return false;
+            }
+        }
+
+        // Vérifier qu'il n'y a pas d'erreurs de validation
+        const validationErrors = Object.values(vehiculeValidations).filter(v => !v.isValid);
+        return validationErrors.length === 0;
+    };
+
+    const isVisiteFormValid = () => {
+        const requiredFields = ['conducteurNom', 'services', 'montantTotal'];
+        
+        for (const field of requiredFields) {
+            if (!visiteForm[field as keyof VisiteFormData].trim()) {
+                return false;
+            }
+        }
+
+        const validationErrors = Object.values(visiteValidations).filter(v => !v.isValid);
+        return validationErrors.length === 0;
+    };
+
     const openVehiculeModal = (type: "add" | "edit", vehicule: Vehicule | null = null) => {
+        setError("");
         setModalType(type);
+        setSelectedCountry('OTHER');
+        
         if (vehicule) {
             setSelectedVehicule(vehicule);
             setVehiculeForm({
                 proprietaireId: vehicule.proprietaireId,
                 marque: vehicule.marque,
                 modele: vehicule.modele,
-                kilometrage: vehicule.kilometrage,
+                kilometrage: vehicule.kilometrage?.toString() || "",
                 immatriculation: vehicule.immatriculation,
                 annee: vehicule.annee?.toString() || "",
                 couleur: vehicule.couleur || "",
                 typeCarburant: vehicule.typeCarburant || "essence"
             });
+             const detectedCountry = FormValidator.detectImmatriculationCountry(vehicule.immatriculation);
+            setSelectedCountry(detectedCountry);
         } else {
             setVehiculeForm({
                 proprietaireId: "",
@@ -191,12 +728,13 @@ const fetchClients = async () => {
     };
 
     const openVisiteModal = (vehicule: Vehicule) => {
+        setError("");
         setSelectedVehicule(vehicule);
         setVisiteForm({
             clientId: vehicule.proprietaireId,
             vehiculeId: vehicule._id,
             conducteurNom: getClientName(vehicule.proprietaireId),
-            conducteurTelephone: "",
+            conducteurTelephone: getClientNumero(vehicule.proprietaireId),
             conducteurRelation: "propriétaire",
             services: "",
             montantTotal: "",
@@ -207,19 +745,44 @@ const fetchClients = async () => {
 
     const handleVehiculeSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // ✅ VALIDATION FINALE AVANT SOUMISSION
+        if (!isVehiculeFormValid()) {
+            showError("Veuillez corriger les erreurs dans le formulaire");
+            return;
+        }
+
         setLoading(true);
+        setError("");
+
         try {
+            const submitData = {
+                proprietaireId: vehiculeForm.proprietaireId,
+                marque: vehiculeForm.marque.trim(),
+                modele: vehiculeForm.modele.trim(),
+                immatriculation: vehiculeForm.immatriculation.trim().toUpperCase(),
+                annee: vehiculeForm.annee ? parseInt(vehiculeForm.annee) : undefined,
+                couleur: vehiculeForm.couleur.trim() || undefined,
+                typeCarburant: vehiculeForm.typeCarburant,
+                kilometrage: vehiculeForm.kilometrage ? parseInt(vehiculeForm.kilometrage.replace(/\s/g, '')) : undefined
+            };
+
+            console.log("📤 Données à envoyer:", submitData);
+
             if (modalType === "add") {
-                await axios.post(`${API_BASE_URL}/vehicules`, vehiculeForm);
-                alert("Véhicule ajouté avec succès!");
+                await axios.post(`${API_BASE_URL}/vehicules`, submitData);
+                showSuccess("Véhicule ajouté avec succès!");
             } else if (modalType === "edit" && selectedVehicule) {
-                await axios.put(`${API_BASE_URL}/vehicules/${selectedVehicule._id}`, vehiculeForm);
-                alert("Véhicule modifié avec succès!");
+                await axios.put(`${API_BASE_URL}/vehicules/${selectedVehicule._id}`, submitData);
+                showSuccess("Véhicule modifié avec succès!");
             }
+            
             fetchVehicules();
             setShowVehiculeModal(false);
-        } catch (error) {
-            setError("Erreur lors de l'opération");
+        } catch (error: any) {
+            console.error("❌ Erreur soumission véhicule:", error);
+            const errorMessage = error.response?.data?.error || error.message;
+            showError(`Erreur: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
@@ -227,20 +790,33 @@ const fetchClients = async () => {
 
     const handleVisiteSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // ✅ VALIDATION FINALE AVANT SOUMISSION
+        if (!isVisiteFormValid()) {
+            showError("Veuillez corriger les erreurs dans le formulaire");
+            return;
+        }
+
         setLoading(true);
+        setError("");
+
         try {
-            await axios.post(`${API_BASE_URL}/visites`, {
+            const submitData = {
                 ...visiteForm,
                 montantTotal: parseFloat(visiteForm.montantTotal),
                 services: visiteForm.services.split(',').map(s => s.trim()),
                 dateVisite: new Date(),
                 statut: "en_cours"
-            });
-            alert("Visite enregistrée avec succès!");
+            };
+
+            await axios.post(`${API_BASE_URL}/visites`, submitData);
+            showSuccess("Visite enregistrée avec succès!");
             fetchVisites();
             setShowVisiteModal(false);
-        } catch (error) {
-            setError("Erreur lors de l'enregistrement de la visite");
+        } catch (error: any) {
+            console.error("❌ Erreur soumission visite:", error);
+            const errorMessage = error.response?.data?.error || error.message;
+            showError(`Erreur: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
@@ -251,9 +827,11 @@ const fetchClients = async () => {
             try {
                 await axios.delete(`${API_BASE_URL}/vehicules/${vehicule._id}`);
                 fetchVehicules();
-                alert("Véhicule supprimé avec succès!");
-            } catch (error) {
-                alert("Erreur lors de la suppression");
+                showSuccess("Véhicule supprimé avec succès!");
+            } catch (error: any) {
+                console.error("❌ Erreur suppression:", error);
+                const errorMessage = error.response?.data?.error || error.message;
+                showError(`Erreur suppression: ${errorMessage}`);
             }
         }
     };
@@ -262,6 +840,28 @@ const fetchClients = async () => {
         return visites.filter(v => v.vehiculeId === vehiculeId);
     };
 
+    // ✅ FONCTION POUR FORMATER L'IMMATRICULATION AUTOMATIQUEMENT
+    const formatImmatriculation = (value: string) => {
+        // Enlever tous les caractères non alphanumériques
+        const cleaned = value.replace(/[^A-Z0-9]/g, '');
+        
+        // Formater selon les patterns courants
+        if (cleaned.length <= 7) {
+            // Format AB123CD
+            return cleaned.replace(/^([A-Z]{2})([0-9]{3})([A-Z]{2})$/, '$1-$2-$3');
+        }
+        
+        return cleaned;
+    };
+
+    // ✅ FONCTION POUR FORMATER LE KILOMÉTRAGE
+    const formatKilometrage = (value: string) => {
+        const numericValue = value.replace(/[^0-9]/g, '');
+        if (numericValue) {
+            return parseInt(numericValue).toLocaleString('fr-FR');
+        }
+        return '';
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 p-6">
@@ -279,9 +879,28 @@ const fetchClients = async () => {
                         </button>
                     </div>
 
+                    {/* ✅ AFFICHAGE DES ERREURS AMÉLIORÉ */}
                     {error && (
                         <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-                            {error}
+                            <div className="flex">
+                                <div className="flex-shrink-0">
+                                    <AlertTriangle className="h-5 w-5 text-red-400" />
+                                </div>
+                                <div className="ml-3">
+                                    <p className="text-sm font-medium">{error}</p>
+                                </div>
+                                <div className="ml-auto pl-3">
+                                    <button
+                                        onClick={() => setError("")}
+                                        className="inline-flex text-red-400 hover:text-red-600"
+                                    >
+                                        <span className="sr-only">Fermer</span>
+                                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -356,17 +975,22 @@ const fetchClients = async () => {
                                     <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-4">
                                         {vehicule.annee && (
                                             <div>
-                                                <span className="font-medium">Année:</span> {vehicule.annee}
+                                                <span className="font-medium">Année:</span> {String(vehicule.annee)}
                                             </div>
                                         )}
                                         {vehicule.couleur && (
                                             <div>
-                                                <span className="font-medium">Couleur:</span> {vehicule.couleur}
+                                                <span className="font-medium">Couleur:</span> {String(vehicule.couleur)}
                                             </div>
                                         )}
                                         {vehicule.typeCarburant && (
                                             <div className="col-span-2">
-                                                <span className="font-medium">Carburant:</span> {vehicule.typeCarburant}
+                                                <span className="font-medium">Carburant:</span> {String(vehicule.typeCarburant)}
+                                            </div>
+                                        )}
+                                        {vehicule.kilometrage && (
+                                            <div className="col-span-2">
+                                                <span className="font-medium">Kilométrage:</span> {Number(vehicule.kilometrage).toLocaleString('fr-FR')} km
                                             </div>
                                         )}
                                     </div>
@@ -385,7 +1009,7 @@ const fetchClients = async () => {
                                                         </span>
                                                     </div>
                                                     <span className="text-sm font-bold text-green-600">
-                                                        {derniereVisite.montantTotal}€
+                                                        {Number(derniereVisite.montantTotal).toFixed(2)}€
                                                     </span>
                                                 </div>
                                                 <p className="text-xs text-gray-600">
@@ -407,10 +1031,10 @@ const fetchClients = async () => {
                     })}
                 </div>
 
-                {/* Modal Véhicule */}
+                {/* ✅ MODAL VÉHICULE AVEC VALIDATION */}
                 {showVehiculeModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+                        <div className="bg-white rounded-lg max-w-3xl w-full max-h-screen overflow-y-auto">
                             <div className="p-6">
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-xl font-bold text-gray-900">
@@ -424,139 +1048,205 @@ const fetchClients = async () => {
                                     </button>
                                 </div>
 
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Propriétaire
-                                        </label>
-                                        <select
-                                            value={vehiculeForm.proprietaireId}
-                                            onChange={(e) => setVehiculeForm({ ...vehiculeForm, proprietaireId: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                            required
-                                        >
-                                            <option value="">Sélectionnez un client</option>
-                                            {clients.map(client => (
-                                                <option key={client._id} value={client._id}>
-                                                    {client.nom} ({client.type})
-                                                </option>
-                                            ))}
-                                        </select>
+                                {/* ✅ INDICATEUR DE VALIDATION GLOBALE */}
+                                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium text-gray-700">État du formulaire:</span>
+                                        <div className="flex items-center space-x-2">
+                                            {isVehiculeFormValid() ? (
+                                                <>
+                                                    <CheckCircle className="w-5 h-5 text-green-500" />
+                                                    <span className="text-sm text-green-600 font-medium">Prêt à soumettre</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                                                    <span className="text-sm text-yellow-600 font-medium">Veuillez corriger les erreurs</span>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
+                                </div>
 
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Marque</label>
-                                            <input
-                                                type="text"
+                                <form onSubmit={handleVehiculeSubmit}>
+                                    <div className="space-y-6">
+                                         <ValidatedField
+            label="Propriétaire"
+            value={vehiculeForm.proprietaireId}
+            onChange={(value) => setVehiculeForm({ ...vehiculeForm, proprietaireId: value })}
+            validation={vehiculeValidations.proprietaireId}
+            required
+        >
+            <option value="">-- Sélectionner un propriétaire --</option>
+            {clients.map((client) => (
+                <option key={client._id} value={client._id}>
+                    {client.nom} ({client.type})
+                </option>
+            ))}
+        </ValidatedField>
+
+        {/* Pays d'immatriculation */}
+        <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pays d'immatriculation
+            </label>
+            <select
+                value={selectedCountry}
+                onChange={(e) => setSelectedCountry(e.target.value as 'TN' | 'FR' | 'OTHER')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+                <option value="OTHER">🌍 Autre pays (format libre)</option>
+                <option value="TN">🇹🇳 Tunisie</option>
+                <option value="FR">🇫🇷 France</option>
+            </select>
+        </div>
+
+        
+                                    
+
+                                        {/* Première ligne : Marque, Modèle, Kilométrage */}
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <ValidatedField
+                                                label="Marque"
                                                 value={vehiculeForm.marque}
-                                                onChange={(e) => setVehiculeForm({ ...vehiculeForm, marque: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                onChange={(value) => setVehiculeForm({ ...vehiculeForm, marque: value })}
+                                                validation={vehiculeValidations.marque}
                                                 required
+                                                maxLength={50}
+                                                placeholder="Ex: Peugeot"
                                             />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Modèle</label>
-                                            <input
-                                                type="text"
+                                            
+                                            <ValidatedField
+                                                label="Modèle"
                                                 value={vehiculeForm.modele}
-                                                onChange={(e) => setVehiculeForm({ ...vehiculeForm, modele: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                onChange={(value) => setVehiculeForm({ ...vehiculeForm, modele: value })}
+                                                validation={vehiculeValidations.modele}
                                                 required
+                                                maxLength={50}
+                                                placeholder="Ex: 308"
                                             />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Kilométrage (km)
-                                            </label>
-                                            <input
-                                                type="text" // text au lieu de number pour permettre le formatage
+                                            
+                                            <ValidatedField
+                                                label="Kilométrage (km)"
                                                 value={vehiculeForm.kilometrage}
-                                                onChange={(e) => {
-                                                    // Autoriser seulement les chiffres et espaces
-                                                    const value = e.target.value.replace(/[^0-9\s]/g, '');
-                                                    setVehiculeForm({ ...vehiculeForm, kilometrage: value });
+                                                onChange={(value) => {
+                                                    const formatted = formatKilometrage(value);
+                                                    setVehiculeForm({ ...vehiculeForm, kilometrage: formatted });
                                                 }}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                                placeholder="Ex: 125000"
-                                                maxLength="7" // Max 9,999,999 km
+                                                validation={vehiculeValidations.kilometrage}
+                                                placeholder="Ex: 125 000"
+                                                maxLength={10}
                                             />
                                         </div>
-                                    </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Immatriculation</label>
-                                        <input
-                                            type="text"
+                                        {/* Immatriculation */}
+                                        <ValidatedField
+                                            label="Immatriculation"
                                             value={vehiculeForm.immatriculation}
-                                            onChange={(e) => setVehiculeForm({ ...vehiculeForm, immatriculation: e.target.value.toUpperCase() })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                            placeholder="AB-123-CD"
-                                            required
-                                        />
-                                    </div>
+                                            onChange={(value) => {
+                                                const uppercased = value.toUpperCase();
+                                                setVehiculeForm({ ...vehiculeForm, immatriculation: uppercased });
 
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Année</label>
-                                            <input
+                                                // Auto-détection si "Autre pays" sélectionné
+                                                if (selectedCountry === 'OTHER' && uppercased.length > 5) {
+                                                    const detected = FormValidator.detectImmatriculationCountry(uppercased);
+                                                    if (detected !== 'OTHER') {
+                                                        console.log(`Pays détecté: ${detected}`);
+                                                        // Optionnel: setSelectedCountry(detected);
+                                                    }
+                                                }
+                                            }}
+                                            validation={vehiculeValidations.immatriculation}
+                                            required
+                                            placeholder={
+                                                selectedCountry === 'TN' ? "Ex: 123TUN456, TUN12345" :
+                                                selectedCountry === 'FR' ? "Ex: AB-123-CD, AB123CD" :
+                                                "Ex: ABC123 (format libre)"
+                                            }
+                                            maxLength={15}
+                                        />
+
+                                        {/* Deuxième ligne : Année, Couleur, Carburant */}
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <ValidatedField
+                                                label="Année"
                                                 type="number"
                                                 value={vehiculeForm.annee}
-                                                onChange={(e) => setVehiculeForm({ ...vehiculeForm, annee: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                                min="1900"
-                                                max="2024"
+                                                onChange={(value) => setVehiculeForm({ ...vehiculeForm, annee: value })}
+                                                validation={vehiculeValidations.annee}
+                                                placeholder="Ex: 2020"
                                             />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Couleur</label>
-                                            <input
-                                                type="text"
+                                            
+                                            <ValidatedField
+                                                label="Couleur"
                                                 value={vehiculeForm.couleur}
-                                                onChange={(e) => setVehiculeForm({ ...vehiculeForm, couleur: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                onChange={(value) => setVehiculeForm({ ...vehiculeForm, couleur: value })}
+                                                validation={vehiculeValidations.couleur}
+                                                placeholder="Ex: Bleu"
+                                                maxLength={30}
                                             />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Carburant</label>
-                                            <select
+                                            
+                                            <ValidatedField
+                                                label="Carburant"
                                                 value={vehiculeForm.typeCarburant}
-                                                onChange={(e) => setVehiculeForm({ ...vehiculeForm, typeCarburant: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                onChange={(value) => setVehiculeForm({ ...vehiculeForm, typeCarburant: value })}
                                             >
                                                 <option value="essence">Essence</option>
                                                 <option value="diesel">Diesel</option>
                                                 <option value="hybride">Hybride</option>
                                                 <option value="electrique">Électrique</option>
                                                 <option value="gpl">GPL</option>
-                                            </select>
+                                            </ValidatedField>
+                                        </div>
+
+                                        {/* ✅ ALERTE DE COHÉRENCE */}
+                                        {vehiculeValidations.coherence?.message && vehiculeValidations.coherence.type === 'warning' && (
+                                            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                                <div className="flex items-center space-x-2">
+                                                    <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                                                    <span className="text-sm text-yellow-800">
+                                                        {vehiculeValidations.coherence.message}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Boutons */}
+                                        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowVehiculeModal(false)}
+                                                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                            >
+                                                Annuler
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={loading || !isVehiculeFormValid()}
+                                                className={`px-4 py-2 rounded-lg text-white font-medium ${
+                                                    loading || !isVehiculeFormValid()
+                                                        ? 'bg-gray-400 cursor-not-allowed'
+                                                        : 'bg-blue-600 hover:bg-blue-700'
+                                                }`}
+                                            >
+                                                {loading ? (
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                        <span>En cours...</span>
+                                                    </div>
+                                                ) : (
+                                                    modalType === "add" ? "Ajouter le véhicule" : "Sauvegarder les modifications"
+                                                )}
+                                            </button>
                                         </div>
                                     </div>
-
-                                    <div className="flex justify-end space-x-3 pt-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowVehiculeModal(false)}
-                                            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                                        >
-                                            Annuler
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={(e) => handleVehiculeSubmit(e as any)}
-                                            disabled={loading}
-                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
-                                        >
-                                            {modalType === "add" ? "Ajouter" : "Sauvegarder"}
-                                        </button>
-                                    </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* Modal Visite */}
+                {/* ✅ MODAL VISITE AVEC VALIDATION */}
                 {showVisiteModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                         <div className="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
@@ -583,100 +1273,139 @@ const fetchClients = async () => {
                                     </div>
                                 )}
 
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Nom du conducteur/accompagnant
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={visiteForm.conducteurNom}
-                                                onChange={(e) => setVisiteForm({ ...visiteForm, conducteurNom: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                                required
-                                            />
+                                {/* ✅ INDICATEUR DE VALIDATION GLOBALE */}
+                                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium text-gray-700">État du formulaire:</span>
+                                        <div className="flex items-center space-x-2">
+                                            {isVisiteFormValid() ? (
+                                                <>
+                                                    <CheckCircle className="w-5 h-5 text-green-500" />
+                                                    <span className="text-sm text-green-600 font-medium">Prêt à soumettre</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                                                    <span className="text-sm text-yellow-600 font-medium">Veuillez corriger les erreurs</span>
+                                                </>
+                                            )}
                                         </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Relation</label>
-                                            <select
+                                    </div>
+                                </div>
+
+                                <form onSubmit={handleVisiteSubmit}>
+                                    <div className="space-y-6">
+                                        {/* Première ligne : Conducteur et Relation */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <ValidatedField
+                                                label="Nom du conducteur/accompagnant"
+                                                value={visiteForm.conducteurNom}
+                                                onChange={(value) => setVisiteForm({ ...visiteForm, conducteurNom: value })}
+                                                validation={visiteValidations.conducteurNom}
+                                                required
+                                                maxLength={100}
+                                                placeholder="Ex: Mohamed Ben Ali"
+                                            />
+                                            
+                                            <ValidatedField
+                                                label="Relation"
                                                 value={visiteForm.conducteurRelation}
-                                                onChange={(e) => setVisiteForm({ ...visiteForm, conducteurRelation: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                onChange={(value) => setVisiteForm({ ...visiteForm, conducteurRelation: value })}
                                             >
                                                 <option value="propriétaire">Propriétaire</option>
                                                 <option value="famille">Famille</option>
                                                 <option value="employe">Employé</option>
                                                 <option value="ami">Ami</option>
                                                 <option value="autre">Autre</option>
-                                            </select>
+                                            </ValidatedField>
                                         </div>
-                                    </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-                                        <input
+                                        {/* Téléphone */}
+                                        <ValidatedField
+                                            label="Téléphone"
                                             type="tel"
                                             value={visiteForm.conducteurTelephone}
-                                            onChange={(e) => setVisiteForm({ ...visiteForm, conducteurTelephone: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            onChange={(value) => setVisiteForm({ ...visiteForm, conducteurTelephone: value })}
+                                            validation={visiteValidations.conducteurTelephone}
+                                            placeholder="Ex: 01 23 45 67 89 ou 12 345 678"
+                                            maxLength={20}
                                         />
-                                    </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Services (séparés par des virgules)
-                                        </label>
-                                        <input
-                                            type="text"
+                                        {/* Services */}
+                                        <ValidatedField
+                                            label="Services (séparés par des virgules)"
                                             value={visiteForm.services}
-                                            onChange={(e) => setVisiteForm({ ...visiteForm, services: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Vidange, Révision, Réparation freins..."
+                                            onChange={(value) => setVisiteForm({ ...visiteForm, services: value })}
+                                            validation={visiteValidations.services}
                                             required
+                                            placeholder="Ex: Vidange, Révision, Réparation freins"
+                                            maxLength={500}
                                         />
-                                    </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Montant total (€)</label>
-                                        <input
+                                        {/* Montant */}
+                                        <ValidatedField
+                                            label="Montant total (TND)"
                                             type="number"
-                                            step="0.01"
                                             value={visiteForm.montantTotal}
-                                            onChange={(e) => setVisiteForm({ ...visiteForm, montantTotal: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            onChange={(value) => setVisiteForm({ ...visiteForm, montantTotal: value })}
+                                            validation={visiteValidations.montantTotal}
                                             required
+                                            placeholder="Ex: 500"
                                         />
-                                    </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                                        <textarea
-                                            value={visiteForm.notes}
-                                            onChange={(e) => setVisiteForm({ ...visiteForm, notes: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                            rows={3}
-                                        />
-                                    </div>
+                                        {/* Notes */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Notes (optionnel)
+                                            </label>
+                                            <textarea
+                                                value={visiteForm.notes}
+                                                onChange={(e) => setVisiteForm({ ...visiteForm, notes: e.target.value })}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                rows={3}
+                                                maxLength={500}
+                                                placeholder="Observations particulières..."
+                                            />
+                                            {visiteValidations.notes && (
+                                                <p className="text-xs mt-1 text-yellow-600">
+                                                    {visiteValidations.notes.message}
+                                                </p>
+                                            )}
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {visiteForm.notes.length}/500 caractères
+                                            </p>
+                                        </div>
 
-                                    <div className="flex justify-end space-x-3 pt-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowVisiteModal(false)}
-                                            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                                        >
-                                            Annuler
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={(e) => handleVisiteSubmit(e as any)}
-                                            disabled={loading}
-                                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400"
-                                        >
-                                            Enregistrer la visite
-                                        </button>
+                                        {/* Boutons */}
+                                        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowVisiteModal(false)}
+                                                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                            >
+                                                Annuler
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={loading || !isVisiteFormValid()}
+                                                className={`px-4 py-2 rounded-lg text-white font-medium ${
+                                                    loading || !isVisiteFormValid()
+                                                        ? 'bg-gray-400 cursor-not-allowed'
+                                                        : 'bg-green-600 hover:bg-green-700'
+                                                }`}
+                                            >
+                                                {loading ? (
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                        <span>En cours...</span>
+                                                    </div>
+                                                ) : (
+                                                    "Enregistrer"
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>

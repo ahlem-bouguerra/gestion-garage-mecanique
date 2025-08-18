@@ -11,6 +11,7 @@ import { completeProfile, getProfile } from "../controllers/ProfileContoller.js"
 import { enhancedLocationRoutes } from "../apiDataFetcher.js"; 
 import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient,getFicheClientNoms} from "../controllers/FicheClient.js";
 import {getAllVehicules,getVehiculeById,createVehicule,updateVehicule,deleteVehicule,getVehiculesByProprietaire} from '../controllers/vehiculeController.js';
+import {getAllPieces,getPieceById,createPiece,updatePiece,deletePiece}from '../controllers/piecesController.js'
 
 
 const router = express.Router();
@@ -173,6 +174,12 @@ router.put('/vehicules/:id', updateVehicule);
 router.delete('/vehicules/:id', deleteVehicule);
 router.get('/vehicules/proprietaire/:clientId', getVehiculesByProprietaire);
 
+
+router.get('/pieces', getAllPieces);
+router.get('/pieces/:id', getPieceById);
+router.post('/pieces', createPiece);
+router.put('/pieces/:id', updatePiece);
+router.delete('/pieces/:id', deletePiece);
 
 
 
