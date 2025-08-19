@@ -12,6 +12,7 @@ import { enhancedLocationRoutes } from "../apiDataFetcher.js";
 import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient,getFicheClientNoms} from "../controllers/FicheClient.js";
 import {getAllVehicules,getVehiculeById,createVehicule,updateVehicule,deleteVehicule,getVehiculesByProprietaire} from '../controllers/vehiculeController.js';
 import {getAllPieces,getPieceById,createPiece,updatePiece,deletePiece}from '../controllers/piecesController.js'
+import {createDevis,getAllDevis,updateDevisStatus,deleteDevis}from '../controllers/devisController.js'
 
 
 const router = express.Router();
@@ -181,6 +182,11 @@ router.post('/pieces', createPiece);
 router.put('/pieces/:id', updatePiece);
 router.delete('/pieces/:id', deletePiece);
 
+
+router.post('/createdevis',createDevis);
+router.get('/Devis',getAllDevis);
+router.put('/Devis/:id/status',updateDevisStatus);
+router.delete('/Devis/:id',deleteDevis);
 
 
 export default router;
