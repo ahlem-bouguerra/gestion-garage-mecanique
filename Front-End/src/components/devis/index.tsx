@@ -438,6 +438,26 @@ const GarageQuoteSystem = () => {
     }
   };
 
+  const sendDevisByEmail = async (devisId) => {
+    try {
+      setLoading(true);
+
+      const response = await axios.post(`http://localhost:5000/api/devis/${devisId}/send-email`);
+
+      if (response.data.success) {
+        showSuccess(`Devis envoyé par email avec succès`);
+
+        // Mettre à jour le statut localement
+        setQuotes(quotes.map(quote =>
+          quote.id === devisId ? { ...quote, status: 'envoye' } : quote
+        ));
+      }
+    } catch (error) {
+      showError(error.response?.data?.message || 'Erreur lors de l\'envoi');
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 
@@ -584,7 +604,10 @@ const GarageQuoteSystem = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {quotes.map((quote) => {
-                      const StatusIcon = statusIcons[quote.status];
+                      // Normaliser le status pour qu'il corresponde aux clés de statusIcons
+                      const normalizedStatus = quote.status?.toLowerCase() || 'brouillon';
+                      const StatusIcon = statusIcons[normalizedStatus] || FileText;
+                      const statusColor = statusColors[normalizedStatus] || statusColors.brouillon;
                       return (
                         <tr key={quote.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -609,17 +632,14 @@ const GarageQuoteSystem = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-
-                              <span className="text-sm font-medium text-gray-900">
-                                {quote.totalTTC.toFixed(3)}
-                              </span>
-                            </div>
+                            <span className="text-sm font-medium text-gray-900">
+                              {quote.totalTTC?.toFixed(3) || '0.000'}
+                            </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[quote.status]}`}>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}`}>
                               <StatusIcon className="h-3 w-3 mr-1" />
-                              {quote.status.charAt(0).toUpperCase() + quote.status.slice(1)}
+                              {quote.status?.charAt(0).toUpperCase() + quote.status?.slice(1) || 'Brouillon'}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
@@ -634,8 +654,9 @@ const GarageQuoteSystem = () => {
                             </button>
                             {quote.status === 'brouillon' && (
                               <button
-                                onClick={() => changeQuoteStatus(quote.id, 'envoye')}
+                                onClick={() => sendDevisByEmail(quote.id)} // ✅ Nouvelle fonction
                                 className="text-indigo-600 hover:text-indigo-900"
+                                disabled={loading}
                               >
                                 <Send className="h-4 w-4" />
                               </button>
@@ -1085,15 +1106,31 @@ const GarageQuoteSystem = () => {
 
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
                   <div className="space-y-2">
-                    <div className="flex justify-between">
+                    {/* Détail des composants */}
+                    <div className="flex justify-between text-gray-600">
+                      <span>Total pièces HT:</span>
+                      <span>{((selectedQuote.totalHT || 0) - (selectedQuote.maindoeuvre || 0)).toFixed(2)} Dinnar</span>
+                    </div>
+
+                    <div className="flex justify-between text-gray-600">
+                      <span>Main d'œuvre:</span>
+                      <span>{(selectedQuote.maindoeuvre || 0).toFixed(2)} Dinnar</span>
+                    </div>
+
+                    {/* Sous-total */}
+                    <div className="flex justify-between font-medium border-t pt-2">
                       <span>Total HT:</span>
-                      <span className="font-medium">{selectedQuote.totalHT.toFixed(2)} Dinnar</span>
+                      <span>{selectedQuote.totalHT.toFixed(2)} Dinnar</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>TVA ({selectedQuote.tvaRate || 20}%):</span> {/* ✅ Utilise le taux sauvegardé */}
-                      <span className="font-medium">{(selectedQuote.totalTTC - selectedQuote.totalHT).toFixed(2)} Dinnar</span>
+
+                    {/* TVA */}
+                    <div className="flex justify-between text-blue-600">
+                      <span>TVA ({selectedQuote.tvaRate || 20}%):</span>
+                      <span>{(selectedQuote.totalTTC - selectedQuote.totalHT).toFixed(2)} Dinnar</span>
                     </div>
-                    <div className="flex justify-between text-lg font-bold border-t pt-2">
+
+                    {/* Total final */}
+                    <div className="flex justify-between text-lg font-bold border-t pt-2 text-green-700">
                       <span>Total TTC:</span>
                       <span>{selectedQuote.totalTTC.toFixed(2)} Dinnar</span>
                     </div>

@@ -11,8 +11,11 @@ import { completeProfile, getProfile } from "../controllers/ProfileContoller.js"
 import { enhancedLocationRoutes } from "../apiDataFetcher.js"; 
 import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient,getFicheClientNoms} from "../controllers/FicheClient.js";
 import {getAllVehicules,getVehiculeById,createVehicule,updateVehicule,deleteVehicule,getVehiculesByProprietaire} from '../controllers/vehiculeController.js';
-import {getAllPieces,getPieceById,createPiece,updatePiece,deletePiece}from '../controllers/piecesController.js'
-import {createDevis,getAllDevis,updateDevisStatus,deleteDevis}from '../controllers/devisController.js'
+import {getAllPieces,getPieceById,createPiece,updatePiece,deletePiece}from '../controllers/piecesController.js';
+import {createDevis,getAllDevis,updateDevisStatus,deleteDevis, accepteDevis}from '../controllers/devisController.js';
+import { sendDevisByEmail } from '../utils/sendDevis.js';
+
+
 
 
 const router = express.Router();
@@ -187,6 +190,9 @@ router.post('/createdevis',createDevis);
 router.get('/Devis',getAllDevis);
 router.put('/Devis/:id/status',updateDevisStatus);
 router.delete('/Devis/:id',deleteDevis);
+router.get("/:id/accept", accepteDevis);
+
+router.post('/devis/:devisId/send-email', sendDevisByEmail);
 
 
 export default router;

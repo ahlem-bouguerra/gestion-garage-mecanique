@@ -155,3 +155,21 @@ export const deleteDevis = async (req, res) => {
     });
   }
 };
+
+
+
+// Route accepter devis
+export const accepteDevis = async (req, res) => {
+  try {
+    const devis = await Devis.findByIdAndUpdate(
+      req.params.id,
+      { status: "Accepté" },
+      { new: true }
+    );
+    if (!devis) return res.status(404).send("Devis introuvable");
+    res.send("✅ Merci ! Vous avez accepté le devis.");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erreur serveur");
+  }
+};
