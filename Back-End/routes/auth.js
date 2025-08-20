@@ -12,7 +12,7 @@ import { enhancedLocationRoutes } from "../apiDataFetcher.js";
 import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient,getFicheClientNoms} from "../controllers/FicheClient.js";
 import {getAllVehicules,getVehiculeById,createVehicule,updateVehicule,deleteVehicule,getVehiculesByProprietaire} from '../controllers/vehiculeController.js';
 import {getAllPieces,getPieceById,createPiece,updatePiece,deletePiece}from '../controllers/piecesController.js';
-import {createDevis,getAllDevis,updateDevisStatus,deleteDevis, accepteDevis}from '../controllers/devisController.js';
+import {createDevis,getAllDevis,updateDevisStatus,updateDevis,deleteDevis, acceptDevis,refuseDevis}from '../controllers/devisController.js';
 import { sendDevisByEmail } from '../utils/sendDevis.js';
 
 
@@ -189,10 +189,13 @@ router.delete('/pieces/:id', deletePiece);
 router.post('/createdevis',createDevis);
 router.get('/Devis',getAllDevis);
 router.put('/Devis/:id/status',updateDevisStatus);
+router.put('/Devis/:id', updateDevis);
 router.delete('/Devis/:id',deleteDevis);
-router.get("/:id/accept", accepteDevis);
+router.get("/devis/:devisId/accept", acceptDevis);
+router.get("/devis/:devisId/refuse", refuseDevis);
 
-router.post('/devis/:devisId/send-email', sendDevisByEmail);
+
+router.post('/devis/:devisId/send-email',authMiddleware, sendDevisByEmail);
 
 
 export default router;

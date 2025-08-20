@@ -1,4 +1,3 @@
-// 1. Créer models/Devis.js
 import mongoose from "mongoose";
 
 const serviceSchema = new mongoose.Schema({
@@ -52,24 +51,39 @@ const devisSchema = new mongoose.Schema({
     required: true
   },
   services: [serviceSchema],
+  
+  // ✅ CLARIFICATION DES CHAMPS
   totalHT: {
     type: Number,
     required: true,
-    min: 0
+    min: 0,
+    comment: "Total des services HT (sans main d'œuvre)"
+  },
+  totalServicesHT: {
+    type: Number,
+    required: true,
+    min: 0,
+    comment: "Total des services HT (avec main d'œuvre)"
+
   },
   totalTTC: {
     type: Number,
     required: true,
-    min: 0
+    min: 0,
+    comment: "Total TTC final (services + main d'œuvre + TVA)"
   },
   tvaRate: {
     type: Number,
     required: true,
-    default: 20
+    default: 20,
+    min: 0,
+    max: 100
   },
-  maindoeuvre:{
+  maindoeuvre: {
     type: Number,
     required: true,
+    default: 0,
+    min: 0
   },
   status: {
     type: String,
@@ -80,17 +94,40 @@ const devisSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Générer ID automatique
+// ✅ Méthode pour générer un ID unique
 devisSchema.statics.generateDevisId = async function() {
-  const lastDevis = await this.findOne({}, {}, { sort: { 'createdAt': -1 } });
-  let nextNumber = 1;
-  
-  if (lastDevis && lastDevis.id) {
-    const lastNumber = parseInt(lastDevis.id.replace('DEV', ''));
-    nextNumber = lastNumber + 1;
+  try {
+    const lastDevis = await this.findOne({}, {}, { sort: { 'createdAt': -1 } });
+    let nextNumber = 1;
+    
+    if (lastDevis && lastDevis.id) {
+      const match = lastDevis.id.match(/DEV(\d+)/);
+      if (match) {
+        nextNumber = parseInt(match[1]) + 1;
+      }
+    }
+    
+    return `DEV${String(nextNumber).padStart(3, '0')}`;
+  } catch (error) {
+    console.error('Erreur génération ID devis:', error);
+    // Fallback avec timestamp en cas d'erreur
+    return `DEV${Date.now().toString().slice(-6)}`;
   }
-  
-  return `DEV${String(nextNumber).padStart(3, '0')}`;
 };
+
+// ✅ Méthode virtuelle pour calculer le total complet
+devisSchema.virtual('totalCompletHT').get(function() {
+  return this.totalHT + (this.maindoeuvre || 0);
+});
+
+// ✅ Méthode virtuelle pour calculer la TVA
+devisSchema.virtual('montantTVA').get(function() {
+  const totalHT = this.totalHT + (this.maindoeuvre || 0);
+  return totalHT * ((this.tvaRate || 20) / 100);
+});
+
+// ✅ Inclure les virtuels dans JSON
+devisSchema.set('toJSON', { virtuals: true });
+devisSchema.set('toObject', { virtuals: true });
 
 export default mongoose.model('Devis', devisSchema);

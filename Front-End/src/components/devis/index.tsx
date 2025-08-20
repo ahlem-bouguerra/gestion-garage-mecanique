@@ -23,6 +23,8 @@ const GarageQuoteSystem = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [editingQuote, setEditingQuote] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [filters, setFilters] = useState({
     status: '',
     clientName: '',
@@ -36,7 +38,6 @@ const GarageQuoteSystem = () => {
     inspectionDate: '',
     services: [{ piece: '', quantity: 1, unitPrice: 0 }]
   });
-
 
   const [pieces, setPieces] = useState([]);
   const [loadingPieces, setLoadingPieces] = useState(false);
@@ -59,11 +60,6 @@ const GarageQuoteSystem = () => {
     description: ''
   });
 
-
-
-
-
-
   const statusColors = {
     brouillon: 'bg-gray-100 text-gray-800',
     envoye: 'bg-blue-100 text-blue-800',
@@ -80,6 +76,51 @@ const GarageQuoteSystem = () => {
 
 
 
+  // 🔧 2. FONCTION POUR GÉRER LES CHANGEMENTS DE FILTRES
+  const handleFilterChange = (field, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // 🔧 3. FONCTION POUR RÉINITIALISER LES FILTRES
+  const resetFilters = () => {
+    setFilters({
+      status: '',
+      clientName: '',
+      dateDebut: '',
+      dateFin: ''
+    });
+    // Recharger tous les devis sans filtres
+    loadDevis({});
+  };
+
+  // 🔧 4. FONCTION POUR APPLIQUER LES FILTRES
+  const applyFilters = () => {
+    // Construire l'objet de filtres pour l'API
+    const apiFilters = {};
+
+    if (filters.status && filters.status !== 'Tous') {
+      apiFilters.status = filters.status.toLowerCase();
+    }
+
+    if (filters.clientName.trim()) {
+      apiFilters.clientName = filters.clientName.trim();
+    }
+
+    if (filters.dateDebut) {
+      apiFilters.dateDebut = filters.dateDebut;
+    }
+
+    if (filters.dateFin) {
+      apiFilters.dateFin = filters.dateFin;
+    }
+
+    console.log('🔍 Filtres appliqués:', apiFilters);
+    loadDevis(apiFilters);
+  };
+
   const calculateTotal = (services, maindoeuvre = 0) => {
     const totalServicesHT = services.reduce((sum, service) => {
       return sum + (service.quantity * service.unitPrice);
@@ -93,11 +134,52 @@ const GarageQuoteSystem = () => {
     };
   };
 
+  const loadDevis = async (filterParams = {}) => {
+    try {
+      setLoading(true);
+      const response = await devisApi.getAll(filterParams);
+
+      // Recalculer les totaux pour chaque devis
+      const devisWithCalculatedTotals = (response.data || []).map(devis => {
+        const servicesWithTotal = (devis.services || []).map(service => ({
+          ...service,
+          total: (service.quantity || 0) * (service.unitPrice || 0)
+        }));
+
+        const totalServicesHT = servicesWithTotal.reduce((sum, service) => {
+          return sum + ((service.quantity || 0) * (service.unitPrice || 0));
+        }, 0);
+
+        const totalHT = totalServicesHT + (devis.maindoeuvre || 0);
+        const totalTTC = totalHT * (1 + (devis.tvaRate || 20) / 100);
+
+        return {
+          ...devis,
+          services: servicesWithTotal,
+          totalHT: totalServicesHT,
+          totalTTC: totalTTC
+        };
+      });
+
+      setQuotes(devisWithCalculatedTotals);
+
+      // Message informatif
+      if (Object.keys(filterParams).length > 0) {
+        showSuccess(`${devisWithCalculatedTotals.length} devis trouvé(s) avec les filtres appliqués`);
+      }
+
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const saveQuote = async () => {
     try {
       setLoading(true);
 
-      // Validation
+      // Validation (même code existant)
       if (!selectedClientId || !newQuote.vehicleInfo || !newQuote.inspectionDate) {
         showError('Veuillez remplir tous les champs obligatoires');
         return;
@@ -115,14 +197,22 @@ const GarageQuoteSystem = () => {
         inspectionDate: newQuote.inspectionDate,
         services: newQuote.services,
         tvaRate: tvaRate,
-        maindoeuvre: maindoeuvre
+        maindoeuvre: maindoeuvre,
+        // Si c'est une modification, remettre le statut à "brouillon"
+        status: isEditMode ? 'brouillon' : undefined
       };
 
-      await devisApi.create(devisData);
+      if (isEditMode && editingQuote) {
+        // Mode édition
+        await devisApi.update(editingQuote.id, devisData);
+        showSuccess('Devis modifié avec succès ! Statut remis à "brouillon".');
+      } else {
+        // Mode création
+        await devisApi.create(devisData);
+        showSuccess('Devis créé avec succès !');
+      }
 
-      showSuccess('Devis créé avec succès !');
-
-      // Reset du formulaire
+      // Reset du formulaire (même code existant)
       setNewQuote({
         clientName: '',
         vehicleInfo: '',
@@ -133,8 +223,9 @@ const GarageQuoteSystem = () => {
       setTvaRate(20);
       setVehicules([]);
       setMaindoeuvre(0);
+      setEditingQuote(null);
+      setIsEditMode(false);
 
-      // Recharger la liste et revenir à l'onglet liste
       await loadDevis();
       setActiveTab('list');
 
@@ -189,17 +280,44 @@ const GarageQuoteSystem = () => {
     }
   };
 
-  const sendQuote = (quoteId) => {
-    setQuotes(quotes.map(quote =>
-      quote.id === quoteId ? { ...quote, status: 'envoye' } : quote
-    ));
-  };
 
-  const acceptQuote = (quoteId) => {
-    setQuotes(quotes.map(quote =>
-      quote.id === quoteId ? { ...quote, status: 'accepte' } : quote
-    ));
-  };
+  const sendDevisByEmail = async (devisId) => {
+  try {
+    setLoading(true);
+
+    const token = localStorage.getItem("token"); // ou Cookies.get("token")
+
+    // 1. Envoyer l'email avec token dans headers
+    const response = await axios.post(
+      `http://localhost:5000/api/devis/${devisId}/send-email`,
+      {}, // corps vide
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.data.success) {
+      // 2. Mettre à jour le statut
+      await devisApi.updateStatus(devisId, 'envoye');
+
+      showSuccess(`Devis envoyé par email avec succès`);
+
+      // 3. Mettre à jour localement
+      setQuotes(quotes.map(quote =>
+        quote.id === devisId ? { ...quote, status: 'envoye' } : quote
+      ));
+    }
+  } catch (error) {
+    showError(error.response?.data?.message || 'Erreur lors de l\'envoi');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
 
   // Modifier cette fonction
@@ -379,14 +497,26 @@ const GarageQuoteSystem = () => {
   };
 
   const devisApi = {
-    create: async (devisData) => {
-      try {
-        const response = await axios.post("http://localhost:5000/api/createdevis", devisData);
-        return response.data;
-      } catch (error) {
-        throw new Error(error.response?.data?.message || "Erreur lors de la création du devis");
+    create: async (devisData, token) => {
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/api/createdevis",
+      devisData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // ✅ IMPORTANT
+        },
       }
-    },
+    );
+    console.log("TOKEN envoyé :", token);
+
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Erreur lors de la création du devis");
+  }
+},
+
 
     getAll: async (filters = {}) => {
       try {
@@ -405,6 +535,14 @@ const GarageQuoteSystem = () => {
         throw new Error(error.response?.data?.message || "Erreur lors du changement de statut");
       }
     },
+    update: async (devisId, devisData) => {
+      try {
+        const response = await axios.put(`http://localhost:5000/api/Devis/${devisId}`, devisData);
+        return response.data;
+      } catch (error) {
+        throw new Error(error.response?.data?.message || "Erreur lors de la mise à jour du devis");
+      }
+    },
 
     delete: async (devisId) => {
       try {
@@ -416,6 +554,42 @@ const GarageQuoteSystem = () => {
     }
   };
 
+  const startEditQuote = (quote) => {
+    // Vérifier si le devis peut être modifié
+    if (quote.status === 'accepte' || quote.status === 'refuse') {
+      if (!confirm('Ce devis a déjà été accepté/refusé. Voulez-vous vraiment le modifier ? Il repassera en statut "brouillon".')) {
+        return;
+      }
+    }
+
+    setEditingQuote(quote);
+    setIsEditMode(true);
+
+    // Pré-remplir le formulaire avec les données existantes
+    setNewQuote({
+      clientName: quote.clientName,
+      vehicleInfo: quote.vehicleInfo,
+      inspectionDate: quote.inspectionDate,
+      services: quote.services.map(service => ({
+        pieceId: service.pieceId || '',
+        piece: service.piece,
+        quantity: service.quantity,
+        unitPrice: service.unitPrice
+      }))
+    });
+
+    setSelectedClientId(quote.clientId || '');
+    setTvaRate(quote.tvaRate || 20);
+    setMaindoeuvre(quote.maindoeuvre || 0);
+
+    // Charger les véhicules du client
+    if (quote.clientId) {
+      loadVehiculesByClient(quote.clientId);
+    }
+
+    setActiveTab('create');
+  };
+
   const showError = (message) => {
     setError(message);
     setTimeout(() => setError(''), 5000);
@@ -425,39 +599,8 @@ const GarageQuoteSystem = () => {
     setSuccess(message);
     setTimeout(() => setSuccess(''), 3000);
   };
-  // 4. Ajouter cette fonction pour charger les devis depuis l'API
-  const loadDevis = async () => {
-    try {
-      setLoading(true);
-      const response = await devisApi.getAll(filters);
-      setQuotes(response.data || []);
-    } catch (err) {
-      showError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const sendDevisByEmail = async (devisId) => {
-    try {
-      setLoading(true);
 
-      const response = await axios.post(`http://localhost:5000/api/devis/${devisId}/send-email`);
-
-      if (response.data.success) {
-        showSuccess(`Devis envoyé par email avec succès`);
-
-        // Mettre à jour le statut localement
-        setQuotes(quotes.map(quote =>
-          quote.id === devisId ? { ...quote, status: 'envoye' } : quote
-        ));
-      }
-    } catch (error) {
-      showError(error.response?.data?.message || 'Erreur lors de l\'envoi');
-    } finally {
-      setLoading(false);
-    }
-  };
 
 
 
@@ -525,48 +668,160 @@ const GarageQuoteSystem = () => {
           <div className="space-y-6">
             {/* Filters */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Filtres de recherche</h3>
+                <button
+                  onClick={resetFilters}
+                  className="text-sm text-gray-600 hover:text-gray-800 underline"
+                >
+                  Réinitialiser
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                {/* FILTRE STATUT */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-                  <select className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option>Tous</option>
-                    <option>Brouillon</option>
-                    <option>Envoyé</option>
-                    <option>Accepté</option>
-                    <option>Refusé</option>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Statut
+                  </label>
+                  <select
+                    value={filters.status}
+                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Tous</option>
+                    <option value="brouillon">Brouillon</option>
+                    <option value="envoye">Envoyé</option>
+                    <option value="accepte">Accepté</option>
+                    <option value="refuse">Refusé</option>
                   </select>
                 </div>
+
+                {/* FILTRE CLIENT */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Client</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Client
+                  </label>
                   <input
                     type="text"
+                    value={filters.clientName}
+                    onChange={(e) => handleFilterChange('clientName', e.target.value)}
                     placeholder="Nom du client..."
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        applyFilters();
+                      }
+                    }}
                   />
                 </div>
+
+                {/* FILTRE DATE DÉBUT */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date début</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date début
+                  </label>
                   <input
                     type="date"
+                    value={filters.dateDebut}
+                    onChange={(e) => handleFilterChange('dateDebut', e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
+
+                {/* FILTRE DATE FIN */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date fin</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date fin
+                  </label>
                   <input
                     type="date"
+                    value={filters.dateFin}
+                    onChange={(e) => handleFilterChange('dateFin', e.target.value)}
+                    min={filters.dateDebut} // La date de fin ne peut pas être avant la date de début
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                <div className="md:col-span flex items-end">
+
+                {/* BOUTONS D'ACTIONS */}
+                <div className="flex items-end space-x-2">
                   <button
-                    onClick={loadDevis}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    onClick={applyFilters}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
                     disabled={loading}
                   >
-                    {loading ? 'Chargement...' : 'Filtrer'}
+                    {loading && (
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    )}
+                    <span>{loading ? 'Filtrage...' : 'Filtrer'}</span>
                   </button>
                 </div>
+              </div>
+
+              {/* INDICATEURS DE FILTRES ACTIFS */}
+              {(filters.status || filters.clientName || filters.dateDebut || filters.dateFin) && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="text-sm text-gray-600">Filtres actifs:</span>
+
+                  {filters.status && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Statut: {filters.status}
+                      <button
+                        onClick={() => handleFilterChange('status', '')}
+                        className="ml-1 text-blue-600 hover:text-blue-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+
+                  {filters.clientName && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Client: {filters.clientName}
+                      <button
+                        onClick={() => handleFilterChange('clientName', '')}
+                        className="ml-1 text-green-600 hover:text-green-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+
+                  {filters.dateDebut && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      Du: {filters.dateDebut}
+                      <button
+                        onClick={() => handleFilterChange('dateDebut', '')}
+                        className="ml-1 text-purple-600 hover:text-purple-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+
+                  {filters.dateFin && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                      Au: {filters.dateFin}
+                      <button
+                        onClick={() => handleFilterChange('dateFin', '')}
+                        className="ml-1 text-orange-600 hover:text-orange-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* RÉSUMÉ DES RÉSULTATS */}
+              <div className="mt-4 text-sm text-gray-600">
+                {quotes.length} devis affiché(s)
+                {(filters.status || filters.clientName || filters.dateDebut || filters.dateFin) && (
+                  <span> (filtré(s))</span>
+                )}
               </div>
             </div>
 
@@ -649,26 +904,29 @@ const GarageQuoteSystem = () => {
                             >
                               <Eye className="h-4 w-4" />
                             </button>
-                            <button className="text-green-600 hover:text-green-900">
+
+                            <button
+                              onClick={() => startEditQuote(quote)}
+                              className="text-green-600 hover:text-green-900"
+                            >
                               <Edit2 className="h-4 w-4" />
                             </button>
+
+                            {/* Bouton Send - visible seulement pour les devis en brouillon */}
                             {quote.status === 'brouillon' && (
                               <button
-                                onClick={() => sendDevisByEmail(quote.id)} // ✅ Nouvelle fonction
+                                onClick={() => sendDevisByEmail(quote.id)}
                                 className="text-indigo-600 hover:text-indigo-900"
                                 disabled={loading}
+                                title="Envoyer par email"
                               >
                                 <Send className="h-4 w-4" />
                               </button>
                             )}
-                            {quote.status === 'envoye' && (
-                              <button
-                                onClick={() => changeQuoteStatus(quote.id, 'accepte')}
-                                className="text-green-600 hover:text-green-900"
-                              >
-                                <Check className="h-4 w-4" />
-                              </button>
-                            )}
+
+
+
+
                             <button
                               onClick={() => deleteQuote(quote.id)}
                               className="text-red-600 hover:text-red-900"
@@ -689,7 +947,7 @@ const GarageQuoteSystem = () => {
 
         {activeTab === 'create' && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Créer un Nouveau Devis</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">{isEditMode ? 'Modifier le Devis' : 'Créer un Nouveau Devis'}</h2>
 
             {/* Client Info */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -1035,7 +1293,12 @@ const GarageQuoteSystem = () => {
                 className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 disabled:opacity-50"
               >
                 <Check className="h-4 w-4" />
-                <span>{loading ? 'Enregistrement...' : 'Enregistrer le Devis'}</span>
+                <span>
+                  {loading
+                    ? (isEditMode ? 'Modification...' : 'Enregistrement...')
+                    : (isEditMode ? 'Modifier le Devis' : 'Enregistrer le Devis')
+                  }
+                </span>
               </button>
               <button
                 onClick={() => setActiveTab('list')}
@@ -1095,8 +1358,10 @@ const GarageQuoteSystem = () => {
                           <tr key={index}>
                             <td className="px-4 py-2 text-sm text-gray-900">{service.piece}</td>
                             <td className="px-4 py-2 text-sm text-gray-900">{service.quantity}</td>
-                            <td className="px-4 py-2 text-sm text-gray-900">{service.unitPrice.toFixed(3)} Dinnar</td>
-                            <td className="px-4 py-2 text-sm font-medium text-gray-900">{service.total.toFixed(3)} Dinnar</td>
+                            <td className="px-4 py-2 text-sm text-gray-900">{(service.unitPrice || 0).toFixed(3)} Dinnar</td>
+                            <td className="px-4 py-2 text-sm font-medium text-gray-900">
+                              {((service.quantity || 0) * (service.unitPrice || 0)).toFixed(3)} Dinnar
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -1109,59 +1374,47 @@ const GarageQuoteSystem = () => {
                     {/* Détail des composants */}
                     <div className="flex justify-between text-gray-600">
                       <span>Total pièces HT:</span>
-                      <span>{((selectedQuote.totalHT || 0) - (selectedQuote.maindoeuvre || 0)).toFixed(2)} Dinnar</span>
+                      <span>{((selectedQuote.totalHT || 0)).toFixed(3)} Dinnar</span>
                     </div>
 
                     <div className="flex justify-between text-gray-600">
                       <span>Main d'œuvre:</span>
-                      <span>{(selectedQuote.maindoeuvre || 0).toFixed(2)} Dinnar</span>
+                      <span>{(selectedQuote.maindoeuvre || 0).toFixed(3)} Dinnar</span>
                     </div>
 
                     {/* Sous-total */}
                     <div className="flex justify-between font-medium border-t pt-2">
                       <span>Total HT:</span>
-                      <span>{selectedQuote.totalHT.toFixed(2)} Dinnar</span>
+                      <span>{((selectedQuote.totalHT || 0) + (selectedQuote.maindoeuvre || 0)).toFixed(3)} Dinnar</span>
                     </div>
 
                     {/* TVA */}
                     <div className="flex justify-between text-blue-600">
                       <span>TVA ({selectedQuote.tvaRate || 20}%):</span>
-                      <span>{(selectedQuote.totalTTC - selectedQuote.totalHT).toFixed(2)} Dinnar</span>
+                      <span>
+                        {(
+                          ((selectedQuote.totalHT || 0) + (selectedQuote.maindoeuvre || 0)) *
+                          ((selectedQuote.tvaRate || 20) / 100)
+                        ).toFixed(3)} Dinnar
+                      </span>
                     </div>
 
                     {/* Total final */}
                     <div className="flex justify-between text-lg font-bold border-t pt-2 text-green-700">
                       <span>Total TTC:</span>
-                      <span>{selectedQuote.totalTTC.toFixed(2)} Dinnar</span>
+                      <span>
+                        {(
+                          (selectedQuote.totalHT || 0) +
+                          (selectedQuote.maindoeuvre || 0) +
+                          ((selectedQuote.totalHT || 0) + (selectedQuote.maindoeuvre || 0)) *
+                          ((selectedQuote.tvaRate || 20) / 100)
+                        ).toFixed(3)} Dinnar
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex space-x-4">
-                  {selectedQuote.status === 'brouillon' && (
-                    <button
-                      onClick={() => {
-                        sendQuote(selectedQuote.id);
-                        setSelectedQuote({ ...selectedQuote, status: 'envoye' });
-                      }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                    >
-                      <Send className="h-4 w-4" />
-                      <span>Envoyer au Client</span>
-                    </button>
-                  )}
-                  {selectedQuote.status === 'envoye' && (
-                    <button
-                      onClick={() => {
-                        acceptQuote(selectedQuote.id);
-                        setSelectedQuote({ ...selectedQuote, status: 'accepte' });
-                      }}
-                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
-                    >
-                      <Check className="h-4 w-4" />
-                      <span>Marquer comme Accepté</span>
-                    </button>
-                  )}
                   <button className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
                     Imprimer PDF
                   </button>
