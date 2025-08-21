@@ -1,4 +1,4 @@
-// CompleteProfile.tsx - Version optimisée
+// CompleteProfile.tsx - Version corrigée pour Google OAuth
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -22,7 +22,7 @@ export default function CompleteProfile() {
   const [phone, setPhone] = useState("");
   const [governorateId, setGovernorateId] = useState("");
   const [cityId, setCityId] = useState("");
-  const [streetAddress, setStreetAddress] = useState(""); // ✅ Changé en texte libre
+  const [streetAddress, setStreetAddress] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,54 +31,129 @@ export default function CompleteProfile() {
   const [governoratesList, setGovernoratesList] = useState<any[]>([]);
   const [citiesList, setCitiesList] = useState<any[]>([]);
   
-  // ✅ Position précise du mécanicien (coordinates GPS)
   const [mechanicLocation, setMechanicLocation] = useState<[number, number] | null>(null);
   const [cityBaseLocation, setCityBaseLocation] = useState<[number, number] | null>(null);
 
-  // --- Récupération profil et token ---
+  // 🔧 FONCTION AMÉLIORÉE POUR RÉCUPÉRER LE TOKEN
+  const getToken = () => {
+    // Vérifier d'abord les URL params (Google callback)
+    const urlToken = searchParams.get('token');
+    if (urlToken) {
+      console.log('🔐 Token trouvé dans URL params');
+      return urlToken;
+    }
+
+    // Ensuite localStorage
+    const localToken = localStorage.getItem("token");
+    if (localToken) {
+      console.log('🔐 Token trouvé dans localStorage');
+      return localToken;
+    }
+
+    // Enfin cookies
+    const cookieToken = Cookies.get("token");
+    if (cookieToken) {
+      console.log('🔐 Token trouvé dans cookies');
+      return cookieToken;
+    }
+
+    console.log('❌ Aucun token trouvé');
+    return null;
+  };
+
+  // 🔧 FONCTION POUR ATTENDRE LE TOKEN (retry logic)
+  const waitForToken = async (maxAttempts = 10, delay = 500): Promise<string | null> => {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      console.log(`🔍 Tentative ${attempt}/${maxAttempts} de récupération du token`);
+      
+      const token = getToken();
+      if (token) {
+        console.log('✅ Token trouvé !');
+        return token;
+      }
+
+      if (attempt < maxAttempts) {
+        console.log(`⏳ Attente ${delay}ms avant nouvelle tentative...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+
+    console.log('❌ Token non trouvé après toutes les tentatives');
+    return null;
+  };
+
+  // --- Récupération profil et token (VERSION CORRIGÉE) ---
   useEffect(() => {
     const fetchProfile = async () => {
-      if (typeof window === 'undefined') return;
-      let token = searchParams.get('token') || localStorage.getItem("token");
-      if (!token) {
-        router.push("/auth/sign-in");
+      console.log('🚀 CompleteProfile - Démarrage fetchProfile');
+      
+      if (typeof window === 'undefined') {
+        console.log('❌ Window undefined, retour');
         return;
-      }
-      if (searchParams.get('token')) {
-        localStorage.setItem("token", token);
-        Cookies.set("token", token, { expires: 7, path: "/" });
-        const url = new URL(window.location.href);
-        url.searchParams.delete('token');
-        url.searchParams.delete('google_success');
-        window.history.replaceState({}, '', url.toString());
-        if (searchParams.get('google_success') === 'true') {
-          toast.success("Connexion Google réussie ! Veuillez compléter votre profil.");
-        }
       }
 
       try {
+        // 🔧 ATTENDRE LE TOKEN avec retry logic
+        const token = await waitForToken();
+        
+        if (!token) {
+          console.log('❌ Aucun token après attente - Redirection vers sign-in');
+          toast.error("Session expirée, veuillez vous reconnecter");
+          router.push("/auth/sign-in");
+          return;
+        }
+
+        // 🔧 SAUVEGARDER LE TOKEN si trouvé dans les params
+        if (searchParams.get('token')) {
+          console.log('💾 Sauvegarde du token depuis URL params');
+          localStorage.setItem("token", token);
+          Cookies.set("token", token, { expires: 7, path: "/" });
+          
+          // Nettoyer l'URL
+          const url = new URL(window.location.href);
+          url.searchParams.delete('token');
+          url.searchParams.delete('google_success');
+          window.history.replaceState({}, '', url.toString());
+          
+          if (searchParams.get('google_success') === 'true') {
+            toast.success("Connexion Google réussie ! Veuillez compléter votre profil.");
+          }
+        }
+
+        console.log('📡 Appel API get-profile avec token');
         const response = await axios.get("http://localhost:5000/api/get-profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         const user = response.data;
+        console.log('👤 Profil utilisateur récupéré:', user);
+
         setUsername(user.username || "");
         setEmail(user.email || "");
         setPhone(user.phone || "");
         setGovernorateId(user.governorateId || "");
         setCityId(user.cityId || "");
-        setStreetAddress(user.streetAddress || ""); // ✅ Récupérer l'adresse texte
+        setStreetAddress(user.streetAddress || "");
         
-        // ✅ Récupérer la position précise existante
+        // Récupérer la position précise existante
         if (user.location?.coordinates) {
           setMechanicLocation([user.location.coordinates[1], user.location.coordinates[0]]);
         }
+
+        console.log('✅ Profil chargé avec succès');
+
       } catch (err: any) {
+        console.error('❌ Erreur fetchProfile:', err);
+        
         if (err.response?.status === 401) {
+          console.log('❌ Token invalide - Nettoyage et redirection');
           localStorage.removeItem("token");
           Cookies.remove("token");
+          toast.error("Session expirée, veuillez vous reconnecter");
           router.push("/auth/sign-in");
         } else {
-          setError("Erreur lors du chargement du profil");
+          console.error('❌ Erreur serveur:', err.response?.data);
+          setError("Erreur lors du chargement du profil: " + (err.response?.data?.message || err.message));
         }
       } finally {
         setIsPageLoading(false);
@@ -92,10 +167,13 @@ export default function CompleteProfile() {
   useEffect(() => {
     const fetchGovernorate = async () => {
       try {
+        console.log('📍 Chargement des gouvernorats...');
         const govRes = await axios.get("http://localhost:5000/api/governorates");
         setGovernoratesList(govRes.data);
+        console.log('✅ Gouvernorats chargés:', govRes.data.length);
       } catch (err) {
         console.error("❌ Erreur gouvernorats:", err);
+        toast.error("Erreur lors du chargement des gouvernorats");
       }
     };
     fetchGovernorate();
@@ -109,16 +187,19 @@ export default function CompleteProfile() {
         return;
       }
       try {
+        console.log('🏙️ Chargement des villes pour gouvernorat:', governorateId);
         const cityRes = await axios.get(`http://localhost:5000/api/cities/${governorateId}`);
         setCitiesList(cityRes.data);
+        console.log('✅ Villes chargées:', cityRes.data.length);
       } catch (err) {
         console.error("❌ Erreur villes:", err);
+        toast.error("Erreur lors du chargement des villes");
       }
     };
     fetchCities();
   }, [governorateId]);
 
-  // ✅ Géocodage automatique quand ville + adresse changent
+  // Géocodage automatique quand ville + adresse changent
   useEffect(() => {
     const geocodeAddress = async () => {
       if (!cityId || !streetAddress.trim()) return;
@@ -157,12 +238,11 @@ export default function CompleteProfile() {
       }
     };
 
-    // Délai pour éviter trop de requêtes
     const timer = setTimeout(geocodeAddress, 1000);
     return () => clearTimeout(timer);
   }, [cityId, streetAddress, citiesList]);
 
-  // ✅ Handler pour changement de ville
+  // Handler pour changement de ville
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCityId = e.target.value;
     setCityId(selectedCityId);
@@ -175,7 +255,6 @@ export default function CompleteProfile() {
       ];
       setCityBaseLocation(cityCoords);
       
-      // Si pas d'adresse spécifique, centrer sur la ville
       if (!streetAddress.trim()) {
         setMechanicLocation(cityCoords);
       }
@@ -189,8 +268,9 @@ export default function CompleteProfile() {
     setMessage("");
     setError("");
 
-    const token = localStorage.getItem("token");
+    const token = getToken();
     if (!token) {
+      toast.error("Token manquant, veuillez vous reconnecter");
       router.push("/auth/sign-in");
       return;
     }
@@ -210,7 +290,7 @@ export default function CompleteProfile() {
     const loadingToast = toast.loading('Mise à jour du profil...');
 
     try {
-      // ✅ Format GeoJSON pour MongoDB
+      // Format GeoJSON pour MongoDB
       const locationData = {
         type: 'Point',
         coordinates: [mechanicLocation[1], mechanicLocation[0]] // [lng, lat] pour GeoJSON
@@ -224,8 +304,8 @@ export default function CompleteProfile() {
           phone: phone.trim(),
           governorateId,
           cityId,
-          streetAddress: streetAddress.trim(), // ✅ Adresse texte libre
-          location: locationData // ✅ Position précise
+          streetAddress: streetAddress.trim(),
+          location: locationData
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -236,17 +316,66 @@ export default function CompleteProfile() {
       setTimeout(() => router.push("/"), 2000);
     } catch (err: any) {
       toast.dismiss(loadingToast);
+      console.error('❌ Erreur soumission:', err);
       setError(err.response?.data?.message || "Erreur lors de la mise à jour");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isPageLoading) return <div>Chargement du profil...</div>;
+  // 🔧 AMÉLIORATION DE L'AFFICHAGE DE CHARGEMENT
+  if (isPageLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minHeight: '100vh',
+        fontFamily: 'Arial, sans-serif'
+      }}>
+        <div style={{
+          width: 50,
+          height: 50,
+          border: '4px solid #f3f3f3',
+          borderTop: '4px solid #3498db',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          marginBottom: 20
+        }}></div>
+        <h3>🔄 Chargement du profil...</h3>
+        <p style={{ color: '#666' }}>Vérification de votre session en cours...</p>
+        
+        <style jsx>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: 20, maxWidth: 1000, margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
       <h1 style={{ textAlign: 'center', marginBottom: 30 }}>🔧 Compléter votre profil de mécanicien</h1>
+      
+      {/* 🔧 AJOUT D'UN MESSAGE DE DEBUG TEMPORAIRE */}
+      <div style={{ 
+        backgroundColor: '#f0f8ff', 
+        padding: 15, 
+        borderRadius: 8, 
+        marginBottom: 20,
+        fontSize: 14,
+        border: '1px solid #b0d4f1'
+      }}>
+        <strong>🔍 Debug Info:</strong>
+        <br />Username: {username || 'Non défini'}
+        <br />Email: {email || 'Non défini'}
+        <br />Phone: {phone || 'Non défini'}
+        <br />Gouvernorat: {governorateId || 'Non sélectionné'}
+        <br />Token présent: {getToken() ? '✅ Oui' : '❌ Non'}
+      </div>
       
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* Informations personnelles */}

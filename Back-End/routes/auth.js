@@ -48,40 +48,43 @@ router.post("/login", login);
 // Code Backend corrigé
 
 // Route Google OAuth initiale
-router.get("/google", 
-  passport.authenticate("google", { 
-    scope: ["profile", "email"],
-    prompt: "select_account" // Force la sélection de compte
+// Route d'initialisation OAuth Google
+router.get(
+  "/google", // URL: http://localhost:5000/api/google
+  passport.authenticate("google", {
+    scope: ["profile", "email"]
   })
 );
 
-// Callback Google - Version corrigée avec gestion d'erreurs améliorée
+// Route de callback OAuth Google - VERSION CORRIGÉE
 router.get(
-  "/google/callback",
+  "/google/callback", // URL: http://localhost:5000/api/google/callback
   passport.authenticate("google", { 
-    failureRedirect: "http://localhost:3000/auth/google-callback?error=google_auth_failed",
+    failureRedirect: "http://localhost:3000/auth/sign-in?error=google_auth_failed",
     session: false
   }),
   async (req, res) => {
     try {
-      console.log('📥 Google Callback - Début traitement');
+      console.log('📥 Google API Callback - Début traitement');
       const user = req.user;
 
       if (!user) {
         console.error('❌ Pas d\'utilisateur dans req.user');
-        return res.redirect("http://localhost:3000/auth/google-callback?error=no_user");
+        return res.redirect("http://localhost:3000/auth/sign-in?error=no_user");
       }
 
       console.log('👤 Utilisateur Google authentifié:', {
         id: user._id,
         email: user.email,
-        username: user.username
+        username: user.username,
+        phone: user.phone,
+        governorateId: user.governorateId
       });
 
       // Vérifier JWT_SECRET
       if (!process.env.JWT_SECRET) {
         console.error('❌ JWT_SECRET non défini');
-        return res.redirect("http://localhost:3000/auth/google-callback?error=server_config_error");
+        return res.redirect("http://localhost:3000/auth/sign-in?error=server_config_error");
       }
 
       // Générer token JWT
@@ -97,25 +100,213 @@ router.get(
 
       console.log('🔐 Token JWT généré pour Google OAuth');
 
-      // Redirection vers la page de callback dédiée
-      const redirectUrl = `http://localhost:3000/auth/google-callback?token=${token}&google_success=true`;
+      // ✅ FIX: Vérifier directement les propriétés de l'utilisateur depuis la DB
+      const isProfileComplete = !!(user.username && user.phone && user.governorateId);
+      console.log('🔍 Vérification profil complet SERVEUR:', {
+        isComplete: isProfileComplete,
+        hasUsername: !!user.username,
+        hasPhone: !!user.phone,
+        hasGovernorateId: !!user.governorateId
+      });
+
+      // Page HTML avec traitement automatique côté client
+      const html = `
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Connexion Google...</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .container {
+              text-align: center;
+              padding: 3rem 2rem;
+              max-width: 420px;
+              background: rgba(255, 255, 255, 0.1);
+              backdrop-filter: blur(10px);
+              border-radius: 20px;
+              border: 1px solid rgba(255, 255, 255, 0.2);
+              box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            }
+            h2 { margin-bottom: 1rem; font-size: 1.5rem; }
+            .spinner {
+              width: 60px;
+              height: 60px;
+              border: 4px solid rgba(255, 255, 255, 0.3);
+              border-left: 4px solid white;
+              border-radius: 50%;
+              animation: spin 1s linear infinite;
+              margin: 2rem auto;
+            }
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            #status {
+              font-size: 1rem;
+              margin-top: 1rem;
+              min-height: 24px;
+            }
+            .success { color: #4ade80; }
+            .error { color: #f87171; }
+            .loading { color: #e5e7eb; }
+            .progress {
+              width: 100%;
+              height: 4px;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 2px;
+              margin: 1rem 0;
+              overflow: hidden;
+            }
+            .progress-bar {
+              height: 100%;
+              background: linear-gradient(90deg, #4ade80, #22d3ee);
+              width: 0%;
+              animation: progress 2s ease-in-out;
+            }
+            @keyframes progress {
+              0% { width: 0%; }
+              100% { width: 100%; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>🎉 Connexion Google réussie !</h2>
+            <div class="spinner"></div>
+            <div class="progress">
+              <div class="progress-bar"></div>
+            </div>
+            <p id="status" class="loading">Préparation de votre session...</p>
+          </div>
+
+          <script>
+            const token = "${token}";
+            const isComplete = ${isProfileComplete}; // ✅ FIX: Utiliser la valeur du serveur
+            const statusEl = document.getElementById('status');
+            
+            console.log('🔐 Token reçu du serveur Google OAuth');
+            console.log('📍 Token preview:', token.substring(0, 30) + '...');
+            console.log('📋 Profil complet (serveur):', isComplete);
+            
+            // Fonction pour mettre à jour le statut
+            function updateStatus(message, className = 'loading') {
+              statusEl.textContent = message;
+              statusEl.className = className;
+            }
+
+            // ✅ FIX: Sauvegarde immédiate et redirection basée sur les données serveur
+            try {
+              updateStatus('Sauvegarde des informations de connexion...');
+              
+              // Sauvegarde du token
+              localStorage.setItem('token', token);
+              document.cookie = \`token=\${token}; path=/; max-age=604800; secure=false; samesite=lax\`;
+              console.log('💾 Token sauvegardé avec succès');
+              
+              // ✅ FIX: Redirection immédiate basée sur les données serveur
+              setTimeout(() => {
+                if (isComplete) {
+                  console.log('➡️ Profil complet - Redirection vers la page d\\'accueil');
+                  updateStatus('Profil complet ! Redirection vers l\\'accueil...', 'success');
+                  setTimeout(() => {
+                    window.location.href = 'http://localhost:3000/';
+                  }, 1000);
+                } else {
+                  console.log('➡️ Profil incomplet - Redirection vers completion du profil');
+                  updateStatus('Completion du profil requise...', 'loading');
+                  setTimeout(() => {
+                    window.location.href = 'http://localhost:3000/auth/complete-profile';
+                  }, 1000);
+                }
+              }, 500);
+              
+            } catch (error) {
+              console.error('❌ Erreur lors du traitement:', error);
+              updateStatus('Erreur: ' + error.message, 'error');
+              
+              setTimeout(() => {
+                console.log('➡️ Redirection vers sign-in à cause de l\\'erreur');
+                window.location.href = 'http://localhost:3000/auth/sign-in?error=processing_failed';
+              }, 3000);
+            }
+          </script>
+        </body>
+        </html>
+      `;
       
-      console.log('🔗 Redirection vers callback page');
-      return res.redirect(redirectUrl);
+      return res.send(html);
 
     } catch (error) {
-      console.error("❌ Erreur dans callback Google:", error);
+      console.error("❌ Erreur dans callback Google API:", error);
       
-      // Log détaillé selon le type d'erreur
-      if (error.name === 'JsonWebTokenError') {
-        console.error('🔐 Erreur JWT:', error.message);
-        return res.redirect("http://localhost:3000/auth/google-callback?error=token_error");
-      }
+      const errorHtml = `
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+          <meta charset="UTF-8">
+          <title>Erreur de connexion</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              text-align: center;
+              padding: 50px;
+              background: #f8f9fa;
+              color: #343a40;
+            }
+            .error-container {
+              max-width: 400px;
+              margin: 0 auto;
+              padding: 2rem;
+              background: white;
+              border-radius: 10px;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            h2 { color: #dc3545; margin-bottom: 1rem; }
+            .btn {
+              display: inline-block;
+              padding: 10px 20px;
+              background: #007bff;
+              color: white;
+              text-decoration: none;
+              border-radius: 5px;
+              margin-top: 1rem;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="error-container">
+            <h2>❌ Erreur de connexion Google</h2>
+            <p>Une erreur s'est produite lors de la connexion avec Google.</p>
+            <p><strong>Erreur:</strong> ${error.message}</p>
+            <a href="http://localhost:3000/auth/sign-in" class="btn">Retour à la connexion</a>
+          </div>
+          
+          <script>
+            console.error('❌ Erreur callback Google:', '${error.message}');
+            setTimeout(() => {
+              window.location.href = 'http://localhost:3000/auth/sign-in?error=callback_error';
+            }, 5000);
+          </script>
+        </body>
+        </html>
+      `;
       
-      return res.redirect("http://localhost:3000/auth/google-callback?error=callback_error");
+      return res.send(errorHtml);
     }
   }
 );
+
 // Route pour vérifier le token (optionnelle mais utile pour débugger)
 router.get("/verify-token", async (req, res) => {
   try {
