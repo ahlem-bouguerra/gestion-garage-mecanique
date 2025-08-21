@@ -25,6 +25,8 @@ const GarageQuoteSystem = () => {
   const [success, setSuccess] = useState('');
   const [editingQuote, setEditingQuote] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [invoiceData, setInvoiceData] = useState(null);
   const [filters, setFilters] = useState({
     status: '',
     clientName: '',
@@ -73,6 +75,51 @@ const GarageQuoteSystem = () => {
     accepte: Check,
     refuse: X
   };
+
+  const generateInvoice = (quote) => {
+    const invoice = {
+      ...quote,
+      invoiceNumber: `FAC-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
+      invoiceDate: new Date().toISOString().split('T')[0],
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 jours
+      type: 'facture'
+    };
+
+    setInvoiceData(invoice);
+    setSelectedInvoice(invoice);
+  };
+
+  // Fonction pour imprimer/télécharger la facture (PDF)
+  const printInvoice = () => {
+  const content = document.getElementById("invoice-content"); // ton conteneur
+  if (!content) return;
+
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) return;
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Page 2</title>
+        <style>
+          /* styles d'impression spécifiques */
+          body { font-family: Arial, sans-serif; }
+        </style>
+      </head>
+      <body>
+        ${content.innerHTML}
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  printWindow.close();
+};
+
+
+
 
 
 
@@ -282,40 +329,40 @@ const GarageQuoteSystem = () => {
 
 
   const sendDevisByEmail = async (devisId) => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const token = localStorage.getItem("token"); // ou Cookies.get("token")
+      const token = localStorage.getItem("token"); // ou Cookies.get("token")
 
-    // 1. Envoyer l'email avec token dans headers
-    const response = await axios.post(
-      `http://localhost:5000/api/devis/${devisId}/send-email`,
-      {}, // corps vide
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+      // 1. Envoyer l'email avec token dans headers
+      const response = await axios.post(
+        `http://localhost:5000/api/devis/${devisId}/send-email`,
+        {}, // corps vide
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        // 2. Mettre à jour le statut
+        await devisApi.updateStatus(devisId, 'envoye');
+
+        showSuccess(`Devis envoyé par email avec succès`);
+
+        // 3. Mettre à jour localement
+        setQuotes(quotes.map(quote =>
+          quote.id === devisId ? { ...quote, status: 'envoye' } : quote
+        ));
       }
-    );
-
-    if (response.data.success) {
-      // 2. Mettre à jour le statut
-      await devisApi.updateStatus(devisId, 'envoye');
-
-      showSuccess(`Devis envoyé par email avec succès`);
-
-      // 3. Mettre à jour localement
-      setQuotes(quotes.map(quote =>
-        quote.id === devisId ? { ...quote, status: 'envoye' } : quote
-      ));
+    } catch (error) {
+      showError(error.response?.data?.message || 'Erreur lors de l\'envoi');
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    showError(error.response?.data?.message || 'Erreur lors de l\'envoi');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
 
@@ -498,24 +545,24 @@ const GarageQuoteSystem = () => {
 
   const devisApi = {
     create: async (devisData, token) => {
-  try {
-    const response = await axios.post(
-      "http://localhost:5000/api/createdevis",
-      devisData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`, // ✅ IMPORTANT
-        },
-      }
-    );
-    console.log("TOKEN envoyé :", token);
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/api/createdevis",
+          devisData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`, // ✅ IMPORTANT
+            },
+          }
+        );
+        console.log("TOKEN envoyé :", token);
 
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Erreur lors de la création du devis");
-  }
-},
+        return response.data;
+      } catch (error) {
+        throw new Error(error.response?.data?.message || "Erreur lors de la création du devis");
+      }
+    },
 
 
     getAll: async (filters = {}) => {
@@ -897,10 +944,13 @@ const GarageQuoteSystem = () => {
                               {quote.status?.charAt(0).toUpperCase() + quote.status?.slice(1) || 'Brouillon'}
                             </span>
                           </td>
+
+
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                             <button
                               onClick={() => setSelectedQuote(quote)}
                               className="text-blue-600 hover:text-blue-900"
+                              title="Voir détails"
                             >
                               <Eye className="h-4 w-4" />
                             </button>
@@ -908,6 +958,7 @@ const GarageQuoteSystem = () => {
                             <button
                               onClick={() => startEditQuote(quote)}
                               className="text-green-600 hover:text-green-900"
+                              title="Modifier"
                             >
                               <Edit2 className="h-4 w-4" />
                             </button>
@@ -924,8 +975,16 @@ const GarageQuoteSystem = () => {
                               </button>
                             )}
 
-
-
+                            {/* NOUVEAU: Bouton Facture - visible seulement pour les devis acceptés */}
+                            {quote.status === 'accepte' && (
+                              <button
+                                onClick={() => generateInvoice(quote)}
+                                className="text-purple-600 hover:text-purple-900"
+                                title="Générer facture"
+                              >
+                                <FileText className="h-4 w-4" />
+                              </button>
+                            )}
 
                             <button
                               onClick={() => deleteQuote(quote.id)}
@@ -1415,10 +1474,179 @@ const GarageQuoteSystem = () => {
                 </div>
 
                 <div className="flex space-x-4">
-                  <button className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                  <button onClick={printInvoice} className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
                     Imprimer PDF
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {selectedInvoice && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full m-4 max-h-screen overflow-y-auto">
+              <div className="p-6 border-b border-gray-200 no-print">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-gray-900">Facture {selectedInvoice.invoiceNumber}</h2>
+                  <button
+                    onClick={() => setSelectedInvoice(null)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Contenu de la facture - Format professionnel */}
+              <div className="p-8 print:p-4" id="invoice-content">
+                {/* Header de la facture */}
+                <div className="flex justify-between items-start mb-8">
+                  {/* Informations de l'entreprise */}
+                  <div className="flex-1">
+                    <h1 className="text-3xl font-bold text-blue-600 mb-2">GARAGE AUTO</h1>
+                    <div className="text-gray-600 space-y-1">
+                      <p>123 Avenue de la Mécanique</p>
+                      <p>1000 Tunis, Tunisie</p>
+                      <p>Tél: +216 XX XXX XXX</p>
+                      <p>Email: contact@garageauto.tn</p>
+                      <p>Matricule Fiscal: XXXXXXXX</p>
+                    </div>
+                  </div>
+
+                  {/* Logo et titre facture */}
+                  <div className="text-right">
+                    <div className="text-gray-600 space-y-1">
+                      <p><strong>Date facture:</strong> {new Date(selectedInvoice.invoiceDate).toLocaleDateString('fr-FR')}</p>
+                      <p><strong>Date d'échéance:</strong> {new Date(selectedInvoice.dueDate).toLocaleDateString('fr-FR')}</p>
+                      <p><strong>Devis N°:</strong> {selectedInvoice.id}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informations client */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-300 pb-1">FACTURER À</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="font-semibold text-lg">{selectedInvoice.clientName}</p>
+                    <p className="text-gray-600 mt-1">Véhicule: {selectedInvoice.vehicleInfo}</p>
+                    <p className="text-gray-600">Date d'intervention: {new Date(selectedInvoice.inspectionDate).toLocaleDateString('fr-FR')}</p>
+                  </div>
+                </div>
+
+                {/* Tableau des services */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-300 pb-1">DÉTAIL DES PRESTATIONS</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold">Désignation</th>
+                          <th className="border border-gray-300 px-4 py-3 text-center font-semibold">Qté</th>
+                          <th className="border border-gray-300 px-4 py-3 text-right font-semibold">Prix Unit. HT</th>
+                          <th className="border border-gray-300 px-4 py-3 text-right font-semibold">Total HT</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedInvoice.services.map((service, index) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="border border-gray-300 px-4 py-3">{service.piece}</td>
+                            <td className="border border-gray-300 px-4 py-3 text-center">{service.quantity}</td>
+                            <td className="border border-gray-300 px-4 py-3 text-right">{(service.unitPrice || 0).toFixed(3)} DT</td>
+                            <td className="border border-gray-300 px-4 py-3 text-right font-semibold">
+                              {((service.quantity || 0) * (service.unitPrice || 0)).toFixed(3)} DT
+                            </td>
+                          </tr>
+                        ))}
+
+                        {/* Ligne main d'œuvre si présente */}
+                        {selectedInvoice.maindoeuvre > 0 && (
+                          <tr className="hover:bg-gray-50">
+                            <td className="border border-gray-300 px-4 py-3 font-medium">Main d'œuvre</td>
+                            <td className="border border-gray-300 px-4 py-3 text-center">1</td>
+                            <td className="border border-gray-300 px-4 py-3 text-right">{(selectedInvoice.maindoeuvre || 0).toFixed(3)} DT</td>
+                            <td className="border border-gray-300 px-4 py-3 text-right font-semibold">
+                              {(selectedInvoice.maindoeuvre || 0).toFixed(3)} DT
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Totaux */}
+                <div className="flex justify-end mb-8">
+                  <div className="w-80">
+                    <div className="bg-gray-50 p-6 rounded-lg space-y-3">
+                      <div className="flex justify-between text-gray-700">
+                        <span>Total HT:</span>
+                        <span className="font-semibold">
+                          {((selectedInvoice.totalHT || 0) + (selectedInvoice.maindoeuvre || 0)).toFixed(3)} DT
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between text-gray-700">
+                        <span>TVA ({selectedInvoice.tvaRate || 20}%):</span>
+                        <span className="font-semibold">
+                          {(
+                            ((selectedInvoice.totalHT || 0) + (selectedInvoice.maindoeuvre || 0)) *
+                            ((selectedInvoice.tvaRate || 20) / 100)
+                          ).toFixed(3)} DT
+                        </span>
+                      </div>
+
+                      <div className="border-t border-gray-300 pt-3">
+                        <div className="flex justify-between text-xl font-bold text-green-700">
+                          <span>Total TTC:</span>
+                          <span>
+                            {(
+                              (selectedInvoice.totalHT || 0) +
+                              (selectedInvoice.maindoeuvre || 0) +
+                              ((selectedInvoice.totalHT || 0) + (selectedInvoice.maindoeuvre || 0)) *
+                              ((selectedInvoice.tvaRate || 20) / 100)
+                            ).toFixed(3)} DT
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Conditions de paiement */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-300 pb-1">CONDITIONS DE PAIEMENT</h3>
+                  <div className="bg-yellow-50 p-4 rounded-lg text-sm text-gray-700 space-y-1">
+                    <p>• Paiement à 30 jours à compter de la date de facture</p>
+                    <p>• En cas de retard de paiement, des pénalités de 3% par mois seront appliquées</p>
+                    <p>• Aucun escompte accordé pour paiement anticipé</p>
+                    <p>• Règlement par chèque, virement ou espèces</p>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="text-center text-gray-500 text-sm border-t pt-4">
+                  <p>GARAGE AUTO - SARL au capital de 10 000 DT</p>
+                 
+                </div>
+              </div>
+
+              {/* Actions - Masquées lors de l'impression */}
+              <div className="p-6 border-t border-gray-200 flex space-x-4 no-print">
+                <button
+                  onClick={printInvoice}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span>Imprimer / PDF</span>
+                </button>
+
+
+                <button
+                  onClick={() => setSelectedInvoice(null)}
+                  className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Fermer
+                </button>
               </div>
             </div>
           </div>
