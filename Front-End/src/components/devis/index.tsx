@@ -1485,17 +1485,7 @@ const GarageQuoteSystem = () => {
         {selectedInvoice && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full m-4 max-h-screen overflow-y-auto">
-              <div className="p-6 border-b border-gray-200 no-print">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-gray-900">Facture {selectedInvoice.invoiceNumber}</h2>
-                  <button
-                    onClick={() => setSelectedInvoice(null)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                </div>
-              </div>
+             
 
               {/* Contenu de la facture - Format professionnel */}
               <div className="p-8 print:p-4" id="invoice-content">
@@ -1625,7 +1615,7 @@ const GarageQuoteSystem = () => {
 
                 {/* Footer */}
                 <div className="text-center text-gray-500 text-sm border-t pt-4">
-                  <p>GARAGE AUTO - SARL au capital de 10 000 DT</p>
+                  <p>GARAGE AUTO</p>
                  
                 </div>
               </div>
