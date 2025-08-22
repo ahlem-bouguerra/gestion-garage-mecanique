@@ -368,3 +368,5 @@ export const getVehiculesByProprietaire = async (req, res) => {
     res.status(500).json({ error: `Erreur serveur: ${error.message}` });
   }
 };
+
+

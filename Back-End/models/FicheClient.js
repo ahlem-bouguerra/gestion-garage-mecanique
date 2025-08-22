@@ -28,10 +28,10 @@ const FicheClientSchema = new mongoose.Schema({
     unique: true,
   },
   //derniereVisite: String, // ou Date si tu veux
-  vehiculeAssocie:{
-    type: String,
-    required: true,
-  },
+//  vehiculeAssocie:{
+  //  type: String,
+ //   required: true,
+//  },
   //contactsSecondaires: [
    // {
    //   nom: String,

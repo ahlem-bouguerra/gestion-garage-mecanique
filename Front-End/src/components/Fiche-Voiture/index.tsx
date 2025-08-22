@@ -99,21 +99,9 @@ class SmartImmatriculationValidator {
             examples: ['123TUN456', 'TUN12345', '123-TUN-456'],
             description: 'Format tunisien'
         },
-        {
-            code: 'FR',
-            name: 'France',
-            patterns: [
-                /^[A-Z]{2}[0-9]{3}[A-Z]{2}$/,          // AB123CD (nouveau)
-                /^[0-9]{1,4}[A-Z]{2,3}[0-9]{1,3}$/,    // 1234AB12 (ancien)
-                /^[A-Z]{2}-[0-9]{3}-[A-Z]{2}$/,        // AB-123-CD
-                /^[0-9]{1,4}-[A-Z]{2,3}-[0-9]{1,3}$/   // 1234-AB-12
-            ],
-            examples: ['AB123CD', 'AB-123-CD', '1234AB12'],
-            description: 'Format français'
-        }
     ];
 
-    static validateImmatriculationFlexible(immat: string, countryCode?: 'TN' | 'FR' | 'OTHER'): FieldValidation {
+    static validateImmatriculationFlexible(immat: string, countryCode?: 'TN' | 'OTHER'): FieldValidation {
         if (!immat.trim()) {
             return { isValid: false, message: 'Immatriculation obligatoire', type: 'error' };
         }
@@ -121,7 +109,7 @@ class SmartImmatriculationValidator {
         const cleanImmat = immat.trim().toUpperCase().replace(/[\s]/g, '');
 
         // Si pays spécifique TN ou FR, validation stricte
-        if (countryCode === 'TN' || countryCode === 'FR') {
+        if (countryCode === 'TN' ) {
             const country = this.countries.find(c => c.code === countryCode);
             if (!country) {
                 return { isValid: false, message: 'Pays non supporté', type: 'error' };
@@ -213,7 +201,7 @@ class FormValidator {
         const cleanPhone = phone.replace(/[\s\-\.]/g, '');
         
         // Formats acceptés:
-        // France: 01234567890, +33123456789, 0033123456789
+
         // Tunisie: 12345678, 21612345678, +21612345678, 0021612345678
         const phoneRegexes = [
             /^[2-9]\d{7}$/, // Format tunisien 8 chiffres
@@ -450,16 +438,7 @@ export default function VehiculeManagement() {
         typeCarburant: "essence"
     });
 
-    const [visiteForm, setVisiteForm] = useState<VisiteFormData>({
-        clientId: "",
-        vehiculeId: "",
-        conducteurNom: "",
-        conducteurTelephone: "",
-        conducteurRelation: "propriétaire",
-        services: "",
-        montantTotal: "",
-        notes: ""
-    });
+ 
 
     // ✅ ÉTAT POUR LES VALIDATIONS EN TEMPS RÉEL
     const [vehiculeValidations, setVehiculeValidations] = useState<{[key: string]: FieldValidation}>({});
@@ -468,7 +447,6 @@ export default function VehiculeManagement() {
     useEffect(() => {
         fetchClients();
         fetchVehicules();
-        fetchVisites();
     }, []);
 
     // ✅ MISE À JOUR DES IMMATRICULATIONS EXISTANTES
@@ -539,43 +517,6 @@ export default function VehiculeManagement() {
         setVehiculeValidations(newValidations);
     }, [vehiculeForm, existingImmatriculations, selectedVehicule,selectedCountry]);
 
-    // ✅ VALIDATION EN TEMPS RÉEL DU FORMULAIRE VISITE
-    useEffect(() => {
-        const newValidations: {[key: string]: FieldValidation} = {};
-
-        // Validation conducteur
-        newValidations.conducteurNom = FormValidator.validateTextLength(visiteForm.conducteurNom, 2, 100, 'Nom conducteur');
-
-        // Validation téléphone
-        newValidations.conducteurTelephone = FormValidator.validatePhone(visiteForm.conducteurTelephone);
-
-        // Validation services
-        if (!visiteForm.services.trim()) {
-            newValidations.services = { isValid: false, message: 'Services obligatoires', type: 'error' };
-        } else {
-            const servicesArray = visiteForm.services.split(',').map(s => s.trim()).filter(s => s);
-            newValidations.services = { 
-                isValid: true, 
-                message: `${servicesArray.length} service(s)`, 
-                type: 'success' 
-            };
-        }
-
-        // Validation montant
-        newValidations.montantTotal = FormValidator.validateAmount(visiteForm.montantTotal);
-
-        // Validation notes (optionnelles)
-        if (visiteForm.notes.trim() && visiteForm.notes.length > 500) {
-            newValidations.notes = { 
-                isValid: true, 
-                message: 'Notes très longues', 
-                type: 'warning' 
-            };
-        }
-
-        setVisiteValidations(newValidations);
-    }, [visiteForm]);
-
     // Fonction pour afficher les erreurs
     const showError = (message: string) => {
         console.error("❌ Erreur:", message);
@@ -618,15 +559,6 @@ export default function VehiculeManagement() {
         }
     };
 
-    const fetchVisites = async () => {
-        try {
-            const response = await axios.get(`${API_BASE_URL}/visites`);
-            setVisites(response.data);
-        } catch (error: any) {
-            console.error("❌ Erreur lors du chargement des visites:", error);
-            showError(`Erreur chargement visites: ${error.response?.data?.error || error.message}`);
-        }
-    };
 
     const getClientName = (clientData: string | any) => {
         console.log("🔍 Recherche client ID/Data:", clientData);
@@ -668,28 +600,10 @@ export default function VehiculeManagement() {
     const isVehiculeFormValid = () => {
         const requiredFields = ['proprietaireId', 'marque', 'modele', 'immatriculation'];
         
-        // Vérifier que tous les champs requis sont remplis
-        for (const field of requiredFields) {
-            if (!vehiculeForm[field as keyof VehiculeFormData].trim()) {
-                return false;
-            }
-        }
+        
 
         // Vérifier qu'il n'y a pas d'erreurs de validation
         const validationErrors = Object.values(vehiculeValidations).filter(v => !v.isValid);
-        return validationErrors.length === 0;
-    };
-
-    const isVisiteFormValid = () => {
-        const requiredFields = ['conducteurNom', 'services', 'montantTotal'];
-        
-        for (const field of requiredFields) {
-            if (!visiteForm[field as keyof VisiteFormData].trim()) {
-                return false;
-            }
-        }
-
-        const validationErrors = Object.values(visiteValidations).filter(v => !v.isValid);
         return validationErrors.length === 0;
     };
 
@@ -700,16 +614,178 @@ export default function VehiculeManagement() {
         
         if (vehicule) {
             setSelectedVehicule(vehicule);
-            setVehiculeForm({
-                proprietaireId: vehicule.proprietaireId,
-                marque: vehicule.marque,
-                modele: vehicule.modele,
-                kilometrage: vehicule.kilometrage?.toString() || "",
-                immatriculation: vehicule.immatriculation,
-                annee: vehicule.annee?.toString() || "",
-                couleur: vehicule.couleur || "",
-                typeCarburant: vehicule.typeCarburant || "essence"
-            });
+            <form onSubmit={handleVehiculeSubmit}>
+                                    <div className="space-y-6">
+                                         <ValidatedField
+                                            label="Propriétaire"
+                                            value={vehiculeForm.proprietaireId}
+                                            onChange={(value) => setVehiculeForm({ ...vehiculeForm, proprietaireId: value })}
+                                            validation={vehiculeValidations.proprietaireId}
+                                            required
+                                        >
+                                            <option value="">-- Sélectionner un propriétaire --</option>
+                                            {clients.map((client) => (
+                                                <option key={client._id} value={client._id}>
+                                                    {client.nom} ({client.type})
+                                                </option>
+                                            ))}
+                                        </ValidatedField>
+
+                                    {/* Pays d'immatriculation */}
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Pays d'immatriculation
+                                        </label>
+                                        <select
+                                            value={selectedCountry}
+                                            onChange={(e) => setSelectedCountry(e.target.value as 'TN' | 'FR' | 'OTHER')}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        >
+                                            <option value="OTHER">🌍 Autre pays (format libre)</option>
+                                            <option value="TN">🇹🇳 Tunisie</option>
+                                        </select>
+                                    </div>
+
+        
+                                    
+
+                                        {/* Première ligne : Marque, Modèle, Kilométrage */}
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <ValidatedField
+                                                label="Marque"
+                                                value={vehiculeForm.marque}
+                                                onChange={(value) => setVehiculeForm({ ...vehiculeForm, marque: value })}
+                                                validation={vehiculeValidations.marque}
+                                                required
+                                                maxLength={50}
+                                                placeholder="Ex: Peugeot"
+                                            />
+                                            
+                                            <ValidatedField
+                                                label="Modèle"
+                                                value={vehiculeForm.modele}
+                                                onChange={(value) => setVehiculeForm({ ...vehiculeForm, modele: value })}
+                                                validation={vehiculeValidations.modele}
+                                                required
+                                                maxLength={50}
+                                                placeholder="Ex: 308"
+                                            />
+                                            
+                                            <ValidatedField
+                                                label="Kilométrage (km)"
+                                                value={vehiculeForm.kilometrage}
+                                                onChange={(value) => {
+                                                    const formatted = formatKilometrage(value);
+                                                    setVehiculeForm({ ...vehiculeForm, kilometrage: formatted });
+                                                }}
+                                                validation={vehiculeValidations.kilometrage}
+                                                placeholder="Ex: 125 000"
+                                                maxLength={10}
+                                            />
+                                        </div>
+
+                                        {/* Immatriculation */}
+                                        <ValidatedField
+                                            label="Immatriculation"
+                                            value={vehiculeForm.immatriculation}
+                                            onChange={(value) => {
+                                                const uppercased = value.toUpperCase();
+                                                setVehiculeForm({ ...vehiculeForm, immatriculation: uppercased });
+
+                                                // Auto-détection si "Autre pays" sélectionné
+                                                if (selectedCountry === 'OTHER' && uppercased.length > 5) {
+                                                    const detected = FormValidator.detectImmatriculationCountry(uppercased);
+                                                    if (detected !== 'OTHER') {
+                                                        console.log(`Pays détecté: ${detected}`);
+                                                        // Optionnel: setSelectedCountry(detected);
+                                                    }
+                                                }
+                                            }}
+                                            validation={vehiculeValidations.immatriculation}
+                                            required
+                                            placeholder={
+                                                selectedCountry === 'TN' ? "Ex: 123TUN456, TUN12345" :
+                                                selectedCountry === 'FR' ? "Ex: AB-123-CD, AB123CD" :
+                                                "Ex: ABC123 (format libre)"
+                                            }
+                                            maxLength={15}
+                                        />
+
+                                        {/* Deuxième ligne : Année, Couleur, Carburant */}
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <ValidatedField
+                                                label="Année"
+                                                type="number"
+                                                value={vehiculeForm.annee}
+                                                onChange={(value) => setVehiculeForm({ ...vehiculeForm, annee: value })}
+                                                validation={vehiculeValidations.annee}
+                                                placeholder="Ex: 2020"
+                                            />
+                                            
+                                            <ValidatedField
+                                                label="Couleur"
+                                                value={vehiculeForm.couleur}
+                                                onChange={(value) => setVehiculeForm({ ...vehiculeForm, couleur: value })}
+                                                validation={vehiculeValidations.couleur}
+                                                placeholder="Ex: Bleu"
+                                                maxLength={30}
+                                            />
+                                            
+                                            <ValidatedField
+                                                label="Carburant"
+                                                value={vehiculeForm.typeCarburant}
+                                                onChange={(value) => setVehiculeForm({ ...vehiculeForm, typeCarburant: value })}
+                                            >
+                                                <option value="essence">Essence</option>
+                                                <option value="diesel">Diesel</option>
+                                                <option value="hybride">Hybride</option>
+                                                <option value="electrique">Électrique</option>
+                                                <option value="gpl">GPL</option>
+                                            </ValidatedField>
+                                        </div>
+
+                                        {/* ✅ ALERTE DE COHÉRENCE */}
+                                        {vehiculeValidations.coherence?.message && vehiculeValidations.coherence.type === 'warning' && (
+                                            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                                <div className="flex items-center space-x-2">
+                                                    <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                                                    <span className="text-sm text-yellow-800">
+                                                        {vehiculeValidations.coherence.message}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Boutons */}
+                                        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowVehiculeModal(false)}
+                                                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                            >
+                                                Annuler
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={loading || !isVehiculeFormValid()}
+                                                className={`px-4 py-2 rounded-lg text-white font-medium ${
+                                                    loading || !isVehiculeFormValid()
+                                                        ? 'bg-gray-400 cursor-not-allowed'
+                                                        : 'bg-blue-600 hover:bg-blue-700'
+                                                }`}
+                                            >
+                                                {loading ? (
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                        <span>En cours...</span>
+                                                    </div>
+                                                ) : (
+                                                    modalType === "add" ? "Ajouter le véhicule" : "Sauvegarder les modifications"
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
              const detectedCountry = FormValidator.detectImmatriculationCountry(vehicule.immatriculation);
             setSelectedCountry(detectedCountry);
         } else {
@@ -730,16 +806,6 @@ export default function VehiculeManagement() {
     const openVisiteModal = (vehicule: Vehicule) => {
         setError("");
         setSelectedVehicule(vehicule);
-        setVisiteForm({
-            clientId: vehicule.proprietaireId,
-            vehiculeId: vehicule._id,
-            conducteurNom: getClientName(vehicule.proprietaireId),
-            conducteurTelephone: getClientNumero(vehicule.proprietaireId),
-            conducteurRelation: "propriétaire",
-            services: "",
-            montantTotal: "",
-            notes: ""
-        });
         setShowVisiteModal(true);
     };
 
@@ -781,40 +847,6 @@ export default function VehiculeManagement() {
             setShowVehiculeModal(false);
         } catch (error: any) {
             console.error("❌ Erreur soumission véhicule:", error);
-            const errorMessage = error.response?.data?.error || error.message;
-            showError(`Erreur: ${errorMessage}`);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleVisiteSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        
-        // ✅ VALIDATION FINALE AVANT SOUMISSION
-        if (!isVisiteFormValid()) {
-            showError("Veuillez corriger les erreurs dans le formulaire");
-            return;
-        }
-
-        setLoading(true);
-        setError("");
-
-        try {
-            const submitData = {
-                ...visiteForm,
-                montantTotal: parseFloat(visiteForm.montantTotal),
-                services: visiteForm.services.split(',').map(s => s.trim()),
-                dateVisite: new Date(),
-                statut: "en_cours"
-            };
-
-            await axios.post(`${API_BASE_URL}/visites`, submitData);
-            showSuccess("Visite enregistrée avec succès!");
-            fetchVisites();
-            setShowVisiteModal(false);
-        } catch (error: any) {
-            console.error("❌ Erreur soumission visite:", error);
             const errorMessage = error.response?.data?.error || error.message;
             showError(`Erreur: ${errorMessage}`);
         } finally {
@@ -928,13 +960,6 @@ export default function VehiculeManagement() {
                                         </div>
                                         <div className="flex space-x-2">
                                             <button
-                                                onClick={() => openVisiteModal(vehicule)}
-                                                className="p-2 text-gray-500 hover:text-green-600 hover:bg-gray-100 rounded-lg"
-                                                title="Nouvelle visite"
-                                            >
-                                                <Calendar className="w-4 h-4" />
-                                            </button>
-                                            <button
                                                 onClick={() => openVehiculeModal("edit", vehicule)}
                                                 className="p-2 text-gray-500 hover:text-orange-600 hover:bg-gray-100 rounded-lg"
                                                 title="Modifier"
@@ -995,36 +1020,7 @@ export default function VehiculeManagement() {
                                         )}
                                     </div>
 
-                                    {/* Dernière visite */}
-                                    {derniereVisite && (
-                                        <div className="pt-4 border-t border-gray-200">
-                                            <h4 className="text-sm font-medium text-gray-700 mb-2">Dernière visite:</h4>
-                                            <div className="bg-blue-50 p-3 rounded-lg">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div className="flex items-center space-x-2">
-                                                        <UserCheck className="w-4 h-4 text-blue-600" />
-                                                        <span className="text-sm font-medium">{derniereVisite.conducteurNom}</span>
-                                                        <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">
-                                                            {derniereVisite.conducteurRelation}
-                                                        </span>
-                                                    </div>
-                                                    <span className="text-sm font-bold text-green-600">
-                                                        {Number(derniereVisite.montantTotal).toFixed(2)}€
-                                                    </span>
-                                                </div>
-                                                <p className="text-xs text-gray-600">
-                                                    {new Date(derniereVisite.dateVisite).toLocaleDateString('fr-FR')}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
 
-                                    {/* Nombre de visites */}
-                                    <div className="mt-3 text-center">
-                                        <span className="text-sm text-gray-500">
-                                            {vehiculeVisites.length} visite{vehiculeVisites.length > 1 ? 's' : ''}
-                                        </span>
-                                    </div>
                                 </div>
                             </div>
                         );
@@ -1071,35 +1067,34 @@ export default function VehiculeManagement() {
                                 <form onSubmit={handleVehiculeSubmit}>
                                     <div className="space-y-6">
                                          <ValidatedField
-            label="Propriétaire"
-            value={vehiculeForm.proprietaireId}
-            onChange={(value) => setVehiculeForm({ ...vehiculeForm, proprietaireId: value })}
-            validation={vehiculeValidations.proprietaireId}
-            required
-        >
-            <option value="">-- Sélectionner un propriétaire --</option>
-            {clients.map((client) => (
-                <option key={client._id} value={client._id}>
-                    {client.nom} ({client.type})
-                </option>
-            ))}
-        </ValidatedField>
+                                            label="Propriétaire"
+                                            value={vehiculeForm.proprietaireId}
+                                            onChange={(value) => setVehiculeForm({ ...vehiculeForm, proprietaireId: value })}
+                                            validation={vehiculeValidations.proprietaireId}
+                                            required
+                                        >
+                                            <option value="">-- Sélectionner un propriétaire --</option>
+                                            {clients.map((client) => (
+                                                <option key={client._id} value={client._id}>
+                                                    {client.nom} ({client.type})
+                                                </option>
+                                            ))}
+                                        </ValidatedField>
 
-        {/* Pays d'immatriculation */}
-        <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-                Pays d'immatriculation
-            </label>
-            <select
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value as 'TN' | 'FR' | 'OTHER')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-                <option value="OTHER">🌍 Autre pays (format libre)</option>
-                <option value="TN">🇹🇳 Tunisie</option>
-                <option value="FR">🇫🇷 France</option>
-            </select>
-        </div>
+                                    {/* Pays d'immatriculation */}
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Pays d'immatriculation
+                                        </label>
+                                        <select
+                                            value={selectedCountry}
+                                            onChange={(e) => setSelectedCountry(e.target.value as 'TN' | 'FR' | 'OTHER')}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        >
+                                            <option value="OTHER">🌍 Autre pays (format libre)</option>
+                                            <option value="TN">🇹🇳 Tunisie</option>
+                                        </select>
+                                    </div>
 
         
                                     
@@ -1246,170 +1241,6 @@ export default function VehiculeManagement() {
                     </div>
                 )}
 
-                {/* ✅ MODAL VISITE AVEC VALIDATION */}
-                {showVisiteModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
-                            <div className="p-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-xl font-bold text-gray-900">Nouvelle Visite</h2>
-                                    <button
-                                        onClick={() => setShowVisiteModal(false)}
-                                        className="text-gray-400 hover:text-gray-600 text-2xl"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-
-                                {selectedVehicule && (
-                                    <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-                                        <h3 className="font-medium text-blue-900">
-                                            {selectedVehicule.marque} {selectedVehicule.modele}
-                                        </h3>
-                                        <p className="text-sm text-blue-700">{selectedVehicule.immatriculation}</p>
-                                        <p className="text-sm text-blue-600">
-                                            Propriétaire: {getClientName(selectedVehicule.proprietaireId)}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {/* ✅ INDICATEUR DE VALIDATION GLOBALE */}
-                                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700">État du formulaire:</span>
-                                        <div className="flex items-center space-x-2">
-                                            {isVisiteFormValid() ? (
-                                                <>
-                                                    <CheckCircle className="w-5 h-5 text-green-500" />
-                                                    <span className="text-sm text-green-600 font-medium">Prêt à soumettre</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <AlertTriangle className="w-5 h-5 text-yellow-500" />
-                                                    <span className="text-sm text-yellow-600 font-medium">Veuillez corriger les erreurs</span>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <form onSubmit={handleVisiteSubmit}>
-                                    <div className="space-y-6">
-                                        {/* Première ligne : Conducteur et Relation */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <ValidatedField
-                                                label="Nom du conducteur/accompagnant"
-                                                value={visiteForm.conducteurNom}
-                                                onChange={(value) => setVisiteForm({ ...visiteForm, conducteurNom: value })}
-                                                validation={visiteValidations.conducteurNom}
-                                                required
-                                                maxLength={100}
-                                                placeholder="Ex: Mohamed Ben Ali"
-                                            />
-                                            
-                                            <ValidatedField
-                                                label="Relation"
-                                                value={visiteForm.conducteurRelation}
-                                                onChange={(value) => setVisiteForm({ ...visiteForm, conducteurRelation: value })}
-                                            >
-                                                <option value="propriétaire">Propriétaire</option>
-                                                <option value="famille">Famille</option>
-                                                <option value="employe">Employé</option>
-                                                <option value="ami">Ami</option>
-                                                <option value="autre">Autre</option>
-                                            </ValidatedField>
-                                        </div>
-
-                                        {/* Téléphone */}
-                                        <ValidatedField
-                                            label="Téléphone"
-                                            type="tel"
-                                            value={visiteForm.conducteurTelephone}
-                                            onChange={(value) => setVisiteForm({ ...visiteForm, conducteurTelephone: value })}
-                                            validation={visiteValidations.conducteurTelephone}
-                                            placeholder="Ex: 01 23 45 67 89 ou 12 345 678"
-                                            maxLength={20}
-                                        />
-
-                                        {/* Services */}
-                                        <ValidatedField
-                                            label="Services (séparés par des virgules)"
-                                            value={visiteForm.services}
-                                            onChange={(value) => setVisiteForm({ ...visiteForm, services: value })}
-                                            validation={visiteValidations.services}
-                                            required
-                                            placeholder="Ex: Vidange, Révision, Réparation freins"
-                                            maxLength={500}
-                                        />
-
-                                        {/* Montant */}
-                                        <ValidatedField
-                                            label="Montant total (TND)"
-                                            type="number"
-                                            value={visiteForm.montantTotal}
-                                            onChange={(value) => setVisiteForm({ ...visiteForm, montantTotal: value })}
-                                            validation={visiteValidations.montantTotal}
-                                            required
-                                            placeholder="Ex: 500"
-                                        />
-
-                                        {/* Notes */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Notes (optionnel)
-                                            </label>
-                                            <textarea
-                                                value={visiteForm.notes}
-                                                onChange={(e) => setVisiteForm({ ...visiteForm, notes: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                rows={3}
-                                                maxLength={500}
-                                                placeholder="Observations particulières..."
-                                            />
-                                            {visiteValidations.notes && (
-                                                <p className="text-xs mt-1 text-yellow-600">
-                                                    {visiteValidations.notes.message}
-                                                </p>
-                                            )}
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                {visiteForm.notes.length}/500 caractères
-                                            </p>
-                                        </div>
-
-                                        {/* Boutons */}
-                                        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowVisiteModal(false)}
-                                                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                                            >
-                                                Annuler
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                disabled={loading || !isVisiteFormValid()}
-                                                className={`px-4 py-2 rounded-lg text-white font-medium ${
-                                                    loading || !isVisiteFormValid()
-                                                        ? 'bg-gray-400 cursor-not-allowed'
-                                                        : 'bg-green-600 hover:bg-green-700'
-                                                }`}
-                                            >
-                                                {loading ? (
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                                        <span>En cours...</span>
-                                                    </div>
-                                                ) : (
-                                                    "Enregistrer"
-                                                )}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

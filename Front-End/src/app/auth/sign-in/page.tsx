@@ -77,7 +77,7 @@ export default function SignIn() {
                     <div className="relative h-full flex flex-col justify-center">
                       <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-orange-500/20 border-2 border-orange-500/30">
                         <Image
-                          src="/images/Tablet login.gif"
+                          src="/images/login.gif"
                           alt="Interface de gestion garage"
                           width={600}
                           height={450}

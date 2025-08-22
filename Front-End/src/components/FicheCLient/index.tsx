@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Search, Filter, Plus, User, Building2, Calendar, Car, Phone, Mail, MapPin, Eye, Edit, Trash2 } from 'lucide-react';
 import axios from "axios";
 
@@ -22,13 +23,12 @@ interface HistoriqueVisite {
 
 interface Client {
   _id: string;
-  id?: string | number;  // Optionnel car on utilise _id comme principal
+  id?: string | number;
   nom: string;
   type: "particulier" | "professionnel";
   adresse: string;
   telephone: string;
   email: string;
-  vehiculeAssocie: string;
   derniereVisite?: string;
   contactsSecondaires?: ContactSecondaire[];
   historiqueVisites?: HistoriqueVisite[];
@@ -40,7 +40,20 @@ interface FormData {
   adresse: string;
   telephone: string;
   email: string;
-  vehiculeAssocie: string;
+}
+
+// Interface pour les véhicules
+interface Vehicule {
+  _id: string;
+  proprietaireId: string;
+  marque: string;
+  modele: string;
+  immatriculation: string;
+  annee?: number;
+  couleur?: string;
+  typeCarburant?: string;
+  kilometrage?: number;
+  statut: "actif" | "inactif";
 }
 
 export default function ClientForm() {
@@ -50,7 +63,6 @@ export default function ClientForm() {
     adresse: "",
     telephone: "",
     email: "",
-    vehiculeAssocie: "",
   });
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -62,19 +74,89 @@ export default function ClientForm() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [telephoneError, setTelephoneError] = useState("");
-
+  const router = useRouter();
+  
+  // CORRECTION 1: Changer la structure pour stocker tous les véhicules
+  const [vehicules, setVehicules] = useState<Vehicule[]>([]);
+  const [clientVehicules, setClientVehicules] = useState<{[clientId: string]: Vehicule[]}>({});
 
   // Charger tous les clients au montage du composant
   useEffect(() => {
     fetchAllClients();
+    fetchAllVehicules(); // CORRECTION 2: Charger tous les véhicules une seule fois
   }, []);
 
+  // CORRECTION 3: Fonction pour charger tous les véhicules
+  const fetchAllVehicules = async (): Promise<void> => {
+    try {
+      console.log("🚗 Chargement de tous les véhicules...");
+      const response = await axios.get(`${API_BASE_URL}/vehicules`);
+      setVehicules(response.data);
+      
+      // Organiser par client
+      const vehiculesParClient: {[clientId: string]: Vehicule[]} = {};
+      response.data.forEach((vehicule: any) => {
+        // CORRECTION: Extraire l'ID du proprietaire selon la structure de votre backend
+        let clientId: string;
+        
+        if (typeof vehicule.proprietaireId === 'string') {
+          // Si proprietaireId est déjà un string
+          clientId = vehicule.proprietaireId;
+        } else if (vehicule.proprietaireId && vehicule.proprietaireId._id) {
+          // Si proprietaireId est un objet avec _id (populated)
+          clientId = vehicule.proprietaireId._id;
+        } else {
+          // Cas de fallback
+          console.warn("Structure proprietaireId inattendue:", vehicule.proprietaireId);
+          return;
+        }
+        
+        console.log("🔍 Organisation véhicule:", vehicule.marque, "pour client ID:", clientId);
+        
+        if (!vehiculesParClient[clientId]) {
+          vehiculesParClient[clientId] = [];
+        }
+        
+        // Créer un objet véhicule propre avec l'ID string
+        const vehiculePropre = {
+          ...vehicule,
+          proprietaireId: clientId // S'assurer que c'est un string
+        };
+        
+        vehiculesParClient[clientId].push(vehiculePropre);
+      });
+      
+      setClientVehicules(vehiculesParClient);
+      console.log("✅ Véhicules organisés par client:", vehiculesParClient);
+      console.log("🔍 Clés des clients avec véhicules:", Object.keys(vehiculesParClient));
+    } catch (error) {
+      console.error("❌ Erreur lors du chargement des véhicules:", error);
+    }
+  };
+
+  // CORRECTION 4: Simplifier la fonction pour obtenir les véhicules d'un client
+  const getClientVehicules = (clientId: string): string => {
+    console.log("🔍 Recherche véhicules pour client ID:", clientId);
+    console.log("🔍 Clés disponibles dans clientVehicules:", Object.keys(clientVehicules));
+    
+    const vehiculesClient = clientVehicules[clientId] || [];
+    console.log("🚗 Véhicules trouvés:", vehiculesClient.length);
+    
+    if (vehiculesClient.length === 0) {
+      return "Non assigné";
+    }
+    
+    if (vehiculesClient.length === 1) {
+      const vehicule = vehiculesClient[0];
+      return `${vehicule.marque} ${vehicule.modele} (${vehicule.immatriculation})`;
+    }
+    
+    return `${vehiculesClient.length} véhicules associés`;
+  };
 
   // Validation simple pour numéros tunisiens
   const validateTunisianPhone = (phone: string) => {
-    const cleaned = phone.replace(/[\s\-]/g, ''); // Enlever espaces et tirets
-
-    // Vérifier format tunisien: 8 chiffres commençant par 2,4,5,7,9
+    const cleaned = phone.replace(/[\s\-]/g, '');
     const tunisianPattern = /^[24579]\d{7}$/;
 
     if (!cleaned) return "Numéro requis";
@@ -83,27 +165,26 @@ export default function ClientForm() {
   };
 
   const handleTelephoneChange = (e: { target: { value: string; }; }) => {
-    let value = e.target.value.replace(/[^\d\s\-]/g, ''); // Seulement chiffres, espaces, tirets
-
-    // Limiter à 10 caractères (8 chiffres + 2 espaces/tirets)
+    let value = e.target.value.replace(/[^\d\s\-]/g, '');
     if (value.length > 10) return;
 
     setFormData({ ...formData, telephone: value });
 
-    // Validation en temps réel
     const error = validateTunisianPhone(value);
     setTelephoneError(error);
   };
 
+  // CORRECTION 5: Corriger les dépendances du useMemo
   const filteredClients = useMemo(() => {
     return clients.filter(client => {
+      const vehiculeInfo = getClientVehicules(client._id);
       const matchesSearch = client.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.vehiculeAssocie.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vehiculeInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = filterType === "tous" || client.type === filterType;
       return matchesSearch && matchesType;
     });
-  }, [clients, searchTerm, filterType]);
+  }, [clients, searchTerm, filterType, clientVehicules]); // Corriger les dépendances
 
   // Récupérer tous les clients
   const fetchAllClients = async (): Promise<void> => {
@@ -134,20 +215,32 @@ export default function ClientForm() {
     }
   };
 
-  // service
+  // CORRECTION 6: Fonction pour récupérer les véhicules d'un client spécifique (pour le modal)
+  const fetchClientVehicules = async (clientId: string): Promise<Vehicule[]> => {
+    try {
+      console.log("🔍 Récupération véhicules pour client:", clientId);
+      // CORRECTION: Utiliser la bonne URL selon votre route backend
+      const response = await axios.get(`${API_BASE_URL}/vehicules/proprietaire/${clientId}`);
+      console.log("🚗 Véhicules reçus:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Erreur lors de la récupération des véhicules du client:", error);
+      return [];
+    }
+  };
+
   const createClient = async (clientData: any): Promise<any> => {
     try {
       const response = await axios.post(`${API_BASE_URL}/Creation`, clientData);
       return response.data;
     } catch (error: any) {
       if (error.response && error.response.data && error.response.data.error) {
-        throw new Error(error.response.data.error); // On renvoie le message backend
+        throw new Error(error.response.data.error);
       }
       throw new Error("Erreur lors de la création du client");
     }
   };
 
-  // Mettre à jour un client
   const updateClient = async (id: string | number, clientData: FormData): Promise<any> => {
     try {
       console.log("🔄 Frontend updateClient - ID reçu:", id);
@@ -157,7 +250,6 @@ export default function ClientForm() {
         throw new Error("ID du client non défini");
       }
 
-      // CORRECTION: Ajouter les données dans le body de la requête PUT
       const response = await axios.put(`${API_BASE_URL}/updateOne/${id}`, clientData);
       console.log("✅ Réponse serveur:", response.data);
       return response.data;
@@ -167,7 +259,6 @@ export default function ClientForm() {
     }
   };
 
-  // Supprimer un client
   const deleteClient = async (id: string | number): Promise<void> => {
     console.log("🗑️ Frontend - Suppression du client avec ID:", id);
 
@@ -183,7 +274,6 @@ export default function ClientForm() {
 
     try {
       await axios.delete(`${API_BASE_URL}/deleteOne/${id}`);
-      // CORRECTION: Utiliser _id au lieu de id pour la comparaison
       setClients(clients.filter(client => client._id !== id && client.id !== id));
       alert("Client supprimé avec succès !");
     } catch (error) {
@@ -201,14 +291,11 @@ export default function ClientForm() {
     console.log("🎯 Ouverture modal:", type, "pour client:", client);
     setModalType(type);
     if (client) {
-      // CORRECTION: Utiliser _id en priorité, puis id comme fallback
       const clientId = client._id;
       console.log("🆔 ID utilisé:", clientId);
-      console.log("🔍 Client original:", JSON.stringify(client, null, 2));
 
       if (type === "view" || type === "edit") {
         const fullClient = await fetchClientById(clientId);
-        console.log("📋 Client complet récupéré:", JSON.stringify(fullClient, null, 2));
         if (fullClient) {
           setSelectedClient(fullClient);
           if (type === "edit") {
@@ -219,7 +306,6 @@ export default function ClientForm() {
               adresse: fullClient.adresse,
               telephone: fullClient.telephone,
               email: fullClient.email,
-              vehiculeAssocie: fullClient.vehiculeAssocie
             });
           }
         }
@@ -227,14 +313,12 @@ export default function ClientForm() {
         setSelectedClient(client);
       }
     } else {
-      // Nouveau client
       setFormData({
         nom: "",
         type: "particulier",
         adresse: "",
         telephone: "",
         email: "",
-        vehiculeAssocie: ""
       });
       setSelectedClient(null);
     }
@@ -253,25 +337,21 @@ export default function ClientForm() {
     setError("");
 
     console.log("📝 Soumission du formulaire - Type:", modalType);
-    console.log("📝 Client sélectionné:", selectedClient);
 
     try {
       if (modalType === "add") {
-        // Créer un nouveau client
         console.log("➕ Création d'un nouveau client:", formData);
         await createClient(formData);
         alert("Client ajouté avec succès !");
       } else if (modalType === "edit" && selectedClient) {
-        // CORRECTION: Utiliser _id en priorité pour la mise à jour
         const clientId = selectedClient._id;
         console.log("✏️ Modification du client avec ID:", clientId);
-        console.log("📝 Données à envoyer:", formData);
         await updateClient(clientId, formData);
         alert("Client modifié avec succès !");
       }
 
-      // Recharger la liste des clients
       await fetchAllClients();
+      await fetchAllVehicules(); // CORRECTION 7: Recharger aussi les véhicules
       closeModal();
     } catch (error) {
       console.error("Erreur lors de la soumission:", error);
@@ -344,7 +424,6 @@ export default function ClientForm() {
         {/* Clients List */}
         <div className="grid gap-6 lg:grid-cols-1 xl:grid-cols-2">
           {filteredClients.map((client) => {
-            console.log("🏷️ Rendu client:", client.nom, "avec _id:", client._id, "et id:", client.id);
             return (
               <div key={client._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="p-6">
@@ -357,45 +436,43 @@ export default function ClientForm() {
                       )}
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">{client.nom}</h3>
-                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${client.type === "professionnel"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-green-100 text-green-800"
-                          }`}>
+                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                          client.type === "professionnel"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                        }`}>
                           {client.type === "professionnel" ? "Professionnel" : "Particulier"}
                         </span>
                       </div>
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => {
-                          console.log("🔍 Clic sur Voir pour:", client.nom, "ID:", client._id || client.id);
-                          openModal("view", client);
-                        }}
+                        onClick={() => openModal("view", client)}
                         className="p-2 text-gray-500 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
                         title="Voir détails"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => {
-                          console.log("✏️ Clic sur Modifier pour:", client.nom, "ID:", client._id || client.id);
-                          openModal("edit", client);
-                        }}
+                        onClick={() => openModal("edit", client)}
                         className="p-2 text-gray-500 hover:text-orange-600 hover:bg-gray-100 rounded-lg transition-colors"
                         title="Modifier"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => {
-                          const clientId = client._id;
-                          console.log("🗑️ Clic sur Supprimer pour:", client.nom, "ID:", clientId);
-                          deleteClient(clientId);
-                        }}
+                        onClick={() => deleteClient(client._id)}
                         className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
                         title="Supprimer"
                       >
                         <Trash2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => router.push("/Fiche-Voiture")}
+                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Associer véhicules"
+                      >
+                        <Car className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -415,7 +492,9 @@ export default function ClientForm() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Car className="w-4 h-4" />
-                      <span>{client.vehiculeAssocie}</span>
+                      <span className={getClientVehicules(client._id) === "Non assigné" ? "text-orange-600 italic" : ""}>
+                        {getClientVehicules(client._id)}
+                      </span>
                     </div>
                     {client.derniereVisite && (
                       <div className="flex items-center space-x-2">
@@ -501,55 +580,38 @@ export default function ClientForm() {
                       <p className="text-gray-900">{selectedClient?.email}</p>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Véhicule associé</label>
-                      <p className="text-gray-900">{selectedClient?.vehiculeAssocie}</p>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Véhicule(s) associé(s)</label>
+                      <p className={`text-gray-900 ${
+                        getClientVehicules(selectedClient?._id || "") === "Non assigné" ? "text-orange-600 italic" : ""
+                      }`}>
+                        {getClientVehicules(selectedClient?._id || "")}
+                      </p>
+                      
+                      {/* CORRECTION 8: Section détaillée des véhicules dans le modal */}
+                      {selectedClient && clientVehicules[selectedClient._id] && clientVehicules[selectedClient._id].length > 0 && (
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                          <h4 className="text-sm font-medium text-gray-700 mb-3">Véhicules associés:</h4>
+                          <div className="space-y-2">
+                            {clientVehicules[selectedClient._id].map((vehicule) => (
+                              <div key={vehicule._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center space-x-3">
+                                  <Car className="w-4 h-4 text-blue-600" />
+                                  <div>
+                                    <span className="font-medium">{vehicule.marque} {vehicule.modele}</span>
+                                    <span className="text-gray-600 ml-2">({vehicule.immatriculation})</span>
+                                  </div>
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {vehicule.annee && <span>{vehicule.annee}</span>}
+                                  {vehicule.couleur && <span className="ml-2">• {vehicule.couleur}</span>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-
-                  {selectedClient?.contactsSecondaires && selectedClient.contactsSecondaires.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-3">Conducteurs autorisés / Contacts famille</h3>
-                      <div className="space-y-3">
-                        {selectedClient.contactsSecondaires.map((contact, index) => (
-                          <div key={index} className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500">
-                            <div className="flex justify-between items-start mb-2">
-                              <p className="font-medium text-gray-900">{contact.nom}</p>
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                {contact.relation}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-600 flex items-center">
-                              <Phone className="w-3 h-3 mr-1" />
-                              {contact.telephone}
-                            </p>
-                            {contact.email && (
-                              <p className="text-sm text-gray-600 flex items-center mt-1">
-                                <Mail className="w-3 h-3 mr-1" />
-                                {contact.email}
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedClient?.historiqueVisites && selectedClient.historiqueVisites.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-3">Historique des visites</h3>
-                      <div className="space-y-2">
-                        {selectedClient.historiqueVisites.map((visite, index) => (
-                          <div key={index} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                            <div>
-                              <p className="font-medium">{visite.service}</p>
-                              <p className="text-sm text-gray-600">{new Date(visite.date).toLocaleDateString('fr-FR')}</p>
-                            </div>
-                            <p className="font-bold text-green-600">{visite.montant}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -597,13 +659,11 @@ export default function ClientForm() {
                         name="telephone"
                         value={formData.telephone}
                         onChange={(e) => {
-                          // Accepter seulement chiffres, espaces et tirets
                           let value = e.target.value.replace(/[^\d\s\-]/g, '');
-                          if (value.length > 8) return; // Limiter la longueur
+                          if (value.length > 8) return;
 
-                          handleChange({ target: { name: 'telephone', value } });
+                          handleChange({ target: { name: 'telephone', value } } as React.ChangeEvent<HTMLInputElement>);
 
-                          // Validation simple
                           const cleaned = value.replace(/[\s\-]/g, '');
                           const isValid = /^[24579]\d{7}$/.test(cleaned);
 
@@ -614,8 +674,9 @@ export default function ClientForm() {
                           }
                         }}
                         placeholder="Ex: 20123456"
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${error ? 'border-red-500' : 'border-gray-300'
-                          }`}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                          error ? 'border-red-500' : 'border-gray-300'
+                        }`}
                         required
                       />
                       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
@@ -632,18 +693,7 @@ export default function ClientForm() {
                       />
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Véhicule associé</label>
-                    <input
-                      type="text"
-                      name="vehiculeAssocie"
-                      value={formData.vehiculeAssocie}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="Ex: Renault Clio - AB-123-CD"
-                      required
-                    />
-                  </div>
+                  
                   <div className="flex justify-end space-x-3 pt-4">
                     <button
                       type="button"
