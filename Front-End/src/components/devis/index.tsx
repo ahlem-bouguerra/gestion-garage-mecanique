@@ -647,6 +647,13 @@ const GarageQuoteSystem = () => {
     setTimeout(() => setSuccess(''), 3000);
   };
 
+  const createWorkOrder = (quote) => {
+  // Sauvegarder les données du devis pour la page ordre de travail
+  localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
+  window.open('/ordre-travail', '_blank');
+
+};
+
 
 
 
@@ -902,6 +909,9 @@ const GarageQuoteSystem = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Ordres
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -993,6 +1003,27 @@ const GarageQuoteSystem = () => {
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            {quote.status === 'accepte' ? (
+                              <button
+                                onClick={() => createWorkOrder(quote)}
+                                className="bg-orange-600 text-white px-3 py-1 rounded-lg hover:bg-orange-700 transition-colors flex items-center space-x-1"
+                                title="Créer ordre de travail"
+                              >
+                                <FileText className="h-4 w-4" />
+                                <span className="hidden sm:inline">Ordre</span>
+                              </button>
+                            ) : (
+                              <button
+                                disabled
+                                className="bg-gray-300 text-gray-500 px-3 py-1 rounded-lg cursor-not-allowed flex items-center space-x-1"
+                                title="Devis doit être accepté"
+                              >
+                                <FileText className="h-4 w-4" />
+                                <span className="hidden sm:inline">Ordre</span>
+                              </button>
+                            )}
                           </td>
                         </tr>
                       );

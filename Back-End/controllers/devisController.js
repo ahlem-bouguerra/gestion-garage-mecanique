@@ -108,6 +108,26 @@ export const getAllDevis = async (req, res) => {
   }
 };
 
+
+
+// GET /api/vehicules/:id - Récupérer un véhicule spécifique
+export const getDevisById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const devis = await Devis.findById(id);
+    
+    if (!devis) {
+      return res.status(404).json({ error: 'devis non trouvé' });
+    }
+    
+    res.json(devis);
+  } catch (error) {
+    console.error("❌ Erreur getdevisById:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const updateDevisStatus = async (req, res) => {
   try {
     const { id } = req.params;

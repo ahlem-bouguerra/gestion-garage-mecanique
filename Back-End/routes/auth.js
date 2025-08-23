@@ -12,8 +12,9 @@ import { enhancedLocationRoutes } from "../apiDataFetcher.js";
 import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient,getFicheClientNoms} from "../controllers/FicheClient.js";
 import {getAllVehicules,getVehiculeById,createVehicule,updateVehicule,deleteVehicule,getVehiculesByProprietaire} from '../controllers/vehiculeController.js';
 import {getAllPieces,getPieceById,createPiece,updatePiece,deletePiece}from '../controllers/piecesController.js';
-import {createDevis,getAllDevis,updateDevisStatus,updateDevis,deleteDevis, acceptDevis,refuseDevis}from '../controllers/devisController.js';
+import {createDevis,getAllDevis,getDevisById,updateDevisStatus,updateDevis,deleteDevis, acceptDevis,refuseDevis}from '../controllers/devisController.js';
 import { sendDevisByEmail } from '../utils/sendDevis.js';
+import {createMecanicien,updateMecanicien,deleteMecanicien,getAllMecaniciens,getMecanicienById} from "../controllers/mecanicienController.js";
 
 
 
@@ -42,23 +43,14 @@ router.get("/verify-email/:token", async (req, res) => {
 });
 
 router.post("/login", login);
-
-// 🔥 SOLUTION 1: Modifier les routes Google pour gérer les tokens
-
-// Code Backend corrigé
-
-// Route Google OAuth initiale
-// Route d'initialisation OAuth Google
 router.get(
-  "/google", // URL: http://localhost:5000/api/google
+  "/google", 
   passport.authenticate("google", {
     scope: ["profile", "email"]
   })
 );
-
-// Route de callback OAuth Google - VERSION CORRIGÉE
 router.get(
-  "/google/callback", // URL: http://localhost:5000/api/google/callback
+  "/google/callback", 
   passport.authenticate("google", { 
     failureRedirect: "http://localhost:3000/auth/sign-in?error=google_auth_failed",
     session: false
@@ -306,8 +298,6 @@ router.get(
     }
   }
 );
-
-// Route pour vérifier le token (optionnelle mais utile pour débugger)
 router.get("/verify-token", async (req, res) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
@@ -379,6 +369,7 @@ router.delete('/pieces/:id', deletePiece);
 
 router.post('/createdevis',createDevis);
 router.get('/Devis',getAllDevis);
+router.get('/Devis/:id',getDevisById);
 router.put('/Devis/:id/status',updateDevisStatus);
 router.put('/Devis/:id', updateDevis);
 router.delete('/Devis/:id',deleteDevis);
@@ -387,6 +378,13 @@ router.get("/devis/:devisId/refuse", refuseDevis);
 
 
 router.post('/devis/:devisId/send-email',authMiddleware, sendDevisByEmail);
+
+
+router.post("/", createMecanicien);     
+router.get("/", getAllMecaniciens);         
+router.get("/:id", getMecanicienById);      
+router.put("/:id", updateMecanicien);       
+router.delete("/:id", deleteMecanicien); 
 
 
 export default router;
