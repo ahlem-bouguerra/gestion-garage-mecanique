@@ -1,4 +1,6 @@
 import * as Icons from "../icons";
+import { Car, Plus, Edit, Trash2, User, Users,Building2, Calendar, Phone, UserCheck, AlertTriangle, CheckCircle ,FileText,FileCheck,Clipboard} from 'lucide-react';
+
 
 export const NAV_DATA = [
   {
@@ -15,15 +17,39 @@ export const NAV_DATA = [
         ],
       },
       {
+        title: "Fiche Client",
+        url: "/fiche-client",
+        icon: Icons.User,
+        items: [],
+      },
+      {
+        title: "Fiche  Véhicule",
+        url: "/fiche-voiture",
+        icon: Car,
+        items: [],
+      },
+      {
+        title: "Géstion des Devis",
+        url: "/devis",
+        icon: FileText,
+        items: [],
+      },
+      {
+        title: "Gestion des Mécanicien",
+        url: "/gestion-mecanicien",
+        icon: Users,
+        items: [],
+      },
+      {
+        title: "Gestion des Ordres de travail  ",
+        url: "/gestion-ordres",
+        icon: Clipboard,
+        items: [],
+      },
+      {
         title: "Calendar",
         url: "/calendar",
         icon: Icons.Calendar,
-        items: [],
-      },
-       {
-        title: "FicheClient",
-        url: "/fiche-client",
-        icon: Icons.User,
         items: [],
       },
       {

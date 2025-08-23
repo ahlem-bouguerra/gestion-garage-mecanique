@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Eye, Send, Check, X, Car, User, Calendar, FileText, Euro, AlertCircle, Trash2 } from 'lucide-react';
 
 import axios from 'axios';
+import { redirect } from 'next/dist/server/api-utils';
+import { useRouter } from 'next/navigation';
 
 
 
@@ -27,6 +29,7 @@ const GarageQuoteSystem = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [invoiceData, setInvoiceData] = useState(null);
+  const router = useRouter();
   const [filters, setFilters] = useState({
     status: '',
     clientName: '',
@@ -650,7 +653,7 @@ const GarageQuoteSystem = () => {
   const createWorkOrder = (quote) => {
   // Sauvegarder les données du devis pour la page ordre de travail
   localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
-  window.open('/ordre-travail', '_blank');
+   router.push('/ordre-travail');
 
 };
 
