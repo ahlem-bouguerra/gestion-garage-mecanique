@@ -85,6 +85,25 @@ const devisSchema = new mongoose.Schema({
     default: 0,
     min: 0
   },
+  estimatedTime: {
+  days: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  hours: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 23
+  },
+  minutes: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 59
+  }
+},
   status: {
     type: String,
     enum: ['brouillon', 'envoye', 'accepte', 'refuse'],

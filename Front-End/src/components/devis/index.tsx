@@ -22,6 +22,7 @@ const GarageQuoteSystem = () => {
   const [loadingVehicules, setLoadingVehicules] = useState(false);
   const [tvaRate, setTvaRate] = useState(20); // TVA par défaut à 20%
   const [maindoeuvre, setMaindoeuvre] = useState(0);
+  const [estimatedTime, setEstimatedTime] = useState({days: 0,hours: 0,minutes: 0});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -248,6 +249,7 @@ const GarageQuoteSystem = () => {
         services: newQuote.services,
         tvaRate: tvaRate,
         maindoeuvre: maindoeuvre,
+        estimatedTime: estimatedTime,
         // Si c'est une modification, remettre le statut à "brouillon"
         status: isEditMode ? 'brouillon' : undefined
       };
@@ -275,6 +277,7 @@ const GarageQuoteSystem = () => {
       setMaindoeuvre(0);
       setEditingQuote(null);
       setIsEditMode(false);
+      setEstimatedTime({ days: 0, hours: 0, minutes: 0 });
 
       await loadDevis();
       setActiveTab('list');
@@ -624,13 +627,14 @@ const GarageQuoteSystem = () => {
         pieceId: service.pieceId || '',
         piece: service.piece,
         quantity: service.quantity,
-        unitPrice: service.unitPrice
+        unitPrice: service.unitPrice,
       }))
     });
 
     setSelectedClientId(quote.clientId || '');
     setTvaRate(quote.tvaRate || 20);
     setMaindoeuvre(quote.maindoeuvre || 0);
+    setEstimatedTime(quote.estimatedTime || { days: 0, hours: 0, minutes: 0 });
 
     // Charger les véhicules du client
     if (quote.clientId) {
@@ -653,7 +657,7 @@ const GarageQuoteSystem = () => {
   const createWorkOrder = (quote) => {
   // Sauvegarder les données du devis pour la page ordre de travail
   localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
-   router.push('/ordre-travail');
+   router.push('/gestion-ordres');
 
 };
 
@@ -1118,36 +1122,7 @@ const GarageQuoteSystem = () => {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Taux TVA (%) *
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="100"
-                  value={tvaRate}
-                  onChange={(e) => setTvaRate(parseFloat(e.target.value) || 0)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="20"
-                />
-                <div className="mt-1 text-xs text-gray-500">
-                  Taux de TVA applicable
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Main D’œuvre
-                </label>
-                <input
-                  type="number"
-                  value={maindoeuvre}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onChange={(e) => setMaindoeuvre(parseFloat(e.target.value) || 0)}
-                />
-
-              </div>
+              
 
             </div>
 
@@ -1226,6 +1201,7 @@ const GarageQuoteSystem = () => {
                           </div>
                         )}
                       </div>
+                      
 
                       {/* Modal pour ajouter une nouvelle pièce */}
                       {showAddPieceModal && (
@@ -1298,6 +1274,7 @@ const GarageQuoteSystem = () => {
                                 <span>Créer la pièce</span>
                               </button>
                             </div>
+                            
                           </div>
                         </div>
                       )}
@@ -1349,6 +1326,91 @@ const GarageQuoteSystem = () => {
                 ))}
               </div>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Taux TVA (%) *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  value={tvaRate}
+                  onChange={(e) => setTvaRate(parseFloat(e.target.value) || 0)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="20"
+                />
+                <div className="mt-1 text-xs text-gray-500">
+                  Taux de TVA applicable
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Main D’œuvre
+                </label>
+                <input
+                  type="number"
+                  value={maindoeuvre}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onChange={(e) => setMaindoeuvre(parseFloat(e.target.value) || 0)}
+                />
+
+              </div>
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Temps Estimé
+  </label>
+  <div className="flex gap-2">
+    <div className="flex flex-col">
+      <input
+        type="number"
+        min="0"
+        value={estimatedTime.days}
+        onChange={(e) => setEstimatedTime({
+          ...estimatedTime, 
+          days: parseInt(e.target.value) || 0
+        })}
+        className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        placeholder="Jours"
+      />
+      <span className="text-xs text-gray-500 text-center mt-1">Jours</span>
+    </div>
+
+    <div className="flex flex-col">
+      <input
+        type="number"
+        min="0"
+        max="23"
+        value={estimatedTime.hours}
+        onChange={(e) => setEstimatedTime({
+          ...estimatedTime, 
+          hours: parseInt(e.target.value) || 0
+        })}
+        className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        placeholder="Heures"
+      />
+      <span className="text-xs text-gray-500 text-center mt-1">Heures</span>
+    </div>
+
+    <div className="flex flex-col">
+      <input
+        type="number"
+        min="0"
+        max="59"
+        value={estimatedTime.minutes}
+        onChange={(e) => setEstimatedTime({
+          ...estimatedTime, 
+          minutes: parseInt(e.target.value) || 0
+        })}
+        className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        placeholder="Minutes"
+      />
+      <span className="text-xs text-gray-500 text-center mt-1">Minutes</span>
+    </div>
+  </div>
+</div>
+              </div>
 
             {/* Summary */}
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
@@ -1425,6 +1487,9 @@ const GarageQuoteSystem = () => {
                     <p className="text-gray-600">Nom: {selectedQuote.clientName}</p>
                     <p className="text-gray-600">Véhicule: {selectedQuote.vehicleInfo}</p>
                     <p className="text-gray-600">Date d'inspection: {selectedQuote.inspectionDate}</p>
+                    <p className="text-gray-600">
+                    Temps estimé: {selectedQuote.estimatedTime?.days || 0}j {selectedQuote.estimatedTime?.hours || 0}h {selectedQuote.estimatedTime?.minutes || 0}min
+                  </p>
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900 mb-2">Statut</h3>

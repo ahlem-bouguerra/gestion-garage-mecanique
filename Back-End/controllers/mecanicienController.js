@@ -1,8 +1,18 @@
 import Mecanicien from '../models/Mecanicien.js';
+import { validateTunisianPhone, validatePhoneMiddleware } from '../utils/phoneValidator.js';
 
 // 📌 Créer un mécanicien
 export const createMecanicien = async (req, res) => {
   try {
+    // Valider le téléphone
+    const phoneValidation = validateTunisianPhone(req.body.telephone);
+    if (!phoneValidation.isValid) {
+      return res.status(400).json({ error: phoneValidation.message });
+    }
+    
+    // Normaliser le numéro
+    req.body.telephone = phoneValidation.cleanNumber;
+    
     const mecanicien = new Mecanicien(req.body);
     await mecanicien.save();
     res.status(201).json(mecanicien);
@@ -11,9 +21,19 @@ export const createMecanicien = async (req, res) => {
   }
 };
 
-// 📌 Modifier un mécanicien
 export const updateMecanicien = async (req, res) => {
   try {
+    // Valider le téléphone si il est modifié
+    if (req.body.telephone) {
+      const phoneValidation = validateTunisianPhone(req.body.telephone);
+      if (!phoneValidation.isValid) {
+        return res.status(400).json({ error: phoneValidation.message });
+      }
+      
+      // Normaliser le numéro
+      req.body.telephone = phoneValidation.cleanNumber;
+    }
+    
     const { id } = req.params;
     const mecanicien = await Mecanicien.findByIdAndUpdate(id, req.body, { new: true });
     if (!mecanicien) return res.status(404).json({ error: "Mécanicien non trouvé" });

@@ -468,12 +468,18 @@ export default function ClientForm() {
                         <Trash2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => router.push("/Fiche-Voiture")}
-                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Associer véhicules"
-                      >
-                        <Car className="w-4 h-4" />
-                      </button>
+onClick={() => {
+  sessionStorage.setItem('preselectedClient', JSON.stringify({
+    id: client._id,
+    nom: client.nom
+  }));
+  router.push("/fiche-voiture");
+}}
+  className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+  title="Associer véhicules"
+>
+  <Car className="w-4 h-4" />
+</button>
                     </div>
                   </div>
 

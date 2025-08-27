@@ -146,6 +146,7 @@ const generateDevisHTML = (devis ,user) => {
             <p><strong>Main d'œuvre:</strong> ${(devis.maindoeuvre || 0).toFixed(3)} Dinnar</p>
             <p><strong>Total HT:</strong> ${devis.totalHT.toFixed(3)} Dinnar</p>
             <p><strong>TVA (${devis.tvaRate || 20}%):</strong> ${tvaAmount} Dinnar</p>
+            <p><strong>Temps Estimé </strong> ${devis.estimatedTime} </p>
             <p style="font-size: 20px; color: #2c3e50;"><strong>TOTAL TTC: ${devis.totalTTC.toFixed(3)} Dinnar</strong></p>
           </div>
 

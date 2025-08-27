@@ -6,7 +6,7 @@ export const createDevis = async (req, res) => {
   try {
     console.log('📥 Données reçues:', req.body);
 
-    const { clientId, clientName, vehicleInfo, inspectionDate, services, tvaRate, maindoeuvre } = req.body;
+    const { clientId, clientName, vehicleInfo, inspectionDate, services, tvaRate, maindoeuvre,estimatedTime } = req.body;
 
     // ✅ CALCUL CORRECT DES TOTAUX
     // 1. Total des services (pièces seulement)
@@ -45,7 +45,8 @@ export const createDevis = async (req, res) => {
       totalTTC,
       tvaRate: tvaRate || 20,
       maindoeuvre: maindoeuvre || 0,
-      status: 'brouillon'
+      status: 'brouillon',
+      estimatedTime,
     });
 
     console.log('💾 Sauvegarde du devis...');
@@ -163,7 +164,7 @@ export const updateDevisStatus = async (req, res) => {
 export const updateDevis = async (req, res) => {
   try {
     const { id } = req.params;
-    const { clientId, clientName, vehicleInfo, inspectionDate, services, tvaRate, maindoeuvre } = req.body;
+    const { clientId, clientName, vehicleInfo, inspectionDate, services, tvaRate, maindoeuvre ,estimatedTime} = req.body;
 
     console.log('🔄 Mise à jour devis:', id);
     console.log('📥 Nouvelles données:', req.body);
@@ -209,6 +210,7 @@ export const updateDevis = async (req, res) => {
         tvaRate: tvaRate || 20,
         maindoeuvre: maindoeuvre || 0,
         status: 'brouillon', // ✅ Remettre en brouillon après modification
+        estimatedTime,
       },
       {
         new: true, // Retourner le document mis à jour

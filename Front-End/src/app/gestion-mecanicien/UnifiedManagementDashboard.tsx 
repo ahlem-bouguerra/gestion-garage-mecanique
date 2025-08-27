@@ -1,11 +1,10 @@
-
+// Page component (Server Component)
 import { createTimeFrameExtractor } from "@/utils/timeframe-extractor";
 import { Metadata } from "next";
-import OrdreTravailSystem from "@/components/gestion-ordres";
-
+import UnifiedManagementDashboard from "./UnifiedManagementDashboard";
 
 export const metadata: Metadata = {
-  title: "Basic Chart",
+  title: "Gestion - Centre de Gestion",
 };
 
 type PropsType = {
@@ -19,14 +18,9 @@ export default async function Page(props: PropsType) {
   const extractTimeFrame = createTimeFrameExtractor(selected_time_frame);
 
   return (
-    <>
-
-      <div>
-
-        <div className="col-span-12 xl:col-span-5">
-          < OrdreTravailSystem/>
-        </div>
-      </div>
-    </>
+    <UnifiedManagementDashboard 
+      selectedTimeFrame={selected_time_frame}
+      extractTimeFrame={extractTimeFrame}
+    />
   );
 }

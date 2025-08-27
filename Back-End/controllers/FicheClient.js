@@ -1,7 +1,16 @@
 import FicheClient from "../models/FicheClient.js";
-
+import { validateTunisianPhone, validatePhoneMiddleware } from '../utils/phoneValidator.js';
 export const createFicheClient = async (req, res) => {
   try {
+        // Valider le téléphone
+        const phoneValidation = validateTunisianPhone(req.body.telephone);
+        if (!phoneValidation.isValid) {
+          return res.status(400).json({ error: phoneValidation.message });
+        }
+        
+        // Normaliser le numéro
+        req.body.telephone = phoneValidation.cleanNumber;
+
     const fiche = new FicheClient(req.body);
     await fiche.save();
     res.status(201).json(fiche);

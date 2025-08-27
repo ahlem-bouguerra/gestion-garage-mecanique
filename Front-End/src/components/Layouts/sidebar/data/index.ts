@@ -1,5 +1,5 @@
 import * as Icons from "../icons";
-import { Car, Plus, Edit, Trash2, User, Users,Building2, Calendar, Phone, UserCheck, AlertTriangle, CheckCircle ,FileText,FileCheck,Clipboard} from 'lucide-react';
+import { FolderOpen,Car,Settings, Building,Plus, Edit, Trash2, User, Users,Building2, Calendar, Phone, UserCheck, AlertTriangle, CheckCircle ,FileText,FileCheck,Clipboard} from 'lucide-react';
 
 
 export const NAV_DATA = [
@@ -16,18 +16,24 @@ export const NAV_DATA = [
           },
         ],
       },
-      {
-        title: "Fiche Client",
-        url: "/fiche-client",
-        icon: Icons.User,
-        items: [],
-      },
-      {
-        title: "Fiche  Véhicule",
-        url: "/fiche-voiture",
-        icon: Car,
-        items: [],
-      },
+     {
+  title: "CLients & Véhicules",
+  url: "/fiches", // lien général, tu peux soit mettre un onglet parent vide ou rediriger vers une page résumé
+  icon: FolderOpen, // ou une icône générique pour les fiches
+  items: [
+    {
+      title: "Fiche Client",
+      url: "/fiche-client",
+      icon: User, // icône spécifique
+    },
+    {
+      title: "Fiche Véhicule",
+      url: "/fiche-voiture",
+      icon: Car, // icône spécifique
+    },
+  ],
+},
+
       {
         title: "Géstion des Devis",
         url: "/devis",
@@ -35,11 +41,18 @@ export const NAV_DATA = [
         items: [],
       },
       {
-        title: "Gestion des Mécanicien",
-        url: "/gestion-mecanicien",
-        icon: Users,
-        items: [],
-      },
+  title: "Gestion Garage",
+  url: "/gestion-mecanicien",
+  icon: Building,
+  items: [
+    {
+      title: "Mécaniciens | Ateliers | Services",
+      url: "/gestion-mecanicien",
+      icon: Users,
+    },
+  ],
+},
+
       {
         title: "Gestion des Ordres de travail  ",
         url: "/gestion-ordres",
