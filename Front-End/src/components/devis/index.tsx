@@ -661,13 +661,6 @@ const GarageQuoteSystem = () => {
 
 };
 
-
-
-
-
-
-
-
   // Ajouter après les autres useState
   useEffect(() => {
     fetchClients();
