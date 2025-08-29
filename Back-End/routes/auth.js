@@ -12,13 +12,23 @@ import { enhancedLocationRoutes } from "../apiDataFetcher.js";
 import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient,getFicheClientNoms} from "../controllers/FicheClient.js";
 import {getAllVehicules,getVehiculeById,createVehicule,updateVehicule,deleteVehicule,getVehiculesByProprietaire} from '../controllers/vehiculeController.js';
 import {getAllPieces,getPieceById,createPiece,updatePiece,deletePiece}from '../controllers/piecesController.js';
-import {createDevis,getAllDevis,getDevisById,updateDevisStatus,updateDevis,deleteDevis, acceptDevis,refuseDevis}from '../controllers/devisController.js';
+import {createDevis,getAllDevis,getDevisById,getDevisByNum,updateDevisStatus,updateDevis,deleteDevis, acceptDevis,refuseDevis}from '../controllers/devisController.js';
 import { sendDevisByEmail } from '../utils/sendDevis.js';
-import {createMecanicien,updateMecanicien,deleteMecanicien,getAllMecaniciens,getMecanicienById} from "../controllers/mecanicienController.js";
+import {createMecanicien,updateMecanicien,deleteMecanicien,getAllMecaniciens,getMecanicienById,getMecaniciensByService} from "../controllers/mecanicienController.js";
 import {getAllAteliers,getAtelierById,createAtelier,updateAtelier,deleteAtelier}from '../controllers/atelierController.js';
 import {getAllServices,getServiceById,createService,updateService,deleteService}from '../controllers/serviceController.js';
-
-
+import {
+  createOrdreTravail,
+  getOrdresTravail,
+  getOrdreTravailById,
+  updateStatusOrdreTravail,
+  demarrerTache,
+  terminerTache,
+  ajouterNote,
+  getStatistiques,
+  supprimerOrdreTravail,
+  getOrdresParMecanicien
+} from '../controllers/ordreController.js';
 
 const router = express.Router();
 
@@ -371,6 +381,7 @@ router.delete('/pieces/:id', deletePiece);
 router.post('/createdevis',createDevis);
 router.get('/Devis',getAllDevis);
 router.get('/Devis/:id',getDevisById);
+router.get('/devis/code/:id', getDevisByNum);
 router.put('/Devis/:id/status',updateDevisStatus);
 router.put('/Devis/:id', updateDevis);
 router.delete('/Devis/:id',deleteDevis);
@@ -383,7 +394,9 @@ router.post("/createMecanicien", createMecanicien);
 router.get("/getAllMecaniciens", getAllMecaniciens);         
 router.get("/getMecanicienById/:id", getMecanicienById);      
 router.put("/updateMecanicien/:id", updateMecanicien);       
-router.delete("/deleteMecanicien/:id", deleteMecanicien); 
+router.delete("/deleteMecanicien/:id", deleteMecanicien);
+router.get('/mecaniciens/by-service/:serviceId', getMecaniciensByService);
+
 
 
 router.get('/getAllAteliers', getAllAteliers);
@@ -398,5 +411,37 @@ router.get('/getServiceById/:id', getServiceById);
 router.post('/createService', createService);
 router.put('/updateService/:id', updateService);
 router.delete('/deleteService/:id', deleteService);
+
+
+
+
+router.get('/mecanicien/:mecanicienId', getOrdresParMecanicien);
+router.post('/', createOrdreTravail);
+router.get('/', getOrdresTravail);
+router.get('/getOrdreTravailById/:id', getOrdreTravailById);
+
+// Routes de mise à jour
+router.put('/:id/status', updateStatusOrdreTravail);
+router.put('/:id/taches/:tacheId/demarrer', demarrerTache);
+router.put('/:id/taches/:tacheId/terminer', terminerTache);
+router.post('/:id/notes', ajouterNote);
+router.delete('/:id', supprimerOrdreTravail);
+
+
+router.put('/:id/status', updateStatusOrdreTravail);
+
+// Démarrer une tâche spécifique
+router.put('/:id/taches/:tacheId/demarrer', demarrerTache);
+
+// Terminer une tâche spécifique
+router.put('/:id/taches/:tacheId/terminer', terminerTache);
+
+// Ajouter une note à un ordre de travail
+router.post('/:id/notes', ajouterNote);
+
+// Récupérer les statistiques des ordres de travail
+router.get('/statistiques', getStatistiques);
+
+
 
 export default router;

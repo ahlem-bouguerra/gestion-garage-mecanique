@@ -80,6 +80,18 @@ const GarageQuoteSystem = () => {
     refuse: X
   };
 
+useEffect(() => {
+  const header = document.querySelector('header');
+  if (!header) return;
+
+  if (selectedInvoice || selectedQuote) {
+    header.classList.add("hidden");
+  } else {
+    header.classList.remove("hidden");
+  }
+}, [selectedInvoice, selectedQuote]);
+
+
   const generateInvoice = (quote) => {
     const invoice = {
       ...quote,
@@ -1586,13 +1598,7 @@ const GarageQuoteSystem = () => {
                   {/* Informations de l'entreprise */}
                   <div className="flex-1">
                     <h1 className="text-3xl font-bold text-blue-600 mb-2">GARAGE AUTO</h1>
-                    <div className="text-gray-600 space-y-1">
-                      <p>123 Avenue de la Mécanique</p>
-                      <p>1000 Tunis, Tunisie</p>
-                      <p>Tél: +216 XX XXX XXX</p>
-                      <p>Email: contact@garageauto.tn</p>
-                      <p>Matricule Fiscal: XXXXXXXX</p>
-                    </div>
+                    
                   </div>
 
                   {/* Logo et titre facture */}

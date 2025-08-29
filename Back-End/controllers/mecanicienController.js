@@ -1,5 +1,7 @@
 import Mecanicien from '../models/Mecanicien.js';
 import { validateTunisianPhone, validatePhoneMiddleware } from '../utils/phoneValidator.js';
+import mongoose from "mongoose";
+
 
 // 📌 Créer un mécanicien
 export const createMecanicien = async (req, res) => {
@@ -74,5 +76,30 @@ export const getMecanicienById = async (req, res) => {
     res.json(mecanicien);
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+};
+
+
+// GET /api/mecaniciens/by-service/:serviceId
+export const getMecaniciensByService = async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+
+    // ⚠️ convertir en ObjectId
+    const serviceObjectId = new mongoose.Types.ObjectId(serviceId);
+
+    // recherche dans le tableau "services"
+    const mecaniciens = await Mecanicien.find({
+      "services.serviceId": serviceObjectId
+    });
+
+    if (!mecaniciens || mecaniciens.length === 0) {
+      return res.status(404).json({ error: `Aucun mécanicien trouvé pour le service ${serviceId}` });
+    }
+
+    res.json(mecaniciens);
+  } catch (error) {
+    console.error("❌ Erreur getMecaniciensByService:", error);
+    res.status(500).json({ error: error.message });
   }
 };

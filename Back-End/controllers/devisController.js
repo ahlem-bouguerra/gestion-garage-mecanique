@@ -1,7 +1,5 @@
 import Devis from "../models/Devis.js";
 
-
-
 export const createDevis = async (req, res) => {
   try {
     console.log('📥 Données reçues:', req.body);
@@ -110,7 +108,6 @@ export const getAllDevis = async (req, res) => {
 };
 
 
-
 // GET /api/vehicules/:id - Récupérer un véhicule spécifique
 export const getDevisById = async (req, res) => {
   try {
@@ -128,6 +125,26 @@ export const getDevisById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// GET /api/devis/:id - Récupérer un devis par son champ "id" (ex: DEV011)
+export const getDevisByNum = async (req, res) => {
+  try {
+    const { id } = req.params; // ici "id" correspond au champ "id" du devis (DEV011)
+
+    // Recherche dans le champ métier "id", pas dans _id
+    const devis = await Devis.findOne({ id: id });
+
+    if (!devis) {
+      return res.status(404).json({ error: `Devis avec id ${id} non trouvé` });
+    }
+
+    res.json(devis);
+  } catch (error) {
+    console.error("❌ Erreur getDevisById:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 export const updateDevisStatus = async (req, res) => {
   try {
