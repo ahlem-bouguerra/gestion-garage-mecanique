@@ -445,11 +445,7 @@ const MecaniciensManager = () => {
                         <p className="text-sm text-gray-500">#{mecanicien.matricule}</p>
                       </div>
                     </div>
-                    <div className="relative">
-                      <button className="p-2 hover:bg-gray-100 rounded-lg">
-                        <MoreVertical className="h-4 w-4 text-gray-400" />
-                      </button>
-                    </div>
+                   
                   </div>
 
                   <div className="space-y-3">

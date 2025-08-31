@@ -24,10 +24,12 @@ import {
   updateStatusOrdreTravail,
   demarrerTache,
   terminerTache,
-  ajouterNote,
   getStatistiques,
   supprimerOrdreTravail,
-  getOrdresParMecanicien
+  getOrdresParDevisId,
+  getOrdresByStatus,
+  getOrdresByAtelier,
+  updateOrdreTravail
 } from '../controllers/ordreController.js';
 
 const router = express.Router();
@@ -413,34 +415,21 @@ router.put('/updateService/:id', updateService);
 router.delete('/deleteService/:id', deleteService);
 
 
-
-
-router.get('/mecanicien/:mecanicienId', getOrdresParMecanicien);
 router.post('/', createOrdreTravail);
 router.get('/', getOrdresTravail);
 router.get('/getOrdreTravailById/:id', getOrdreTravailById);
-
 // Routes de mise à jour
 router.put('/:id/status', updateStatusOrdreTravail);
 router.put('/:id/taches/:tacheId/demarrer', demarrerTache);
 router.put('/:id/taches/:tacheId/terminer', terminerTache);
-router.post('/:id/notes', ajouterNote);
 router.delete('/:id', supprimerOrdreTravail);
-
-
-router.put('/:id/status', updateStatusOrdreTravail);
-
-// Démarrer une tâche spécifique
+router.put('/modifier/id',updateOrdreTravail);
 router.put('/:id/taches/:tacheId/demarrer', demarrerTache);
-
-// Terminer une tâche spécifique
 router.put('/:id/taches/:tacheId/terminer', terminerTache);
-
-// Ajouter une note à un ordre de travail
-router.post('/:id/notes', ajouterNote);
-
-// Récupérer les statistiques des ordres de travail
 router.get('/statistiques', getStatistiques);
+router.get('/ordre-travail/by-devis/:devisId',getOrdresParDevisId);
+router.get("/ordres/status/:status", getOrdresByStatus);
+router.get("/ordres/atelier/:atelierId", getOrdresByAtelier);
 
 
 

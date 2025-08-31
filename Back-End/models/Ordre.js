@@ -68,11 +68,11 @@ const OrdreTravailSchema = new Schema({
   numeroOrdre: {
     type: String,
     unique: true,
-    required: true
   },
   devisId: {
     type: String, // Au lieu de Schema.Types.ObjectId
-    required: true
+    required: true,
+    unique: true, 
   },
   // Informations client (dénormalisées pour performance)
   clientInfo: {
@@ -115,7 +115,7 @@ const OrdreTravailSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['en_attente', 'en_cours', 'termine', 'suspendu'],
+    enum: ['en_attente', 'en_cours', 'termine', 'suspendu','supprime'],
     default: 'en_attente'
   },
   // Description générale
@@ -191,7 +191,6 @@ OrdreTravailSchema.virtual('enRetard').get(function() {
 OrdreTravailSchema.pre('save', async function(next) {
   if (this.isNew && !this.numeroOrdre) {
     const count = await this.constructor.countDocuments();
-    const year = new Date().getFullYear();
     this.numeroOrdre = `ORD-${String(count + 1).padStart(4, '0')}`;
   }
   
@@ -238,14 +237,6 @@ OrdreTravailSchema.methods.terminerTache = function(tacheId, heuresReelles, user
   throw new Error('Tâche non trouvée ou non en cours');
 };
 
-OrdreTravailSchema.methods.ajouterNote = function(contenu, auteur) {
-  this.notes.push({
-    contenu,
-    auteur,
-    date: new Date()
-  });
-  return this.save();
-};
 
 // Méthodes statiques
 OrdreTravailSchema.statics.findByStatus = function(status, options = {}) {

@@ -5,10 +5,7 @@ import Service from '../models/Service.js';
 import Mecanicien from '../models/Mecanicien.js';
 import mongoose from 'mongoose';
 
-/**
- * Créer un nouvel ordre de travail
- * POST /api/ordre-travail/
- */
+
 export const createOrdreTravail = async (req, res) => {
   try {
     const { devisId, dateCommence, atelierId, priorite, description, taches } = req.body;
@@ -30,6 +27,15 @@ export const createOrdreTravail = async (req, res) => {
       });
     }
 
+    // Vérifier si un ordre existe déjà pour ce devis
+    const existingOrdre = await OrdreTravail.findOne({ devisId });
+    if (existingOrdre) {
+      return res.status(400).json({
+        success: false,
+        error: `Un ordre de travail est déjà créé pour le devis ${devisId}`
+      });
+    }
+
     // Vérifier que l'atelier existe
     const atelier = await Atelier.findById(atelierId);
     if (!atelier) {
@@ -38,11 +44,6 @@ export const createOrdreTravail = async (req, res) => {
         error: 'Atelier non trouvé'
       });
     }
-
-    // ✅ Générer le numéro d'ordre AVANT la création
-    const count = await OrdreTravail.countDocuments({});
-    const year = new Date().getFullYear();
-    const numeroOrdre = `OT-${year}-${String(count + 1).padStart(4, '0')}`;
 
     // Valider et enrichir les tâches
     const tachesEnrichies = [];
@@ -92,7 +93,6 @@ export const createOrdreTravail = async (req, res) => {
 
     // Créer l'ordre de travail avec le numéro généré
     const ordreTravail = new OrdreTravail({
-      numeroOrdre, // ✅ Ajout explicite du numéro
       devisId: devis.id,
       clientInfo: {
         nom: devis.clientName,
@@ -135,10 +135,7 @@ export const createOrdreTravail = async (req, res) => {
     });
   }
 };
-/**
- * Récupérer tous les ordres de travail avec pagination et filtres
- * GET /api/ordre-travail/
- */
+
 export const getOrdresTravail = async (req, res) => {
   try {
     const {
@@ -212,10 +209,6 @@ export const getOrdresTravail = async (req, res) => {
   }
 };
 
-/**
- * Récupérer un ordre de travail par ID avec tous les détails
- * GET /api/ordre-travail/:id
- */
 export const getOrdreTravailById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -254,10 +247,6 @@ export const getOrdreTravailById = async (req, res) => {
   }
 };
 
-/**
- * Mettre à jour le statut d'un ordre de travail
- * PUT /api/ordre-travail/:id/status
- */
 export const updateStatusOrdreTravail = async (req, res) => {
   try {
     const { id } = req.params;
@@ -303,10 +292,6 @@ export const updateStatusOrdreTravail = async (req, res) => {
   }
 };
 
-/**
- * Démarrer une tâche spécifique
- * PUT /api/ordre-travail/:id/taches/:tacheId/demarrer
- */
 export const demarrerTache = async (req, res) => {
   try {
     const { id, tacheId } = req.params;
@@ -336,10 +321,6 @@ export const demarrerTache = async (req, res) => {
   }
 };
 
-/**
- * Terminer une tâche spécifique
- * PUT /api/ordre-travail/:id/taches/:tacheId/terminer
- */
 export const terminerTache = async (req, res) => {
   try {
     const { id, tacheId } = req.params;
@@ -370,51 +351,7 @@ export const terminerTache = async (req, res) => {
   }
 };
 
-/**
- * Ajouter une note à un ordre de travail
- * POST /api/ordre-travail/:id/notes
- */
-export const ajouterNote = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { contenu } = req.body;
 
-    if (!contenu?.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: 'Le contenu de la note est obligatoire'
-      });
-    }
-
-    const ordre = await OrdreTravail.findById(id);
-    if (!ordre) {
-      return res.status(404).json({
-        success: false,
-        error: 'Ordre de travail non trouvé'
-      });
-    }
-
-    await ordre.ajouterNote(contenu, req.user?.nom || 'Utilisateur');
-
-    res.json({
-      success: true,
-      message: 'Note ajoutée avec succès',
-      ordre
-    });
-
-  } catch (error) {
-    console.error('Erreur ajout note:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Erreur serveur lors de l\'ajout de la note'
-    });
-  }
-};
-
-/**
- * Récupérer les statistiques des ordres de travail
- * GET /api/ordre-travail/statistiques
- */
 export const getStatistiques = async (req, res) => {
   try {
     const { atelierId } = req.query;
@@ -452,10 +389,7 @@ export const getStatistiques = async (req, res) => {
   }
 };
 
-/**
- * Supprimer un ordre de travail (soft delete)
- * DELETE /api/ordre-travail/:id
- */
+
 export const supprimerOrdreTravail = async (req, res) => {
   try {
     const { id } = req.params;
@@ -495,44 +429,202 @@ export const supprimerOrdreTravail = async (req, res) => {
   }
 };
 
-/**
- * Récupérer les ordres par mécanicien
- * GET /api/ordre-travail/mecanicien/:mecanicienId
- */
-export const getOrdresParMecanicien = async (req, res) => {
-  try {
-    const { mecanicienId } = req.params;
-    const { status } = req.query;
 
-    const filter = {
-      'taches.mecanicienId': mecanicienId
+
+export const getOrdresParDevisId = async (req, res) => {
+  try {
+    const { devisId } = req.params;
+    
+    // Chercher un ordre existant pour ce devis
+    const existingOrdre = await OrdreTravail.findOne({ devisId: devisId });
+    
+    if (existingOrdre) {
+      return res.json({
+        exists: true,
+        ordre: existingOrdre
+      });
+    } else {
+      return res.json({
+        exists: false
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// GET /api/ordres/status/:status
+export const getOrdresByStatus = async (req, res) => {
+  try {
+    const { status } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+
+    const options = {
+      sort: { createdAt: -1 },
+      limit: parseInt(limit),
+      skip: (parseInt(page) - 1) * parseInt(limit)
     };
 
-    if (status) {
-      filter['taches.status'] = status;
-    }
-
-    const ordres = await OrdreTravail.find(filter)
-      .populate('devisId', 'id clientName vehicleInfo')
-      .populate('atelierId', 'name')
-      .sort({ createdAt: -1 });
-
-    // Filtrer les tâches pour ne montrer que celles du mécanicien
-    const ordresFiltres = ordres.map(ordre => ({
-      ...ordre.toJSON(),
-      taches: ordre.taches.filter(t => t.mecanicienId.toString() === mecanicienId)
-    }));
+    const ordres = await OrdreTravail.findByStatus(status, options);
 
     res.json({
       success: true,
-      ordres: ordresFiltres
+      total: ordres.length,
+      ordres
+    });
+  } catch (error) {
+    console.error("Erreur getOrdresByStatus:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// GET /api/ordres/atelier/:atelierId
+export const getOrdresByAtelier = async (req, res) => {
+  try {
+    const { atelierId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+
+    const options = {
+      sort: { createdAt: -1 },
+      limit: parseInt(limit),
+      skip: (parseInt(page) - 1) * parseInt(limit)
+    };
+
+    const ordres = await OrdreTravail.findByAtelier(atelierId, options);
+
+    res.json({
+      success: true,
+      total: ordres.length,
+      ordres
+    });
+  } catch (error) {
+    console.error("Erreur getOrdresByAtelier:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+export const updateOrdreTravail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      dateCommence,
+      atelierId,
+      priorite,
+      description,
+      taches
+    } = req.body;
+
+    // Chercher l'ordre existant
+    const ordre = await OrdreTravail.findById(id);
+    if (!ordre) {
+      return res.status(404).json({
+        success: false,
+        error: 'Ordre de travail non trouvé'
+      });
+    }
+
+    // Vérifier si l'ordre peut être modifié
+    if (ordre.status === 'termine') {
+      return res.status(400).json({
+        success: false,
+        error: 'Impossible de modifier un ordre terminé'
+      });
+    }
+
+    // Mettre à jour les champs simples
+    if (dateCommence) ordre.dateCommence = new Date(dateCommence);
+    if (atelierId) {
+      const atelier = await Atelier.findById(atelierId);
+      if (!atelier) {
+        return res.status(404).json({
+          success: false,
+          error: 'Atelier non trouvé'
+        });
+      }
+      ordre.atelierId = atelierId;
+      ordre.atelierNom = atelier.name;
+    }
+    if (priorite) ordre.priorite = priorite;
+    if (description !== undefined) ordre.description = description;
+
+    // Mettre à jour les tâches si fournies
+    if (taches && Array.isArray(taches)) {
+      const tachesEnrichies = [];
+      for (const tache of taches) {
+        if (!tache.serviceId || !tache.mecanicienId) {
+          return res.status(400).json({
+            success: false,
+            error: 'Chaque tâche doit avoir un serviceId et mecanicienId'
+          });
+        }
+
+        const service = await Service.findById(tache.serviceId);
+        const mecanicien = await Mecanicien.findById(tache.mecanicienId);
+
+        if (!service || !mecanicien) {
+          return res.status(404).json({
+            success: false,
+            error: 'Service ou mécanicien non trouvé'
+          });
+        }
+
+        tachesEnrichies.push({
+          _id: tache._id || new mongoose.Types.ObjectId(),
+          description: tache.description,
+          quantite: tache.quantite || 1,
+          serviceId: tache.serviceId,
+          serviceNom: service.name,
+          mecanicienId: tache.mecanicienId,
+          mecanicienNom: mecanicien.nom,
+          estimationHeures: tache.estimationHeures || 1,
+          notes: tache.notes || '',
+          status: tache.status || 'assignee',
+          dateDebut: tache.dateDebut,
+          dateFin: tache.dateFin,
+          heuresReelles: tache.heuresReelles
+        });
+      }
+      ordre.taches = tachesEnrichies;
+
+      // Recalculer dateFinPrevue
+      const totalHeuresEstimees = tachesEnrichies.reduce(
+        (total, t) => total + t.estimationHeures,
+        0
+      );
+      const dateFinPrevue = new Date(ordre.dateCommence);
+      dateFinPrevue.setHours(dateFinPrevue.getHours() + totalHeuresEstimees);
+      ordre.dateFinPrevue = dateFinPrevue;
+    }
+
+    ordre.updatedBy = req.user?.id;
+    ordre.updatedAt = new Date();
+
+    const ordreSauve = await ordre.save();
+
+    // Populer les références pour la réponse
+    await ordreSauve.populate([
+      { path: 'atelierId', select: 'name localisation' },
+      { path: 'taches.serviceId', select: 'name' },
+      { path: 'taches.mecanicienId', select: 'nom' }
+    ]);
+
+    res.json({
+      success: true,
+      message: 'Ordre de travail mis à jour avec succès',
+      ordre: ordreSauve
     });
 
   } catch (error) {
-    console.error('Erreur récupération ordres mécanicien:', error);
+    console.error('Erreur mise à jour ordre de travail:', error);
     res.status(500).json({
       success: false,
-      error: 'Erreur serveur'
+      error: error.message || 'Erreur serveur lors de la mise à jour'
     });
   }
 };

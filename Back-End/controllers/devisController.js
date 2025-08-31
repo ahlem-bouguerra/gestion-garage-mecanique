@@ -1,4 +1,5 @@
 import Devis from "../models/Devis.js";
+import OrdreTravail from '../models/Ordre.js'; 
 
 export const createDevis = async (req, res) => {
   try {
@@ -126,21 +127,27 @@ export const getDevisById = async (req, res) => {
   }
 };
 
-// GET /api/devis/:id - Récupérer un devis par son champ "id" (ex: DEV011)
 export const getDevisByNum = async (req, res) => {
   try {
-    const { id } = req.params; // ici "id" correspond au champ "id" du devis (DEV011)
+    const { id } = req.params; // ex: "DEV017"
 
-    // Recherche dans le champ métier "id", pas dans _id
+    // 🔎 Recherche du devis via le champ "id" (pas _id)
     const devis = await Devis.findOne({ id: id });
 
     if (!devis) {
       return res.status(404).json({ error: `Devis avec id ${id} non trouvé` });
     }
 
-    res.json(devis);
+    // 🔎 Recherche des ordres liés à ce devis
+    const ordres = await OrdreTravail.find({ devisId: id });
+
+    // 📝 Retourne le devis avec la liste des ordres liés
+    res.json({
+      devis,
+      ordres,
+    });
   } catch (error) {
-    console.error("❌ Erreur getDevisById:", error);
+    console.error("❌ Erreur getDevisByNum:", error);
     res.status(500).json({ error: error.message });
   }
 };

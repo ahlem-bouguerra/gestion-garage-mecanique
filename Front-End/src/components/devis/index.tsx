@@ -666,13 +666,26 @@ useEffect(() => {
     setTimeout(() => setSuccess(''), 3000);
   };
 
-  const createWorkOrder = (quote) => {
-  // Sauvegarder les données du devis pour la page ordre de travail
-  localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
-   router.push('/gestion-ordres');
-
+const createWorkOrder = async (quote) => {
+  try {
+    // Vérifier si un ordre existe déjà pour ce devis
+    const response = await axios.get(`http://localhost:5000/api/ordre-travail/by-devis/${quote.id}`);
+    
+    if (response.data.exists) {
+      // Ordre existe déjà - rediriger vers les détails
+      localStorage.setItem('selectedOrdreToView', JSON.stringify(response.data.ordre));
+      router.push('/gestion-ordres?tab=list&view=details');
+    } else {
+      // Pas d'ordre - rediriger vers création
+      localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
+      router.push('/gestion-ordres');
+    }
+  } catch (error) {
+    // En cas d'erreur, procéder comme avant (création)
+    localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
+    router.push('/gestion-ordres');
+  }
 };
-
   // Ajouter après les autres useState
   useEffect(() => {
     fetchClients();

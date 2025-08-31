@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Play,User, Car, Calendar, MapPin, Wrench, Save, Eye, AlertCircle, CheckCircle, Clock, UserCheck, FileText, X } from 'lucide-react';
+import { ArrowLeft, Play,User, Car, Calendar, MapPin, Wrench, Save, Eye,Trash2, AlertCircle, CheckCircle, Clock, UserCheck, FileText, X, Edit2 } from 'lucide-react';
 import axios from 'axios';
 
 const OrdreTravailSystem = () => {
@@ -13,6 +13,8 @@ const OrdreTravailSystem = () => {
   const [ateliers, setAteliers] = useState([]);
   const [mecaniciens, setMecaniciens] = useState([]);
   const [statistiques, setStatistiques] = useState(null);
+const [isEditMode, setIsEditMode] = useState(false);
+const [editingOrdreId, setEditingOrdreId] = useState(null);
 
   // ✅ Structure conforme au backend
   const [ordreTravail, setOrdreTravail] = useState({
@@ -100,45 +102,54 @@ const OrdreTravailSystem = () => {
     }
   };
 
-  const loadDevisById = async (devisId) => {
-    if (!devisId) return;
+ const loadDevisById = async (devisId) => {
+  if (!devisId) return;
 
-    setLoading(true);
-    try {
-      const response = await axios.get(`http://localhost:5000/api/devis/code/${devisId}`);
-      const devis = response.data;
+  setLoading(true);
+  try {
+    const response = await axios.get(`http://localhost:5000/api/devis/code/${devisId}`);
+    const { devis, ordres } = response.data; // ✅ On récupère devis + ordres
 
-      setQuoteData(devis);
-
-      // ✅ Créer les tâches avec la structure attendue par le backend
-      const tachesFromServices = devis.services.map((service, index) => ({
-        id: index + 1,
-        description: service.piece,
-        quantite: service.quantity || 1,
-        serviceId: '',
-        mecanicienId: '',
-        estimationHeures: 1,
-        notes: ''
-      }));
-
-      // ✅ Structure conforme au backend
-      setOrdreTravail({
-        devisId: devis.id,
-        dateCommence: '',
-        atelier: '',
-        priorite: 'normale',
-        description: `Ordre de travail généré depuis le devis ${devis.id}`,
-        taches: tachesFromServices
-      });
-
-    } catch (err) {
-      setError(`Erreur lors du chargement du devis: ${err.response?.data?.error || err.message}`);
-    } finally {
-      setLoading(false);
+    // ⚡ Vérifie si un ordre existe déjà
+    if (ordres && ordres.length > 0) {
+      setError(`Un ordre de travail existe déjà pour le devis ${devis.id} (ex: ${ordres[0].numeroOrdre})`);
+      setQuoteData(null);
+      setOrdreTravail(null);
+      return;
     }
-  };
 
-  const assignServiceToTache = (tacheId, serviceId) => {
+    setQuoteData(devis);
+
+    // ✅ Créer les tâches avec la structure attendue par le backend
+    const tachesFromServices = devis.services.map((service, index) => ({
+      id: index + 1,
+      description: service.piece,
+      quantite: service.quantity || 1,
+      serviceId: '',
+      mecanicienId: '',
+      estimationHeures: 1,
+      notes: ''
+    }));
+
+    // ✅ Structure conforme au backend
+    setOrdreTravail({
+      devisId: devis.id,
+      dateCommence: '',
+      atelier: '',
+      priorite: 'normale',
+      description: `Ordre de travail généré depuis le devis ${devis.id}`,
+      taches: tachesFromServices
+    });
+
+  } catch (err) {
+    setError(`Erreur lors du chargement du devis: ${err.response?.data?.error || err.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const assignServiceToTache = (tacheId, serviceId) => {
     const service = services.find(s => s._id === serviceId);
     
     loadMecaniciensByService(serviceId);
@@ -159,7 +170,7 @@ const OrdreTravailSystem = () => {
     }));
   };
 
-  const assignMecanicienToTache = (tacheId, mecanicienId) => {
+const assignMecanicienToTache = (tacheId, mecanicienId) => {
     const mecanicien = mecaniciens.find(m => m._id === mecanicienId);
 
     setOrdreTravail(prev => ({
@@ -265,35 +276,65 @@ const saveOrdreTravail = async () => {
 };
 
 
-  // ✅ Fonction pour charger les ordres avec pagination et filtres
-  const loadOrdresTravail = async (page = 1) => {
-    try {
-      setLoading(true);
+const loadOrdresTravail = async (page = 1) => {
+  try {
+    setLoading(true);
+    
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: pagination.limit.toString(),
+      sortBy: 'createdAt',
+      sortOrder: 'desc'
+    });
+
+    // Construire l'URL en fonction des filtres
+    let baseUrl = 'http://localhost:5000/api';
+    
+    // Si on filtre par statut, utiliser l'endpoint spécialisé
+    if (filters.status) {
+      baseUrl = `http://localhost:5000/api/ordres/status/${filters.status}`;
       
-      const params = new URLSearchParams({
+      // Ajouter seulement les paramètres de pagination pour ce endpoint
+      const statusParams = new URLSearchParams({
         page: page.toString(),
-        limit: pagination.limit.toString(),
-        sortBy: 'createdAt',
-        sortOrder: 'desc'
+        limit: pagination.limit.toString()
       });
-
-      // Ajouter les filtres s'ils existent
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) {
-          if (key === 'atelier') {
-            params.append('atelier', value);
-          } else if (key === 'dateDebut' && filters.dateFin) {
-            params.append('dateDebut', value);
-            params.append('dateFin', filters.dateFin);
-          } else if (key !== 'dateFin') {
-            params.append(key, value);
-          }
-        }
-      });
-
-      const response = await axios.get(`http://localhost:5000/api/`);
       
-      // ✅ La réponse du backend contient { ordres, pagination }
+      const response = await axios.get(`${baseUrl}?${statusParams}`);
+      
+      if (response.data.ordres) {
+        setOrdresTravail(response.data.ordres);
+        setPagination(prev => ({
+          ...prev,
+          total: response.data.total,
+          currentPage: page
+        }));
+      }
+      
+    } else if (filters.atelier) {
+      // Si on filtre par atelier, utiliser l'endpoint spécialisé
+      baseUrl = `http://localhost:5000/api/ordres/atelier/${filters.atelier}`;
+      
+      // Ajouter seulement les paramètres de pagination pour ce endpoint
+      const atelierParams = new URLSearchParams({
+        page: page.toString(),
+        limit: pagination.limit.toString()
+      });
+      
+      const response = await axios.get(`${baseUrl}?${atelierParams}`);
+      
+      if (response.data.ordres) {
+        setOrdresTravail(response.data.ordres);
+        setPagination(prev => ({
+          ...prev,
+          total: response.data.total,
+          currentPage: page
+        }));
+      }
+      
+    } else {
+      const response = await axios.get(`${baseUrl}?${params}`);
+      
       if (response.data.ordres) {
         setOrdresTravail(response.data.ordres);
         setPagination(prev => ({
@@ -301,18 +342,18 @@ const saveOrdreTravail = async () => {
           ...response.data.pagination
         }));
       } else {
-        // Fallback si la structure est différente
         setOrdresTravail(Array.isArray(response.data) ? response.data : []);
       }
-    } catch (error) {
-      console.error('Erreur chargement ordres:', error);
-      setOrdresTravail([]);
-    } finally {
-      setLoading(false);
     }
-  };
+    
+  } catch (error) {
+    console.error('Erreur chargement ordres:', error);
+    setOrdresTravail([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  // ✅ Fonction pour obtenir les détails d'un ordre
 const loadOrdreDetails = async (ordreId) => {
   try {
     console.log('Chargement détails pour ordre:', ordreId); // Debug
@@ -320,10 +361,14 @@ const loadOrdreDetails = async (ordreId) => {
     
     const response = await axios.get(`http://localhost:5000/api/getOrdreTravailById/${ordreId}`);
     
-    console.log('Réponse détails ordre:', response.data); // Debug
+    console.log('Réponse détails ordre:', response.data); 
+     console.log('Réponse complète:', response.data);
+    console.log('Ordre dans réponse:', response.data.ordre);// Debug
     
     if (response.data.success && response.data.ordre) {
-      setSelectedOrdre(response.data.ordre);
+  setSelectedOrdre(response.data.ordre);
+  console.log('Données reçues:', response.data.ordre); // Pour vérifier
+
     } else if (response.data) {
       // Si la structure est différente
       setSelectedOrdre(response.data);
@@ -403,30 +448,78 @@ const terminerTache = async (ordreId, tacheId, heuresReelles) => {
   }
 };
 
-const ajouterNote = async (ordreId, contenu) => {
-  try {
-    if (!contenu.trim()) {
-      showError('Le contenu de la note est obligatoire');
-      return;
-    }
+const supprimerOrdre = async (ordreId) => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cet ordre de travail ?')) {
+    return;
+  }
 
+  try {
     setLoading(true);
-    const response = await axios.post(
-      `http://localhost:5000/api/ordre-travail/${ordreId}/notes`,
-      { contenu }
-    );
+    const response = await axios.delete(`http://localhost:5000/api/${ordreId}`);
 
     if (response.data.success) {
-      showSuccess('Note ajoutée avec succès');
-      // Recharger les détails de l'ordre
-      await loadOrdreDetails(ordreId);
+      showSuccess('Ordre de travail supprimé avec succès');
+      // Recharger la liste
+      loadOrdresTravail();
+      // Fermer le modal si l'ordre supprimé était ouvert
+      if (selectedOrdre && selectedOrdre._id === ordreId) {
+        setSelectedOrdre(null);
+      }
     }
   } catch (error) {
-    showError(error.response?.data?.error || 'Erreur lors de l\'ajout de la note');
+    showError(error.response?.data?.error || 'Erreur lors de la suppression');
   } finally {
     setLoading(false);
   }
 };
+
+
+const modifierOrdre = async (ordreId, ordreModifie) => {
+  try {
+    setLoading(true);
+    const response = await axios.put(
+      `http://localhost:5000/api/modifier/${ordreId}`,
+      ordreModifie
+    );
+
+    if (response.data.success) {
+      showSuccess('Ordre de travail modifié avec succès');
+      // Recharger la liste
+      loadOrdresTravail();
+      // Mettre à jour l'ordre sélectionné
+      if (selectedOrdre && selectedOrdre._id === ordreId) {
+        loadOrdreDetails(ordreId);
+      }
+    }
+  } catch (error) {
+    showError(error.response?.data?.error || 'Erreur lors de la modification');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const startEdit = (ordreData = selectedOrdre) => {
+  console.log('startEdit appelé avec:', ordreData);
+  
+  if (!ordreData) {
+    showError('Aucun ordre sélectionné pour modification');
+    return;
+  }
+
+  setEditFormData({
+    dateCommence: ordreData.dateCommence || '',
+    atelier: ordreData.atelierId || ordreData.atelier || '',
+    priorite: ordreData.priorite || 'normale',
+    description: ordreData.description || '',
+    taches: ordreData.taches?.map(tache => ({
+      ...tache,
+      id: tache._id
+    })) || []
+  });
+  setEditMode(true);
+};
+
 
 const loadStatistiques = async () => {
   try {
@@ -442,8 +535,6 @@ const loadStatistiques = async () => {
     setLoading(false);
   }
 };
-
-
 
   const showError = (message) => {
     setError(message);
@@ -462,6 +553,14 @@ const loadStatistiques = async () => {
       loadOrdresTravail();
       loadStatistiques();
     }
+      // Vérifier si on doit afficher un ordre existant
+  const savedOrdreToView = localStorage?.getItem('selectedOrdreToView');
+  if (savedOrdreToView) {
+    const ordre = JSON.parse(savedOrdreToView);
+    setActiveTab('list');
+    setSelectedOrdre(ordre);
+    localStorage.removeItem('selectedOrdreToView');
+  }
 
     const savedQuote = localStorage?.getItem('selectedQuoteForOrder');
     if (savedQuote) {
@@ -806,7 +905,7 @@ const loadStatistiques = async () => {
 
             {/* Filtres */}
             <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <select
                   value={filters.status}
                   onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
@@ -828,17 +927,6 @@ const loadStatistiques = async () => {
                     <option key={atelier._id} value={atelier._id}>
                       {atelier.name}
                     </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.priorite}
-                  onChange={(e) => setFilters(prev => ({ ...prev, priorite: e.target.value }))}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Toutes les priorités</option>
-                  {Object.entries(prioriteOptions).map(([key, option]) => (
-                    <option key={key} value={key}>{option.label}</option>
                   ))}
                 </select>
 
@@ -931,6 +1019,20 @@ const loadStatistiques = async () => {
                                 title="Voir détails"
                               >
                                 <Eye className="h-4 w-4" />
+                              </button>
+                              <button
+                                  onClick={() => startEdit(ordre)} // ✅ Passer l'ordre de la ligne, pas selectedOrdre
+                                  className="text-green-600 hover:text-green-900"
+                                  title="Modifier"
+                              >
+                                  <Edit2 className="h-4 w-4" />
+                                </button>
+                               <button
+                                  onClick={() => supprimerOrdre(ordre._id)}
+                                  className="text-red-600 hover:text-red-900"
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="h-4 w-4" />
                               </button>
                             </td>
                           </tr>
