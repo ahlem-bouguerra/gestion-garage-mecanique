@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Play,User, Car, Calendar, MapPin, Wrench, Save, Eye,Trash2, AlertCircle, CheckCircle, Clock, UserCheck, FileText, X, Edit2 } from 'lucide-react';
+import { ArrowLeft, Play, User, Car, Calendar, MapPin, Wrench, Save, Eye, Trash2, AlertCircle, CheckCircle, Clock, UserCheck, FileText, X, Edit2 } from 'lucide-react';
 import axios from 'axios';
 
 const OrdreTravailSystem = () => {
@@ -13,8 +13,8 @@ const OrdreTravailSystem = () => {
   const [ateliers, setAteliers] = useState([]);
   const [mecaniciens, setMecaniciens] = useState([]);
   const [statistiques, setStatistiques] = useState(null);
-const [isEditMode, setIsEditMode] = useState(false);
-const [editingOrdreId, setEditingOrdreId] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingOrdreId, setEditingOrdreId] = useState(null);
 
   // ✅ Structure conforme au backend
   const [ordreTravail, setOrdreTravail] = useState({
@@ -44,13 +44,13 @@ const [editingOrdreId, setEditingOrdreId] = useState(null);
   });
 
   useEffect(() => {
-  const header = document.querySelector('header');
-  if (selectedOrdre) {
-    header.classList.add("hidden");
-  } else {
-    header.classList.remove("hidden");
-  }
-}, [selectedOrdre]);
+    const header = document.querySelector('header');
+    if (selectedOrdre) {
+      header.classList.add("hidden");
+    } else {
+      header.classList.remove("hidden");
+    }
+  }, [selectedOrdre]);
 
   // Statuts possibles selon le backend
   const statusOptions = {
@@ -93,7 +93,7 @@ const [editingOrdreId, setEditingOrdreId] = useState(null);
         setMecaniciens([]);
         return;
       }
-      
+
       const response = await axios.get(`http://localhost:5000/api/mecaniciens/by-service/${serviceId}`);
       setMecaniciens(response.data);
     } catch (error) {
@@ -102,58 +102,58 @@ const [editingOrdreId, setEditingOrdreId] = useState(null);
     }
   };
 
- const loadDevisById = async (devisId) => {
-  if (!devisId) return;
+  const loadDevisById = async (devisId) => {
+    if (!devisId) return;
 
-  setLoading(true);
-  try {
-    const response = await axios.get(`http://localhost:5000/api/devis/code/${devisId}`);
-    const { devis, ordres } = response.data; // ✅ On récupère devis + ordres
+    setLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:5000/api/devis/code/${devisId}`);
+      const { devis, ordres } = response.data; // ✅ On récupère devis + ordres
 
-    // ⚡ Vérifie si un ordre existe déjà
-    if (ordres && ordres.length > 0) {
-      setError(`Un ordre de travail existe déjà pour le devis ${devis.id} (ex: ${ordres[0].numeroOrdre})`);
-      setQuoteData(null);
-      setOrdreTravail(null);
-      return;
+      // ⚡ Vérifie si un ordre existe déjà
+      if (ordres && ordres.length > 0) {
+        setError(`Un ordre de travail existe déjà pour le devis ${devis.id} (ex: ${ordres[0].numeroOrdre})`);
+        setQuoteData(null);
+        setOrdreTravail(null);
+        return;
+      }
+
+      setQuoteData(devis);
+
+      // ✅ Créer les tâches avec la structure attendue par le backend
+      const tachesFromServices = devis.services.map((service, index) => ({
+        id: index + 1,
+        description: service.piece,
+        quantite: service.quantity || 1,
+        serviceId: '',
+        mecanicienId: '',
+        estimationHeures: 1,
+        notes: ''
+      }));
+
+      // ✅ Structure conforme au backend
+      setOrdreTravail({
+        devisId: devis.id,
+        dateCommence: '',
+        atelier: '',
+        priorite: 'normale',
+        description: `Ordre de travail généré depuis le devis ${devis.id}`,
+        taches: tachesFromServices
+      });
+
+    } catch (err) {
+      setError(`Erreur lors du chargement du devis: ${err.response?.data?.error || err.message}`);
+    } finally {
+      setLoading(false);
     }
-
-    setQuoteData(devis);
-
-    // ✅ Créer les tâches avec la structure attendue par le backend
-    const tachesFromServices = devis.services.map((service, index) => ({
-      id: index + 1,
-      description: service.piece,
-      quantite: service.quantity || 1,
-      serviceId: '',
-      mecanicienId: '',
-      estimationHeures: 1,
-      notes: ''
-    }));
-
-    // ✅ Structure conforme au backend
-    setOrdreTravail({
-      devisId: devis.id,
-      dateCommence: '',
-      atelier: '',
-      priorite: 'normale',
-      description: `Ordre de travail généré depuis le devis ${devis.id}`,
-      taches: tachesFromServices
-    });
-
-  } catch (err) {
-    setError(`Erreur lors du chargement du devis: ${err.response?.data?.error || err.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
-const assignServiceToTache = (tacheId, serviceId) => {
+  const assignServiceToTache = (tacheId, serviceId) => {
     const service = services.find(s => s._id === serviceId);
-    
+
     loadMecaniciensByService(serviceId);
-    
+
     setOrdreTravail(prev => ({
       ...prev,
       taches: prev.taches.map(tache =>
@@ -170,7 +170,7 @@ const assignServiceToTache = (tacheId, serviceId) => {
     }));
   };
 
-const assignMecanicienToTache = (tacheId, mecanicienId) => {
+  const assignMecanicienToTache = (tacheId, mecanicienId) => {
     const mecanicien = mecaniciens.find(m => m._id === mecanicienId);
 
     setOrdreTravail(prev => ({
@@ -187,269 +187,299 @@ const assignMecanicienToTache = (tacheId, mecanicienId) => {
     }));
   };
 
-const saveOrdreTravail = async () => {
+  const saveOrdreTravail = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      // Validations côté client
+      if (!ordreTravail.dateCommence) {
+        throw new Error('La date de commencement est obligatoire');
+      }
+
+      if (!ordreTravail.atelier) {
+        throw new Error('Veuillez sélectionner un atelier');
+      }
+
+      if (ordreTravail.taches.some(t => !t.serviceId)) {
+        throw new Error('Toutes les tâches doivent avoir un service assigné');
+      }
+
+      if (ordreTravail.taches.some(t => !t.mecanicienId)) {
+        throw new Error('Toutes les tâches doivent avoir un mécanicien assigné');
+      }
+
+      // Préparer les données avec la structure correcte
+      const ordreData = {
+        devisId: ordreTravail.devisId,
+        dateCommence: ordreTravail.dateCommence,
+        atelierId: ordreTravail.atelier, // Correction: utilisez atelierId
+        priorite: ordreTravail.priorite,
+        description: ordreTravail.description,
+        taches: ordreTravail.taches.map(tache => ({
+          description: tache.description,
+          quantite: tache.quantite,
+          serviceId: tache.serviceId,
+          mecanicienId: tache.mecanicienId,
+          estimationHeures: tache.estimationHeures,
+          notes: tache.notes
+        }))
+      };
+
+      console.log('Envoi des données:', ordreData);
+
+      const response = await axios.post(
+        'http://localhost:5000/api/',
+        ordreData
+      );
+
+      // Vérification de la réponse
+      if (response.data.success) {
+        setSuccess(response.data.message || 'Ordre de travail créé avec succès !');
+
+        // Reset du formulaire
+        setOrdreTravail({
+          devisId: '',
+          dateCommence: '',
+          atelier: '',
+          priorite: 'normale',
+          description: '',
+          taches: []
+        });
+        setQuoteData(null);
+        setSelectedQuote('');
+
+        // Recharger la liste si on est sur l'onglet liste
+        if (activeTab === 'list') {
+          loadOrdresTravail();
+        }
+      } else {
+        throw new Error(response.data.error || 'Erreur lors de la création');
+      }
+
+    } catch (err) {
+      console.error('Erreur sauvegarde ordre:', err);
+
+      // Gestion d'erreur améliorée
+      let errorMessage = 'Erreur lors de la sauvegarde';
+
+      if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const loadOrdresTravail = async (page = 1) => {
+    try {
+      setLoading(true);
+
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: pagination.limit.toString(),
+        sortBy: 'createdAt',
+        sortOrder: 'desc'
+      });
+
+      // Construire l'URL en fonction des filtres
+      let baseUrl = 'http://localhost:5000/api';
+
+      // Si on filtre par statut, utiliser l'endpoint spécialisé
+      if (filters.status) {
+        baseUrl = `http://localhost:5000/api/ordres/status/${filters.status}`;
+
+        // Ajouter seulement les paramètres de pagination pour ce endpoint
+        const statusParams = new URLSearchParams({
+          page: page.toString(),
+          limit: pagination.limit.toString()
+        });
+
+        const response = await axios.get(`${baseUrl}?${statusParams}`);
+
+        if (response.data.ordres) {
+          setOrdresTravail(response.data.ordres);
+          setPagination(prev => ({
+            ...prev,
+            total: response.data.total,
+            currentPage: page
+          }));
+        }
+
+      } else if (filters.atelier) {
+        // Si on filtre par atelier, utiliser l'endpoint spécialisé
+        baseUrl = `http://localhost:5000/api/ordres/atelier/${filters.atelier}`;
+
+        // Ajouter seulement les paramètres de pagination pour ce endpoint
+        const atelierParams = new URLSearchParams({
+          page: page.toString(),
+          limit: pagination.limit.toString()
+        });
+
+        const response = await axios.get(`${baseUrl}?${atelierParams}`);
+
+        if (response.data.ordres) {
+          setOrdresTravail(response.data.ordres);
+          setPagination(prev => ({
+            ...prev,
+            total: response.data.total,
+            currentPage: page
+          }));
+        }
+
+      } else {
+        const response = await axios.get(`${baseUrl}?${params}`);
+
+        if (response.data.ordres) {
+          setOrdresTravail(response.data.ordres);
+          setPagination(prev => ({
+            ...prev,
+            ...response.data.pagination
+          }));
+        } else {
+          setOrdresTravail(Array.isArray(response.data) ? response.data : []);
+        }
+      }
+
+    } catch (error) {
+      console.error('Erreur chargement ordres:', error);
+      setOrdresTravail([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadOrdreDetails = async (ordreId) => {
+    try {
+      console.log('Chargement détails pour ordre:', ordreId); // Debug
+      setLoading(true);
+
+      const response = await axios.get(`http://localhost:5000/api/getOrdreTravailById/${ordreId}`);
+
+      console.log('Réponse détails ordre:', response.data);
+      console.log('Réponse complète:', response.data);
+      console.log('Ordre dans réponse:', response.data.ordre);// Debug
+
+      if (response.data.success && response.data.ordre) {
+        setSelectedOrdre(response.data.ordre);
+        console.log('Données reçues:', response.data.ordre); // Pour vérifier
+
+      } else if (response.data) {
+        // Si la structure est différente
+        setSelectedOrdre(response.data);
+      } else {
+        setError('Aucune donnée reçue pour cet ordre');
+      }
+
+    } catch (error) {
+      console.error('Erreur détails ordre:', error);
+      setError(`Erreur lors du chargement des détails: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+const demarrerOrdre = async (ordreId) => {
+  // ✅ AJOUT : Demander confirmation
+  const confirmation = window.confirm(
+    'Êtes-vous sûr de vouloir démarrer cet ordre de travail ?\n\n' +
+    'Cette action changera le statut à "En cours" et enregistrera la date de début réelle.'
+  );
+
+  if (!confirmation) {
+    return; // L'utilisateur a annulé
+  }
+
   try {
     setLoading(true);
-    setError('');
-
-    // Validations côté client
-    if (!ordreTravail.dateCommence) {
-      throw new Error('La date de commencement est obligatoire');
-    }
-
-    if (!ordreTravail.atelier) {
-      throw new Error('Veuillez sélectionner un atelier');
-    }
-    
-    if (ordreTravail.taches.some(t => !t.serviceId)) {
-      throw new Error('Toutes les tâches doivent avoir un service assigné');
-    }
-
-    if (ordreTravail.taches.some(t => !t.mecanicienId)) {
-      throw new Error('Toutes les tâches doivent avoir un mécanicien assigné');
-    }
-
-    // Préparer les données avec la structure correcte
-    const ordreData = {
-      devisId: ordreTravail.devisId,
-      dateCommence: ordreTravail.dateCommence,
-      atelierId: ordreTravail.atelier, // Correction: utilisez atelierId
-      priorite: ordreTravail.priorite,
-      description: ordreTravail.description,
-      taches: ordreTravail.taches.map(tache => ({
-        description: tache.description,
-        quantite: tache.quantite,
-        serviceId: tache.serviceId,
-        mecanicienId: tache.mecanicienId,
-        estimationHeures: tache.estimationHeures,
-        notes: tache.notes
-      }))
-    };
-
-    console.log('Envoi des données:', ordreData);
-
-    const response = await axios.post(
-      'http://localhost:5000/api/',
-      ordreData
+    const response = await axios.put(
+      `http://localhost:5000/api/ordre-travail/${ordreId}/demarrer`
     );
 
-    // Vérification de la réponse
     if (response.data.success) {
-      setSuccess(response.data.message || 'Ordre de travail créé avec succès !');
-      
-      // Reset du formulaire
-      setOrdreTravail({
-        devisId: '',
-        dateCommence: '',
-        atelier: '',
-        priorite: 'normale',
-        description: '',
-        taches: []
-      });
-      setQuoteData(null);
-      setSelectedQuote('');
-      
-      // Recharger la liste si on est sur l'onglet liste
-      if (activeTab === 'list') {
-        loadOrdresTravail();
-      }
-    } else {
-      throw new Error(response.data.error || 'Erreur lors de la création');
+      showSuccess('Ordre de travail démarré avec succès');
+      // Recharger les détails de l'ordre
+      await loadOrdreDetails(ordreId);
+      // Mettre à jour la liste des ordres
+      loadOrdresTravail();
     }
-
-  } catch (err) {
-    console.error('Erreur sauvegarde ordre:', err);
-    
-    // Gestion d'erreur améliorée
-    let errorMessage = 'Erreur lors de la sauvegarde';
-    
-    if (err.response?.data?.error) {
-      errorMessage = err.response.data.error;
-    } else if (err.message) {
-      errorMessage = err.message;
-    }
-    
-    setError(errorMessage);
+  } catch (error) {
+    showError(error.response?.data?.error || 'Erreur lors du démarrage de l\'ordre');
   } finally {
     setLoading(false);
   }
 };
 
+const terminerOrdre = async (ordreId) => {
+  // ✅ AJOUT : Demander confirmation
+  const confirmation = window.confirm(
+    'Êtes-vous sûr de vouloir terminer cet ordre de travail ?\n\n' +
+    'Cette action changera le statut à "Terminé" et enregistrera la date de fin réelle.\n' +
+    'Une fois terminé, l\'ordre ne pourra plus être modifié.'
+  );
 
-const loadOrdresTravail = async (page = 1) => {
+  if (!confirmation) {
+    return; // L'utilisateur a annulé
+  }
+
   try {
     setLoading(true);
-    
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: pagination.limit.toString(),
-      sortBy: 'createdAt',
-      sortOrder: 'desc'
-    });
+    const response = await axios.put(
+      `http://localhost:5000/api/ordre-travail/${ordreId}/terminer`
+    );
 
-    // Construire l'URL en fonction des filtres
-    let baseUrl = 'http://localhost:5000/api';
-    
-    // Si on filtre par statut, utiliser l'endpoint spécialisé
-    if (filters.status) {
-      baseUrl = `http://localhost:5000/api/ordres/status/${filters.status}`;
-      
-      // Ajouter seulement les paramètres de pagination pour ce endpoint
-      const statusParams = new URLSearchParams({
-        page: page.toString(),
-        limit: pagination.limit.toString()
-      });
-      
-      const response = await axios.get(`${baseUrl}?${statusParams}`);
-      
-      if (response.data.ordres) {
-        setOrdresTravail(response.data.ordres);
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.total,
-          currentPage: page
-        }));
-      }
-      
-    } else if (filters.atelier) {
-      // Si on filtre par atelier, utiliser l'endpoint spécialisé
-      baseUrl = `http://localhost:5000/api/ordres/atelier/${filters.atelier}`;
-      
-      // Ajouter seulement les paramètres de pagination pour ce endpoint
-      const atelierParams = new URLSearchParams({
-        page: page.toString(),
-        limit: pagination.limit.toString()
-      });
-      
-      const response = await axios.get(`${baseUrl}?${atelierParams}`);
-      
-      if (response.data.ordres) {
-        setOrdresTravail(response.data.ordres);
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.total,
-          currentPage: page
-        }));
-      }
-      
-    } else {
-      const response = await axios.get(`${baseUrl}?${params}`);
-      
-      if (response.data.ordres) {
-        setOrdresTravail(response.data.ordres);
-        setPagination(prev => ({
-          ...prev,
-          ...response.data.pagination
-        }));
-      } else {
-        setOrdresTravail(Array.isArray(response.data) ? response.data : []);
-      }
+    if (response.data.success) {
+      showSuccess('Ordre de travail terminé avec succès');
+      // Recharger les détails de l'ordre
+      await loadOrdreDetails(ordreId);
+      // Mettre à jour la liste des ordres
+      loadOrdresTravail();
     }
-    
   } catch (error) {
-    console.error('Erreur chargement ordres:', error);
+    showError(error.response?.data?.error || 'Erreur lors de la fin de l\'ordre');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const loadOrdresSupprimes = async () => {
+  try {
+    setLoading(true);
+    const response = await axios.get('http://localhost:5000/api/ordres/status/supprime');
+    
+    if (response.data.ordres) {
+      setOrdresTravail(response.data.ordres);
+      setPagination(prev => ({
+        ...prev,
+        total: response.data.total,
+        currentPage: 1
+      }));
+    }
+  } catch (error) {
+    console.error('Erreur chargement ordres supprimés:', error);
     setOrdresTravail([]);
   } finally {
     setLoading(false);
   }
 };
 
-const loadOrdreDetails = async (ordreId) => {
-  try {
-    console.log('Chargement détails pour ordre:', ordreId); // Debug
-    setLoading(true);
-    
-    const response = await axios.get(`http://localhost:5000/api/getOrdreTravailById/${ordreId}`);
-    
-    console.log('Réponse détails ordre:', response.data); 
-     console.log('Réponse complète:', response.data);
-    console.log('Ordre dans réponse:', response.data.ordre);// Debug
-    
-    if (response.data.success && response.data.ordre) {
-  setSelectedOrdre(response.data.ordre);
-  console.log('Données reçues:', response.data.ordre); // Pour vérifier
-
-    } else if (response.data) {
-      // Si la structure est différente
-      setSelectedOrdre(response.data);
-    } else {
-      setError('Aucune donnée reçue pour cet ordre');
-    }
-    
-  } catch (error) {
-    console.error('Erreur détails ordre:', error);
-    setError(`Erreur lors du chargement des détails: ${error.response?.data?.error || error.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
-const updateOrdreStatus = async (ordreId, newStatus) => {
-  try {
-    setLoading(true);
-    const response = await axios.put(
-      `http://localhost:5000/api/ordre-travail/${ordreId}/status`,
-      { status: newStatus }
-    );
-
-    if (response.data.success) {
-      showSuccess('Statut mis à jour avec succès');
-      // Mettre à jour l'ordre dans la liste
-      setOrdresTravail(prev => prev.map(ordre => 
-        ordre._id === ordreId ? { ...ordre, status: newStatus } : ordre
-      ));
-      // Mettre à jour l'ordre sélectionné s'il est ouvert
-      if (selectedOrdre && selectedOrdre._id === ordreId) {
-        setSelectedOrdre(prev => ({ ...prev, status: newStatus }));
-      }
-    }
-  } catch (error) {
-    showError(error.response?.data?.error || 'Erreur lors de la mise à jour du statut');
-  } finally {
-    setLoading(false);
-  }
-};
-
-const demarrerTache = async (ordreId, tacheId) => {
-  try {
-    setLoading(true);
-    const response = await axios.put(
-      `http://localhost:5000/api/${ordreId}/taches/${tacheId}/demarrer`
-    );
-
-    if (response.data.success) {
-      showSuccess('Tâche démarrée avec succès');
-      // Recharger les détails de l'ordre
-      await loadOrdreDetails(ordreId);
-    }
-  } catch (error) {
-    showError(error.response?.data?.error || 'Erreur lors du démarrage de la tâche');
-  } finally {
-    setLoading(false);
-  }
-};
-
-const terminerTache = async (ordreId, tacheId, heuresReelles) => {
-  try {
-    setLoading(true);
-    const response = await axios.put(
-      `http://localhost:5000/api/${ordreId}/taches/${tacheId}/terminer`,
-      { heuresReelles }
-    );
-
-    if (response.data.success) {
-      showSuccess('Tâche terminée avec succès');
-      // Recharger les détails de l'ordre
-      await loadOrdreDetails(ordreId);
-    }
-  } catch (error) {
-    showError(error.response?.data?.error || 'Erreur lors de la fin de la tâche');
-  } finally {
-    setLoading(false);
-  }
-};
-
 const supprimerOrdre = async (ordreId) => {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer cet ordre de travail ?')) {
+  const ordre = ordresTravail.find(o => o._id === ordreId);
+  const numeroOrdre = ordre?.numeroOrdre || ordreId;
+
+  const confirmation = window.confirm(
+    `⚠️ ATTENTION ⚠️\n\n` +
+    `Êtes-vous sûr de vouloir supprimer l'ordre de travail ${numeroOrdre} ?\n\n` +
+    `Cette action marquera l'ordre comme supprimé et il ne sera plus visible dans la liste principale.\n\n` +
+    `Cette action est réversible uniquement par un administrateur.`
+  );
+
+  if (!confirmation) {
     return;
   }
 
@@ -458,7 +488,7 @@ const supprimerOrdre = async (ordreId) => {
     const response = await axios.delete(`http://localhost:5000/api/${ordreId}`);
 
     if (response.data.success) {
-      showSuccess('Ordre de travail supprimé avec succès');
+      showSuccess(`Ordre de travail ${numeroOrdre} supprimé avec succès`);
       // Recharger la liste
       loadOrdresTravail();
       // Fermer le modal si l'ordre supprimé était ouvert
@@ -474,67 +504,67 @@ const supprimerOrdre = async (ordreId) => {
 };
 
 
-const modifierOrdre = async (ordreId, ordreModifie) => {
-  try {
-    setLoading(true);
-    const response = await axios.put(
-      `http://localhost:5000/api/modifier/${ordreId}`,
-      ordreModifie
-    );
+  const modifierOrdre = async (ordreId, ordreModifie) => {
+    try {
+      setLoading(true);
+      const response = await axios.put(
+        `http://localhost:5000/api/modifier/${ordreId}`,
+        ordreModifie
+      );
 
-    if (response.data.success) {
-      showSuccess('Ordre de travail modifié avec succès');
-      // Recharger la liste
-      loadOrdresTravail();
-      // Mettre à jour l'ordre sélectionné
-      if (selectedOrdre && selectedOrdre._id === ordreId) {
-        loadOrdreDetails(ordreId);
+      if (response.data.success) {
+        showSuccess('Ordre de travail modifié avec succès');
+        // Recharger la liste
+        loadOrdresTravail();
+        // Mettre à jour l'ordre sélectionné
+        if (selectedOrdre && selectedOrdre._id === ordreId) {
+          loadOrdreDetails(ordreId);
+        }
       }
+    } catch (error) {
+      showError(error.response?.data?.error || 'Erreur lors de la modification');
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    showError(error.response?.data?.error || 'Erreur lors de la modification');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
-const startEdit = (ordreData = selectedOrdre) => {
-  console.log('startEdit appelé avec:', ordreData);
-  
-  if (!ordreData) {
-    showError('Aucun ordre sélectionné pour modification');
-    return;
-  }
+  const startEdit = (ordreData = selectedOrdre) => {
+    console.log('startEdit appelé avec:', ordreData);
 
-  setEditFormData({
-    dateCommence: ordreData.dateCommence || '',
-    atelier: ordreData.atelierId || ordreData.atelier || '',
-    priorite: ordreData.priorite || 'normale',
-    description: ordreData.description || '',
-    taches: ordreData.taches?.map(tache => ({
-      ...tache,
-      id: tache._id
-    })) || []
-  });
-  setEditMode(true);
-};
-
-
-const loadStatistiques = async () => {
-  try {
-    setLoading(true);
-    const response = await axios.get('http://localhost:5000/api/statistiques');
-    
-    if (response.data.success) {
-      setStatistiques(response.data.statistiques);
+    if (!ordreData) {
+      showError('Aucun ordre sélectionné pour modification');
+      return;
     }
-  } catch (error) {
-    console.error('Erreur chargement statistiques:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+
+    setEditFormData({
+      dateCommence: ordreData.dateCommence || '',
+      atelier: ordreData.atelierId || ordreData.atelier || '',
+      priorite: ordreData.priorite || 'normale',
+      description: ordreData.description || '',
+      taches: ordreData.taches?.map(tache => ({
+        ...tache,
+        id: tache._id
+      })) || []
+    });
+    setEditMode(true);
+  };
+
+
+  const loadStatistiques = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:5000/api/statistiques');
+
+      if (response.data.success) {
+        setStatistiques(response.data.statistiques);
+      }
+    } catch (error) {
+      console.error('Erreur chargement statistiques:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const showError = (message) => {
     setError(message);
@@ -553,14 +583,14 @@ const loadStatistiques = async () => {
       loadOrdresTravail();
       loadStatistiques();
     }
-      // Vérifier si on doit afficher un ordre existant
-  const savedOrdreToView = localStorage?.getItem('selectedOrdreToView');
-  if (savedOrdreToView) {
-    const ordre = JSON.parse(savedOrdreToView);
-    setActiveTab('list');
-    setSelectedOrdre(ordre);
-    localStorage.removeItem('selectedOrdreToView');
-  }
+    // Vérifier si on doit afficher un ordre existant
+    const savedOrdreToView = localStorage?.getItem('selectedOrdreToView');
+    if (savedOrdreToView) {
+      const ordre = JSON.parse(savedOrdreToView);
+      setActiveTab('list');
+      setSelectedOrdre(ordre);
+      localStorage.removeItem('selectedOrdreToView');
+    }
 
     const savedQuote = localStorage?.getItem('selectedQuoteForOrder');
     if (savedQuote) {
@@ -613,8 +643,8 @@ const loadStatistiques = async () => {
               <button
                 onClick={() => setActiveTab('create')}
                 className={`py-4 border-b-2 font-medium text-sm transition-colors ${activeTab === 'create'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
               >
                 Créer Ordre de Travail
@@ -622,8 +652,8 @@ const loadStatistiques = async () => {
               <button
                 onClick={() => setActiveTab('list')}
                 className={`py-4 border-b-2 font-medium text-sm transition-colors ${activeTab === 'list'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
               >
                 Liste des Ordres
@@ -765,7 +795,7 @@ const loadStatistiques = async () => {
                             <p className="font-medium text-gray-900">{tache.description}</p>
                             <p className="text-sm text-gray-600">Quantité: {tache.quantite}</p>
                           </div>
-                          
+
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               Service assigné *
@@ -905,7 +935,7 @@ const loadStatistiques = async () => {
 
             {/* Filtres */}
             <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <select
                   value={filters.status}
                   onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
@@ -936,6 +966,13 @@ const loadStatistiques = async () => {
                 >
                   Filtrer
                 </button>
+                <button
+  onClick={loadOrdresSupprimes}
+  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+  title="Voir les ordres supprimés (Admin)"
+>
+  Ordres Supprimés
+</button>
               </div>
             </div>
 
@@ -1013,28 +1050,52 @@ const loadStatistiques = async () => {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => loadOrdreDetails(ordre._id)}
-                                className="text-blue-600 hover:text-blue-900"
-                                title="Voir détails"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </button>
-                              <button
-                                  onClick={() => startEdit(ordre)} // ✅ Passer l'ordre de la ligne, pas selectedOrdre
-                                  className="text-green-600 hover:text-green-900"
-                                  title="Modifier"
-                              >
-                                  <Edit2 className="h-4 w-4" />
-                                </button>
-                               <button
-                                  onClick={() => supprimerOrdre(ordre._id)}
-                                  className="text-red-600 hover:text-red-900"
-                                  title="Supprimer"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                              </button>
-                            </td>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => loadOrdreDetails(ordre._id)}
+                                    className="text-blue-600 hover:text-blue-900"
+                                    title="Voir détails"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </button>
+                                  
+                                  {ordre.status === 'en_attente' && (
+                                    <button
+                                      onClick={() => demarrerOrdre(ordre._id)}
+                                      className="text-green-600 hover:text-green-900"
+                                      title="Démarrer"
+                                    >
+                                      <Play className="h-4 w-4" />
+                                    </button>
+                                  )}
+                                  
+                                  {ordre.status === 'en_cours' && (
+                                    <button
+                                      onClick={() => terminerOrdre(ordre._id)}
+                                      className="text-green-600 hover:text-green-900"
+                                      title="Terminer"
+                                    >
+                                      <CheckCircle className="h-4 w-4" />
+                                    </button>
+                                  )}
+                                  
+                                  <button
+                                    onClick={() => startEdit(ordre)}
+                                    className="text-yellow-600 hover:text-yellow-900"
+                                    title="Modifier"
+                                  >
+                                    <Edit2 className="h-4 w-4" />
+                                  </button>
+                                  
+                                  <button
+                                    onClick={() => supprimerOrdre(ordre._id)}
+                                    className="text-red-600 hover:text-red-900"
+                                    title="Supprimer"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              </td>
                           </tr>
                         );
                       })}
@@ -1056,26 +1117,25 @@ const loadStatistiques = async () => {
                       >
                         Précédent
                       </button>
-                      
+
                       {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                         const pageNum = Math.max(1, pagination.page - 2) + i;
                         if (pageNum > pagination.totalPages) return null;
-                        
+
                         return (
                           <button
                             key={pageNum}
                             onClick={() => loadOrdresTravail(pageNum)}
-                            className={`px-3 py-1 text-sm border rounded ${
-                              pageNum === pagination.page
+                            className={`px-3 py-1 text-sm border rounded ${pageNum === pagination.page
                                 ? 'border-blue-500 bg-blue-50 text-blue-600'
                                 : 'border-gray-300 hover:bg-gray-50'
-                            }`}
+                              }`}
                           >
                             {pageNum}
                           </button>
                         );
                       })}
-                      
+
                       <button
                         onClick={() => loadOrdresTravail(pagination.page + 1)}
                         disabled={pagination.page >= pagination.totalPages}
@@ -1091,28 +1151,28 @@ const loadStatistiques = async () => {
           </div>
         )}
         {activeTab === 'list' && statistiques && (
-  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-    <h3 className="text-lg font-medium text-gray-900 mb-4">Statistiques des Ordres de Travail</h3>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="bg-blue-50 p-4 rounded-lg text-center">
-        <div className="text-2xl font-bold text-blue-600">{statistiques.total}</div>
-        <div className="text-sm text-gray-600">Total</div>
-      </div>
-      <div className="bg-green-50 p-4 rounded-lg text-center">
-        <div className="text-2xl font-bold text-green-600">{statistiques.termines}</div>
-        <div className="text-sm text-gray-600">Terminés</div>
-      </div>
-      <div className="bg-yellow-50 p-4 rounded-lg text-center">
-        <div className="text-2xl font-bold text-yellow-600">{statistiques.enCours}</div>
-        <div className="text-sm text-gray-600">En Cours</div>
-      </div>
-      <div className="bg-red-50 p-4 rounded-lg text-center">
-        <div className="text-2xl font-bold text-red-600">{statistiques.suspendus}</div>
-        <div className="text-sm text-gray-600">Suspendus</div>
-      </div>
-    </div>
-  </div>
-)}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Statistiques des Ordres de Travail</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-blue-50 p-4 rounded-lg text-center">
+                <div className="text-2xl font-bold text-blue-600">{statistiques.total}</div>
+                <div className="text-sm text-gray-600">Total</div>
+              </div>
+              <div className="bg-green-50 p-4 rounded-lg text-center">
+                <div className="text-2xl font-bold text-green-600">{statistiques.termines}</div>
+                <div className="text-sm text-gray-600">Terminés</div>
+              </div>
+              <div className="bg-yellow-50 p-4 rounded-lg text-center">
+                <div className="text-2xl font-bold text-yellow-600">{statistiques.enCours}</div>
+                <div className="text-sm text-gray-600">En Cours</div>
+              </div>
+              <div className="bg-red-50 p-4 rounded-lg text-center">
+                <div className="text-2xl font-bold text-red-600">{statistiques.suspendus}</div>
+                <div className="text-sm text-gray-600">Suspendus</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Modal de détail d'ordre */}
         {selectedOrdre && (
@@ -1187,135 +1247,77 @@ const loadStatistiques = async () => {
                     <Wrench className="h-5 w-5 mr-2" />
                     Tâches Assignées ({selectedOrdre.taches?.length || 0})
                   </h3>
-                  
+
 
                   <div className="space-y-3">
-  {selectedOrdre.taches?.map((tache, index) => (
-    <div key={tache._id || index} className="border border-gray-200 rounded-lg p-4 bg-white">
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1">
-          <h4 className="font-medium text-gray-900">{tache.description}</h4>
-          <p className="text-sm text-gray-600">
-            Quantité: {tache.quantite} | 
-            Estimation: {tache.estimationHeures}h | 
-            Réelles: {tache.heuresReelles || 0}h
-          </p>
-          {tache.serviceNom && (
-            <p className="text-sm text-blue-600">Service: {tache.serviceNom}</p>
-          )}
-        </div>
-      </div>
+                    {selectedOrdre.taches?.map((tache, index) => (
+                      <div key={tache._id || index} className="border border-gray-200 rounded-lg p-4 bg-white">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">{tache.description}</h4>
+                            <p className="text-sm text-gray-600">
+                              Quantité: {tache.quantite} |
+                              Estimation: {tache.estimationHeures}h |
+                              Réelles: {tache.heuresReelles || 0}h
+                            </p>
+                            {tache.serviceNom && (
+                              <p className="text-sm text-blue-600">Service: {tache.serviceNom}</p>
+                            )}
+                          </div>
+                        </div>
 
-      {tache.mecanicienNom && (
-        <div className="bg-gray-50 p-3 rounded flex items-center">
-          <UserCheck className="h-4 w-4 text-blue-600 mr-2" />
-          <span className="text-sm">
-            <span className="font-medium">Mécanicien assigné:</span> {tache.mecanicienNom}
-          </span>
-        </div>
-      )}
+                        {tache.mecanicienNom && (
+                          <div className="bg-gray-50 p-3 rounded flex items-center">
+                            <UserCheck className="h-4 w-4 text-blue-600 mr-2" />
+                            <span className="text-sm">
+                              <span className="font-medium">Mécanicien assigné:</span> {tache.mecanicienNom}
+                            </span>
+                          </div>
+                        )}
 
-      {/* Section statut et actions */}
-      <div className="mt-3 flex items-center justify-between">
-        <div className="flex items-center">
-          {/* Badge d'assignation */}
-          {tache.mecanicienId ? (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              <UserCheck className="h-3 w-3 mr-1" />
-              Assignée
-            </span>
-          ) : (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-              <Clock className="h-3 w-3 mr-1" />
-              Non assignée
-            </span>
-          )}
-          
-          {/* Badge de statut */}
-          <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-            tache.status === 'terminee' ? 'bg-green-100 text-green-800' :
-            tache.status === 'en_cours' ? 'bg-blue-100 text-blue-800' :
-            'bg-gray-100 text-gray-800'
-          }`}>
-            {tache.status === 'terminee' ? (
-              <>
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Terminée
-              </>
-            ) : tache.status === 'en_cours' ? (
-              <>
-                <Wrench className="h-3 w-3 mr-1" />
-                En cours
-              </>
-            ) : (
-              <>
-                <Clock className="h-3 w-3 mr-1" />
-                En attente
-              </>
-            )}
-          </span>
-        </div>
-
-        {/* Boutons d'action */}
-        <div className="flex space-x-2">
-          {tache.status !== 'en_cours' && tache.status !== 'terminee' && tache.mecanicienId && (
-            <button
-              onClick={() => demarrerTache(selectedOrdre._id, tache._id)}
-              className="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700 transition-colors flex items-center"
-            >
-              <Play className="h-3 w-3 mr-1" />
-              Démarrer
-            </button>
-          )}
-          
-          {tache.status === 'en_cours' && (
-            <div className="flex items-center space-x-2">
-              <input
-                type="number"
-                step="0.5"
-                min="0.5"
-                placeholder="Heures"
-                className="w-16 border border-gray-300 rounded px-2 py-1 text-xs"
-                id={`heures-${tache._id}`}
-              />
-              <button
-                onClick={() => {
-                  const heuresInput = document.getElementById(`heures-${tache._id}`);
-                  terminerTache(selectedOrdre._id, tache._id, parseFloat(heuresInput.value) || 0);
-                }}
-                className="bg-green-600 text-white px-3 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
-              >
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Terminer
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {tache.notes && (
-        <div className="mt-3 bg-yellow-50 p-3 rounded">
-          <p className="text-sm text-gray-700">
-            <span className="font-medium">Notes:</span> {tache.notes}
-          </p>
-        </div>
-      )}
-
-      {(tache.dateDebut || tache.dateFin) && (
-        <div className="mt-3 text-xs text-gray-500 space-y-1">
-          {tache.dateDebut && (
-            <p>Démarré le: {new Date(tache.dateDebut).toLocaleString('fr-FR')}</p>
-          )}
-          {tache.dateFin && (
-            <p>Terminé le: {new Date(tache.dateFin).toLocaleString('fr-FR')}</p>
-          )}
-        </div>
-      )}
-    </div>
-  )) || (
-    <p className="text-gray-500 text-center py-4">Aucune tâche assignée</p>
+                        {/* Section statut et actions */}
+                        <div className="mt-3 flex items-center justify-between">
+  <div className="flex items-center space-x-2">
+    {/* Badge d'assignation */}
+    {tache.mecanicienId ? (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+        <UserCheck className="h-3 w-3 mr-1" />
+        Assignée à {tache.mecanicienNom}
+      </span>
+    ) : (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+        <Clock className="h-3 w-3 mr-1" />
+        Non assignée
+      </span>
+    )}
+  </div>
+  
+  {/* Affichage du service */}
+  {tache.serviceNom && (
+    <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+      {tache.serviceNom}
+    </span>
   )}
 </div>
+
+
+
+
+                        {(tache.dateDebut || tache.dateFin) && (
+                          <div className="mt-3 text-xs text-gray-500 space-y-1">
+                            {tache.dateDebut && (
+                              <p>Démarré le: {new Date(tache.dateDebut).toLocaleString('fr-FR')}</p>
+                            )}
+                            {tache.dateFin && (
+                              <p>Terminé le: {new Date(tache.dateFin).toLocaleString('fr-FR')}</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )) || (
+                        <p className="text-gray-500 text-center py-4">Aucune tâche assignée</p>
+                      )}
+                  </div>
                 </div>
 
                 {/* Résumé statistique */}
@@ -1349,7 +1351,7 @@ const loadStatistiques = async () => {
               </div>
 
 
-       
+
               <div className="p-6 border-t border-gray-200 flex justify-end space-x-4">
                 <button
                   onClick={() => setSelectedOrdre(null)}

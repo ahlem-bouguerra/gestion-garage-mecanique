@@ -153,7 +153,14 @@ export const getOrdresTravail = async (req, res) => {
     // Construction du filtre
     const filter = {};
     
-    if (status) filter.status = status;
+    // ✅ AJOUT : Exclure les ordres supprimés
+    filter.status = { $ne: 'supprime' };
+    
+    // Si status est fourni ET différent de 'supprime', l'utiliser
+    if (status && status !== 'supprime') {
+      filter.status = status;
+    }
+    
     if (atelier) filter.atelierId = atelier;
     if (priorite) filter.priorite = priorite;
     
@@ -292,9 +299,10 @@ export const updateStatusOrdreTravail = async (req, res) => {
   }
 };
 
-export const demarrerTache = async (req, res) => {
+// Ajouter au controller backend
+export const demarrerOrdre = async (req, res) => {
   try {
-    const { id, tacheId } = req.params;
+    const { id } = req.params;
 
     const ordre = await OrdreTravail.findById(id);
     if (!ordre) {
@@ -304,16 +312,20 @@ export const demarrerTache = async (req, res) => {
       });
     }
 
-    await ordre.demarrerTache(tacheId, req.user?.id);
+    // Changer le statut de l'ordre complet
+    ordre.status = 'en_cours';
+    ordre.dateDebutReelle = new Date();
+    
+    await ordre.save();
 
     res.json({
       success: true,
-      message: 'Tâche démarrée avec succès',
+      message: 'Ordre de travail démarré avec succès',
       ordre
     });
 
   } catch (error) {
-    console.error('Erreur démarrage tâche:', error);
+    console.error('Erreur démarrage ordre:', error);
     res.status(400).json({
       success: false,
       error: error.message
@@ -321,10 +333,9 @@ export const demarrerTache = async (req, res) => {
   }
 };
 
-export const terminerTache = async (req, res) => {
+export const terminerOrdre = async (req, res) => {
   try {
-    const { id, tacheId } = req.params;
-    const { heuresReelles } = req.body;
+    const { id } = req.params;
 
     const ordre = await OrdreTravail.findById(id);
     if (!ordre) {
@@ -334,16 +345,20 @@ export const terminerTache = async (req, res) => {
       });
     }
 
-    await ordre.terminerTache(tacheId, heuresReelles, req.user?.id);
+    // Changer le statut de l'ordre complet
+    ordre.status = 'termine';
+    ordre.dateFinReelle = new Date();
+    
+    await ordre.save();
 
     res.json({
       success: true,
-      message: 'Tâche terminée avec succès',
+      message: 'Ordre de travail terminé avec succès',
       ordre
     });
 
   } catch (error) {
-    console.error('Erreur fin tâche:', error);
+    console.error('Erreur fin ordre:', error);
     res.status(400).json({
       success: false,
       error: error.message
@@ -453,11 +468,16 @@ export const getOrdresParDevisId = async (req, res) => {
   }
 };
 
-// GET /api/ordres/status/:status
 export const getOrdresByStatus = async (req, res) => {
   try {
     const { status } = req.params;
     const { page = 1, limit = 10 } = req.query;
+
+    // ✅ AJOUT : Si on cherche des ordres supprimés explicitement, les inclure
+    // Sinon, les exclure toujours
+    const filter = status === 'supprime' 
+      ? { status: 'supprime' }
+      : { status: status, $and: [{ status: { $ne: 'supprime' } }] };
 
     const options = {
       sort: { createdAt: -1 },
@@ -465,11 +485,21 @@ export const getOrdresByStatus = async (req, res) => {
       skip: (parseInt(page) - 1) * parseInt(limit)
     };
 
-    const ordres = await OrdreTravail.findByStatus(status, options);
+    const ordres = await OrdreTravail.find(filter)
+      .populate('devisId', 'id clientName vehicleInfo')
+      .populate('atelierId', 'name localisation')
+      .populate('taches.serviceId', 'name')
+      .populate('taches.mecanicienId', 'nom')
+      .sort(options.sort)
+      .skip(options.skip)
+      .limit(options.limit)
+      .lean();
+
+    const total = await OrdreTravail.countDocuments(filter);
 
     res.json({
       success: true,
-      total: ordres.length,
+      total,
       ordres
     });
   } catch (error) {
@@ -481,11 +511,17 @@ export const getOrdresByStatus = async (req, res) => {
   }
 };
 
-// GET /api/ordres/atelier/:atelierId
+
 export const getOrdresByAtelier = async (req, res) => {
   try {
     const { atelierId } = req.params;
     const { page = 1, limit = 10 } = req.query;
+
+    // ✅ AJOUT : Exclure les ordres supprimés
+    const filter = { 
+      atelierId: atelierId,
+      status: { $ne: 'supprime' }
+    };
 
     const options = {
       sort: { createdAt: -1 },
@@ -493,11 +529,21 @@ export const getOrdresByAtelier = async (req, res) => {
       skip: (parseInt(page) - 1) * parseInt(limit)
     };
 
-    const ordres = await OrdreTravail.findByAtelier(atelierId, options);
+    const ordres = await OrdreTravail.find(filter)
+      .populate('devisId', 'id clientName vehicleInfo')
+      .populate('atelierId', 'name localisation')
+      .populate('taches.serviceId', 'name')
+      .populate('taches.mecanicienId', 'nom')
+      .sort(options.sort)
+      .skip(options.skip)
+      .limit(options.limit)
+      .lean();
+
+    const total = await OrdreTravail.countDocuments(filter);
 
     res.json({
       success: true,
-      total: ordres.length,
+      total,
       ordres
     });
   } catch (error) {
@@ -520,6 +566,9 @@ export const updateOrdreTravail = async (req, res) => {
       taches
     } = req.body;
 
+    console.log('Modification ordre ID:', id);
+    console.log('Données reçues:', req.body);
+
     // Chercher l'ordre existant
     const ordre = await OrdreTravail.findById(id);
     if (!ordre) {
@@ -537,8 +586,18 @@ export const updateOrdreTravail = async (req, res) => {
       });
     }
 
+    if (ordre.status === 'supprime') {
+      return res.status(400).json({
+        success: false,
+        error: 'Impossible de modifier un ordre supprimé'
+      });
+    }
+
     // Mettre à jour les champs simples
-    if (dateCommence) ordre.dateCommence = new Date(dateCommence);
+    if (dateCommence) {
+      ordre.dateCommence = new Date(dateCommence);
+    }
+
     if (atelierId) {
       const atelier = await Atelier.findById(atelierId);
       if (!atelier) {
@@ -550,27 +609,42 @@ export const updateOrdreTravail = async (req, res) => {
       ordre.atelierId = atelierId;
       ordre.atelierNom = atelier.name;
     }
-    if (priorite) ordre.priorite = priorite;
-    if (description !== undefined) ordre.description = description;
+
+    if (priorite) {
+      ordre.priorite = priorite;
+    }
+
+    if (description !== undefined) {
+      ordre.description = description;
+    }
 
     // Mettre à jour les tâches si fournies
     if (taches && Array.isArray(taches)) {
+      console.log('Mise à jour des tâches:', taches.length);
+      
       const tachesEnrichies = [];
       for (const tache of taches) {
         if (!tache.serviceId || !tache.mecanicienId) {
           return res.status(400).json({
             success: false,
-            error: 'Chaque tâche doit avoir un serviceId et mecanicienId'
+            error: `Chaque tâche doit avoir un serviceId et mecanicienId. Tâche: ${tache.description}`
           });
         }
 
         const service = await Service.findById(tache.serviceId);
         const mecanicien = await Mecanicien.findById(tache.mecanicienId);
 
-        if (!service || !mecanicien) {
+        if (!service) {
           return res.status(404).json({
             success: false,
-            error: 'Service ou mécanicien non trouvé'
+            error: `Service non trouvé pour la tâche: ${tache.description}`
+          });
+        }
+
+        if (!mecanicien) {
+          return res.status(404).json({
+            success: false,
+            error: `Mécanicien non trouvé pour la tâche: ${tache.description}`
           });
         }
 
@@ -587,32 +661,39 @@ export const updateOrdreTravail = async (req, res) => {
           status: tache.status || 'assignee',
           dateDebut: tache.dateDebut,
           dateFin: tache.dateFin,
-          heuresReelles: tache.heuresReelles
+          heuresReelles: tache.heuresReelles || 0
         });
       }
+      
       ordre.taches = tachesEnrichies;
 
-      // Recalculer dateFinPrevue
+      // Recalculer dateFinPrevue basée sur les nouvelles estimations
       const totalHeuresEstimees = tachesEnrichies.reduce(
-        (total, t) => total + t.estimationHeures,
+        (total, t) => total + (t.estimationHeures || 0),
         0
       );
-      const dateFinPrevue = new Date(ordre.dateCommence);
-      dateFinPrevue.setHours(dateFinPrevue.getHours() + totalHeuresEstimees);
-      ordre.dateFinPrevue = dateFinPrevue;
+      if (ordre.dateCommence && totalHeuresEstimees > 0) {
+        const dateFinPrevue = new Date(ordre.dateCommence);
+        dateFinPrevue.setHours(dateFinPrevue.getHours() + totalHeuresEstimees);
+        ordre.dateFinPrevue = dateFinPrevue;
+      }
     }
 
+    // Marquer comme mis à jour
     ordre.updatedBy = req.user?.id;
     ordre.updatedAt = new Date();
 
+    // Sauvegarder
     const ordreSauve = await ordre.save();
 
     // Populer les références pour la réponse
     await ordreSauve.populate([
       { path: 'atelierId', select: 'name localisation' },
       { path: 'taches.serviceId', select: 'name' },
-      { path: 'taches.mecanicienId', select: 'nom' }
+      { path: 'taches.mecanicienId', select: 'nom email telephone' }
     ]);
+
+    console.log('Ordre modifié avec succès:', ordreSauve.numeroOrdre);
 
     res.json({
       success: true,

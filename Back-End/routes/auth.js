@@ -22,8 +22,8 @@ import {
   getOrdresTravail,
   getOrdreTravailById,
   updateStatusOrdreTravail,
-  demarrerTache,
-  terminerTache,
+  demarrerOrdre,
+  terminerOrdre,
   getStatistiques,
   supprimerOrdreTravail,
   getOrdresParDevisId,
@@ -420,12 +420,10 @@ router.get('/', getOrdresTravail);
 router.get('/getOrdreTravailById/:id', getOrdreTravailById);
 // Routes de mise à jour
 router.put('/:id/status', updateStatusOrdreTravail);
-router.put('/:id/taches/:tacheId/demarrer', demarrerTache);
-router.put('/:id/taches/:tacheId/terminer', terminerTache);
+router.put('/ordre-travail/:id/demarrer', demarrerOrdre);
+router.put('/ordre-travail/:id/terminer', terminerOrdre);
 router.delete('/:id', supprimerOrdreTravail);
-router.put('/modifier/id',updateOrdreTravail);
-router.put('/:id/taches/:tacheId/demarrer', demarrerTache);
-router.put('/:id/taches/:tacheId/terminer', terminerTache);
+router.put('/modifier/:id',updateOrdreTravail);
 router.get('/statistiques', getStatistiques);
 router.get('/ordre-travail/by-devis/:devisId',getOrdresParDevisId);
 router.get("/ordres/status/:status", getOrdresByStatus);
