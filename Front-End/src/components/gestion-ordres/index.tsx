@@ -13,8 +13,14 @@ const OrdreTravailSystem = () => {
   const [ateliers, setAteliers] = useState([]);
   const [mecaniciens, setMecaniciens] = useState([]);
   const [statistiques, setStatistiques] = useState(null);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editingOrdreId, setEditingOrdreId] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    dateCommence: '',
+    atelier: '',
+    priorite: 'normale',
+    description: '',
+    taches: []
+  });
 
   // ✅ Structure conforme au backend
   const [ordreTravail, setOrdreTravail] = useState({
@@ -384,172 +390,304 @@ const OrdreTravailSystem = () => {
     }
   };
 
-const demarrerOrdre = async (ordreId) => {
-  // ✅ AJOUT : Demander confirmation
-  const confirmation = window.confirm(
-    'Êtes-vous sûr de vouloir démarrer cet ordre de travail ?\n\n' +
-    'Cette action changera le statut à "En cours" et enregistrera la date de début réelle.'
-  );
-
-  if (!confirmation) {
-    return; // L'utilisateur a annulé
-  }
-
-  try {
-    setLoading(true);
-    const response = await axios.put(
-      `http://localhost:5000/api/ordre-travail/${ordreId}/demarrer`
+  const demarrerOrdre = async (ordreId) => {
+    // ✅ AJOUT : Demander confirmation
+    const confirmation = window.confirm(
+      'Êtes-vous sûr de vouloir démarrer cet ordre de travail ?\n\n' +
+      'Cette action changera le statut à "En cours" et enregistrera la date de début réelle.'
     );
 
-    if (response.data.success) {
-      showSuccess('Ordre de travail démarré avec succès');
-      // Recharger les détails de l'ordre
-      await loadOrdreDetails(ordreId);
-      // Mettre à jour la liste des ordres
-      loadOrdresTravail();
+    if (!confirmation) {
+      return; // L'utilisateur a annulé
     }
-  } catch (error) {
-    showError(error.response?.data?.error || 'Erreur lors du démarrage de l\'ordre');
-  } finally {
-    setLoading(false);
-  }
-};
 
-const terminerOrdre = async (ordreId) => {
-  // ✅ AJOUT : Demander confirmation
-  const confirmation = window.confirm(
-    'Êtes-vous sûr de vouloir terminer cet ordre de travail ?\n\n' +
-    'Cette action changera le statut à "Terminé" et enregistrera la date de fin réelle.\n' +
-    'Une fois terminé, l\'ordre ne pourra plus être modifié.'
-  );
-
-  if (!confirmation) {
-    return; // L'utilisateur a annulé
-  }
-
-  try {
-    setLoading(true);
-    const response = await axios.put(
-      `http://localhost:5000/api/ordre-travail/${ordreId}/terminer`
-    );
-
-    if (response.data.success) {
-      showSuccess('Ordre de travail terminé avec succès');
-      // Recharger les détails de l'ordre
-      await loadOrdreDetails(ordreId);
-      // Mettre à jour la liste des ordres
-      loadOrdresTravail();
-    }
-  } catch (error) {
-    showError(error.response?.data?.error || 'Erreur lors de la fin de l\'ordre');
-  } finally {
-    setLoading(false);
-  }
-};
-
-const loadOrdresSupprimes = async () => {
-  try {
-    setLoading(true);
-    const response = await axios.get('http://localhost:5000/api/ordres/status/supprime');
-    
-    if (response.data.ordres) {
-      setOrdresTravail(response.data.ordres);
-      setPagination(prev => ({
-        ...prev,
-        total: response.data.total,
-        currentPage: 1
-      }));
-    }
-  } catch (error) {
-    console.error('Erreur chargement ordres supprimés:', error);
-    setOrdresTravail([]);
-  } finally {
-    setLoading(false);
-  }
-};
-
-const supprimerOrdre = async (ordreId) => {
-  const ordre = ordresTravail.find(o => o._id === ordreId);
-  const numeroOrdre = ordre?.numeroOrdre || ordreId;
-
-  const confirmation = window.confirm(
-    `⚠️ ATTENTION ⚠️\n\n` +
-    `Êtes-vous sûr de vouloir supprimer l'ordre de travail ${numeroOrdre} ?\n\n` +
-    `Cette action marquera l'ordre comme supprimé et il ne sera plus visible dans la liste principale.\n\n` +
-    `Cette action est réversible uniquement par un administrateur.`
-  );
-
-  if (!confirmation) {
-    return;
-  }
-
-  try {
-    setLoading(true);
-    const response = await axios.delete(`http://localhost:5000/api/${ordreId}`);
-
-    if (response.data.success) {
-      showSuccess(`Ordre de travail ${numeroOrdre} supprimé avec succès`);
-      // Recharger la liste
-      loadOrdresTravail();
-      // Fermer le modal si l'ordre supprimé était ouvert
-      if (selectedOrdre && selectedOrdre._id === ordreId) {
-        setSelectedOrdre(null);
-      }
-    }
-  } catch (error) {
-    showError(error.response?.data?.error || 'Erreur lors de la suppression');
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  const modifierOrdre = async (ordreId, ordreModifie) => {
     try {
       setLoading(true);
       const response = await axios.put(
-        `http://localhost:5000/api/modifier/${ordreId}`,
-        ordreModifie
+        `http://localhost:5000/api/ordre-travail/${ordreId}/demarrer`
       );
 
       if (response.data.success) {
-        showSuccess('Ordre de travail modifié avec succès');
+        showSuccess('Ordre de travail démarré avec succès');
+        // Recharger les détails de l'ordre
+        await loadOrdreDetails(ordreId);
+        // Mettre à jour la liste des ordres
+        loadOrdresTravail();
+      }
+    } catch (error) {
+      showError(error.response?.data?.error || 'Erreur lors du démarrage de l\'ordre');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const terminerOrdre = async (ordreId) => {
+    // ✅ AJOUT : Demander confirmation
+    const confirmation = window.confirm(
+      'Êtes-vous sûr de vouloir terminer cet ordre de travail ?\n\n' +
+      'Cette action changera le statut à "Terminé" et enregistrera la date de fin réelle.\n' +
+      'Une fois terminé, l\'ordre ne pourra plus être modifié.'
+    );
+
+    if (!confirmation) {
+      return; // L'utilisateur a annulé
+    }
+
+    try {
+      setLoading(true);
+      const response = await axios.put(
+        `http://localhost:5000/api/ordre-travail/${ordreId}/terminer`
+      );
+
+      if (response.data.success) {
+        showSuccess('Ordre de travail terminé avec succès');
+        // Recharger les détails de l'ordre
+        await loadOrdreDetails(ordreId);
+        // Mettre à jour la liste des ordres
+        loadOrdresTravail();
+      }
+    } catch (error) {
+      showError(error.response?.data?.error || 'Erreur lors de la fin de l\'ordre');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadOrdresSupprimes = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:5000/api/ordres/status/supprime');
+
+      if (response.data.ordres) {
+        setOrdresTravail(response.data.ordres);
+        setPagination(prev => ({
+          ...prev,
+          total: response.data.total,
+          currentPage: 1
+        }));
+      }
+    } catch (error) {
+      console.error('Erreur chargement ordres supprimés:', error);
+      setOrdresTravail([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const supprimerOrdre = async (ordreId) => {
+    const ordre = ordresTravail.find(o => o._id === ordreId);
+    const numeroOrdre = ordre?.numeroOrdre || ordreId;
+
+    const confirmation = window.confirm(
+      `⚠️ ATTENTION ⚠️\n\n` +
+      `Êtes-vous sûr de vouloir supprimer l'ordre de travail ${numeroOrdre} ?\n\n` +
+      `Cette action marquera l'ordre comme supprimé et il ne sera plus visible dans la liste principale.\n\n` +
+      `Cette action est réversible uniquement par un administrateur.`
+    );
+
+    if (!confirmation) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await axios.delete(`http://localhost:5000/api/${ordreId}`);
+
+      if (response.data.success) {
+        showSuccess(`Ordre de travail ${numeroOrdre} supprimé avec succès`);
         // Recharger la liste
         loadOrdresTravail();
-        // Mettre à jour l'ordre sélectionné
+        // Fermer le modal si l'ordre supprimé était ouvert
         if (selectedOrdre && selectedOrdre._id === ordreId) {
-          loadOrdreDetails(ordreId);
+          setSelectedOrdre(null);
         }
       }
     } catch (error) {
-      showError(error.response?.data?.error || 'Erreur lors de la modification');
+      showError(error.response?.data?.error || 'Erreur lors de la suppression');
     } finally {
       setLoading(false);
     }
   };
 
 
-  const startEdit = (ordreData = selectedOrdre) => {
-    console.log('startEdit appelé avec:', ordreData);
 
-    if (!ordreData) {
+
+  const startEdit = (ordreData = null) => {
+    // Si aucun ordre n'est passé, utiliser selectedOrdre
+    const ordre = ordreData || selectedOrdre;
+
+    console.log('startEdit appelé avec:', ordre);
+
+    if (!ordre) {
       showError('Aucun ordre sélectionné pour modification');
       return;
     }
 
+    // ✅ Formater la date correctement pour input datetime-local
+    const formatDateForInput = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toISOString().slice(0, 16);
+    };
+
     setEditFormData({
-      dateCommence: ordreData.dateCommence || '',
-      atelier: ordreData.atelierId || ordreData.atelier || '',
-      priorite: ordreData.priorite || 'normale',
-      description: ordreData.description || '',
-      taches: ordreData.taches?.map(tache => ({
-        ...tache,
-        id: tache._id
+      dateCommence: formatDateForInput(ordre.dateCommence),
+      atelier: ordre.atelierId || ordre.atelier || '',
+      priorite: ordre.priorite || 'normale',
+      description: ordre.description || '',
+      taches: ordre.taches?.map(tache => ({
+        _id: tache._id,
+        id: tache._id,
+        description: tache.description,
+        quantite: tache.quantite,
+        serviceId: tache.serviceId,
+        serviceNom: tache.serviceNom,
+        mecanicienId: tache.mecanicienId,
+        mecanicienNom: tache.mecanicienNom,
+        estimationHeures: tache.estimationHeures,
+        notes: tache.notes || '',
+        status: tache.status || 'assignee'
       })) || []
     });
+
     setEditMode(true);
+    console.log('EditMode défini à true'); // Debug
   };
 
+  const cancelEdit = () => {
+    console.log('Annulation de l\'édition'); // Debug
+    setEditMode(false);
+    setEditFormData({
+      dateCommence: '',
+      atelier: '',
+      priorite: 'normale',
+      description: '',
+      taches: []
+    });
+  };
+  const saveEdit = async () => {
+    try {
+      console.log('saveEdit appelé');
+      console.log('selectedOrdre._id:', selectedOrdre._id); // <-- Vérifiez cette valeur
+      console.log('editFormData:', editFormData);
+      setLoading(true);
+      setError('');
+
+
+      // Validations
+      if (!editFormData.dateCommence) {
+        throw new Error('La date de commencement est obligatoire');
+      }
+
+      if (!editFormData.atelier) {
+        throw new Error('Veuillez sélectionner un atelier');
+      }
+
+      if (editFormData.taches.some(t => !t.serviceId)) {
+        throw new Error('Toutes les tâches doivent avoir un service assigné');
+      }
+
+      if (editFormData.taches.some(t => !t.mecanicienId)) {
+        throw new Error('Toutes les tâches doivent avoir un mécanicien assigné');
+      }
+
+      // Préparer les données pour l'API
+      const updateData = {
+        dateCommence: editFormData.dateCommence,
+        atelierId: editFormData.atelier,
+        priorite: editFormData.priorite,
+        description: editFormData.description,
+        taches: editFormData.taches.map(tache => ({
+          _id: tache._id,
+          description: tache.description,
+          quantite: tache.quantite,
+          serviceId: tache.serviceId,
+          mecanicienId: tache.mecanicienId,
+          estimationHeures: tache.estimationHeures,
+          notes: tache.notes,
+          status: tache.status
+        }))
+      };
+
+      console.log('Données à envoyer pour modification:', updateData);
+
+      // CORRECTION : Utiliser selectedOrdre._id au lieu de ordre._id
+      const response = await axios.put(
+        `http://localhost:5000/api/modifier/${selectedOrdre._id}`,
+        updateData
+      );
+
+      if (response.data.success) {
+        showSuccess('Ordre de travail modifié avec succès');
+        setEditMode(false);
+
+        // Recharger les détails de l'ordre
+        await loadOrdreDetails(selectedOrdre._id);
+
+        // Recharger la liste si on est sur l'onglet liste
+        if (activeTab === 'list') {
+          loadOrdresTravail();
+        }
+      } else {
+        throw new Error(response.data.error || 'Erreur lors de la modification');
+      }
+
+    } catch (err) {
+      console.error('Erreur modification ordre:', err);
+      let errorMessage = 'Erreur lors de la modification';
+
+      if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const assignServiceToTacheEdit = async (tacheId, serviceId) => {
+    const service = services.find(s => s._id === serviceId);
+
+    // Charger les mécaniciens pour ce service
+    if (serviceId) {
+      await loadMecaniciensByService(serviceId);
+    }
+
+    setEditFormData(prev => ({
+      ...prev,
+      taches: prev.taches.map(tache =>
+        tache._id === tacheId || tache.id === tacheId
+          ? {
+            ...tache,
+            serviceId: serviceId,
+            serviceNom: service ? service.name : '',
+            mecanicienId: '', // Reset mécanicien quand on change de service
+            mecanicienNom: ''
+          }
+          : tache
+      )
+    }));
+  };
+
+  const assignMecanicienToTacheEdit = (tacheId, mecanicienId) => {
+    const mecanicien = mecaniciens.find(m => m._id === mecanicienId);
+
+    setEditFormData(prev => ({
+      ...prev,
+      taches: prev.taches.map(tache =>
+        tache._id === tacheId || tache.id === tacheId
+          ? {
+            ...tache,
+            mecanicienId: mecanicienId,
+            mecanicienNom: mecanicien ? mecanicien.nom : ''
+          }
+          : tache
+      )
+    }));
+  };
 
   const loadStatistiques = async () => {
     try {
@@ -575,6 +713,197 @@ const supprimerOrdre = async (ordreId) => {
     setSuccess(message);
     setTimeout(() => setSuccess(''), 3000);
   };
+  const renderEditForm = () => (
+    <div className="space-y-6">
+      <h3 className="text-lg font-medium text-gray-900">Modification de l'ordre de travail</h3>
+
+      {/* Paramètres généraux */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Date de commencement *
+          </label>
+          <input
+            type="datetime-local"
+            value={editFormData.dateCommence}
+            onChange={(e) => setEditFormData(prev => ({
+              ...prev,
+              dateCommence: e.target.value
+            }))}
+            min={new Date().toISOString().slice(0, 16)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Atelier *
+          </label>
+          <select
+            value={editFormData.atelier}
+            onChange={(e) => setEditFormData(prev => ({
+              ...prev,
+              atelier: e.target.value
+            }))}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">-- Sélectionner un atelier --</option>
+            {ateliers.map(atelier => (
+              <option key={atelier._id} value={atelier._id}>
+                {atelier.name} ({atelier.localisation})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Priorité
+          </label>
+          <select
+            value={editFormData.priorite}
+            onChange={(e) => setEditFormData(prev => ({
+              ...prev,
+              priorite: e.target.value
+            }))}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            {Object.entries(prioriteOptions).map(([key, option]) => (
+              <option key={key} value={key}>{option.label}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Description */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Description
+        </label>
+        <textarea
+          value={editFormData.description}
+          onChange={(e) => setEditFormData(prev => ({
+            ...prev,
+            description: e.target.value
+          }))}
+          rows={3}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+
+      {/* Tâches */}
+      <div>
+        <h4 className="text-md font-medium text-gray-900 mb-4">Tâches</h4>
+        <div className="space-y-4">
+          {editFormData.taches.map((tache) => (
+            <div key={tache._id || tache.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                <div>
+                  <p className="font-medium text-gray-900">{tache.description}</p>
+                  <p className="text-sm text-gray-600">Quantité: {tache.quantite}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Service assigné *
+                  </label>
+                  <select
+                    value={tache.serviceId || ""}
+                    onChange={(e) => assignServiceToTacheEdit(tache._id || tache.id, e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">-- Sélectionner un service --</option>
+                    {services.map(service => (
+                      <option key={service._id} value={service._id}>
+                        {service.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Mécanicien assigné *
+                  </label>
+                  <select
+                    value={tache.mecanicienId || ""}
+                    onChange={(e) => assignMecanicienToTacheEdit(tache._id || tache.id, e.target.value)}
+                    disabled={!tache.serviceId}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">-- Sélectionner un mécanicien --</option>
+                    {mecaniciens.map(m => (
+                      <option key={m._id} value={m._id}>
+                        {m.nom}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Estimation (heures)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0.5"
+                    value={tache.estimationHeures}
+                    onChange={(e) => setEditFormData(prev => ({
+                      ...prev,
+                      taches: prev.taches.map(t =>
+                        (t._id === tache._id || t.id === tache.id)
+                          ? { ...t, estimationHeures: parseFloat(e.target.value) || 1 }
+                          : t
+                      )
+                    }))}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Notes spéciales
+                </label>
+                <input
+                  type="text"
+                  value={tache.notes}
+                  onChange={(e) => setEditFormData(prev => ({
+                    ...prev,
+                    taches: prev.taches.map(t =>
+                      (t._id === tache._id || t.id === tache.id)
+                        ? { ...t, notes: e.target.value }
+                        : t
+                    )
+                  }))}
+                  placeholder="Notes ou instructions particulières..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex justify-end space-x-4">
+        <button
+          onClick={() => setEditMode(false)}
+          className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+        >
+          Annuler
+        </button>
+        <button
+          onClick={saveEdit}
+          disabled={loading}
+          className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+        >
+          {loading ? 'Sauvegarde...' : 'Sauvegarder'}
+        </button>
+      </div>
+    </div>
+  );
 
   useEffect(() => {
     loadAteliers();
@@ -967,12 +1296,12 @@ const supprimerOrdre = async (ordreId) => {
                   Filtrer
                 </button>
                 <button
-  onClick={loadOrdresSupprimes}
-  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
-  title="Voir les ordres supprimés (Admin)"
->
-  Ordres Supprimés
-</button>
+                  onClick={loadOrdresSupprimes}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+                  title="Voir les ordres supprimés (Admin)"
+                >
+                  Ordres Supprimés
+                </button>
               </div>
             </div>
 
@@ -1050,52 +1379,57 @@ const supprimerOrdre = async (ordreId) => {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-2">
+                                <button
+                                  onClick={() => loadOrdreDetails(ordre._id)}
+                                  className="text-blue-600 hover:text-blue-900"
+                                  title="Voir détails"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </button>
+
+                                {ordre.status === 'en_attente' && (
                                   <button
-                                    onClick={() => loadOrdreDetails(ordre._id)}
-                                    className="text-blue-600 hover:text-blue-900"
-                                    title="Voir détails"
+                                    onClick={() => demarrerOrdre(ordre._id)}
+                                    className="text-green-600 hover:text-green-900"
+                                    title="Démarrer"
                                   >
-                                    <Eye className="h-4 w-4" />
+                                    <Play className="h-4 w-4" />
                                   </button>
-                                  
-                                  {ordre.status === 'en_attente' && (
-                                    <button
-                                      onClick={() => demarrerOrdre(ordre._id)}
-                                      className="text-green-600 hover:text-green-900"
-                                      title="Démarrer"
-                                    >
-                                      <Play className="h-4 w-4" />
-                                    </button>
-                                  )}
-                                  
-                                  {ordre.status === 'en_cours' && (
-                                    <button
-                                      onClick={() => terminerOrdre(ordre._id)}
-                                      className="text-green-600 hover:text-green-900"
-                                      title="Terminer"
-                                    >
-                                      <CheckCircle className="h-4 w-4" />
-                                    </button>
-                                  )}
-                                  
+                                )}
+
+                                {ordre.status === 'en_cours' && (
                                   <button
-                                    onClick={() => startEdit(ordre)}
+                                    onClick={() => terminerOrdre(ordre._id)}
+                                    className="text-green-600 hover:text-green-900"
+                                    title="Terminer"
+                                  >
+                                    <CheckCircle className="h-4 w-4" />
+                                  </button>
+                                )}
+
+                                {ordre.status !== 'termine' && ordre.status !== 'supprime' && (
+                                  <button
+                                    onClick={() => {
+                                      setSelectedOrdre(ordre); // ✅ Définir selectedOrdre AVANT startEdit
+                                      startEdit(ordre);
+                                    }}
                                     className="text-yellow-600 hover:text-yellow-900"
                                     title="Modifier"
                                   >
                                     <Edit2 className="h-4 w-4" />
                                   </button>
-                                  
-                                  <button
-                                    onClick={() => supprimerOrdre(ordre._id)}
-                                    className="text-red-600 hover:text-red-900"
-                                    title="Supprimer"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </button>
-                                </div>
-                              </td>
+                                )}
+
+                                <button
+                                  onClick={() => supprimerOrdre(ordre._id)}
+                                  className="text-red-600 hover:text-red-900"
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </td>
                           </tr>
                         );
                       })}
@@ -1127,8 +1461,8 @@ const supprimerOrdre = async (ordreId) => {
                             key={pageNum}
                             onClick={() => loadOrdresTravail(pageNum)}
                             className={`px-3 py-1 text-sm border rounded ${pageNum === pagination.page
-                                ? 'border-blue-500 bg-blue-50 text-blue-600'
-                                : 'border-gray-300 hover:bg-gray-50'
+                              ? 'border-blue-500 bg-blue-50 text-blue-600'
+                              : 'border-gray-300 hover:bg-gray-50'
                               }`}
                           >
                             {pageNum}
@@ -1183,6 +1517,7 @@ const supprimerOrdre = async (ordreId) => {
                   <h2 className="text-2xl font-bold text-gray-900">
                     {selectedOrdre.numeroOrdre || `Ordre de Travail ${selectedOrdre._id}`}
                   </h2>
+
                   <button
                     onClick={() => setSelectedOrdre(null)}
                     className="text-gray-500 hover:text-gray-700"
@@ -1193,161 +1528,167 @@ const supprimerOrdre = async (ordreId) => {
               </div>
 
               <div className="p-6 space-y-6">
-                {/* Informations générales */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-medium text-gray-900 mb-3 flex items-center">
-                      <User className="h-5 w-5 mr-2" />
-                      Informations Client
-                    </h3>
-                    <div className="space-y-2">
-                      <p><span className="font-medium">Nom:</span> {selectedOrdre.clientInfo?.nom || 'N/A'}</p>
-                      <p><span className="font-medium">Véhicule:</span> {selectedOrdre.vehiculeInfo || 'N/A'}</p>
-                      <p><span className="font-medium">Devis N°:</span> {selectedOrdre.devisId || 'N/A'}</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-medium text-gray-900 mb-3 flex items-center">
-                      <MapPin className="h-5 w-5 mr-2" />
-                      Détails Opérationnels
-                    </h3>
-                    <div className="space-y-2">
-                      <p><span className="font-medium">Date début:</span> {selectedOrdre.dateCommence ? new Date(selectedOrdre.dateCommence).toLocaleString('fr-FR') : 'N/A'}</p>
-                      <p><span className="font-medium">Date fin prévue:</span> {selectedOrdre.dateFinPrevue ? new Date(selectedOrdre.dateFinPrevue).toLocaleString('fr-FR') : 'N/A'}</p>
-                      <p><span className="font-medium">Atelier:</span> {selectedOrdre.atelierNom || 'N/A'}</p>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium">Priorité:</span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${prioriteOptions[selectedOrdre.priorite]?.color}`}>
-                          {prioriteOptions[selectedOrdre.priorite]?.label}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium">Statut:</span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusOptions[selectedOrdre.status]?.color}`}>
-                          {React.createElement(statusOptions[selectedOrdre.status]?.icon || Clock, { className: "h-3 w-3 mr-1" })}
-                          {statusOptions[selectedOrdre.status]?.label}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Description */}
-                {selectedOrdre.description && (
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h3 className="font-medium text-gray-900 mb-2">Description</h3>
-                    <p className="text-gray-700">{selectedOrdre.description}</p>
-                  </div>
-                )}
-
-                {/* Liste des tâches */}
-                <div>
-                  <h3 className="font-medium text-gray-900 mb-4 flex items-center">
-                    <Wrench className="h-5 w-5 mr-2" />
-                    Tâches Assignées ({selectedOrdre.taches?.length || 0})
-                  </h3>
-
-
-                  <div className="space-y-3">
-                    {selectedOrdre.taches?.map((tache, index) => (
-                      <div key={tache._id || index} className="border border-gray-200 rounded-lg p-4 bg-white">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex-1">
-                            <h4 className="font-medium text-gray-900">{tache.description}</h4>
-                            <p className="text-sm text-gray-600">
-                              Quantité: {tache.quantite} |
-                              Estimation: {tache.estimationHeures}h |
-                              Réelles: {tache.heuresReelles || 0}h
-                            </p>
-                            {tache.serviceNom && (
-                              <p className="text-sm text-blue-600">Service: {tache.serviceNom}</p>
-                            )}
-                          </div>
+                {editMode ? (
+                  renderEditForm()
+                ) : (
+                  <>
+                    {/* Informations générales */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h3 className="font-medium text-gray-900 mb-3 flex items-center">
+                          <User className="h-5 w-5 mr-2" />
+                          Informations Client
+                        </h3>
+                        <div className="space-y-2">
+                          <p><span className="font-medium">Nom:</span> {selectedOrdre.clientInfo?.nom || 'N/A'}</p>
+                          <p><span className="font-medium">Véhicule:</span> {selectedOrdre.vehiculeInfo || 'N/A'}</p>
+                          <p><span className="font-medium">Devis N°:</span> {selectedOrdre.devisId || 'N/A'}</p>
                         </div>
+                      </div>
 
-                        {tache.mecanicienNom && (
-                          <div className="bg-gray-50 p-3 rounded flex items-center">
-                            <UserCheck className="h-4 w-4 text-blue-600 mr-2" />
-                            <span className="text-sm">
-                              <span className="font-medium">Mécanicien assigné:</span> {tache.mecanicienNom}
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h3 className="font-medium text-gray-900 mb-3 flex items-center">
+                          <MapPin className="h-5 w-5 mr-2" />
+                          Détails Opérationnels
+                        </h3>
+                        <div className="space-y-2">
+                          <p><span className="font-medium">Date début:</span> {selectedOrdre.dateCommence ? new Date(selectedOrdre.dateCommence).toLocaleString('fr-FR') : 'N/A'}</p>
+                          <p><span className="font-medium">Date fin prévue:</span> {selectedOrdre.dateFinPrevue ? new Date(selectedOrdre.dateFinPrevue).toLocaleString('fr-FR') : 'N/A'}</p>
+                          <p><span className="font-medium">Atelier:</span> {selectedOrdre.atelierNom || 'N/A'}</p>
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium">Priorité:</span>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${prioriteOptions[selectedOrdre.priorite]?.color}`}>
+                              {prioriteOptions[selectedOrdre.priorite]?.label}
                             </span>
                           </div>
-                        )}
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium">Statut:</span>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusOptions[selectedOrdre.status]?.color}`}>
+                              {React.createElement(statusOptions[selectedOrdre.status]?.icon || Clock, { className: "h-3 w-3 mr-1" })}
+                              {statusOptions[selectedOrdre.status]?.label}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-                        {/* Section statut et actions */}
-                        <div className="mt-3 flex items-center justify-between">
-  <div className="flex items-center space-x-2">
-    {/* Badge d'assignation */}
-    {tache.mecanicienId ? (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-        <UserCheck className="h-3 w-3 mr-1" />
-        Assignée à {tache.mecanicienNom}
-      </span>
-    ) : (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-        <Clock className="h-3 w-3 mr-1" />
-        Non assignée
-      </span>
-    )}
-  </div>
-  
-  {/* Affichage du service */}
-  {tache.serviceNom && (
-    <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-      {tache.serviceNom}
-    </span>
-  )}
-</div>
+                    {/* Description */}
+                    {selectedOrdre.description && (
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <h3 className="font-medium text-gray-900 mb-2">Description</h3>
+                        <p className="text-gray-700">{selectedOrdre.description}</p>
+                      </div>
+                    )}
 
+                    {/* Liste des tâches */}
+                    <div>
+                      <h3 className="font-medium text-gray-900 mb-4 flex items-center">
+                        <Wrench className="h-5 w-5 mr-2" />
+                        Tâches Assignées ({selectedOrdre.taches?.length || 0})
+                      </h3>
 
 
+                      <div className="space-y-3">
+                        {selectedOrdre.taches?.map((tache, index) => (
+                          <div key={tache._id || index} className="border border-gray-200 rounded-lg p-4 bg-white">
+                            <div className="flex justify-between items-start mb-3">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-gray-900">{tache.description}</h4>
+                                <p className="text-sm text-gray-600">
+                                  Quantité: {tache.quantite} |
+                                  Estimation: {tache.estimationHeures}h |
+                                  Réelles: {tache.heuresReelles || 0}h
+                                </p>
+                                {tache.serviceNom && (
+                                  <p className="text-sm text-blue-600">Service: {tache.serviceNom}</p>
+                                )}
+                              </div>
+                            </div>
 
-                        {(tache.dateDebut || tache.dateFin) && (
-                          <div className="mt-3 text-xs text-gray-500 space-y-1">
-                            {tache.dateDebut && (
-                              <p>Démarré le: {new Date(tache.dateDebut).toLocaleString('fr-FR')}</p>
+                            {tache.mecanicienNom && (
+                              <div className="bg-gray-50 p-3 rounded flex items-center">
+                                <UserCheck className="h-4 w-4 text-blue-600 mr-2" />
+                                <span className="text-sm">
+                                  <span className="font-medium">Mécanicien assigné:</span> {tache.mecanicienNom}
+                                </span>
+                              </div>
                             )}
-                            {tache.dateFin && (
-                              <p>Terminé le: {new Date(tache.dateFin).toLocaleString('fr-FR')}</p>
+
+                            {/* Section statut et actions */}
+                            <div className="mt-3 flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                {/* Badge d'assignation */}
+                                {tache.mecanicienId ? (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <UserCheck className="h-3 w-3 mr-1" />
+                                    Assignée à {tache.mecanicienNom}
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    Non assignée
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Affichage du service */}
+                              {tache.serviceNom && (
+                                <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                  {tache.serviceNom}
+                                </span>
+                              )}
+                            </div>
+
+
+
+
+                            {(tache.dateDebut || tache.dateFin) && (
+                              <div className="mt-3 text-xs text-gray-500 space-y-1">
+                                {tache.dateDebut && (
+                                  <p>Démarré le: {new Date(tache.dateDebut).toLocaleString('fr-FR')}</p>
+                                )}
+                                {tache.dateFin && (
+                                  <p>Terminé le: {new Date(tache.dateFin).toLocaleString('fr-FR')}</p>
+                                )}
+                              </div>
                             )}
                           </div>
-                        )}
+                        )) || (
+                            <p className="text-gray-500 text-center py-4">Aucune tâche assignée</p>
+                          )}
                       </div>
-                    )) || (
-                        <p className="text-gray-500 text-center py-4">Aucune tâche assignée</p>
-                      )}
-                  </div>
-                </div>
+                    </div>
 
-                {/* Résumé statistique */}
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="font-medium text-gray-900 mb-3">Résumé</h3>
-                  <div className="grid grid-cols-4 gap-4 text-center">
-                    <div>
-                      <p className="text-2xl font-bold text-blue-600">{selectedOrdre.taches?.length || 0}</p>
-                      <p className="text-sm text-gray-600">Tâches Total</p>
+                    {/* Résumé statistique */}
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="font-medium text-gray-900 mb-3">Résumé</h3>
+                      <div className="grid grid-cols-4 gap-4 text-center">
+                        <div>
+                          <p className="text-2xl font-bold text-blue-600">{selectedOrdre.taches?.length || 0}</p>
+                          <p className="text-sm text-gray-600">Tâches Total</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-green-600">
+                            {selectedOrdre.taches?.filter(t => t.status === 'terminee').length || 0}
+                          </p>
+                          <p className="text-sm text-gray-600">Terminées</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-orange-600">
+                            {selectedOrdre.taches?.reduce((total, tache) => total + (tache.estimationHeures || 0), 0) || 0}h
+                          </p>
+                          <p className="text-sm text-gray-600">Temps Estimé</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-purple-600">
+                            {selectedOrdre.taches?.reduce((total, tache) => total + (tache.heuresReelles || 0), 0) || 0}h
+                          </p>
+                          <p className="text-sm text-gray-600">Temps Réel</p>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-2xl font-bold text-green-600">
-                        {selectedOrdre.taches?.filter(t => t.status === 'terminee').length || 0}
-                      </p>
-                      <p className="text-sm text-gray-600">Terminées</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-orange-600">
-                        {selectedOrdre.taches?.reduce((total, tache) => total + (tache.estimationHeures || 0), 0) || 0}h
-                      </p>
-                      <p className="text-sm text-gray-600">Temps Estimé</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-purple-600">
-                        {selectedOrdre.taches?.reduce((total, tache) => total + (tache.heuresReelles || 0), 0) || 0}h
-                      </p>
-                      <p className="text-sm text-gray-600">Temps Réel</p>
-                    </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
 
 
@@ -1371,7 +1712,10 @@ const supprimerOrdre = async (ordreId) => {
               </div>
             </div>
           </div>
+
         )}
+
+
       </div>
     </div>
   );
