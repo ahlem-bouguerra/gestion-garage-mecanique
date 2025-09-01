@@ -96,6 +96,7 @@ export const createOrdreTravail = async (req, res) => {
       devisId: devis.id,
       clientInfo: {
         nom: devis.clientName,
+        ClientId : devis.clientId,
         telephone: devis.clientPhone,
         email: devis.clientEmail,
         adresse: devis.clientAddress

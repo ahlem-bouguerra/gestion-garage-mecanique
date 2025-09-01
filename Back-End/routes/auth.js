@@ -9,7 +9,7 @@ import { resetPassword } from "../controllers/ResetPassword.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { completeProfile, getProfile } from "../controllers/ProfileContoller.js";
 import { enhancedLocationRoutes } from "../apiDataFetcher.js"; 
-import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient,getFicheClientNoms} from "../controllers/FicheClient.js";
+import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient,getFicheClientNoms, getHistoriqueVisiteByIdClient, getHistoryVisite} from "../controllers/FicheClient.js";
 import {getAllVehicules,getVehiculeById,createVehicule,updateVehicule,deleteVehicule,getVehiculesByProprietaire} from '../controllers/vehiculeController.js';
 import {getAllPieces,getPieceById,createPiece,updatePiece,deletePiece}from '../controllers/piecesController.js';
 import {createDevis,getAllDevis,getDevisById,getDevisByNum,updateDevisStatus,updateDevis,deleteDevis, acceptDevis,refuseDevis}from '../controllers/devisController.js';
@@ -31,6 +31,7 @@ import {
   getOrdresByAtelier,
   updateOrdreTravail
 } from '../controllers/ordreController.js';
+import { get } from "mongoose";
 
 const router = express.Router();
 
@@ -363,7 +364,8 @@ router.get("/GetOne/:_id", getFicheClientById);
 router.put("/updateOne/:_id", updateFicheClient);    
 router.delete("/deleteOne/:_id", deleteFicheClient); 
 router.get("/clients/noms", getFicheClientNoms);
-
+router.get('/clients/:clientId/historique', getHistoriqueVisiteByIdClient);
+router.get('/clients/:clientId/visites-resume',getHistoryVisite);
 
 router.get('/vehicules', getAllVehicules);
 router.get('/vehicules/:id', getVehiculeById);

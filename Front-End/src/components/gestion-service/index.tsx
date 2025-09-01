@@ -69,17 +69,24 @@ const ServicesManager = () => {
   };
 
   // Update service
-  const updateService = async () => {
-    if (!selectedService) return;
+const updateService = async () => {
+  if (!selectedService) return;
 
-    try {
-      await axios.put(`${API_BASE_URL}/updateService/${selectedService._id}`, formData);
-      await fetchServices();
-      closeModal();
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du service:', error);
-    }
-  };
+  try {
+    await axios.put(
+      `${API_BASE_URL}/updateService/${selectedService._id}`,
+      formData, // objet JSON classique
+      {
+        headers: { "Content-Type": "application/json" }, // très important
+      }
+    );
+    await fetchServices();
+    closeModal();
+  } catch (error: any) {
+    console.error("Erreur lors de la mise à jour du service:", error.response?.data || error.message);
+  }
+};
+
 
   // Delete service
   const deleteService = async (id: string) => {
@@ -356,7 +363,7 @@ const ServicesManager = () => {
                       onChange={(e) => setFormData({ ...formData, statut: e.target.value as 'Actif' | 'Désactivé' })}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                      <option value="actif">Actif</option>
+                      <option value="Actif">Actif</option>
                       <option value="Désactivé">Désactivé</option>
                     </select>
                   </div>

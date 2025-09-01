@@ -2,23 +2,33 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Filter, Plus, User, Building2, Calendar, Car, Phone, Mail, MapPin, Eye, Edit, Trash2 } from 'lucide-react';
+import { Search, Filter, Plus, User, Building2, Calendar, Car, Phone, Mail, MapPin, Eye, Edit, Trash2, History, Clock, Wrench } from 'lucide-react';
 import axios from "axios";
+
+interface HistoriqueVisite {
+  id: string;
+  numeroOrdre: string;
+  dateVisite: string;
+  vehicule: string;
+  atelier: string;
+  dureeHeures: number;
+  taches: Array<{
+    description: string;
+    service: string;
+    mecanicien: string;
+    heuresReelles: number;
+    status: string;
+  }>;
+  servicesEffectues: string;
+}
 
 const API_BASE_URL = "http://localhost:5000/api";
 
-// Définition des types TypeScript
 interface ContactSecondaire {
   nom: string;
   relation: string;
   telephone: string;
   email?: string;
-}
-
-interface HistoriqueVisite {
-  date: string;
-  service: string;
-  montant: string;
 }
 
 interface Client {
@@ -42,7 +52,6 @@ interface FormData {
   email: string;
 }
 
-// Interface pour les véhicules
 interface Vehicule {
   _id: string;
   proprietaireId: string;
@@ -68,93 +77,69 @@ export default function ClientForm() {
   const [clients, setClients] = useState<Client[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [modalType, setModalType] = useState<"view" | "add" | "edit">("view");
+  const [modalType, setModalType] = useState<"view" | "add" | "edit" | "history">("view");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterType, setFilterType] = useState<string>("tous");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [telephoneError, setTelephoneError] = useState("");
   const router = useRouter();
-  
-  // CORRECTION 1: Changer la structure pour stocker tous les véhicules
+  const [clientsHistorique, setClientsHistorique] = useState<{ [clientId: string]: HistoriqueVisite[] }>({});
+  const [clientsResume, setClientsResume] = useState<{ [clientId: string]: { nombreVisites: number; derniereVisite: any } }>({});
+  const [historiqueDetails, setHistoriqueDetails] = useState<HistoriqueVisite[]>([]);
   const [vehicules, setVehicules] = useState<Vehicule[]>([]);
-  const [clientVehicules, setClientVehicules] = useState<{[clientId: string]: Vehicule[]}>({});
+  const [clientVehicules, setClientVehicules] = useState<{ [clientId: string]: Vehicule[] }>({});
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
-  // Charger tous les clients au montage du composant
   useEffect(() => {
     fetchAllClients();
-    fetchAllVehicules(); // CORRECTION 2: Charger tous les véhicules une seule fois
+    fetchAllVehicules();
   }, []);
 
-  // CORRECTION 3: Fonction pour charger tous les véhicules
+  useEffect(() => {
+    if (clients.length > 0) {
+      loadAllClientsResume();
+    }
+  }, [clients]);
+
   const fetchAllVehicules = async (): Promise<void> => {
     try {
       console.log("🚗 Chargement de tous les véhicules...");
       const response = await axios.get(`${API_BASE_URL}/vehicules`);
       setVehicules(response.data);
-      
-      // Organiser par client
-      const vehiculesParClient: {[clientId: string]: Vehicule[]} = {};
+
+      const vehiculesParClient: { [clientId: string]: Vehicule[] } = {};
       response.data.forEach((vehicule: any) => {
-        // CORRECTION: Extraire l'ID du proprietaire selon la structure de votre backend
         let clientId: string;
-        
+
         if (typeof vehicule.proprietaireId === 'string') {
-          // Si proprietaireId est déjà un string
           clientId = vehicule.proprietaireId;
         } else if (vehicule.proprietaireId && vehicule.proprietaireId._id) {
-          // Si proprietaireId est un objet avec _id (populated)
           clientId = vehicule.proprietaireId._id;
         } else {
-          // Cas de fallback
           console.warn("Structure proprietaireId inattendue:", vehicule.proprietaireId);
           return;
         }
-        
-        console.log("🔍 Organisation véhicule:", vehicule.marque, "pour client ID:", clientId);
-        
+
         if (!vehiculesParClient[clientId]) {
           vehiculesParClient[clientId] = [];
         }
-        
-        // Créer un objet véhicule propre avec l'ID string
+
         const vehiculePropre = {
           ...vehicule,
-          proprietaireId: clientId // S'assurer que c'est un string
+          proprietaireId: clientId
         };
-        
+
         vehiculesParClient[clientId].push(vehiculePropre);
       });
-      
+
       setClientVehicules(vehiculesParClient);
       console.log("✅ Véhicules organisés par client:", vehiculesParClient);
-      console.log("🔍 Clés des clients avec véhicules:", Object.keys(vehiculesParClient));
     } catch (error) {
       console.error("❌ Erreur lors du chargement des véhicules:", error);
     }
   };
 
-  // CORRECTION 4: Simplifier la fonction pour obtenir les véhicules d'un client
-  const getClientVehicules = (clientId: string): string => {
-    console.log("🔍 Recherche véhicules pour client ID:", clientId);
-    console.log("🔍 Clés disponibles dans clientVehicules:", Object.keys(clientVehicules));
-    
-    const vehiculesClient = clientVehicules[clientId] || [];
-    console.log("🚗 Véhicules trouvés:", vehiculesClient.length);
-    
-    if (vehiculesClient.length === 0) {
-      return "Non assigné";
-    }
-    
-    if (vehiculesClient.length === 1) {
-      const vehicule = vehiculesClient[0];
-      return `${vehicule.marque} ${vehicule.modele} (${vehicule.immatriculation})`;
-    }
-    
-    return `${vehiculesClient.length} véhicules associés`;
-  };
-
-  // Validation simple pour numéros tunisiens
   const validateTunisianPhone = (phone: string) => {
     const cleaned = phone.replace(/[\s\-]/g, '');
     const tunisianPattern = /^[24579]\d{7}$/;
@@ -174,7 +159,21 @@ export default function ClientForm() {
     setTelephoneError(error);
   };
 
-  // CORRECTION 5: Corriger les dépendances du useMemo
+  const getClientVehicules = (clientId: string): string => {
+    const vehiculesClient = clientVehicules[clientId] || [];
+
+    if (vehiculesClient.length === 0) {
+      return "Non assigné";
+    }
+
+    if (vehiculesClient.length === 1) {
+      const vehicule = vehiculesClient[0];
+      return `${vehicule.marque} ${vehicule.modele} (${vehicule.immatriculation})`;
+    }
+
+    return `${vehiculesClient.length} véhicules associés`;
+  };
+
   const filteredClients = useMemo(() => {
     return clients.filter(client => {
       const vehiculeInfo = getClientVehicules(client._id);
@@ -184,9 +183,8 @@ export default function ClientForm() {
       const matchesType = filterType === "tous" || client.type === filterType;
       return matchesSearch && matchesType;
     });
-  }, [clients, searchTerm, filterType, clientVehicules]); // Corriger les dépendances
+  }, [clients, searchTerm, filterType, clientVehicules]);
 
-  // Récupérer tous les clients
   const fetchAllClients = async (): Promise<void> => {
     setLoading(true);
     try {
@@ -201,7 +199,6 @@ export default function ClientForm() {
     }
   };
 
-  // Récupérer un client par ID
   const fetchClientById = async (id: string | number): Promise<Client | null> => {
     try {
       console.log("🔍 Récupération du client avec ID:", id);
@@ -215,18 +212,102 @@ export default function ClientForm() {
     }
   };
 
-  // CORRECTION 6: Fonction pour récupérer les véhicules d'un client spécifique (pour le modal)
-  const fetchClientVehicules = async (clientId: string): Promise<Vehicule[]> => {
+  const fetchClientResume = async (clientId: string) => {
     try {
-      console.log("🔍 Récupération véhicules pour client:", clientId);
-      // CORRECTION: Utiliser la bonne URL selon votre route backend
-      const response = await axios.get(`${API_BASE_URL}/vehicules/proprietaire/${clientId}`);
-      console.log("🚗 Véhicules reçus:", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("Erreur lors de la récupération des véhicules du client:", error);
-      return [];
+      const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/visites-resume`);
+
+      if (response.data.success) {
+        setClientsResume(prev => ({
+          ...prev,
+          [clientId]: {
+            nombreVisites: response.data.nombreVisites,
+            derniereVisite: response.data.derniereVisite
+          }
+        }));
+      }
+    } catch (error: any) {
+      if (error.response?.status !== 404) {
+        console.error("❌ Erreur lors du chargement du résumé:", error);
+      }
+      setClientsResume(prev => ({
+        ...prev,
+        [clientId]: {
+          nombreVisites: 0,
+          derniereVisite: null
+        }
+      }));
     }
+  };
+
+  const fetchClientHistorique = async (clientId: string): Promise<HistoriqueVisite[]> => {
+    try {
+      console.log("📋 Chargement historique pour client:", clientId);
+      setLoadingHistory(true);
+      const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/historique`);
+
+      if (response.data.success) {
+        const historique = response.data.historiqueVisites;
+
+        setClientsHistorique(prev => ({
+          ...prev,
+          [clientId]: historique
+        }));
+
+        return historique;
+      }
+      return [];
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        setError("Routes d'historique non configurées dans le backend");
+      } else {
+        console.error("❌ Erreur lors du chargement de l'historique:", error);
+        setError("Erreur lors du chargement de l'historique");
+      }
+      return [];
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const loadAllClientsResume = async () => {
+    if (clients.length === 0) return;
+
+    try {
+      if (clients.length > 0) {
+        await fetchClientResume(clients[0]._id);
+
+        for (let i = 1; i < clients.length; i++) {
+          await fetchClientResume(clients[i]._id);
+        }
+      }
+    } catch (error) {
+      console.log("Routes d'historique non encore implémentées");
+    }
+  };
+
+  const getClientVisitesInfo = (clientId: string): string => {
+    const resume = clientsResume[clientId];
+
+    if (!resume || resume.nombreVisites === 0) {
+      return "Aucune visite";
+    }
+
+    if (resume.nombreVisites === 1) {
+      return "1 visite effectuée";
+    }
+
+    return `${resume.nombreVisites} visites effectuées`;
+  };
+
+  const getDerniereVisite = (clientId: string): string => {
+    const resume = clientsResume[clientId];
+
+    if (!resume || !resume.derniereVisite) {
+      return "";
+    }
+
+    const date = new Date(resume.derniereVisite.date);
+    return date.toLocaleDateString('fr-FR');
   };
 
   const createClient = async (clientData: any): Promise<any> => {
@@ -287,9 +368,11 @@ export default function ClientForm() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const openModal = async (type: "view" | "add" | "edit", client: Client | null = null): Promise<void> => {
+  const openModal = async (type: "view" | "add" | "edit" | "history", client: Client | null = null): Promise<void> => {
     console.log("🎯 Ouverture modal:", type, "pour client:", client);
     setModalType(type);
+    setError(""); // Reset error state
+
     if (client) {
       const clientId = client._id;
       console.log("🆔 ID utilisé:", clientId);
@@ -309,10 +392,15 @@ export default function ClientForm() {
             });
           }
         }
+      } else if (type === "history") {
+        setSelectedClient(client);
+        const historique = await fetchClientHistorique(clientId);
+        setHistoriqueDetails(historique);
       } else {
         setSelectedClient(client);
       }
-    } else {
+    } else if (type === "add") {
+      // Reset form for new client
       setFormData({
         nom: "",
         type: "particulier",
@@ -320,8 +408,8 @@ export default function ClientForm() {
         telephone: "",
         email: "",
       });
-      setSelectedClient(null);
     }
+
     setShowModal(true);
   };
 
@@ -329,10 +417,20 @@ export default function ClientForm() {
     setShowModal(false);
     setSelectedClient(null);
     setError("");
+    setHistoriqueDetails([]);
+    setTelephoneError("");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
+
+    // Validate phone before submission
+    const phoneError = validateTunisianPhone(formData.telephone);
+    if (phoneError) {
+      setError(phoneError);
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -351,7 +449,7 @@ export default function ClientForm() {
       }
 
       await fetchAllClients();
-      await fetchAllVehicules(); // CORRECTION 7: Recharger aussi les véhicules
+      await fetchAllVehicules();
       closeModal();
     } catch (error) {
       console.error("Erreur lors de la soumission:", error);
@@ -360,6 +458,106 @@ export default function ClientForm() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderHistoryModal = () => {
+    if (!selectedClient) return null;
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-gray-900">
+            Historique des visites - {selectedClient.nom}
+          </h3>
+          <div className="text-sm text-gray-600">
+            {historiqueDetails.length} visite(s) effectuée(s)
+          </div>
+        </div>
+
+        {loadingHistory ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-500">Chargement de l'historique...</p>
+          </div>
+        ) : historiqueDetails.length === 0 ? (
+          <div className="text-center py-8">
+            <History className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune visite enregistrée</h3>
+            <p className="text-gray-500">Ce client n'a pas encore d'historique de visites terminées.</p>
+          </div>
+        ) : (
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {historiqueDetails.map((visite, index) => (
+              <div key={visite.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="font-semibold text-gray-900">{visite.numeroOrdre}</span>
+                      <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                        Terminé
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      <Calendar className="w-4 h-4 inline mr-1" />
+                      {new Date(visite.dateVisite).toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm text-gray-600">
+                      <Clock className="w-4 h-4 inline mr-1" />
+                      {visite.dureeHeures}h de travail
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      <MapPin className="w-4 h-4 inline mr-1" />
+                      {visite.atelier}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Car className="w-4 h-4 text-blue-600" />
+                    <span className="font-medium text-gray-900">{visite.vehicule}</span>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <Wrench className="w-4 h-4 inline mr-1" />
+                    Services: {visite.servicesEffectues}
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-300 pt-3">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Tâches effectuées ({visite.taches.length})
+                  </h4>
+                  <div className="space-y-2">
+                    {visite.taches.map((tache, tacheIndex) => (
+                      <div key={tacheIndex} className="bg-white p-2 rounded border border-gray-200">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">{tache.description}</p>
+                            <p className="text-xs text-gray-600">
+                              Service: {tache.service} | Mécanicien: {tache.mecanicien}
+                            </p>
+                          </div>
+                          <div className="text-xs text-gray-500 text-right">
+                            {tache.heuresReelles}h
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -436,11 +634,10 @@ export default function ClientForm() {
                       )}
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">{client.nom}</h3>
-                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                          client.type === "professionnel"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800"
-                        }`}>
+                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${client.type === "professionnel"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-green-100 text-green-800"
+                          }`}>
                           {client.type === "professionnel" ? "Professionnel" : "Particulier"}
                         </span>
                       </div>
@@ -468,18 +665,25 @@ export default function ClientForm() {
                         <Trash2 className="w-4 h-4" />
                       </button>
                       <button
-onClick={() => {
-  sessionStorage.setItem('preselectedClient', JSON.stringify({
-    id: client._id,
-    nom: client.nom
-  }));
-  router.push("/fiche-voiture");
-}}
-  className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
-  title="Associer véhicules"
->
-  <Car className="w-4 h-4" />
-</button>
+                        onClick={() => {
+                          sessionStorage.setItem('preselectedClient', JSON.stringify({
+                            id: client._id,
+                            nom: client.nom
+                          }));
+                          router.push("/fiche-voiture");
+                        }}
+                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Associer véhicules"
+                      >
+                        <Car className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => openModal("history", client)}
+                        className="p-2 text-gray-500 hover:text-purple-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Historique des visites"
+                      >
+                        <History className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
 
@@ -502,10 +706,19 @@ onClick={() => {
                         {getClientVehicules(client._id)}
                       </span>
                     </div>
-                    {client.derniereVisite && (
+                    <div className="flex items-center space-x-2">
+                      <History className="w-4 h-4" />
+                      <span className={clientsResume[client._id]?.nombreVisites === 0 ? "text-gray-400 italic" : "text-blue-600"}>
+                        {getClientVisitesInfo(client._id)}
+                      </span>
+                    </div>
+                    {clientsResume[client._id]?.derniereVisite && (
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4" />
-                        <span>Dernière visite: {new Date(client.derniereVisite).toLocaleDateString('fr-FR')}</span>
+                        <span>Dernière visite: {getDerniereVisite(client._id)}</span>
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          {clientsResume[client._id].derniereVisite.numero}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -546,6 +759,7 @@ onClick={() => {
                   {modalType === "add" && "Nouveau Client"}
                   {modalType === "edit" && "Modifier Client"}
                   {modalType === "view" && "Détails Client"}
+                  {modalType === "history" && "Historique des Visites"}
                 </h2>
                 <button
                   onClick={closeModal}
@@ -562,7 +776,9 @@ onClick={() => {
                 </div>
               )}
 
-              {modalType === "view" ? (
+              {modalType === "history" ? (
+                renderHistoryModal()
+              ) : modalType === "view" ? (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -587,13 +803,12 @@ onClick={() => {
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Véhicule(s) associé(s)</label>
-                      <p className={`text-gray-900 ${
-                        getClientVehicules(selectedClient?._id || "") === "Non assigné" ? "text-orange-600 italic" : ""
-                      }`}>
+                      <p className={`text-gray-900 ${getClientVehicules(selectedClient?._id || "") === "Non assigné" ? "text-orange-600 italic" : ""
+                        }`}>
                         {getClientVehicules(selectedClient?._id || "")}
                       </p>
-                      
-                      {/* CORRECTION 8: Section détaillée des véhicules dans le modal */}
+
+                      {/* Section détaillée des véhicules dans le modal */}
                       {selectedClient && clientVehicules[selectedClient._id] && clientVehicules[selectedClient._id].length > 0 && (
                         <div className="mt-6 pt-6 border-t border-gray-200">
                           <h4 className="text-sm font-medium text-gray-700 mb-3">Véhicules associés:</h4>
@@ -616,8 +831,68 @@ onClick={() => {
                           </div>
                         </div>
                       )}
+
+                      {/* Section historique des visites dans le modal view */}
+                      {selectedClient && clientsResume[selectedClient._id] && (
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                          <h4 className="text-sm font-medium text-gray-700 mb-3">Historique des visites:</h4>
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <History className="w-4 h-4" />
+                              <span className={clientsResume[selectedClient._id]?.nombreVisites === 0 ? "text-gray-400 italic" : "text-blue-600"}>
+                                {getClientVisitesInfo(selectedClient._id)}
+                              </span>
+                            </div>
+                            {clientsResume[selectedClient._id]?.derniereVisite && (
+                              <div className="flex items-center space-x-2">
+                                <Calendar className="w-4 h-4" />
+                                <span>Dernière visite: {getDerniereVisite(selectedClient._id)}</span>
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                  {clientsResume[selectedClient._id].derniereVisite.numero}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          {clientsResume[selectedClient._id]?.nombreVisites > 0 && (
+                            <button
+                              onClick={() => {
+                                closeModal();
+                                setTimeout(() => openModal("history", selectedClient), 100);
+                              }}
+                              className="mt-3 text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center space-x-1"
+                            >
+                              <History className="w-4 h-4" />
+                              <span>Voir l'historique complet</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
+
+                  {/* Contacts secondaires */}
+                  {selectedClient?.contactsSecondaires && selectedClient.contactsSecondaires.length > 0 && (
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">Conducteurs autorisés:</h4>
+                      <div className="space-y-2">
+                        {selectedClient.contactsSecondaires.map((contact, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <User className="w-4 h-4 text-gray-600" />
+                              <div>
+                                <span className="font-medium">{contact.nom}</span>
+                                <span className="text-gray-600 ml-2">({contact.relation})</span>
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              <Phone className="w-4 h-4 inline mr-1" />
+                              {contact.telephone}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -674,18 +949,17 @@ onClick={() => {
                           const isValid = /^[24579]\d{7}$/.test(cleaned);
 
                           if (cleaned && !isValid) {
-                            setError("Numéro tunisien invalide");
+                            setTelephoneError("Numéro tunisien invalide");
                           } else {
-                            setError("");
+                            setTelephoneError("");
                           }
                         }}
                         placeholder="Ex: 20123456"
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                          error ? 'border-red-500' : 'border-gray-300'
-                        }`}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${telephoneError ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         required
                       />
-                      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+                      {telephoneError && <p className="text-red-500 text-sm mt-1">{telephoneError}</p>}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -699,7 +973,7 @@ onClick={() => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-end space-x-3 pt-4">
                     <button
                       type="button"
@@ -711,7 +985,7 @@ onClick={() => {
                     </button>
                     <button
                       type="submit"
-                      disabled={loading}
+                      disabled={loading || telephoneError !== ""}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 flex items-center space-x-2"
                     >
                       {loading && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}

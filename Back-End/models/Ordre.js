@@ -77,6 +77,7 @@ const OrdreTravailSchema = new Schema({
   // Informations client (dénormalisées pour performance)
   clientInfo: {
     nom: { type: String, required: true },
+    ClientId: { type: Object, required: true },
     telephone: String,
     email: String,
     adresse: String

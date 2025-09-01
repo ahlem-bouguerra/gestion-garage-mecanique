@@ -35,7 +35,7 @@ const devisSchema = new mongoose.Schema({
   },
   clientId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Client',
+    ref: 'FicheClient', // Référence vers votre modèle Client
     required: true
   },
   clientName: {

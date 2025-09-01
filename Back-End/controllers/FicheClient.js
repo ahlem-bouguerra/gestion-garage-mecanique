@@ -1,5 +1,7 @@
 import FicheClient from "../models/FicheClient.js";
+import OrdreTravail from "../models/Ordre.js";
 import { validateTunisianPhone, validatePhoneMiddleware } from '../utils/phoneValidator.js';
+import mongoose from "mongoose";
 export const createFicheClient = async (req, res) => {
   try {
         // Valider le téléphone
@@ -90,5 +92,119 @@ export const deleteFicheClient = async (req, res) => {
   } catch (error) {
     console.error("❌ Erreur:", error.message);
     res.status(500).json({ error: error.message });
+  }
+};
+
+
+// Route pour récupérer l'historique des visites d'un client
+export const getHistoriqueVisiteByIdClient = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    
+    console.log('🔍 Recherche historique pour client:', clientId);
+
+    // Vérifier que le client existe
+    const client = await FicheClient.findById(clientId);
+    if (!client) {
+      return res.status(404).json({
+        success: false,
+        error: 'Client non trouvé'
+      });
+    }
+
+    // Rechercher tous les ordres terminés pour ce client
+    const ordresTermines = await OrdreTravail.find({
+      'clientInfo.ClientId': new mongoose.Types.ObjectId(clientId),
+      status: 'termine'
+    })
+    .populate('atelierId', 'name localisation')
+    .populate('taches.serviceId', 'name')
+    .populate('taches.mecanicienId', 'nom')
+    .sort({ dateFinReelle: -1 }) // Trier par date de fin la plus récente
+    .select('numeroOrdre dateCommence dateFinReelle atelierNom taches vehiculeInfo totalHeuresReelles');
+
+    console.log(`✅ Trouvé ${ordresTermines.length} ordres terminés`);
+
+    // Formater les données pour l'affichage
+    const historiqueVisites = ordresTermines.map(ordre => ({
+      id: ordre._id,
+      numeroOrdre: ordre.numeroOrdre,
+      dateVisite: ordre.dateFinReelle || ordre.dateCommence,
+      vehicule: ordre.vehiculeInfo,
+      atelier: ordre.atelierNom,
+      dureeHeures: ordre.totalHeuresReelles || 0,
+      taches: ordre.taches.map(tache => ({
+        description: tache.description,
+        service: tache.serviceNom,
+        mecanicien: tache.mecanicienNom,
+        heuresReelles: tache.heuresReelles || 0,
+        status: tache.status
+      })),
+      // Résumé des services effectués
+      servicesEffectues: [...new Set(ordre.taches.map(t => t.serviceNom))].join(', ')
+    }));
+
+    // Calculer quelques statistiques
+    const statistiques = {
+      nombreVisites: historiqueVisites.length,
+      derniereVisite: historiqueVisites.length > 0 ? historiqueVisites[0].dateVisite : null,
+      totalHeuresTravail: historiqueVisites.reduce((total, visite) => total + visite.dureeHeures, 0),
+      servicesUniques: [...new Set(historiqueVisites.flatMap(v => v.taches.map(t => t.service)))].length
+    };
+
+    res.json({
+      success: true,
+      client: {
+        id: client._id,
+        nom: client.nom,
+        type: client.type
+      },
+      historiqueVisites,
+      statistiques
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur récupération historique client:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la récupération de l\'historique client'
+    });
+  }
+};
+
+// Route pour récupérer un résumé rapide des visites (pour affichage sur la carte)
+export const getHistoryVisite = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    
+    // Compter les ordres terminés
+    const nombreVisites = await OrdreTravail.countDocuments({
+      'clientInfo.ClientId': new mongoose.Types.ObjectId(clientId),
+      status: 'termine'
+    });
+
+    // Trouver la dernière visite
+    const derniereVisite = await OrdreTravail.findOne({
+      'clientInfo.ClientId': new mongoose.Types.ObjectId(clientId),
+      status: 'termine'
+    })
+    .sort({ dateFinReelle: -1 })
+    .select('dateFinReelle numeroOrdre');
+
+    res.json({
+      success: true,
+      nombreVisites,
+      derniereVisite: derniereVisite ? {
+        date: derniereVisite.dateFinReelle,
+        numero: derniereVisite.numeroOrdre
+      } : null
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur résumé visites:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la récupération du résumé'
+    });
   }
 };
