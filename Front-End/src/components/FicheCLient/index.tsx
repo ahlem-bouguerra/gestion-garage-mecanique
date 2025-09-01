@@ -90,6 +90,7 @@ export default function ClientForm() {
   const [vehicules, setVehicules] = useState<Vehicule[]>([]);
   const [clientVehicules, setClientVehicules] = useState<{ [clientId: string]: Vehicule[] }>({});
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [dateFilter, setDateFilter] = useState("tous");
 
   useEffect(() => {
     fetchAllClients();
@@ -174,16 +175,57 @@ export default function ClientForm() {
     return `${vehiculesClient.length} véhicules associés`;
   };
 
-  const filteredClients = useMemo(() => {
-    return clients.filter(client => {
-      const vehiculeInfo = getClientVehicules(client._id);
-      const matchesSearch = client.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehiculeInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.email.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = filterType === "tous" || client.type === filterType;
-      return matchesSearch && matchesType;
-    });
-  }, [clients, searchTerm, filterType, clientVehicules]);
+  const filterByDate = (client) => {
+  const resume = clientsResume[client._id];
+  
+  if (dateFilter === "tous") return true;
+  
+  if (dateFilter === "jamais") {
+    return !resume || resume.nombreVisites === 0;
+  }
+  
+  if (!resume || !resume.derniereVisite) return false;
+  
+  const derniereVisiteDate = new Date(resume.derniereVisite.date);
+  const now = new Date();
+  
+  switch (dateFilter) {
+    case "7jours":
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return derniereVisiteDate >= weekAgo;
+    case "30jours":
+      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      return derniereVisiteDate >= monthAgo;
+    case "90jours":
+      const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      return derniereVisiteDate >= quarterAgo;
+    case "6mois":
+      const sixMonthsAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+      return derniereVisiteDate >= sixMonthsAgo;
+    case "1an":
+      const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      return derniereVisiteDate >= yearAgo;
+    case "plus1an":
+      const yearAgoPlus = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      return derniereVisiteDate < yearAgoPlus;
+    default:
+      return true;
+  }
+};
+
+// 3. Modifiez votre useMemo comme ceci :
+const filteredClients = useMemo(() => {
+  return clients.filter(client => {
+    const vehiculeInfo = getClientVehicules(client._id);
+    const matchesSearch = client.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehiculeInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filterType === "tous" || client.type === filterType;
+    const matchesDate = filterByDate(client);
+    return matchesSearch && matchesType && matchesDate;
+  });
+}, [clients, searchTerm, filterType, dateFilter, clientVehicules, clientsResume]);
+
 
   const fetchAllClients = async (): Promise<void> => {
     setLoading(true);
@@ -608,6 +650,23 @@ export default function ClientForm() {
                 <option value="professionnel">Professionnels</option>
               </select>
             </div>
+            <div className="flex items-center space-x-2">
+  <Calendar className="w-4 h-4 text-gray-500" />
+  <select
+    value={dateFilter}
+    onChange={(e) => setDateFilter(e.target.value)}
+    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+  >
+    <option value="tous">Toutes les dates</option>
+    <option value="jamais">Jamais visité</option>
+    <option value="7jours">7 derniers jours</option>
+    <option value="30jours">30 derniers jours</option>
+    <option value="90jours">3 derniers mois</option>
+    <option value="6mois">6 derniers mois</option>
+    <option value="1an">Dernière année</option>
+    <option value="plus1an">Plus d'1 an</option>
+  </select>
+</div>
           </div>
         </div>
 
