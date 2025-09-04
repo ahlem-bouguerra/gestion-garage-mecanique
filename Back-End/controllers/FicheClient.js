@@ -120,8 +120,8 @@ export const getHistoriqueVisiteByIdClient = async (req, res) => {
     .populate('atelierId', 'name localisation')
     .populate('taches.serviceId', 'name')
     .populate('taches.mecanicienId', 'nom')
-    .sort({ dateFinReelle: -1 }) // Trier par date de fin la plus récente
-    .select('numeroOrdre dateCommence dateFinReelle atelierNom taches vehiculeInfo totalHeuresReelles');
+    .sort({ dateFinPrevue: -1 }) // Trier par date de fin la plus récente
+    .select('numeroOrdre dateCommence dateFinPrevue atelierNom taches vehiculeInfo totalHeuresEstimees');
 
     console.log(`✅ Trouvé ${ordresTermines.length} ordres terminés`);
 
@@ -129,15 +129,15 @@ export const getHistoriqueVisiteByIdClient = async (req, res) => {
     const historiqueVisites = ordresTermines.map(ordre => ({
       id: ordre._id,
       numeroOrdre: ordre.numeroOrdre,
-      dateVisite: ordre.dateFinReelle || ordre.dateCommence,
+      dateVisite: ordre.dateFinPrevue,
       vehicule: ordre.vehiculeInfo,
       atelier: ordre.atelierNom,
-      dureeHeures: ordre.totalHeuresReelles || 0,
+      dureeHeures: ordre.totalHeuresEstimees || 0,
       taches: ordre.taches.map(tache => ({
         description: tache.description,
         service: tache.serviceNom,
         mecanicien: tache.mecanicienNom,
-        heuresReelles: tache.heuresReelles || 0,
+        heuresReelles: tache.estimationHeures || 0,
         status: tache.status
       })),
       // Résumé des services effectués
@@ -188,15 +188,15 @@ export const getHistoryVisite = async (req, res) => {
       'clientInfo.ClientId': new mongoose.Types.ObjectId(clientId),
       status: 'termine'
     })
-    .sort({ dateFinReelle: -1 })
-    .select('dateFinReelle numeroOrdre');
+    .sort({ dateFinPrevue: -1 })
+    .select('dateFinPrevue numeroOrdre');
 
     res.json({
       success: true,
       nombreVisites,
       derniereVisite: derniereVisite ? {
-        date: derniereVisite.dateFinReelle,
-        numero: derniereVisite.numeroOrdre
+        date: derniereVisite.dateFinPrevue,
+        
       } : null
     });
 

@@ -167,14 +167,6 @@ const OrdreTravailSchema = new Schema({
   toObject: { virtuals: true }
 });
 
-// Index pour la performance
-OrdreTravailSchema.index({ numeroOrdre: 1 });
-OrdreTravailSchema.index({ devisId: 1 });
-OrdreTravailSchema.index({ atelierId: 1 });
-OrdreTravailSchema.index({ status: 1 });
-OrdreTravailSchema.index({ priorite: 1 });
-OrdreTravailSchema.index({ dateCommence: 1 });
-OrdreTravailSchema.index({ createdAt: -1 });
 
 // Virtual pour calculer le pourcentage de progression
 OrdreTravailSchema.virtual('progressionPourcentage').get(function() {

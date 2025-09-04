@@ -103,6 +103,18 @@ export default function ClientForm() {
     }
   }, [clients]);
 
+
+    useEffect(() => {
+      const header = document.querySelector('header');
+      if (!header) return;
+  
+      if ( loadingHistory || selectedClient ) {
+        header.classList.add("hidden");
+      } else {
+        header.classList.remove("hidden");
+      }
+    }, [loadingHistory ,selectedClient ]);
+
   const fetchAllVehicules = async (): Promise<void> => {
     try {
       console.log("🚗 Chargement de tous les véhicules...");
@@ -348,8 +360,9 @@ const filteredClients = useMemo(() => {
       return "";
     }
 
-    const date = new Date(resume.derniereVisite.date);
-    return date.toLocaleDateString('fr-FR');
+   const date = new Date(resume.derniereVisite.date);
+return date.toLocaleDateString('fr-FR');
+
   };
 
   const createClient = async (clientData: any): Promise<any> => {
@@ -775,9 +788,7 @@ const filteredClients = useMemo(() => {
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4" />
                         <span>Dernière visite: {getDerniereVisite(client._id)}</span>
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                          {clientsResume[client._id].derniereVisite.numero}
-                        </span>
+                        
                       </div>
                     )}
                   </div>
@@ -906,9 +917,7 @@ const filteredClients = useMemo(() => {
                               <div className="flex items-center space-x-2">
                                 <Calendar className="w-4 h-4" />
                                 <span>Dernière visite: {getDerniereVisite(selectedClient._id)}</span>
-                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                  {clientsResume[selectedClient._id].derniereVisite.numero}
-                                </span>
+                                
                               </div>
                             )}
                           </div>

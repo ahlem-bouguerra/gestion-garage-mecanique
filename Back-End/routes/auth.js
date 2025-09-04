@@ -17,21 +17,8 @@ import { sendDevisByEmail } from '../utils/sendDevis.js';
 import {createMecanicien,updateMecanicien,deleteMecanicien,getAllMecaniciens,getMecanicienById,getMecaniciensByService} from "../controllers/mecanicienController.js";
 import {getAllAteliers,getAtelierById,createAtelier,updateAtelier,deleteAtelier}from '../controllers/atelierController.js';
 import {getAllServices,getServiceById,createService,updateService,deleteService}from '../controllers/serviceController.js';
-import {
-  createOrdreTravail,
-  getOrdresTravail,
-  getOrdreTravailById,
-  updateStatusOrdreTravail,
-  demarrerOrdre,
-  terminerOrdre,
-  getStatistiques,
-  supprimerOrdreTravail,
-  getOrdresParDevisId,
-  getOrdresByStatus,
-  getOrdresByAtelier,
-  updateOrdreTravail
-} from '../controllers/ordreController.js';
-import { get } from "mongoose";
+import {createOrdreTravail,getOrdresTravail,getOrdreTravailById,updateStatusOrdreTravail,demarrerOrdre,terminerOrdre,getStatistiques,supprimerOrdreTravail,getOrdresParDevisId,getOrdresByStatus,getOrdresByAtelier,updateOrdreTravail} from '../controllers/ordreController.js';
+import { CreateFacture, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture } from '../controllers/facturesController.js';
 
 const router = express.Router();
 
@@ -432,5 +419,13 @@ router.get("/ordres/status/:status", getOrdresByStatus);
 router.get("/ordres/atelier/:atelierId", getOrdresByAtelier);
 
 
+router.post('/create/:devisId', CreateFacture);
+router.get('/getFactures',GetAllFactures);
+router.get('/getFacture/:id',GetFactureById);
+router.get('/factureByDevis/:devisId', getFactureByDevis);
+router.put('/:id/payment',MarquerFacturePayed);
+router.put('/:id',UpdateFacture);
+router.delete('/:id',DeleteFacture);
+router.get('/stats/summary',StaticFacture);
 
 export default router;

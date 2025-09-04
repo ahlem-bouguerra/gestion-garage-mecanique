@@ -22,13 +22,16 @@ const GarageQuoteSystem = () => {
   const [loadingVehicules, setLoadingVehicules] = useState(false);
   const [tvaRate, setTvaRate] = useState(20); // TVA par défaut à 20%
   const [maindoeuvre, setMaindoeuvre] = useState(0);
-  const [estimatedTime, setEstimatedTime] = useState({days: 0,hours: 0,minutes: 0});
+  const [estimatedTime, setEstimatedTime] = useState({ days: 0, hours: 0, minutes: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [editingQuote, setEditingQuote] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [factureExists, setFactureExists] = useState({});
+  const [showFactureModal, setShowFactureModal] = useState(false);
+  const [selectedFacture, setSelectedFacture] = useState(null);
   const [invoiceData, setInvoiceData] = useState(null);
   const router = useRouter();
   const [filters, setFilters] = useState({
@@ -80,17 +83,27 @@ const GarageQuoteSystem = () => {
     refuse: X
   };
 
+  useEffect(() => {
+    const header = document.querySelector('header');
+    if (!header) return;
+
+    if (selectedInvoice || selectedQuote || selectedQuote) {
+      header.classList.add("hidden");
+    } else {
+      header.classList.remove("hidden");
+    }
+  }, [selectedInvoice, selectedQuote , selectedQuote]);
+
 useEffect(() => {
   const header = document.querySelector('header');
   if (!header) return;
 
-  if (selectedInvoice || selectedQuote) {
+  if (showFactureModal || selectedFacture) {
     header.classList.add("hidden");
   } else {
     header.classList.remove("hidden");
   }
-}, [selectedInvoice, selectedQuote]);
-
+}, [showFactureModal, selectedFacture]);
 
   const generateInvoice = (quote) => {
     const invoice = {
@@ -107,13 +120,13 @@ useEffect(() => {
 
   // Fonction pour imprimer/télécharger la facture (PDF)
   const printInvoice = () => {
-  const content = document.getElementById("invoice-content"); // ton conteneur
-  if (!content) return;
+    const content = document.getElementById("invoice-content"); // ton conteneur
+    if (!content) return;
 
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) return;
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
 
-  printWindow.document.write(`
+    printWindow.document.write(`
     <html>
       <head>
         <title>Page 2</title>
@@ -128,11 +141,11 @@ useEffect(() => {
     </html>
   `);
 
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-  printWindow.close();
-};
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
 
 
 
@@ -156,7 +169,7 @@ useEffect(() => {
       dateFin: ''
     });
     // Recharger tous les devis sans filtres
-    loadDevis({});
+    loadDevisWithFactures({});
   };
 
   // 🔧 4. FONCTION POUR APPLIQUER LES FILTRES
@@ -181,7 +194,7 @@ useEffect(() => {
     }
 
     console.log('🔍 Filtres appliqués:', apiFilters);
-    loadDevis(apiFilters);
+    loadDevisWithFactures(apiFilters);
   };
 
   const calculateTotal = (services, maindoeuvre = 0) => {
@@ -197,12 +210,11 @@ useEffect(() => {
     };
   };
 
-  const loadDevis = async (filterParams = {}) => {
+  const loadDevisWithFactures = async (filterParams = {}) => {
     try {
       setLoading(true);
       const response = await devisApi.getAll(filterParams);
 
-      // Recalculer les totaux pour chaque devis
       const devisWithCalculatedTotals = (response.data || []).map(devis => {
         const servicesWithTotal = (devis.services || []).map(service => ({
           ...service,
@@ -226,7 +238,18 @@ useEffect(() => {
 
       setQuotes(devisWithCalculatedTotals);
 
-      // Message informatif
+      // Vérifier les factures existantes pour chaque devis accepté
+      const facturesCheck = {};
+      for (const devis of devisWithCalculatedTotals) {
+        if (devis.status === 'accepte') {
+          const facture = await checkFactureExists(devis.id);
+          if (facture) {
+            facturesCheck[devis.id] = facture;
+          }
+        }
+      }
+      setFactureExists(facturesCheck);
+
       if (Object.keys(filterParams).length > 0) {
         showSuccess(`${devisWithCalculatedTotals.length} devis trouvé(s) avec les filtres appliqués`);
       }
@@ -237,6 +260,7 @@ useEffect(() => {
       setLoading(false);
     }
   };
+
 
   const saveQuote = async () => {
     try {
@@ -291,7 +315,7 @@ useEffect(() => {
       setIsEditMode(false);
       setEstimatedTime({ days: 0, hours: 0, minutes: 0 });
 
-      await loadDevis();
+      await loadDevisWithFactures();
       setActiveTab('list');
 
     } catch (err) {
@@ -385,7 +409,6 @@ useEffect(() => {
 
 
 
-  // Modifier cette fonction
   const fetchClients = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/clients/noms');
@@ -399,8 +422,6 @@ useEffect(() => {
       setFilteredClients([]);
     }
   };
-
-
 
   const loadVehiculesByClient = async (clientId) => {
     if (!clientId) {
@@ -666,37 +687,145 @@ useEffect(() => {
     setTimeout(() => setSuccess(''), 3000);
   };
 
-const createWorkOrder = async (quote) => {
-  try {
-    // Vérifier si un ordre existe déjà pour ce devis
-    const response = await axios.get(`http://localhost:5000/api/ordre-travail/by-devis/${quote.id}`);
-    
-    if (response.data.exists) {
-      // Ordre existe déjà - rediriger vers les détails
-      localStorage.setItem('selectedOrdreToView', JSON.stringify(response.data.ordre));
-      router.push('/gestion-ordres?tab=list&view=details');
-    } else {
-      // Pas d'ordre - rediriger vers création
+  const createWorkOrder = async (quote) => {
+    try {
+      // Vérifier si un ordre existe déjà pour ce devis
+      const response = await axios.get(`http://localhost:5000/api/ordre-travail/by-devis/${quote.id}`);
+
+      if (response.data.exists) {
+        // Ordre existe déjà - rediriger vers les détails
+        localStorage.setItem('selectedOrdreToView', JSON.stringify(response.data.ordre));
+        router.push('/gestion-ordres?tab=list&view=details');
+      } else {
+        // Pas d'ordre - rediriger vers création
+        localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
+        router.push('/gestion-ordres');
+      }
+    } catch (error) {
+      // En cas d'erreur, procéder comme avant (création)
       localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
       router.push('/gestion-ordres');
     }
-  } catch (error) {
-    // En cas d'erreur, procéder comme avant (création)
-    localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
-    router.push('/gestion-ordres');
-  }
-};
+  };
   // Ajouter après les autres useState
   useEffect(() => {
     fetchClients();
     loadPieces();
-    loadDevis();
+    loadDevisWithFactures();
 
   }, []);
 
   const openAddPieceModal = (serviceIndex) => {
     setCurrentServiceIndex(serviceIndex);
     setShowAddPieceModal(true);
+  };
+
+
+  const checkFactureExists = async (devisId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/devis/${devisId}`);
+      return response.data.success ? response.data.data : null;
+    } catch (error) {
+      if (error.response?.status === 404) {
+        return null; // Pas de facture trouvée
+      }
+      console.error('Erreur lors de la vérification de facture:', error);
+      return null;
+    }
+  };
+
+
+
+  // 3. Fonction pour créer une facture à partir d'un devis
+  const createFactureFromDevis = async (devis) => {
+    try {
+      setLoading(true);
+
+      // Vérifier d'abord si une facture existe déjà
+      const existingFacture = await checkFactureExists(devis._id);
+
+      if (existingFacture) {
+        setSelectedFacture(existingFacture);
+        setShowFactureModal(true);
+        showSuccess('Facture déjà existante pour ce devis');
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `http://localhost:5000/api/create/${devis._id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setSelectedFacture(response.data.facture);
+        setShowFactureModal(true);
+        showSuccess('Facture créée avec succès !');
+
+        // Mettre à jour l'état local pour indiquer qu'une facture existe
+        setFactureExists(prev => ({
+          ...prev,
+          [devis.id]: response.data.facture
+        }));
+      }
+    } catch (error) {
+      console.error('Erreur lors de la création de facture:', error);
+      showError(error.response?.data?.message || 'Erreur lors de la création de facture');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fonction pour voir/gérer une facture existante
+  const viewFacture = async (devisId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/factureByDevis/${devisId}`);
+
+      if (response.data) {
+        setSelectedFacture(response.data);
+        setShowFactureModal(true);
+      } else {
+        showError('Aucune facture trouvée pour ce devis');
+      }
+    } catch (error) {
+      if (error.response?.status === 404) {
+        showError('Aucune facture trouvée pour ce devis');
+      } else {
+        showError('Erreur lors de la récupération de la facture');
+      }
+    }
+  };
+
+
+  // 5. Fonction pour marquer une facture comme payée
+  const markFactureAsPaid = async (factureId, paymentData) => {
+    try {
+      setLoading(true);
+      const response = await axios.put(
+        `http://localhost:5000/api/${factureId}/payment`,
+        paymentData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setSelectedFacture(response.data.facture);
+        showSuccess('Paiement enregistré avec succès');
+      }
+    } catch (error) {
+      showError('Erreur lors de l\'enregistrement du paiement');
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -1011,15 +1140,37 @@ const createWorkOrder = async (quote) => {
                             )}
 
                             {/* NOUVEAU: Bouton Facture - visible seulement pour les devis acceptés */}
-                            {quote.status === 'accepte' && (
-                              <button
-                                onClick={() => generateInvoice(quote)}
-                                className="text-purple-600 hover:text-purple-900"
-                                title="Générer facture"
-                              >
-                                <FileText className="h-4 w-4" />
-                              </button>
-                            )}
+
+                            <button
+                              onClick={async () => {
+                                try {
+                                  const response = await axios.get(
+                                    `http://localhost:5000/api/factureByDevis/${quote._id}`
+                                  );
+                                  setSelectedFacture(response.data);
+                                  setShowFactureModal(true);
+                                } catch (error) {
+                                  console.error("Erreur lors de la récupération de la facture:", error);
+                                  showError("Aucune facture trouvée pour ce devis");
+                                }
+                              }}
+                              className="text-purple-600 hover:text-purple-900 text-xs bg-purple-100 px-2 py-1 rounded"
+                              title="Voir facture existante"
+                            >
+                              <FileText className="h-4 w-4 inline mr-1" />
+                              Voir
+                            </button>
+
+
+
+
+                            <button
+                              onClick={() => createFactureFromDevis(quote)}
+                              className="text-blue-600 hover:text-blue-900"
+                              title="Créer facture"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </button>
 
                             <button
                               onClick={() => deleteQuote(quote.id)}
@@ -1140,7 +1291,7 @@ const createWorkOrder = async (quote) => {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              
+
 
             </div>
 
@@ -1219,7 +1370,7 @@ const createWorkOrder = async (quote) => {
                           </div>
                         )}
                       </div>
-                      
+
 
                       {/* Modal pour ajouter une nouvelle pièce */}
                       {showAddPieceModal && (
@@ -1292,7 +1443,7 @@ const createWorkOrder = async (quote) => {
                                 <span>Créer la pièce</span>
                               </button>
                             </div>
-                            
+
                           </div>
                         </div>
                       )}
@@ -1345,7 +1496,7 @@ const createWorkOrder = async (quote) => {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Taux TVA (%) *
                 </label>
@@ -1375,60 +1526,60 @@ const createWorkOrder = async (quote) => {
                 />
 
               </div>
-<div>
-  <label className="block text-sm font-medium text-gray-700 mb-2">
-    Temps Estimé
-  </label>
-  <div className="flex gap-2">
-    <div className="flex flex-col">
-      <input
-        type="number"
-        min="0"
-        value={estimatedTime.days}
-        onChange={(e) => setEstimatedTime({
-          ...estimatedTime, 
-          days: parseInt(e.target.value) || 0
-        })}
-        className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Jours"
-      />
-      <span className="text-xs text-gray-500 text-center mt-1">Jours</span>
-    </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Temps Estimé
+                </label>
+                <div className="flex gap-2">
+                  <div className="flex flex-col">
+                    <input
+                      type="number"
+                      min="0"
+                      value={estimatedTime.days}
+                      onChange={(e) => setEstimatedTime({
+                        ...estimatedTime,
+                        days: parseInt(e.target.value) || 0
+                      })}
+                      className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Jours"
+                    />
+                    <span className="text-xs text-gray-500 text-center mt-1">Jours</span>
+                  </div>
 
-    <div className="flex flex-col">
-      <input
-        type="number"
-        min="0"
-        max="23"
-        value={estimatedTime.hours}
-        onChange={(e) => setEstimatedTime({
-          ...estimatedTime, 
-          hours: parseInt(e.target.value) || 0
-        })}
-        className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Heures"
-      />
-      <span className="text-xs text-gray-500 text-center mt-1">Heures</span>
-    </div>
+                  <div className="flex flex-col">
+                    <input
+                      type="number"
+                      min="0"
+                      max="23"
+                      value={estimatedTime.hours}
+                      onChange={(e) => setEstimatedTime({
+                        ...estimatedTime,
+                        hours: parseInt(e.target.value) || 0
+                      })}
+                      className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Heures"
+                    />
+                    <span className="text-xs text-gray-500 text-center mt-1">Heures</span>
+                  </div>
 
-    <div className="flex flex-col">
-      <input
-        type="number"
-        min="0"
-        max="59"
-        value={estimatedTime.minutes}
-        onChange={(e) => setEstimatedTime({
-          ...estimatedTime, 
-          minutes: parseInt(e.target.value) || 0
-        })}
-        className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Minutes"
-      />
-      <span className="text-xs text-gray-500 text-center mt-1">Minutes</span>
-    </div>
-  </div>
-</div>
+                  <div className="flex flex-col">
+                    <input
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={estimatedTime.minutes}
+                      onChange={(e) => setEstimatedTime({
+                        ...estimatedTime,
+                        minutes: parseInt(e.target.value) || 0
+                      })}
+                      className="w-20 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Minutes"
+                    />
+                    <span className="text-xs text-gray-500 text-center mt-1">Minutes</span>
+                  </div>
+                </div>
               </div>
+            </div>
 
             {/* Summary */}
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
@@ -1506,8 +1657,8 @@ const createWorkOrder = async (quote) => {
                     <p className="text-gray-600">Véhicule: {selectedQuote.vehicleInfo}</p>
                     <p className="text-gray-600">Date d'inspection: {selectedQuote.inspectionDate}</p>
                     <p className="text-gray-600">
-                    Temps estimé: {selectedQuote.estimatedTime?.days || 0}j {selectedQuote.estimatedTime?.hours || 0}h {selectedQuote.estimatedTime?.minutes || 0}min
-                  </p>
+                      Temps estimé: {selectedQuote.estimatedTime?.days || 0}j {selectedQuote.estimatedTime?.hours || 0}h {selectedQuote.estimatedTime?.minutes || 0}min
+                    </p>
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900 mb-2">Statut</h3>
@@ -1599,7 +1750,9 @@ const createWorkOrder = async (quote) => {
             </div>
           </div>
         )}
-        {selectedInvoice && (
+
+        {showFactureModal && selectedFacture && (
+                  
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full m-4 max-h-screen overflow-y-auto">
              
@@ -1617,9 +1770,8 @@ const createWorkOrder = async (quote) => {
                   {/* Logo et titre facture */}
                   <div className="text-right">
                     <div className="text-gray-600 space-y-1">
-                      <p><strong>Date facture:</strong> {new Date(selectedInvoice.invoiceDate).toLocaleDateString('fr-FR')}</p>
-                      <p><strong>Date d'échéance:</strong> {new Date(selectedInvoice.dueDate).toLocaleDateString('fr-FR')}</p>
-                      <p><strong>Devis N°:</strong> {selectedInvoice.id}</p>
+                      <p><strong>Date facture:</strong> {new Date(selectedFacture.invoiceDate).toLocaleDateString('fr-FR')}</p>
+                      <p><strong>Date d'échéance:</strong> {new Date(selectedFacture.dueDate).toLocaleDateString('fr-FR')}</p>
                     </div>
                   </div>
                 </div>
@@ -1628,9 +1780,9 @@ const createWorkOrder = async (quote) => {
                 <div className="mb-8">
                   <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-300 pb-1">FACTURER À</h3>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="font-semibold text-lg">{selectedInvoice.clientName}</p>
-                    <p className="text-gray-600 mt-1">Véhicule: {selectedInvoice.vehicleInfo}</p>
-                    <p className="text-gray-600">Date d'intervention: {new Date(selectedInvoice.inspectionDate).toLocaleDateString('fr-FR')}</p>
+                    <p className="font-semibold text-lg">{selectedFacture.clientName}</p>
+                    <p className="text-gray-600 mt-1">Véhicule: {selectedFacture.vehicleInfo}</p>
+                    <p className="text-gray-600">Date d'intervention: {new Date(selectedFacture.inspectionDate).toLocaleDateString('fr-FR')}</p>
                   </div>
                 </div>
 
@@ -1648,7 +1800,7 @@ const createWorkOrder = async (quote) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedInvoice.services.map((service, index) => (
+                        {selectedFacture.services.map((service, index) => (
                           <tr key={index} className="hover:bg-gray-50">
                             <td className="border border-gray-300 px-4 py-3">{service.piece}</td>
                             <td className="border border-gray-300 px-4 py-3 text-center">{service.quantity}</td>
@@ -1660,13 +1812,13 @@ const createWorkOrder = async (quote) => {
                         ))}
 
                         {/* Ligne main d'œuvre si présente */}
-                        {selectedInvoice.maindoeuvre > 0 && (
+                        {selectedFacture.maindoeuvre > 0 && (
                           <tr className="hover:bg-gray-50">
                             <td className="border border-gray-300 px-4 py-3 font-medium">Main d'œuvre</td>
                             <td className="border border-gray-300 px-4 py-3 text-center">1</td>
-                            <td className="border border-gray-300 px-4 py-3 text-right">{(selectedInvoice.maindoeuvre || 0).toFixed(3)} DT</td>
+                            <td className="border border-gray-300 px-4 py-3 text-right">{(selectedFacture.maindoeuvre || 0).toFixed(3)} DT</td>
                             <td className="border border-gray-300 px-4 py-3 text-right font-semibold">
-                              {(selectedInvoice.maindoeuvre || 0).toFixed(3)} DT
+                              {(selectedFacture.maindoeuvre || 0).toFixed(3)} DT
                             </td>
                           </tr>
                         )}
@@ -1682,16 +1834,16 @@ const createWorkOrder = async (quote) => {
                       <div className="flex justify-between text-gray-700">
                         <span>Total HT:</span>
                         <span className="font-semibold">
-                          {((selectedInvoice.totalHT || 0) + (selectedInvoice.maindoeuvre || 0)).toFixed(3)} DT
+                          {((selectedFacture.totalHT || 0)).toFixed(3)} DT
                         </span>
                       </div>
 
                       <div className="flex justify-between text-gray-700">
-                        <span>TVA ({selectedInvoice.tvaRate || 20}%):</span>
+                        <span>TVA ({selectedFacture.tvaRate || 20}%):</span>
                         <span className="font-semibold">
                           {(
-                            ((selectedInvoice.totalHT || 0) + (selectedInvoice.maindoeuvre || 0)) *
-                            ((selectedInvoice.tvaRate || 20) / 100)
+                            ((selectedFacture.totalHT || 0)) *
+                            ((selectedFacture.tvaRate || 20) / 100)
                           ).toFixed(3)} DT
                         </span>
                       </div>
@@ -1701,10 +1853,9 @@ const createWorkOrder = async (quote) => {
                           <span>Total TTC:</span>
                           <span>
                             {(
-                              (selectedInvoice.totalHT || 0) +
-                              (selectedInvoice.maindoeuvre || 0) +
-                              ((selectedInvoice.totalHT || 0) + (selectedInvoice.maindoeuvre || 0)) *
-                              ((selectedInvoice.tvaRate || 20) / 100)
+                              (selectedFacture.totalHT || 0) +
+                              ((selectedFacture.totalHT || 0)) *
+                              ((selectedFacture.tvaRate || 20) / 100)
                             ).toFixed(3)} DT
                           </span>
                         </div>
@@ -1733,17 +1884,19 @@ const createWorkOrder = async (quote) => {
 
               {/* Actions - Masquées lors de l'impression */}
               <div className="p-6 border-t border-gray-200 flex space-x-4 no-print">
-                <button
-                  onClick={printInvoice}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                >
-                  <FileText className="h-4 w-4" />
-                  <span>Imprimer / PDF</span>
-                </button>
+                 <button
+            onClick={() => window.print()}
+            className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            Imprimer
+          </button>
 
 
                 <button
-                  onClick={() => setSelectedInvoice(null)}
+                  onClick={() => setSelectedFacture(null)}
                   className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   Fermer
@@ -1751,9 +1904,12 @@ const createWorkOrder = async (quote) => {
               </div>
             </div>
           </div>
+        
         )}
       </div>
     </div>
+
+
   );
 };
 

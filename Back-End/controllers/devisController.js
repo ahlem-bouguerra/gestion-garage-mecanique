@@ -40,7 +40,7 @@ export const createDevis = async (req, res) => {
       inspectionDate,
       services: processedServices,
       totalServicesHT: totalServicesHT,
-      totalHT: totalHT, // ✅ Stocke seulement le total des services
+      totalHT: totalHT, 
       totalTTC,
       tvaRate: tvaRate || 20,
       maindoeuvre: maindoeuvre || 0,
@@ -110,19 +110,29 @@ export const getAllDevis = async (req, res) => {
 
 
 // GET /api/vehicules/:id - Récupérer un véhicule spécifique
+// Version corrigée de getDevisById
 export const getDevisById = async (req, res) => {
   try {
     const { id } = req.params;
     
-    const devis = await Devis.findById(id);
+    let devis;
+    
+    // Vérifier si l'ID ressemble à un ObjectId MongoDB (24 caractères hex)
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      // C'est un ObjectId MongoDB
+      devis = await Devis.findById(id);
+    } else {
+      // C'est un ID personnalisé (DEV001, DEV002, etc.)
+      devis = await Devis.findOne({ id: id });
+    }
     
     if (!devis) {
-      return res.status(404).json({ error: 'devis non trouvé' });
+      return res.status(404).json({ error: 'Devis non trouvé' });
     }
     
     res.json(devis);
   } catch (error) {
-    console.error("❌ Erreur getdevisById:", error);
+    console.error("❌ Erreur getDevisById:", error);
     res.status(500).json({ error: error.message });
   }
 };

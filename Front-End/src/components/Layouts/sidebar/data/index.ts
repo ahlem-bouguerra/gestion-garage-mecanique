@@ -40,6 +40,12 @@ export const NAV_DATA = [
         icon: FileText,
         items: [],
       },
+         {
+        title: "gestion-factures",
+        url: "/gestion-factures",
+        icon: Icons.FourCircle,
+        items: [],
+      },
       {
   title: "Gestion Garage",
   url: "/gestion-mecanicien",

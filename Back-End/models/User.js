@@ -65,7 +65,6 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index géospatial pour les requêtes de géolocalisation
-userSchema.index({ location: '2dsphere' });
+
 
 export const User = mongoose.model("User", userSchema);

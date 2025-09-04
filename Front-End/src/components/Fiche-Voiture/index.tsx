@@ -55,9 +55,6 @@ interface VehiculeFormData {
     typeCarburant: string;
 }
 
-
-
-// ✅ NOUVELLES INTERFACES POUR LA VALIDATION
 interface ValidationError {
     field: string;
     message: string;
@@ -165,8 +162,6 @@ class SmartImmatriculationValidator {
     }
 }
 
-
-// ✅ CLASSE DE VALIDATION
 class FormValidator {
     // Validation email
     static validateEmail(email: string): FieldValidation {
@@ -306,7 +301,6 @@ class FormValidator {
     }
 }
 
-// ✅ COMPOSANT DE CHAMP AVEC VALIDATION
 interface ValidatedFieldProps {
     label: string;
     type?: string;
@@ -330,6 +324,7 @@ const ValidatedField: React.FC<ValidatedFieldProps> = ({
     maxLength,
     children
 }) => {
+    const safeValue = value ?? "";
     const getValidationColor = () => {
         if (!validation) return 'border-gray-300';
 
@@ -372,7 +367,7 @@ const ValidatedField: React.FC<ValidatedFieldProps> = ({
             <div className="relative">
                 {children ? (
                     <select
-                        value={value}
+                        value={safeValue}
                         onChange={(e) => onChange(e.target.value)}
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${getValidationColor()}`}
                     >
@@ -381,7 +376,7 @@ const ValidatedField: React.FC<ValidatedFieldProps> = ({
                 ) : (
                     <input
                         type={type}
-                        value={value}
+                        value={safeValue}
                         onChange={(e) => onChange(e.target.value)}
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent pr-10 ${getValidationColor()}`}
                         placeholder={placeholder}
@@ -421,69 +416,53 @@ export default function VehiculeManagement() {
     const preselectedClientId = searchParams.get('clientId');
     const preselectedClientName = searchParams.get('clientName');
     const [preselectionMessage, setPreselectionMessage] = useState<string>("");
-
-    // ✅ ÉTAT POUR SUIVRE LES IMMATRICULATIONS EXISTANTES
     const [existingImmatriculations, setExistingImmatriculations] = useState<string[]>([]);
-
-    const [vehiculeForm, setVehiculeForm] = useState<VehiculeFormData>({
-        proprietaireId: "",
-        marque: "",
-        modele: "",
-        kilometrage: "",
-        immatriculation: "",
-        annee: "",
-        couleur: "",
-        typeCarburant: "essence"
-    });
-
-
-    // ✅ ÉTAT POUR LES VALIDATIONS EN TEMPS RÉEL
+    const [vehiculeForm, setVehiculeForm] = useState<VehiculeFormData>({proprietaireId: "",marque: "",modele: "",kilometrage: "",immatriculation: "",annee: "",couleur: "",typeCarburant: "essence"});
     const [vehiculeValidations, setVehiculeValidations] = useState<{ [key: string]: FieldValidation }>({});
     const [visiteValidations, setVisiteValidations] = useState<{ [key: string]: FieldValidation }>({});
+
+
+    useEffect(() => {
+           const header = document.querySelector('header');
+           if (!header) return;
+       
+           if ( showVehiculeModal) {
+             header.classList.add("hidden");
+           } else {
+             header.classList.remove("hidden");
+           }
+    }, [showVehiculeModal ]);
 
     useEffect(() => {
         fetchClients();
         fetchVehicules();
     }, []);
 
-    // ✅ MISE À JOUR DES IMMATRICULATIONS EXISTANTES
     useEffect(() => {
         const immatriculations = vehicules.map(v => v.immatriculation.toUpperCase());
         setExistingImmatriculations(immatriculations);
     }, [vehicules]);
 
-    // ✅ VALIDATION EN TEMPS RÉEL DU FORMULAIRE VÉHICULE
+
     useEffect(() => {
         const newValidations: { [key: string]: FieldValidation } = {};
-
-        // Validation propriétaire
         if (!vehiculeForm.proprietaireId) {
             newValidations.proprietaireId = { isValid: false, message: 'Propriétaire obligatoire', type: 'error' };
         } else {
             newValidations.proprietaireId = { isValid: true, message: 'Propriétaire sélectionné', type: 'success' };
         }
-
-        // Validation marque
         newValidations.marque = FormValidator.validateTextLength(vehiculeForm.marque, 2, 50, 'Marque');
-
-        // Validation modèle
         newValidations.modele = FormValidator.validateTextLength(vehiculeForm.modele, 1, 50, 'Modèle');
-
         const immatValidation = FormValidator.validateImmatriculation(vehiculeForm.immatriculation, selectedCountry);
-
-        // Auto-détection si pas de pays sélectionné
         if (selectedCountry === 'OTHER' && vehiculeForm.immatriculation.length > 5) {
             const detectedCountry = FormValidator.detectImmatriculationCountry(vehiculeForm.immatriculation);
             if (detectedCountry !== 'OTHER') {
                 immatValidation.message += ` (${detectedCountry === 'TN' ? 'Tunisie' : 'France'} détecté)`;
             }
         }
-
-        // Vérifier unicité (garder ce code existant)
         if (immatValidation.isValid) {
             const cleanImmat = vehiculeForm.immatriculation.trim().toUpperCase().replace(/[\s\-]/g, '');
             const currentVehiculeImmat = selectedVehicule?.immatriculation.toUpperCase().replace(/[\s\-]/g, '');
-
             if (existingImmatriculations.includes(cleanImmat) && cleanImmat !== currentVehiculeImmat) {
                 newValidations.immatriculation = {
                     isValid: false,
@@ -970,7 +949,6 @@ const openVehiculeModal = (type: "add" | "edit", vehicule: Vehicule | null = nul
                                             <option 
                                                 key={client._id} 
                                                 value={client._id}
-                                                selected={client._id === vehiculeForm.proprietaireId} // Force la sélection
                                             >
                                                 {client.nom} ({client.type})
                                             </option>

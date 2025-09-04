@@ -51,8 +51,5 @@ const vehiculeSchema = new mongoose.Schema({
   timestamps: true // Ajoute createdAt et updatedAt automatiquement
 });
 
-// Index pour améliorer les performances
-vehiculeSchema.index({ proprietaireId: 1 });
-vehiculeSchema.index({ immatriculation: 1 });
 
 export default mongoose.model('Vehicule', vehiculeSchema);
