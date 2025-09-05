@@ -51,6 +51,7 @@ interface VehiculeInfo {
   modele: string;
   immatriculation: string;
   typeCarburant: string;
+  kilometrage?: number;
   annee?: number;
   proprietaire: {
     _id: string;
@@ -225,6 +226,14 @@ const CarnetEntretien: React.FC = () => {
                 {data.vehicule.annee && (
                   <p className="text-sm text-gray-500">Année: {data.vehicule.annee}</p>
                 )}
+                {data.vehicule.typeCarburant && (
+                <p className="text-sm text-gray-500">Type Carburant: {data.vehicule.typeCarburant}</p>
+                )}
+
+                {data.vehicule.kilometrage && (
+                <p className="text-sm text-gray-500">Kilométrage: {data.vehicule.kilometrage.toLocaleString('fr-FR')} km</p>
+                )}
+
                 
               </div>
             </div>

@@ -76,6 +76,7 @@ export const getCarnetByVehiculeId = async (req, res) => {
       return res.status(404).json({ error: 'Véhicule non trouvé' });
     }
 
+console.log("🚗 Véhicule trouvé:", vehicule);
 
     res.json({
       vehicule: {
@@ -84,7 +85,9 @@ export const getCarnetByVehiculeId = async (req, res) => {
         modele: vehicule.modele,
         immatriculation: vehicule.immatriculation,
         annee: vehicule.annee,
-        proprietaire: vehicule.proprietaireId
+        proprietaire: vehicule.proprietaireId,
+        typeCarburant: vehicule.typeCarburant,
+        kilometrage: vehicule.kilometrage,
       },
       historique,
     });
