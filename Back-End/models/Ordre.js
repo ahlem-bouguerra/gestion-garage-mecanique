@@ -83,9 +83,9 @@ const OrdreTravailSchema = new Schema({
     adresse: String
   },
   // Informations véhicule (dénormalisées)
-  vehiculeInfo: {
-    type: String,
-    required: true
+  vehiculedetails: {
+    nom: { type: String, required: true },
+    vehiculeId: { type: Object, required: true },
   },
   // Dates importantes
   dateCommence: {

@@ -46,6 +46,16 @@ const devisSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  vehiculeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vehicule', // Référence vers votre modèle Véhicule
+    required: true
+  },
+  factureId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Facture', 
+    default: null 
+  },
   inspectionDate: {
     type: String,
     required: true

@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Car, Plus, Edit, Trash2, User, Building2, Calendar, Phone, UserCheck, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Car, Plus, Edit, Trash2, User, Building2, Calendar, BookOpen,Phone, UserCheck, AlertTriangle, CheckCircle, Pen } from 'lucide-react';
 import axios from 'axios';
 
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -827,6 +827,13 @@ const openVehiculeModal = (type: "add" | "edit", vehicule: Vehicule | null = nul
                                             </div>
                                         </div>
                                         <div className="flex space-x-2">
+                                              <button
+  onClick={() => router.push(`/gestion-carnet-entretien?vehiculeId=${vehicule._id}`)}
+  className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+  title="Voir Carnet d'Entretien"
+>
+  <BookOpen className="w-4 h-4" />
+</button>
                                             <button
                                                 onClick={() => openVehiculeModal("edit", vehicule)}
                                                 className="p-2 text-gray-500 hover:text-orange-600 hover:bg-gray-100 rounded-lg"

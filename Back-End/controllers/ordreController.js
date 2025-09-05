@@ -8,6 +8,7 @@ import mongoose from 'mongoose';
 
 export const createOrdreTravail = async (req, res) => {
   try {
+     console.log("📥 Données reçues pour ordre de travail:", req.body);
     const { devisId, dateCommence, atelierId, priorite, description, taches } = req.body;
 
     // Validation des données requises
@@ -101,7 +102,12 @@ export const createOrdreTravail = async (req, res) => {
         email: devis.clientEmail,
         adresse: devis.clientAddress
       },
-      vehiculeInfo: devis.vehicleInfo,
+      vehiculedetails: {
+        nom: devis.vehicleInfo,
+        vehiculeId: devis.vehiculeId,
+      },
+
+ 
       dateCommence: new Date(dateCommence),
       dateFinPrevue,
       atelierId,
@@ -116,7 +122,7 @@ export const createOrdreTravail = async (req, res) => {
 
     // Populer les références pour la réponse
     await ordreSauve.populate([
-      { path: 'devisId', select: 'id clientName vehicleInfo' },
+      { path: 'devisId', select: 'id clientName vehicleInfo vehiculeId' },
       { path: 'atelierId', select: 'name localisation' },
       { path: 'taches.serviceId', select: 'name' },
       { path: 'taches.mecanicienId', select: 'nom' }

@@ -19,6 +19,7 @@ const GarageQuoteSystem = () => {
   const [selectedClient, setSelectedClient] = useState(null);
   const [vehicules, setVehicules] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState('');
+  const [selectedVehiculeId, setSelectedVehiculeId] = useState('');
   const [loadingVehicules, setLoadingVehicules] = useState(false);
   const [tvaRate, setTvaRate] = useState(20); // TVA par défaut à 20%
   const [maindoeuvre, setMaindoeuvre] = useState(0);
@@ -44,6 +45,7 @@ const GarageQuoteSystem = () => {
   const [newQuote, setNewQuote] = useState({
     clientName: '',
     vehicleInfo: '',
+    vehiculeId: '',
     inspectionDate: '',
     services: [{ piece: '', quantity: 1, unitPrice: 0 }]
   });
@@ -267,7 +269,7 @@ useEffect(() => {
       setLoading(true);
 
       // Validation (même code existant)
-      if (!selectedClientId || !newQuote.vehicleInfo || !newQuote.inspectionDate) {
+      if (!selectedClientId || !newQuote.vehicleInfo ||!selectedVehiculeId || !newQuote.inspectionDate) {
         showError('Veuillez remplir tous les champs obligatoires');
         return;
       }
@@ -281,6 +283,7 @@ useEffect(() => {
         clientId: selectedClientId,
         clientName: newQuote.clientName,
         vehicleInfo: newQuote.vehicleInfo,
+        vehiculeId: selectedVehiculeId,
         inspectionDate: newQuote.inspectionDate,
         services: newQuote.services,
         tvaRate: tvaRate,
@@ -308,6 +311,7 @@ useEffect(() => {
         services: [{ pieceId: '', piece: '', quantity: 1, unitPrice: 0 }]
       });
       setSelectedClientId('');
+      setSelectedVehiculeId('');
       setTvaRate(20);
       setVehicules([]);
       setMaindoeuvre(0);
@@ -476,6 +480,8 @@ useEffect(() => {
   const handleClientChange = async (e: { target: { value: any; }; }) => {
     const clientId = e.target.value;
     const selectedClient = clients.find(c => c._id === clientId);
+    
+
 
     setSelectedClientId(clientId);
     setNewQuote({
@@ -486,6 +492,8 @@ useEffect(() => {
 
     // Charger les véhicules pour ce client
     await loadVehiculesByClient(clientId);
+    setSelectedVehiculeId('');
+    
   };
 
   // Fonction pour mettre à jour un service
@@ -602,6 +610,7 @@ useEffect(() => {
         throw new Error(error.response?.data?.message || "Erreur lors de la création du devis");
       }
     },
+    
 
 
     getAll: async (filters = {}) => {
@@ -665,6 +674,7 @@ useEffect(() => {
     });
 
     setSelectedClientId(quote.clientId || '');
+    setSelectedVehiculeId(quote.vehiculeId|| '');
     setTvaRate(quote.tvaRate || 20);
     setMaindoeuvre(quote.maindoeuvre || 0);
     setEstimatedTime(quote.estimatedTime || { days: 0, hours: 0, minutes: 0 });
@@ -764,16 +774,31 @@ useEffect(() => {
       );
 
       if (response.data.success) {
-        setSelectedFacture(response.data.facture);
-        setShowFactureModal(true);
-        showSuccess('Facture créée avec succès !');
+      const factureData = response.data.facture;
+      const factureId = factureData._id || factureData.id;
 
-        // Mettre à jour l'état local pour indiquer qu'une facture existe
-        setFactureExists(prev => ({
-          ...prev,
-          [devis.id]: response.data.facture
-        }));
+      try {
+        await axios.put(`http://localhost:5000/api/updateId/${devis._id}`, {
+          factureId: factureId
+        });
+        console.log('Devis mis à jour avec factureId:', factureId);
+      } catch (error) {
+        console.error('Erreur mise à jour devis:', error);
       }
+      
+      setSelectedFacture(factureData);
+      setShowFactureModal(true);
+      showSuccess('Facture créée avec succès !');
+      
+
+      // Mettre à jour l'état local avec l'ID de la facture
+      setFactureExists(prev => ({
+        ...prev,
+        [devis.id]: factureData  // ✅ Stocke la facture avec son ID
+      }));
+      
+      console.log('ID de la facture créée:', factureData.factureId); // Pour debug
+    }
     } catch (error) {
       console.error('Erreur lors de la création de facture:', error);
       showError(error.response?.data?.message || 'Erreur lors de la création de facture');
@@ -788,10 +813,15 @@ useEffect(() => {
       const response = await axios.get(`http://localhost:5000/api/factureByDevis/${devisId}`);
 
       if (response.data) {
-        setSelectedFacture(response.data);
+        const factureWithId = {
+          ...response.data,
+          factureId: response.data._id || response.data.id  // ✅ Ajoute l'ID
+        };
+        
+        setSelectedFacture(factureWithId);
         setShowFactureModal(true);
-      } else {
-        showError('Aucune facture trouvée pour ce devis');
+        
+        console.log('ID de la facture existante:', factureWithId.factureId); // Pour debug
       }
     } catch (error) {
       if (error.response?.status === 404) {
@@ -1241,10 +1271,18 @@ useEffect(() => {
                   Véhicule *
                 </label>
                 <select
-                  value={newQuote.vehicleInfo}
-                  onChange={(e) => setNewQuote({ ...newQuote, vehicleInfo: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={!selectedClientId || loadingVehicules}
+  value={selectedVehiculeId}  // ✅ CORRECT - utilise l'ID
+  onChange={(e) => {
+    const vehiculeId = e.target.value;
+    const selectedVehicule = vehicules.find(v => v._id === vehiculeId);
+    
+    setSelectedVehiculeId(vehiculeId);
+    setNewQuote({ 
+      ...newQuote, 
+      vehicleInfo: selectedVehicule ? `${selectedVehicule.marque} ${selectedVehicule.modele} - ${selectedVehicule.immatriculation}` : '' 
+    });
+  }}
+  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">
                     {!selectedClientId
@@ -1258,11 +1296,11 @@ useEffect(() => {
                   </option>
                   {vehicules.map((vehicule) => (
                     <option
-                      key={vehicule._id}
-                      value={`${vehicule.marque} ${vehicule.modele} - ${vehicule.immatriculation}`}
-                    >
-                      {vehicule.marque} {vehicule.modele} - {vehicule.immatriculation} ({vehicule.annee})
-                    </option>
+  key={vehicule._id}
+  value={vehicule._id}  // ✅ CORRECT - utilise l'ID comme value
+>
+  {vehicule.marque} {vehicule.modele} - {vehicule.immatriculation} ({vehicule.annee})
+</option>
                   ))}
                 </select>
 

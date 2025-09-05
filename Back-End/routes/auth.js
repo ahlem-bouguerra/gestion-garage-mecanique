@@ -12,13 +12,14 @@ import { enhancedLocationRoutes } from "../apiDataFetcher.js";
 import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient,getFicheClientNoms, getHistoriqueVisiteByIdClient, getHistoryVisite} from "../controllers/FicheClient.js";
 import {getAllVehicules,getVehiculeById,createVehicule,updateVehicule,deleteVehicule,getVehiculesByProprietaire} from '../controllers/vehiculeController.js';
 import {getAllPieces,getPieceById,createPiece,updatePiece,deletePiece}from '../controllers/piecesController.js';
-import {createDevis,getAllDevis,getDevisById,getDevisByNum,updateDevisStatus,updateDevis,deleteDevis, acceptDevis,refuseDevis}from '../controllers/devisController.js';
+import {createDevis,getAllDevis,getDevisById,getDevisByNum,updateDevisStatus,updateDevis,deleteDevis, acceptDevis,refuseDevis,updateFactureId}from '../controllers/devisController.js';
 import { sendDevisByEmail } from '../utils/sendDevis.js';
 import {createMecanicien,updateMecanicien,deleteMecanicien,getAllMecaniciens,getMecanicienById,getMecaniciensByService} from "../controllers/mecanicienController.js";
 import {getAllAteliers,getAtelierById,createAtelier,updateAtelier,deleteAtelier}from '../controllers/atelierController.js';
 import {getAllServices,getServiceById,createService,updateService,deleteService}from '../controllers/serviceController.js';
 import {createOrdreTravail,getOrdresTravail,getOrdreTravailById,updateStatusOrdreTravail,demarrerOrdre,terminerOrdre,getStatistiques,supprimerOrdreTravail,getOrdresParDevisId,getOrdresByStatus,getOrdresByAtelier,updateOrdreTravail} from '../controllers/ordreController.js';
 import { CreateFacture, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture } from '../controllers/facturesController.js';
+import { getCarnetByVehiculeId, creerCarnet, marquerCarnettermine } from '../controllers/carnetController.js';
 
 const router = express.Router();
 
@@ -375,6 +376,7 @@ router.get('/Devis/:id',getDevisById);
 router.get('/devis/code/:id', getDevisByNum);
 router.put('/Devis/:id/status',updateDevisStatus);
 router.put('/Devis/:id', updateDevis);
+router.put('/updateId/:id', updateFactureId);
 router.delete('/Devis/:id',deleteDevis);
 router.get("/devis/:devisId/accept", acceptDevis);
 router.get("/devis/:devisId/refuse", refuseDevis);
@@ -427,5 +429,12 @@ router.put('/:id/payment',MarquerFacturePayed);
 router.put('/:id',UpdateFacture);
 router.delete('/:id',DeleteFacture);
 router.get('/stats/summary',StaticFacture);
+
+
+router.get('/carnet-entretien/vehicule/:vehiculeId',getCarnetByVehiculeId);
+
+router.post('/carnet-entretien', creerCarnet);
+router.put('/carnet-entretien/:id/terminer', marquerCarnettermine);
+
 
 export default router;

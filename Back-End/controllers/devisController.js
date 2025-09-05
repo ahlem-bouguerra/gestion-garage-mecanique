@@ -5,7 +5,7 @@ export const createDevis = async (req, res) => {
   try {
     console.log('📥 Données reçues:', req.body);
 
-    const { clientId, clientName, vehicleInfo, inspectionDate, services, tvaRate, maindoeuvre,estimatedTime } = req.body;
+    const { clientId, clientName, vehicleInfo,vehiculeId, inspectionDate, services, tvaRate, maindoeuvre,estimatedTime } = req.body;
 
     // ✅ CALCUL CORRECT DES TOTAUX
     // 1. Total des services (pièces seulement)
@@ -37,6 +37,7 @@ export const createDevis = async (req, res) => {
       clientId,
       clientName,
       vehicleInfo,
+      vehiculeId,
       inspectionDate,
       services: processedServices,
       totalServicesHT: totalServicesHT,
@@ -272,6 +273,51 @@ export const updateDevis = async (req, res) => {
     }
   }
 };
+
+
+export const updateFactureId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    console.log('🔄 Mise à jour devis:', id);
+    console.log('📥 Nouvelles données:', updateData);
+
+    const existingDevis = await Devis.findById(id);
+    if (!existingDevis) {
+      return res.status(404).json({ success: false, message: 'Devis non trouvé' });
+    }
+
+    // ⚡ Recalcul seulement si services sont envoyés
+    if (updateData.services) {
+      let totalServicesHT = 0;
+      updateData.services = updateData.services.map(service => {
+        const serviceTotal = service.quantity * service.unitPrice;
+        totalServicesHT += serviceTotal;
+        return { ...service, total: serviceTotal };
+      });
+
+      const totalHT = totalServicesHT + (updateData.maindoeuvre || 0);
+      const totalTTC = totalHT * (1 + (updateData.tvaRate || 20) / 100);
+
+      updateData.totalServicesHT = totalServicesHT;
+      updateData.totalHT = totalHT;
+      updateData.totalTTC = totalTTC;
+      updateData.status = 'brouillon';
+    }
+
+    const updatedDevis = await Devis.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true
+    });
+
+    res.json({ success: true, message: 'Devis mis à jour avec succès', data: updatedDevis });
+  } catch (error) {
+    console.error('❌ Erreur mise à jour devis:', error);
+    res.status(500).json({ success: false, message: 'Erreur lors de la mise à jour du devis', error: error.message });
+  }
+};
+
 
 export const deleteDevis = async (req, res) => {
   try {

@@ -1359,7 +1359,7 @@ const OrdreTravailSystem = () => {
                               {ordre.clientInfo?.nom || 'N/A'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {ordre.vehiculeInfo || 'N/A'}
+                              {ordre.vehiculedetails?.nom|| 'N/A'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {ordre.dateCommence ? new Date(ordre.dateCommence).toLocaleDateString('fr-FR') : 'N/A'}
@@ -1541,7 +1541,7 @@ const OrdreTravailSystem = () => {
                         </h3>
                         <div className="space-y-2">
                           <p><span className="font-medium">Nom:</span> {selectedOrdre.clientInfo?.nom || 'N/A'}</p>
-                          <p><span className="font-medium">Véhicule:</span> {selectedOrdre.vehiculeInfo || 'N/A'}</p>
+                          <p><span className="font-medium">Véhicule:</span> {selectedOrdre.vehiculedetails?.nom || 'N/A'}</p>
                           <p><span className="font-medium">Devis N°:</span> {selectedOrdre.devisId || 'N/A'}</p>
                         </div>
                       </div>
