@@ -19,7 +19,7 @@ import {getAllAteliers,getAtelierById,createAtelier,updateAtelier,deleteAtelier}
 import {getAllServices,getServiceById,createService,updateService,deleteService}from '../controllers/serviceController.js';
 import {createOrdreTravail,getOrdresTravail,getOrdreTravailById,updateStatusOrdreTravail,demarrerOrdre,terminerOrdre,getStatistiques,supprimerOrdreTravail,getOrdresParDevisId,getOrdresByStatus,getOrdresByAtelier,updateOrdreTravail} from '../controllers/ordreController.js';
 import { CreateFacture, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture } from '../controllers/facturesController.js';
-import { getCarnetByVehiculeId, creerCarnet, marquerCarnettermine } from '../controllers/carnetController.js';
+import { getCarnetByVehiculeId ,creerCarnetManuel} from '../controllers/carnetController.js';
 
 const router = express.Router();
 
@@ -432,9 +432,7 @@ router.get('/stats/summary',StaticFacture);
 
 
 router.get('/carnet-entretien/vehicule/:vehiculeId',getCarnetByVehiculeId);
-
-router.post('/carnet-entretien', creerCarnet);
-router.put('/carnet-entretien/:id/terminer', marquerCarnettermine);
+router.post('/creer-manuel', creerCarnetManuel);
 
 
 export default router;

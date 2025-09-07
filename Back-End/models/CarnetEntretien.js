@@ -1,130 +1,196 @@
-// models/CarnetEntretien.js
 import mongoose from 'mongoose';
 
 const carnetEntretienSchema = new mongoose.Schema({
+  // Référence au véhicule
   vehiculeId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Vehicule',
     required: true
   },
-  ordreId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Ordre', // Si vous avez un modèle Ordre
-    required: false
-  },
+  
+  // Référence au devis (optionnel)
   devisId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Devis',
-    required: true
+    required: false
   },
+  
+  // Dates
   dateCommencement: {
     type: Date,
     required: true
   },
+  
   dateFinCompletion: {
     type: Date,
-    required: false // Peut être null si l'entretien n'est pas terminé
+    required: false
   },
-  tachesService: [{
-    pieceId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Piece',
-      required: true
-    },
-    piece: {
-      type: String,
-      required: true
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1
-    },
-    unitPrice: {
-      type: Number,
-      required: true,
-      min: 0
-    },
-    total: {
-      type: Number,
-      required: true,
-      min: 0
-    }
-  }],
+  
+  // Statut
+  statut: {
+    type: String,
+    enum: ['en_cours', 'termine', 'annule'],
+    default: 'en_cours'
+  },
+  
+  // Coûts
   totalTTC: {
     type: Number,
     required: true,
     min: 0
   },
+  
+  // Kilométrage au moment de l'entretien
   kilometrageEntretien: {
     type: Number,
+    required: false,
     min: 0
   },
-  statut: {
-    type: String,
-    enum: ['planifie', 'en_cours', 'termine', 'annule'],
-    default: 'planifie'
-  },
+  
+  // Notes/commentaires
   notes: {
     type: String,
-    trim: true
+    maxlength: 1000
   },
-  typeEntretien: {
-    type: String,
-    enum: ['revision', 'reparation', 'maintenance_preventive', 'diagnostic', 'autre'],
-    default: 'revision'
+  
+  // Services/travaux effectués
+  services: [{
+    nom: {
+      type: String,
+      required: true
+    },
+    description: {
+      type: String
+    },
+    quantite: {
+      type: Number,
+      default: 1,
+      min: 0
+    },
+    prix: {
+      type: Number,
+      min: 0
+    }
+  }],
+  
+  // Pièces utilisées (optionnel)
+  pieces: [{
+    nom: {
+      type: String
+    },
+    reference: {
+      type: String
+    },
+    quantite: {
+      type: Number,
+      default: 1
+    },
+    prix: {
+      type: Number,
+      min: 0
+    }
+  }],
+  
+  // Mécanicien/technicien responsable
+  technicien: {
+    type: String
   }
+  
 }, {
-  timestamps: true
+  timestamps: true // Ajoute automatiquement createdAt et updatedAt
 });
 
-// Index pour optimiser les requêtes par véhicule
+// Index pour améliorer les performances
 carnetEntretienSchema.index({ vehiculeId: 1, dateCommencement: -1 });
+carnetEntretienSchema.index({ statut: 1 });
 
-// Méthode virtuelle pour calculer la durée de l'entretien
-carnetEntretienSchema.virtual('dureeEntretien').get(function() {
-  if (this.dateFinCompletion && this.dateCommencement) {
-    const diffTime = new Date(this.dateFinCompletion) - new Date(this.dateCommencement);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  }
-  return null;
-});
-
-// Méthode statique pour créer un carnet d'entretien depuis un devis accepté
+// Méthode statique pour créer un carnet depuis un devis
 carnetEntretienSchema.statics.creerDepuisDevis = async function(devisId) {
   try {
     const Devis = mongoose.model('Devis');
-    const devis = await Devis.findById(devisId).populate('vehiculeId');
     
-    if (!devis || devis.status !== 'accepte') {
-      throw new Error('Devis non trouvé ou non accepté');
+    // Récupérer le devis
+    const devis = await Devis.findOne({ 
+      $or: [
+        { _id: devisId },
+        { id: devisId }
+      ]
+    }).populate('vehiculeId');
+    
+    if (!devis) {
+      throw new Error('Devis non trouvé');
     }
-
+    
+    if (devis.status !== 'accepte') {
+      throw new Error('Le devis doit être accepté pour créer un carnet d\'entretien');
+    }
+    
     // Vérifier si un carnet existe déjà pour ce devis
-    const existant = await this.findOne({ devisId });
-    if (existant) {
+    const carnetExistant = await this.findOne({ devisId: devis._id });
+    if (carnetExistant) {
       throw new Error('Un carnet d\'entretien existe déjà pour ce devis');
     }
-
-    const carnetData = {
-      vehiculeId: devis.vehiculeId._id,
+    
+    // Créer le carnet
+    const carnet = new this({
+      vehiculeId: devis.vehiculeId,
       devisId: devis._id,
       dateCommencement: new Date(),
-      tachesService: devis.services,
+      typeEntretien: determinerTypeEntretien(devis.services),
       totalTTC: devis.totalTTC,
-      kilometrageEntretien: devis.vehiculeId.kilometrage,
-      statut: 'planifie'
-    };
-
-    return await this.create(carnetData);
+      services: devis.services.map(service => ({
+        nom: service.nom,
+        description: service.description,
+        quantite: service.quantite || 1,
+        prix: service.prix
+      })),
+      notes: `Créé depuis le devis ${devis.id}`
+    });
+    
+    await carnet.save();
+    return carnet;
+    
   } catch (error) {
     throw new Error(`Erreur création carnet: ${error.message}`);
   }
 };
 
-// Inclure les virtuels dans JSON
+// Méthode d'instance pour marquer comme terminé
+carnetEntretienSchema.methods.marquerTermine = function(options = {}) {
+  this.statut = 'termine';
+  this.dateFinCompletion = options.dateFinCompletion || new Date();
+  
+  if (options.kilometrageEntretien) {
+    this.kilometrageEntretien = options.kilometrageEntretien;
+  }
+  
+  if (options.notes) {
+    this.notes = this.notes ? `${this.notes}\n${options.notes}` : options.notes;
+  }
+  
+  return this.save();
+};
+
+// Méthode virtuelle pour calculer la durée
+carnetEntretienSchema.virtual('dureeEntretien').get(function() {
+  if (!this.dateFinCompletion) return null;
+  
+  const debut = new Date(this.dateCommencement);
+  const fin = new Date(this.dateFinCompletion);
+  const diffMs = fin - debut;
+  
+  return {
+    jours: Math.floor(diffMs / (1000 * 60 * 60 * 24)),
+    heures: Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  };
+});
+
+
+
+// Configuration pour inclure les virtuals dans JSON
 carnetEntretienSchema.set('toJSON', { virtuals: true });
 carnetEntretienSchema.set('toObject', { virtuals: true });
 
-export default mongoose.model('CarnetEntretien', carnetEntretienSchema);
+const CarnetEntretien = mongoose.model('CarnetEntretien', carnetEntretienSchema);
+
+export default CarnetEntretien;

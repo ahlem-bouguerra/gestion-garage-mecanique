@@ -1,8 +1,7 @@
-// controllers/vehiculeController.js
+
 import Vehicule from '../models/Vehicule.js';
 import FicheClient from '../models/FicheClient.js';
 
-// GET /api/vehicules - Récupérer tous les véhicules
 export const getAllVehicules = async (req, res) => {
   try {
     const vehicules = await Vehicule.find({ statut: 'actif' })
@@ -17,7 +16,6 @@ export const getAllVehicules = async (req, res) => {
   }
 };
 
-// GET /api/vehicules/:id - Récupérer un véhicule spécifique
 export const getVehiculeById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -36,7 +34,6 @@ export const getVehiculeById = async (req, res) => {
   }
 };
 
-// POST /api/vehicules - Créer un nouveau véhicule
 export const createVehicule = async (req, res) => {
   try {
     const {
@@ -166,7 +163,6 @@ export const createVehicule = async (req, res) => {
   }
 };
 
-// PUT /api/vehicules/:id - Modifier un véhicule
 export const updateVehicule = async (req, res) => {
   try {
     const { id } = req.params;
@@ -301,7 +297,6 @@ export const updateVehicule = async (req, res) => {
   }
 };
 
-// DELETE /api/vehicules/:id - Supprimer un véhicule
 export const deleteVehicule = async (req, res) => {
   try {
     const { id } = req.params;
@@ -338,14 +333,12 @@ export const deleteVehicule = async (req, res) => {
   }
 };
 
-// GET /api/vehicules/proprietaire/:clientId - Véhicules d'un client
 export const getVehiculesByProprietaire = async (req, res) => {
   try {
     const { clientId } = req.params;
     
     console.log("🔍 Recherche véhicules pour client:", clientId);
     
-    // Vérifier que le client existe
     const client = await FicheClient.findById(clientId);
     if (!client) {
       return res.status(404).json({ error: 'Client non trouvé' });
