@@ -121,7 +121,7 @@ export const getHistoriqueVisiteByIdClient = async (req, res) => {
     .populate('taches.serviceId', 'name')
     .populate('taches.mecanicienId', 'nom')
     .sort({ dateFinPrevue: -1 }) // Trier par date de fin la plus récente
-    .select('numeroOrdre dateCommence dateFinPrevue atelierNom taches vehiculeInfo totalHeuresEstimees');
+    .select('numeroOrdre dateCommence dateFinPrevue atelierNom taches vehiculedetails totalHeuresEstimees');
 
     console.log(`✅ Trouvé ${ordresTermines.length} ordres terminés`);
 
@@ -130,7 +130,7 @@ export const getHistoriqueVisiteByIdClient = async (req, res) => {
       id: ordre._id,
       numeroOrdre: ordre.numeroOrdre,
       dateVisite: ordre.dateFinPrevue,
-      vehicule: ordre.vehiculeInfo,
+      vehicule: ordre.vehiculedetails.nom,
       atelier: ordre.atelierNom,
       dureeHeures: ordre.totalHeuresEstimees || 0,
       taches: ordre.taches.map(tache => ({

@@ -664,22 +664,22 @@ return date.toLocaleDateString('fr-FR');
               </select>
             </div>
             <div className="flex items-center space-x-2">
-  <Calendar className="w-4 h-4 text-gray-500" />
-  <select
-    value={dateFilter}
-    onChange={(e) => setDateFilter(e.target.value)}
-    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-  >
-    <option value="tous">Toutes les dates</option>
-    <option value="jamais">Jamais visité</option>
-    <option value="7jours">7 derniers jours</option>
-    <option value="30jours">30 derniers jours</option>
-    <option value="90jours">3 derniers mois</option>
-    <option value="6mois">6 derniers mois</option>
-    <option value="1an">Dernière année</option>
-    <option value="plus1an">Plus d'1 an</option>
-  </select>
-</div>
+              <Calendar className="w-4 h-4 text-gray-500" />
+              <select
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="tous">Toutes les dates</option>
+                <option value="jamais">Jamais visité</option>
+                <option value="7jours">7 derniers jours</option>
+                <option value="30jours">30 derniers jours</option>
+                <option value="90jours">3 derniers mois</option>
+                <option value="6mois">6 derniers mois</option>
+                <option value="1an">Dernière année</option>
+                <option value="plus1an">Plus d'1 an</option>
+              </select>
+            </div>
           </div>
         </div>
 

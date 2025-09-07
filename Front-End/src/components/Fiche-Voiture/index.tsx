@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Car, Plus, Edit, Trash2, User, Building2, Calendar, BookOpen,Phone, UserCheck, AlertTriangle, CheckCircle, Pen } from 'lucide-react';
+import { Car, Plus, Edit, Trash2, User, Building2, Search, X, Calendar, BookOpen, Phone, UserCheck, AlertTriangle, CheckCircle, Pen } from 'lucide-react';
 import axios from 'axios';
 
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -417,21 +417,59 @@ export default function VehiculeManagement() {
     const preselectedClientName = searchParams.get('clientName');
     const [preselectionMessage, setPreselectionMessage] = useState<string>("");
     const [existingImmatriculations, setExistingImmatriculations] = useState<string[]>([]);
-    const [vehiculeForm, setVehiculeForm] = useState<VehiculeFormData>({proprietaireId: "",marque: "",modele: "",kilometrage: "",immatriculation: "",annee: "",couleur: "",typeCarburant: "essence"});
+    const [vehiculeForm, setVehiculeForm] = useState<VehiculeFormData>({ proprietaireId: "", marque: "", modele: "", kilometrage: "", immatriculation: "", annee: "", couleur: "", typeCarburant: "essence" });
     const [vehiculeValidations, setVehiculeValidations] = useState<{ [key: string]: FieldValidation }>({});
     const [visiteValidations, setVisiteValidations] = useState<{ [key: string]: FieldValidation }>({});
+    const [rechercheGlobale, setRechercheGlobale] = useState("");
+    const [vehiculesFiltres, setVehiculesFiltres] = useState<Vehicule[]>([]);
+
+    useEffect(() => {
+    if (!rechercheGlobale.trim()) {
+        setVehiculesFiltres(vehicules);
+        return;
+    }
+
+    const termesRecherche = rechercheGlobale.toLowerCase().trim();
+    
+    const vehiculesFiltrés = vehicules.filter(v => {
+        // Recherche dans l'immatriculation
+        const matchImmat = v.immatriculation.toLowerCase().includes(termesRecherche);
+        
+        // Recherche dans la marque
+        const matchMarque = v.marque.toLowerCase().includes(termesRecherche);
+        
+        // Recherche dans le modèle
+        const matchModele = v.modele.toLowerCase().includes(termesRecherche);
+        
+        // Recherche dans le nom du propriétaire
+        const nomProprietaire = getClientName(v.proprietaireId).toLowerCase();
+        const matchProprietaire = nomProprietaire.includes(termesRecherche);
+        
+        // Recherche dans la couleur (si elle existe)
+        const matchCouleur = v.couleur ? v.couleur.toLowerCase().includes(termesRecherche) : false;
+        
+        // Retourner true si au moins un critère correspond
+        return matchImmat || matchMarque || matchModele || matchProprietaire || matchCouleur;
+    });
+
+        setVehiculesFiltres(vehiculesFiltrés);
+    }, [vehicules, rechercheGlobale, clients]);
+
+    const reinitialiserRecherche = () => {
+        setRechercheGlobale("");
+    };
 
 
     useEffect(() => {
-           const header = document.querySelector('header');
-           if (!header) return;
-       
-           if ( showVehiculeModal) {
-             header.classList.add("hidden");
-           } else {
-             header.classList.remove("hidden");
-           }
-    }, [showVehiculeModal ]);
+        const header = document.querySelector('header');
+        if (!header) return;
+
+        if (showVehiculeModal) {
+            header.classList.add("hidden");
+        } else {
+            header.classList.remove("hidden");
+        }
+    }, [showVehiculeModal]);
 
     useEffect(() => {
         fetchClients();
@@ -493,7 +531,7 @@ export default function VehiculeManagement() {
         setVehiculeValidations(newValidations);
     }, [vehiculeForm, existingImmatriculations, selectedVehicule, selectedCountry]);
 
-    // Fonction pour afficher les erreurs
+
     const showError = (message: string) => {
         console.error("❌ Erreur:", message);
         setError(typeof message === 'string' ? message : 'Une erreur est survenue');
@@ -534,9 +572,6 @@ export default function VehiculeManagement() {
             showError(`Erreur chargement véhicules: ${error.response?.data?.error || error.message}`);
         }
     };
-
-
-
 
     useEffect(() => {
         const preselectedData = sessionStorage.getItem('preselectedClient');
@@ -600,7 +635,6 @@ export default function VehiculeManagement() {
         return client ? client.type : "telephone inconnu";
     };
 
-    // ✅ VÉRIFICATION SI LE FORMULAIRE EST VALIDE
     const isVehiculeFormValid = () => {
         const requiredFields = ['proprietaireId', 'marque', 'modele', 'immatriculation'];
 
@@ -611,57 +645,57 @@ export default function VehiculeManagement() {
         return validationErrors.length === 0;
     };
 
-const openVehiculeModal = (type: "add" | "edit", vehicule: Vehicule | null = null) => {
-    setError("");
-    setModalType(type);
-    setSelectedCountry('OTHER');
+    const openVehiculeModal = (type: "add" | "edit", vehicule: Vehicule | null = null) => {
+        setError("");
+        setModalType(type);
+        setSelectedCountry('OTHER');
 
-    if (vehicule) {
-        // MODE ÉDITION - Remplir le formulaire avec les données existantes
-        setSelectedVehicule(vehicule);
-        
-        setVehiculeForm({
-            proprietaireId: vehicule.proprietaireId,
-            marque: vehicule.marque,
-            modele: vehicule.modele,
-            immatriculation: vehicule.immatriculation,
-            kilometrage: vehicule.kilometrage ? vehicule.kilometrage.toString() : "",
-            annee: vehicule.annee ? vehicule.annee.toString() : "",
-            couleur: vehicule.couleur || "",
-            typeCarburant: vehicule.typeCarburant || "essence"
-        });
-        
-        // Détecter le pays d'immatriculation
-        const detectedCountry = FormValidator.detectImmatriculationCountry(vehicule.immatriculation);
-        setSelectedCountry(detectedCountry);
-        
-    } else {
-        // MODE AJOUT - Formulaire vide
-        setSelectedVehicule(null);
-        
-        // Gérer la présélection client si elle existe
-        const initialProprietaireId = preselectedClientId ;
-        
-        setVehiculeForm({
-            proprietaireId: initialProprietaireId,
-            marque: "",
-            modele: "",
-            kilometrage: "",
-            immatriculation: "",
-            annee: "",
-            couleur: "",
-            typeCarburant: "essence"
-        });
-        
-        // Message de présélection
-        if (preselectedClientId && preselectedClientName) {
-            setPreselectionMessage(`Client "${decodeURIComponent(preselectedClientName)}" présélectionné`);
-            setTimeout(() => setPreselectionMessage(""), 5000);
+        if (vehicule) {
+            // MODE ÉDITION - Remplir le formulaire avec les données existantes
+            setSelectedVehicule(vehicule);
+
+            setVehiculeForm({
+                proprietaireId: vehicule.proprietaireId,
+                marque: vehicule.marque,
+                modele: vehicule.modele,
+                immatriculation: vehicule.immatriculation,
+                kilometrage: vehicule.kilometrage ? vehicule.kilometrage.toString() : "",
+                annee: vehicule.annee ? vehicule.annee.toString() : "",
+                couleur: vehicule.couleur || "",
+                typeCarburant: vehicule.typeCarburant || "essence"
+            });
+
+            // Détecter le pays d'immatriculation
+            const detectedCountry = FormValidator.detectImmatriculationCountry(vehicule.immatriculation);
+            setSelectedCountry(detectedCountry);
+
+        } else {
+            // MODE AJOUT - Formulaire vide
+            setSelectedVehicule(null);
+
+            // Gérer la présélection client si elle existe
+            const initialProprietaireId = preselectedClientId;
+
+            setVehiculeForm({
+                proprietaireId: initialProprietaireId,
+                marque: "",
+                modele: "",
+                kilometrage: "",
+                immatriculation: "",
+                annee: "",
+                couleur: "",
+                typeCarburant: "essence"
+            });
+
+            // Message de présélection
+            if (preselectedClientId && preselectedClientName) {
+                setPreselectionMessage(`Client "${decodeURIComponent(preselectedClientName)}" présélectionné`);
+                setTimeout(() => setPreselectionMessage(""), 5000);
+            }
         }
-    }
-    
-    setShowVehiculeModal(true);
-};
+
+        setShowVehiculeModal(true);
+    };
 
     const openVisiteModal = (vehicule: Vehicule) => {
         setError("");
@@ -732,21 +766,6 @@ const openVehiculeModal = (type: "add" | "edit", vehicule: Vehicule | null = nul
         return visites.filter(v => v.vehiculeId === vehiculeId);
     };
 
-    // ✅ FONCTION POUR FORMATER L'IMMATRICULATION AUTOMATIQUEMENT
-    const formatImmatriculation = (value: string) => {
-        // Enlever tous les caractères non alphanumériques
-        const cleaned = value.replace(/[^A-Z0-9]/g, '');
-
-        // Formater selon les patterns courants
-        if (cleaned.length <= 7) {
-            // Format AB123CD
-            return cleaned.replace(/^([A-Z]{2})([0-9]{3})([A-Z]{2})$/, '$1-$2-$3');
-        }
-
-        return cleaned;
-    };
-
-    // ✅ FONCTION POUR FORMATER LE KILOMÉTRAGE
     const formatKilometrage = (value: string) => {
         const numericValue = value.replace(/[^0-9]/g, '');
         if (numericValue) {
@@ -770,6 +789,45 @@ const openVehiculeModal = (type: "add" | "edit", vehicule: Vehicule | null = nul
                             <span>Nouveau Véhicule</span>
                         </button>
                     </div>
+
+                    <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+                    <div className="flex items-center space-x-4">
+                        {/* Input de recherche global */}
+                        <div className="flex-1 relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Rechercher par immatriculation, marque, modèle, propriétaire, couleur..."
+                                value={rechercheGlobale}
+                                onChange={(e) => setRechercheGlobale(e.target.value)}
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                        
+                        {/* Bouton réinitialiser */}
+                        {rechercheGlobale && (
+                            <button
+                                onClick={() => setRechercheGlobale("")}
+                                className="px-3 py-2 text-sm text-gray-500 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
+                            >
+                                Effacer
+                            </button>
+                        )}
+                        
+                        {/* Compteur de résultats */}
+                        <div className="text-sm text-gray-600 whitespace-nowrap">
+                            {vehiculesFiltres.length} résultat{vehiculesFiltres.length > 1 ? 's' : ''}
+                            {rechercheGlobale && vehiculesFiltres.length !== vehicules.length && (
+                                <span className="text-gray-400"> sur {vehicules.length}</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
 
                     {/* ✅ AFFICHAGE DES ERREURS AMÉLIORÉ */}
                     {error && (
@@ -807,7 +865,7 @@ const openVehiculeModal = (type: "add" | "edit", vehicule: Vehicule | null = nul
 
                 {/* Liste des Véhicules */}
                 <div className="grid gap-6 lg:grid-cols-1 xl:grid-cols-2">
-                    {vehicules.map((vehicule) => {
+                    {vehiculesFiltres.map((vehicule) => {
                         const vehiculeVisites = getVehiculeVisites(vehicule._id);
                         const derniereVisite = vehiculeVisites.sort((a, b) =>
                             new Date(b.dateVisite).getTime() - new Date(a.dateVisite).getTime()
@@ -827,13 +885,13 @@ const openVehiculeModal = (type: "add" | "edit", vehicule: Vehicule | null = nul
                                             </div>
                                         </div>
                                         <div className="flex space-x-2">
-                                              <button
-  onClick={() => router.push(`/gestion-carnet-entretien?vehiculeId=${vehicule._id}`)}
-  className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-  title="Voir Carnet d'Entretien"
->
-  <BookOpen className="w-4 h-4" />
-</button>
+                                            <button
+                                                onClick={() => router.push(`/gestion-carnet-entretien?vehiculeId=${vehicule._id}`)}
+                                                className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                                                title="Voir Carnet d'Entretien"
+                                            >
+                                                <BookOpen className="w-4 h-4" />
+                                            </button>
                                             <button
                                                 onClick={() => openVehiculeModal("edit", vehicule)}
                                                 className="p-2 text-gray-500 hover:text-orange-600 hover:bg-gray-100 rounded-lg"
@@ -942,25 +1000,25 @@ const openVehiculeModal = (type: "add" | "edit", vehicule: Vehicule | null = nul
                                 <form onSubmit={handleVehiculeSubmit}>
                                     <div className="space-y-6">
                                         <ValidatedField
-                                        label="Propriétaire"
-                                        value={vehiculeForm.proprietaireId}
-                                        onChange={(value) => {
-                                            console.log("Propriétaire sélectionné:", value);
-                                            setVehiculeForm({ ...vehiculeForm, proprietaireId: value });
-                                        }}
-                                        validation={vehiculeValidations.proprietaireId}
-                                        required
-                                    >
-                                        <option value="">-- Sélectionner un propriétaire --</option>
-                                        {clients.map((client) => (
-                                            <option 
-                                                key={client._id} 
-                                                value={client._id}
-                                            >
-                                                {client.nom} ({client.type})
-                                            </option>
-                                        ))}
-                                    </ValidatedField>
+                                            label="Propriétaire"
+                                            value={vehiculeForm.proprietaireId}
+                                            onChange={(value) => {
+                                                console.log("Propriétaire sélectionné:", value);
+                                                setVehiculeForm({ ...vehiculeForm, proprietaireId: value });
+                                            }}
+                                            validation={vehiculeValidations.proprietaireId}
+                                            required
+                                        >
+                                            <option value="">-- Sélectionner un propriétaire --</option>
+                                            {clients.map((client) => (
+                                                <option
+                                                    key={client._id}
+                                                    value={client._id}
+                                                >
+                                                    {client.nom} ({client.type})
+                                                </option>
+                                            ))}
+                                        </ValidatedField>
 
                                         {/* Pays d'immatriculation */}
                                         <div className="mb-4">
@@ -1100,8 +1158,8 @@ const openVehiculeModal = (type: "add" | "edit", vehicule: Vehicule | null = nul
                                                 type="submit"
                                                 disabled={loading || !isVehiculeFormValid()}
                                                 className={`px-4 py-2 rounded-lg text-white font-medium ${loading || !isVehiculeFormValid()
-                                                        ? 'bg-gray-400 cursor-not-allowed'
-                                                        : 'bg-blue-600 hover:bg-blue-700'
+                                                    ? 'bg-gray-400 cursor-not-allowed'
+                                                    : 'bg-blue-600 hover:bg-blue-700'
                                                     }`}
                                             >
                                                 {loading ? (
