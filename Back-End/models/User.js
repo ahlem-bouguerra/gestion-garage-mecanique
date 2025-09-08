@@ -5,6 +5,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  garagenom: {
+    type: String,
+    required: true,
+  },
+  matriculefiscal:{
+    type: String,
+    required: true
+  },
   email: {
     type: String,
     required: true,
@@ -22,20 +30,19 @@ const userSchema = new mongoose.Schema({
       return !this.googleId;
     }
   },
-  token: {
-    type: String,
-    default: null
-  },
   isVerified: {
     type: Boolean,
     default: false
   },
+  
+  // ✅ CORRECTION: googleId avec sparse index
   googleId: {
     type: String,
     unique: true,
-    sparse: true,
+    sparse: true, // ✅ IMPORTANT: Permet plusieurs valeurs null
     default: null,
   },
+  
   resetPasswordToken: { 
     type: String, 
     default: null 
@@ -45,26 +52,41 @@ const userSchema = new mongoose.Schema({
     default: null 
   },
 
-    // Localisation
-  governorateId: { type: mongoose.Schema.Types.ObjectId, ref: "Governorate" },
-  cityId: { type: mongoose.Schema.Types.ObjectId, ref: "City" },
-  streetAddress: String,
-
-  // PROBLÈME CORRIGÉ: location optionnel avec structure GeoJSON correcte
-  location: {
-  type: {
-    type: String,
-    enum: ['Point']
+  // Localisation
+  governorateId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Governorate",
+    default: null
   },
-  coordinates: {
-    type: [Number] // [longitude, latitude]
+  cityId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "City",
+    default: null
+  },
+  streetAddress: {
+    type: String,
+    default: ""
+  },
+
+  // Location optionnelle
+  location: {
+    type: {
+      type: String,
+      enum: ['Point']
+    },
+    coordinates: {
+      type: [Number] // [longitude, latitude]
+    }
   }
-}
 
 }, {
   timestamps: true
 });
 
+// ✅ Index géospatial sparse
+userSchema.index({ location: '2dsphere' }, { sparse: true });
 
+// ✅ FORCER la création de l'index googleId avec sparse
+userSchema.index({ googleId: 1 }, { unique: true, sparse: true });
 
 export const User = mongoose.model("User", userSchema);

@@ -1,22 +1,18 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Eye, Send, Check, X, Car, User, Calendar, FileText, Euro, AlertCircle, Trash2 } from 'lucide-react';
-
 import axios from 'axios';
 import { redirect } from 'next/dist/server/api-utils';
 import { useRouter } from 'next/navigation';
-
-
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const GarageQuoteSystem = () => {
   const [activeTab, setActiveTab] = useState('list');
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [quotes, setQuotes] = useState([]);
   const [clients, setClients] = useState([]);
-  const [filteredClients, setFilteredClients] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState(null);
   const [vehicules, setVehicules] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState('');
   const [selectedVehiculeId, setSelectedVehiculeId] = useState('');
@@ -35,55 +31,48 @@ const GarageQuoteSystem = () => {
   const [selectedFacture, setSelectedFacture] = useState(null);
   const [invoiceData, setInvoiceData] = useState(null);
   const router = useRouter();
-  const [filters, setFilters] = useState({
-    status: '',
-    clientName: '',
-    dateDebut: '',
-    dateFin: ''
-  });
-
-  const [newQuote, setNewQuote] = useState({
-    clientName: '',
-    vehicleInfo: '',
-    vehiculeId: '',
-    inspectionDate: '',
-    services: [{ piece: '', quantity: 1, unitPrice: 0 }]
-  });
-
+  const [filters, setFilters] = useState({status: '',clientName: '',dateDebut: '',dateFin: ''});
+  const [newQuote, setNewQuote] = useState({clientName: '',vehicleInfo: '',vehiculeId: '',inspectionDate: '',services: [{ piece: '', quantity: 1, unitPrice: 0 }]});
   const [pieces, setPieces] = useState([]);
   const [loadingPieces, setLoadingPieces] = useState(false);
-  const [newquote, setNewquote] = useState({
-    services: [
-      {
-        pieceId: '',
-        piece: '',
-        quantity: 1,
-        unitPrice: 0
-      }
-    ]
-  });
-
+  const [newquote, setNewquote] = useState({services: [{pieceId: '',piece: '',quantity: 1,unitPrice: 0}]});
   const [showAddPieceModal, setShowAddPieceModal] = useState(false);
   const [currentServiceIndex, setCurrentServiceIndex] = useState(null);
-  const [newPiece, setNewPiece] = useState({
-    name: '',
-    prix: 0,
-    description: ''
-  });
+  const [newPiece, setNewPiece] = useState({name: '',prix: 0,description: ''});
+  const statusColors = {brouillon: 'bg-gray-100 text-gray-800',envoye: 'bg-blue-100 text-blue-800',accepte: 'bg-green-100 text-green-800',refuse: 'bg-red-100 text-red-800'};
+  const statusIcons = {brouillon: FileText,envoye: Send,accepte: Check,refuse: X};
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const statusColors = {
-    brouillon: 'bg-gray-100 text-gray-800',
-    envoye: 'bg-blue-100 text-blue-800',
-    accepte: 'bg-green-100 text-green-800',
-    refuse: 'bg-red-100 text-red-800'
+const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 5;
+
+const indexOfLastDevis = currentPage * itemsPerPage;
+const indexOfFirstDevis = indexOfLastDevis - itemsPerPage;
+const currentDevis = quotes.slice(indexOfFirstDevis, indexOfLastDevis);
+const totalPages = Math.ceil(quotes.length / itemsPerPage);
+
+
+
+useEffect(() => {
+  const fetchUserWithLocation = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const response = await axios.get("http://localhost:5000/api/get-profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCurrentUser(response.data);
+    } catch (error) {
+      console.error("Erreur:", error);
+    }
   };
 
-  const statusIcons = {
-    brouillon: FileText,
-    envoye: Send,
-    accepte: Check,
-    refuse: X
-  };
+  fetchUserWithLocation();
+}, []);
+
+
+
 
   useEffect(() => {
     const header = document.querySelector('header');
@@ -94,18 +83,18 @@ const GarageQuoteSystem = () => {
     } else {
       header.classList.remove("hidden");
     }
-  }, [selectedInvoice, selectedQuote , selectedQuote]);
+  }, [selectedInvoice, selectedQuote, selectedQuote]);
 
-useEffect(() => {
-  const header = document.querySelector('header');
-  if (!header) return;
+  useEffect(() => {
+    const header = document.querySelector('header');
+    if (!header) return;
 
-  if (showFactureModal || selectedFacture) {
-    header.classList.add("hidden");
-  } else {
-    header.classList.remove("hidden");
-  }
-}, [showFactureModal, selectedFacture]);
+    if (showFactureModal || selectedFacture) {
+      header.classList.add("hidden");
+    } else {
+      header.classList.remove("hidden");
+    }
+  }, [showFactureModal, selectedFacture]);
 
   const generateInvoice = (quote) => {
     const invoice = {
@@ -120,35 +109,231 @@ useEffect(() => {
     setSelectedInvoice(invoice);
   };
 
-  // Fonction pour imprimer/télécharger la facture (PDF)
-  const printInvoice = () => {
-    const content = document.getElementById("invoice-content"); // ton conteneur
-    if (!content) return;
+const printInvoice = async () => {
+  setIsGeneratingPDF(true);
 
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
+  try {
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.width;
+    const pageHeight = pdf.internal.pageSize.height;
+    let yPosition = 20;
 
-    printWindow.document.write(`
-    <html>
-      <head>
-        <title>Page 2</title>
-        <style>
-          /* styles d'impression spécifiques */
-          body { font-family: Arial, sans-serif; }
-        </style>
-      </head>
-      <body>
-        ${content.innerHTML}
-      </body>
-    </html>
-  `);
+    // En-tête
+    pdf.setFontSize(20);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('DEVIS', pageWidth / 2, yPosition, { align: 'center' });
 
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-  };
+    yPosition += 15;
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`N° ${selectedQuote.id}`, pageWidth / 2, yPosition, { align: 'center' });
 
+    yPosition += 25;
+
+    // Infos client et entreprise avec meilleur espacement
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(14);
+    pdf.text('Informations Client', 20, yPosition);
+    pdf.text('Notre Entreprise', 100, yPosition);
+
+    yPosition += 12;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+
+    // Client (gauche)
+    pdf.text(`Nom: ${selectedQuote.clientName}`, 20, yPosition);
+    pdf.text(`Véhicule: ${selectedQuote.vehicleInfo}`, 20, yPosition + 6);
+    pdf.text(`Date: ${selectedQuote.inspectionDate}`, 20, yPosition + 12);
+    
+    const estimatedTimeText = selectedQuote.estimatedTime 
+      ? `${selectedQuote.estimatedTime.days}j ${selectedQuote.estimatedTime.hours}h ${selectedQuote.estimatedTime.minutes}m` 
+      : 'N/A';
+    pdf.text(`Temps estimé: ${estimatedTimeText}`, 20, yPosition + 18);
+
+    // ✅ Entreprise (droite) — avec localisation corrigée et visible
+    let rightYPosition = yPosition;
+    
+    // Nom du garage
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(`${currentUser?.garagenom || 'Nom du garage'}`, 100, rightYPosition);
+    pdf.setFont('helvetica', 'normal');
+    rightYPosition += 8;
+
+    // ✅ Adresse complète et bien formatée
+    if (currentUser?.governorateId?.name || currentUser?.cityId?.name || currentUser?.streetAddress) {
+      // Adresse rue
+      if (currentUser?.streetAddress) {
+        pdf.text(`${currentUser.streetAddress}`, 100, rightYPosition);
+        rightYPosition += 6;
+      }
+      
+      // Ville et gouvernorat sur la même ligne
+      const locationParts = [];
+      if (currentUser?.cityId?.name) {
+        locationParts.push(currentUser.cityId.name);
+      }
+      if (currentUser?.governorateId?.name) {
+        locationParts.push(currentUser.governorateId.name);
+      }
+      
+      if (locationParts.length > 0) {
+        pdf.text(`${locationParts.join(', ')}`, 100, rightYPosition);
+        rightYPosition += 6;
+      }
+      
+      // Ligne séparatrice pour clarifier l'adresse
+      rightYPosition += 2;
+    }
+
+    // Contact
+    if (currentUser?.phone) {
+      pdf.text(`Tél: ${currentUser.phone}`, 100, rightYPosition);
+      rightYPosition += 6;
+    }
+    
+    if (currentUser?.email) {
+      pdf.text(`Email: ${currentUser.email}`, 100, rightYPosition);
+      rightYPosition += 6;
+    }
+    
+    if (currentUser?.matriculefiscal) {
+      pdf.text(`Matricule Fiscale: ${currentUser.matriculefiscal}`, 100, rightYPosition);
+      rightYPosition += 6;
+    }
+
+    // ✅ S'assurer que yPosition prend en compte la section la plus longue
+    yPosition = Math.max(yPosition + 30, rightYPosition + 10);
+
+    // Ligne de séparation
+    pdf.setLineWidth(0.5);
+    pdf.line(20, yPosition, pageWidth - 20, yPosition);
+    yPosition += 15;
+
+    // Tableau des services
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(12);
+    pdf.text('Détail des Services', 20, yPosition);
+    yPosition += 10;
+
+    const colPositions = [20, 100, 135, 165];
+    const colWidths = [75, 30, 25, 30];
+
+    // En-têtes du tableau avec fond
+    pdf.setFillColor(240, 240, 240);
+    pdf.rect(20, yPosition - 3, 175, 10, 'F');
+    
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(10);
+    pdf.text('Pièce / Service', colPositions[0] + 2, yPosition + 4);
+    pdf.text('Qté', colPositions[1] + 2, yPosition + 4);
+    pdf.text('Prix Unit.', colPositions[2] + 2, yPosition + 4);
+    pdf.text('Total', colPositions[3] + 2, yPosition + 4);
+
+    yPosition += 12;
+    pdf.setFont('helvetica', 'normal');
+
+    // Lignes du tableau
+    selectedQuote.services.forEach((service, index) => {
+      if (yPosition > 250) {
+        pdf.addPage();
+        yPosition = 20;
+        
+        // Re-créer les en-têtes sur la nouvelle page
+        pdf.setFillColor(240, 240, 240);
+        pdf.rect(20, yPosition - 3, 175, 10, 'F');
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Pièce / Service', colPositions[0] + 2, yPosition + 4);
+        pdf.text('Qté', colPositions[1] + 2, yPosition + 4);
+        pdf.text('Prix Unit.', colPositions[2] + 2, yPosition + 4);
+        pdf.text('Total', colPositions[3] + 2, yPosition + 4);
+        yPosition += 12;
+        pdf.setFont('helvetica', 'normal');
+      }
+
+      const total = (service.quantity || 0) * (service.unitPrice || 0);
+
+      // Fond alterné pour les lignes
+      if (index % 2 === 1) {
+        pdf.setFillColor(250, 250, 250);
+        pdf.rect(20, yPosition - 2, 175, 8, 'F');
+      }
+
+      // Texte tronqué si trop long
+      const pieceText = service.piece.length > 30 ? 
+        service.piece.substring(0, 30) + '...' : 
+        service.piece;
+
+      pdf.text(pieceText, colPositions[0] + 2, yPosition + 3);
+      pdf.text(String(service.quantity), colPositions[1] + 2, yPosition + 3);
+      pdf.text(`${(service.unitPrice || 0).toFixed(3)} DT`, colPositions[2] + 2, yPosition + 3);
+      pdf.text(`${total.toFixed(3)} DT`, colPositions[3] + 2, yPosition + 3);
+
+      yPosition += 8;
+    });
+
+    yPosition += 15;
+
+    // ✅ Section totaux améliorée
+    const totalHT = (selectedQuote.totalHT || 0) + (selectedQuote.maindoeuvre || 0);
+    const tva = totalHT * ((selectedQuote.tvaRate || 20) / 100);
+    const totalTTC = totalHT + tva;
+
+    // Cadre pour les totaux
+    const totalsStartY = yPosition;
+    pdf.setFillColor(248, 248, 248);
+    pdf.rect(120, yPosition - 5, 75, 40, 'F');
+    pdf.setLineWidth(0.3);
+    pdf.rect(120, yPosition - 5, 75, 40, 'S');
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.text(`Total pièces HT:`, 122, yPosition + 2);
+    pdf.text(`${(selectedQuote.totalHT || 0).toFixed(3)} DT`, 170, yPosition + 2, { align: 'right' });
+    
+    pdf.text(`Main d'œuvre:`, 122, yPosition + 8);
+    pdf.text(`${(selectedQuote.maindoeuvre || 0).toFixed(3)} DT`, 170, yPosition + 8, { align: 'right' });
+    
+    pdf.text(`Total HT:`, 122, yPosition + 14);
+    pdf.text(`${totalHT.toFixed(3)} DT`, 170, yPosition + 14, { align: 'right' });
+    
+    pdf.text(`TVA (${selectedQuote.tvaRate || 20}%):`, 122, yPosition + 20);
+    pdf.text(`${tva.toFixed(3)} DT`, 170, yPosition + 20, { align: 'right' });
+
+    // Total TTC en gras
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(11);
+    pdf.text(`Total TTC:`, 122, yPosition + 28);
+    pdf.text(`${totalTTC.toFixed(3)} DT`, 170, yPosition + 28, { align: 'right' });
+
+    yPosition += 50;
+
+    // ✅ Pied de page amélioré
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    const footerY = pageHeight - 20;
+    
+    // Ligne de séparation
+    pdf.setLineWidth(0.3);
+    pdf.line(20, footerY - 5, pageWidth - 20, footerY - 5);
+    
+    pdf.text(`Devis généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, 
+             pageWidth / 2, footerY, { align: 'center' });
+    
+    pdf.text('Ce devis est valable 30 jours à compter de sa date d\'émission', 
+             pageWidth / 2, footerY + 6, { align: 'center' });
+
+    // Sauvegarder avec nom plus descriptif
+    const fileName = `devis_${selectedQuote.id}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.pdf`;
+    pdf.save(fileName);
+
+  } catch (error) {
+    console.error('Erreur lors de la génération du PDF:', error);
+    // Optionnel: Afficher une notification d'erreur à l'utilisateur
+    alert('Erreur lors de la génération du PDF. Veuillez réessayer.');
+  } finally {
+    setIsGeneratingPDF(false);
+  }
+};
 
 
 
@@ -174,30 +359,34 @@ useEffect(() => {
     loadDevisWithFactures({});
   };
 
-  // 🔧 4. FONCTION POUR APPLIQUER LES FILTRES
-  const applyFilters = () => {
-    // Construire l'objet de filtres pour l'API
-    const apiFilters = {};
+const applyFilters = () => {
+  // Construire l'objet de filtres pour l'API
+  const apiFilters = {};
 
-    if (filters.status && filters.status !== 'Tous') {
-      apiFilters.status = filters.status.toLowerCase();
-    }
+  if (filters.status && filters.status !== 'Tous') {
+    apiFilters.status = filters.status.toLowerCase();
+  }
 
-    if (filters.clientName.trim()) {
-      apiFilters.clientName = filters.clientName.trim();
-    }
+  if (filters.clientName.trim()) {
+    apiFilters.clientName = filters.clientName.trim();
+  }
 
-    if (filters.dateDebut) {
-      apiFilters.dateDebut = filters.dateDebut;
-    }
+  if (filters.dateDebut) {
+    apiFilters.dateDebut = filters.dateDebut;
+  }
 
-    if (filters.dateFin) {
-      apiFilters.dateFin = filters.dateFin;
-    }
+  if (filters.dateFin) {
+    apiFilters.dateFin = filters.dateFin;
+  }
 
-    console.log('🔍 Filtres appliqués:', apiFilters);
-    loadDevisWithFactures(apiFilters);
-  };
+  // Réinitialiser à la page 1
+  setCurrentPage(1);
+
+  console.log('🔍 Filtres appliqués:', apiFilters);
+  loadDevisWithFactures(apiFilters);
+};
+
+
 
   const calculateTotal = (services, maindoeuvre = 0) => {
     const totalServicesHT = services.reduce((sum, service) => {
@@ -269,7 +458,7 @@ useEffect(() => {
       setLoading(true);
 
       // Validation (même code existant)
-      if (!selectedClientId || !newQuote.vehicleInfo ||!selectedVehiculeId || !newQuote.inspectionDate) {
+      if (!selectedClientId || !newQuote.vehicleInfo || !selectedVehiculeId || !newQuote.inspectionDate) {
         showError('Veuillez remplir tous les champs obligatoires');
         return;
       }
@@ -419,11 +608,10 @@ useEffect(() => {
       const data = await response.json();
       // Puisque l'API retourne directement le tableau, pas besoin de data.data
       setClients(data);
-      setFilteredClients(data);
+
     } catch (error) {
       console.error('Erreur lors de la récupération des clients:', error);
       setClients([]); // En cas d'erreur, initialiser avec un tableau vide
-      setFilteredClients([]);
     }
   };
 
@@ -480,7 +668,7 @@ useEffect(() => {
   const handleClientChange = async (e: { target: { value: any; }; }) => {
     const clientId = e.target.value;
     const selectedClient = clients.find(c => c._id === clientId);
-    
+
 
 
     setSelectedClientId(clientId);
@@ -493,7 +681,7 @@ useEffect(() => {
     // Charger les véhicules pour ce client
     await loadVehiculesByClient(clientId);
     setSelectedVehiculeId('');
-    
+
   };
 
   // Fonction pour mettre à jour un service
@@ -610,7 +798,7 @@ useEffect(() => {
         throw new Error(error.response?.data?.message || "Erreur lors de la création du devis");
       }
     },
-    
+
 
 
     getAll: async (filters = {}) => {
@@ -674,7 +862,7 @@ useEffect(() => {
     });
 
     setSelectedClientId(quote.clientId || '');
-    setSelectedVehiculeId(quote.vehiculeId|| '');
+    setSelectedVehiculeId(quote.vehiculeId || '');
     setTvaRate(quote.tvaRate || 20);
     setMaindoeuvre(quote.maindoeuvre || 0);
     setEstimatedTime(quote.estimatedTime || { days: 0, hours: 0, minutes: 0 });
@@ -774,31 +962,31 @@ useEffect(() => {
       );
 
       if (response.data.success) {
-      const factureData = response.data.facture;
-      const factureId = factureData._id || factureData.id;
+        const factureData = response.data.facture;
+        const factureId = factureData._id || factureData.id;
 
-      try {
-        await axios.put(`http://localhost:5000/api/updateId/${devis._id}`, {
-          factureId: factureId
-        });
-        console.log('Devis mis à jour avec factureId:', factureId);
-      } catch (error) {
-        console.error('Erreur mise à jour devis:', error);
+        try {
+          await axios.put(`http://localhost:5000/api/updateId/${devis._id}`, {
+            factureId: factureId
+          });
+          console.log('Devis mis à jour avec factureId:', factureId);
+        } catch (error) {
+          console.error('Erreur mise à jour devis:', error);
+        }
+
+        setSelectedFacture(factureData);
+        setShowFactureModal(true);
+        showSuccess('Facture créée avec succès !');
+
+
+        // Mettre à jour l'état local avec l'ID de la facture
+        setFactureExists(prev => ({
+          ...prev,
+          [devis.id]: factureData  // ✅ Stocke la facture avec son ID
+        }));
+
+        console.log('ID de la facture créée:', factureData.factureId); // Pour debug
       }
-      
-      setSelectedFacture(factureData);
-      setShowFactureModal(true);
-      showSuccess('Facture créée avec succès !');
-      
-
-      // Mettre à jour l'état local avec l'ID de la facture
-      setFactureExists(prev => ({
-        ...prev,
-        [devis.id]: factureData  // ✅ Stocke la facture avec son ID
-      }));
-      
-      console.log('ID de la facture créée:', factureData.factureId); // Pour debug
-    }
     } catch (error) {
       console.error('Erreur lors de la création de facture:', error);
       showError(error.response?.data?.message || 'Erreur lors de la création de facture');
@@ -817,10 +1005,10 @@ useEffect(() => {
           ...response.data,
           factureId: response.data._id || response.data.id  // ✅ Ajoute l'ID
         };
-        
+
         setSelectedFacture(factureWithId);
         setShowFactureModal(true);
-        
+
         console.log('ID de la facture existante:', factureWithId.factureId); // Pour debug
       }
     } catch (error) {
@@ -1099,7 +1287,7 @@ useEffect(() => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {quotes.map((quote) => {
+                    {currentDevis.map((quote) => {
                       // Normaliser le status pour qu'il corresponde aux clés de statusIcons
                       const normalizedStatus = quote.status?.toLowerCase() || 'brouillon';
                       const StatusIcon = statusIcons[normalizedStatus] || FileText;
@@ -1237,6 +1425,54 @@ useEffect(() => {
                   </tbody>
                 </table>
               </div>
+              {totalPages > 1 && (
+                <div className="px-6 py-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Affichage de {indexOfFirstDevis + 1} à {Math.min(indexOfLastDevis, quotes.length)} sur {quotes.length} devis
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Précédent
+                      </button>
+                      
+                      <div className="flex items-center space-x-1">
+                        {[...Array(totalPages)].map((_, index) => {
+                          const pageNumber = index + 1;
+                          const isCurrentPage = pageNumber === currentPage;
+                          
+                          return (
+                            <button
+                              key={pageNumber}
+                              onClick={() => setCurrentPage(pageNumber)}
+                              className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                isCurrentPage
+                                  ? 'bg-blue-600 text-white'
+                                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              {pageNumber}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Suivant
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1271,18 +1507,18 @@ useEffect(() => {
                   Véhicule *
                 </label>
                 <select
-  value={selectedVehiculeId}  // ✅ CORRECT - utilise l'ID
-  onChange={(e) => {
-    const vehiculeId = e.target.value;
-    const selectedVehicule = vehicules.find(v => v._id === vehiculeId);
-    
-    setSelectedVehiculeId(vehiculeId);
-    setNewQuote({ 
-      ...newQuote, 
-      vehicleInfo: selectedVehicule ? `${selectedVehicule.marque} ${selectedVehicule.modele} - ${selectedVehicule.immatriculation}` : '' 
-    });
-  }}
-  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={selectedVehiculeId}  // ✅ CORRECT - utilise l'ID
+                  onChange={(e) => {
+                    const vehiculeId = e.target.value;
+                    const selectedVehicule = vehicules.find(v => v._id === vehiculeId);
+
+                    setSelectedVehiculeId(vehiculeId);
+                    setNewQuote({
+                      ...newQuote,
+                      vehicleInfo: selectedVehicule ? `${selectedVehicule.marque} ${selectedVehicule.modele} - ${selectedVehicule.immatriculation}` : ''
+                    });
+                  }}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">
                     {!selectedClientId
@@ -1296,11 +1532,11 @@ useEffect(() => {
                   </option>
                   {vehicules.map((vehicule) => (
                     <option
-  key={vehicule._id}
-  value={vehicule._id}  // ✅ CORRECT - utilise l'ID comme value
->
-  {vehicule.marque} {vehicule.modele} - {vehicule.immatriculation} ({vehicule.annee})
-</option>
+                      key={vehicule._id}
+                      value={vehicule._id}  // ✅ CORRECT - utilise l'ID comme value
+                    >
+                      {vehicule.marque} {vehicule.modele} - {vehicule.immatriculation} ({vehicule.annee})
+                    </option>
                   ))}
                 </select>
 
@@ -1687,7 +1923,7 @@ useEffect(() => {
                   </button>
                 </div>
               </div>
-              <div className="p-6">
+              <div id="invoice-content" className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <h3 className="font-medium text-gray-900 mb-2">Informations Client</h3>
@@ -1730,7 +1966,8 @@ useEffect(() => {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                  </table>
+                
                   </div>
                 </div>
 
@@ -1778,10 +2015,15 @@ useEffect(() => {
                     </div>
                   </div>
                 </div>
-
+              </div>
+              <div className="p-6 border-t border-gray-200">
                 <div className="flex space-x-4">
-                  <button onClick={printInvoice} className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                    Imprimer PDF
+                  <button
+                    onClick={printInvoice}
+                    disabled={isGeneratingPDF}
+                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+                  >
+                    {isGeneratingPDF ? 'Génération...' : 'Télécharger PDF'}
                   </button>
                 </div>
               </div>
@@ -1790,10 +2032,10 @@ useEffect(() => {
         )}
 
         {showFactureModal && selectedFacture && (
-                  
+
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full m-4 max-h-screen overflow-y-auto">
-             
+
 
               {/* Contenu de la facture - Format professionnel */}
               <div className="p-8 print:p-4" id="invoice-content">
@@ -1802,7 +2044,7 @@ useEffect(() => {
                   {/* Informations de l'entreprise */}
                   <div className="flex-1">
                     <h1 className="text-3xl font-bold text-blue-600 mb-2">GARAGE AUTO</h1>
-                    
+
                   </div>
 
                   {/* Logo et titre facture */}
@@ -1916,21 +2158,21 @@ useEffect(() => {
                 {/* Footer */}
                 <div className="text-center text-gray-500 text-sm border-t pt-4">
                   <p>GARAGE AUTO</p>
-                 
+
                 </div>
               </div>
 
               {/* Actions - Masquées lors de l'impression */}
               <div className="p-6 border-t border-gray-200 flex space-x-4 no-print">
-                 <button
-            onClick={() => window.print()}
-            className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
-            Imprimer
-          </button>
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  Imprimer
+                </button>
 
 
                 <button
@@ -1942,8 +2184,10 @@ useEffect(() => {
               </div>
             </div>
           </div>
-        
+          
+
         )}
+
       </div>
     </div>
 

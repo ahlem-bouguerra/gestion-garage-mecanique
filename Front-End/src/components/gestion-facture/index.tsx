@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, FileText, DollarSign, Clock, AlertTriangle, X, User, Calendar, Car } from 'lucide-react';
+import axios from 'axios';
 
 
 interface FactureDetails extends Facture {
@@ -92,6 +93,14 @@ const GestionFactures: React.FC = () => {
   const [factureDetails, setFactureDetails] = useState<FactureDetails | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  // Pagination côté client
+  const indexOfLastFacture = currentPage * itemsPerPage;
+  const indexOfFirstFacture = indexOfLastFacture - itemsPerPage;
+  const currentFactures = filteredFactures.slice(indexOfFirstFacture, indexOfLastFacture);
+
 
   // Récupérer les factures
   useEffect(() => {
@@ -151,6 +160,25 @@ const GestionFactures: React.FC = () => {
       setLoadingDetails(false);
     }
   };
+
+
+  useEffect(() => {
+    const fetchUserWithLocation = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const response = await axios.get("http://localhost:5000/api/get-profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCurrentUser(response.data);
+      } catch (error) {
+        console.error("Erreur:", error);
+      }
+    };
+
+    fetchUserWithLocation();
+  }, []);
 
   // Filtrer les factures
   useEffect(() => {
@@ -358,12 +386,13 @@ const GestionFactures: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredFactures.map((facture) => (
+              {currentFactures.map((facture) => (
+
                 <tr
                   key={facture._id}
                   className={`hover:bg-gray-50 ${facture.paymentStatus === 'en_retard'
-                      ? 'bg-red-50 border-l-4 border-red-500'
-                      : ''
+                    ? 'bg-red-50 border-l-4 border-red-500'
+                    : ''
                     }`}
                 >
 
@@ -578,242 +607,263 @@ const GestionFactures: React.FC = () => {
           </div>
         </div>
       )}
-   {showDetailsModal && factureDetails && (
-  <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div className="relative top-5 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
-      {/* Header avec boutons d'action */}
-      <div className="flex justify-between items-center mb-6 no-print">
-        <h3 className="text-xl font-bold text-gray-900">
-          Facture N° {factureDetails.numeroFacture.toString().padStart(4, '0')}
-        </h3>
-        <button
-            onClick={() => setShowDetailsModal(false)}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        
-      </div>
+      {showDetailsModal && factureDetails && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-5 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+            {/* Header avec boutons d'action */}
+            <div className="flex justify-between items-center mb-6 no-print">
+              <h3 className="text-xl font-bold text-gray-900">
+                Facture N° {factureDetails.numeroFacture.toString().padStart(4, '0')}
+              </h3>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
 
-      {/* Contenu de la facture */}
-      <div className="invoice-content bg-white" id="invoice-print">
-        {/* En-tête de l'entreprise */}
-        <div className="border-b-2 border-gray-200 pb-6 mb-6">
-          <div className="flex justify-between items-start">
-            <div>
-              
-              <h1 className="text-3xl font-bold text-blue-600">AutoRepair Pro</h1>
-              <div className="mt-2 text-gray-600">
-                <p>123 Rue de la Mécanique</p>
-                <p>1000 Tunis, Tunisie</p>
-                <p>Tél: +216 70 123 456</p>
-                <p>Email: contact@autorepair.tn</p>
+            </div>
+
+            {/* Contenu de la facture */}
+            <div className="invoice-content bg-white" id="invoice-print">
+              {/* En-tête de l'entreprise */}
+              <div className="border-b-2 border-gray-200 pb-6 mb-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h1 className="text-3xl font-bold text-blue-600">
+                      {currentUser?.username || "Nom du garage"}
+                    </h1>
+                    <div className="mt-2 text-gray-600">
+                      <p>{currentUser?.governorateId.name}-{currentUser?.cityId.name}-{currentUser?.streetAddress || "Adresse non renseignée"}</p>
+                      <p>Tél: {currentUser?.phone || "Non renseigné"}</p>
+                      <p>Email: {currentUser?.email || "Non renseigné"}</p>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <h2 className="text-2xl font-bold text-gray-800">FACTURE</h2>
+                    <div className="mt-2 text-gray-600">
+                      <p><span className="font-medium">N°:</span> {factureDetails.numeroFacture.toString().padStart(4, '0')}</p>
+                      <p><span className="font-medium">Date:</span> {formatDate(factureDetails.invoiceDate)}</p>
+                      <p><span className="font-medium">Échéance:</span> {formatDate(factureDetails.dueDate)}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="text-right">
-              <h2 className="text-2xl font-bold text-gray-800">FACTURE</h2>
-              <div className="mt-2 text-gray-600">
-                <p><span className="font-medium">N°:</span> {factureDetails.numeroFacture.toString().padStart(4, '0')}</p>
-                <p><span className="font-medium">Date:</span> {formatDate(factureDetails.invoiceDate)}</p>
-                <p><span className="font-medium">Échéance:</span> {formatDate(factureDetails.dueDate)}</p>
+
+              {/* Informations client et véhicule */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">
+                    FACTURÉ À
+                  </h3>
+                  <div className="space-y-1 text-gray-700">
+                    <p className="font-medium text-lg">{factureDetails.clientId?.nom || factureDetails.clientInfo.nom}</p>
+                    {factureDetails.clientId?.adresse && (
+                      <p>{factureDetails.clientId.adresse}</p>
+                    )}
+                    <p>Tél: {factureDetails.clientId?.telephone || factureDetails.clientInfo.telephone}</p>
+                    <p>Email: {factureDetails.clientId?.email || factureDetails.clientInfo.email}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">
+                    VÉHICULE
+                  </h3>
+                  <div className="space-y-1 text-gray-700">
+                    <p className="font-medium">{factureDetails.vehicleInfo}</p>
+                    {factureDetails.devisId && (
+                      <p className="text-sm text-gray-500">Devis: {factureDetails.devisId.id}</p>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Informations client et véhicule */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">
-              FACTURÉ À
-            </h3>
-            <div className="space-y-1 text-gray-700">
-              <p className="font-medium text-lg">{factureDetails.clientId?.nom || factureDetails.clientInfo.nom}</p>
-              {factureDetails.clientId?.adresse && (
-                <p>{factureDetails.clientId.adresse}</p>
-              )}
-              <p>Tél: {factureDetails.clientId?.telephone || factureDetails.clientInfo.telephone}</p>
-              <p>Email: {factureDetails.clientId?.email || factureDetails.clientInfo.email}</p>
-            </div>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">
-              VÉHICULE
-            </h3>
-            <div className="space-y-1 text-gray-700">
-              <p className="font-medium">{factureDetails.vehicleInfo}</p>
-              {factureDetails.devisId && (
-                <p className="text-sm text-gray-500">Devis: {factureDetails.devisId.id}</p>
-              )}
-            </div>
-          </div>
-        </div>
+              {/* Tableau des services */}
+              {factureDetails.services && factureDetails.services.length > 0 && (
+                <div className="mb-8">
+                  <table className="w-full border-collapse border border-gray-300">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-800">
+                          DESCRIPTION
+                        </th>
+                        <th className="border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-800">
+                          QTÉ
+                        </th>
+                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold text-gray-800">
+                          PRIX UNITAIRE
+                        </th>
+                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold text-gray-800">
+                          TOTAL
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {factureDetails.services.map((service, index) => (
+                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="border border-gray-300 px-4 py-3">
+                            <div>
+                              <p className="font-medium text-gray-900">{service.piece}</p>
+                              {service.pieceId && (
+                                <p className="text-xs text-gray-500">{service.pieceId.description}</p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="border border-gray-300 px-4 py-3 text-center text-gray-900">
+                            {service.quantity}
+                          </td>
+                          <td className="border border-gray-300 px-4 py-3 text-right text-gray-900">
+                            {formatCurrency(service.unitPrice)}
+                          </td>
+                          <td className="border border-gray-300 px-4 py-3 text-right font-medium text-gray-900">
+                            {formatCurrency(service.total)}
+                          </td>
+                        </tr>
+                      ))}
 
-        {/* Tableau des services */}
-        {factureDetails.services && factureDetails.services.length > 0 && (
-          <div className="mb-8">
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-800">
-                    DESCRIPTION
-                  </th>
-                  <th className="border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-800">
-                    QTÉ
-                  </th>
-                  <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold text-gray-800">
-                    PRIX UNITAIRE
-                  </th>
-                  <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold text-gray-800">
-                    TOTAL
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {factureDetails.services.map((service, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="border border-gray-300 px-4 py-3">
-                      <div>
-                        <p className="font-medium text-gray-900">{service.piece}</p>
-                        {service.pieceId && (
-                          <p className="text-xs text-gray-500">{service.pieceId.description}</p>
-                        )}
-                      </div>
-                    </td>
-                    <td className="border border-gray-300 px-4 py-3 text-center text-gray-900">
-                      {service.quantity}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-3 text-right text-gray-900">
-                      {formatCurrency(service.unitPrice)}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-3 text-right font-medium text-gray-900">
-                      {formatCurrency(service.total)}
-                    </td>
-                  </tr>
-                ))}
-                
-                {/* Ligne main d'œuvre si présente */}
-                {factureDetails.maindoeuvre && factureDetails.maindoeuvre > 0 && (
-                  <tr className="bg-blue-50">
-                    <td className="border border-gray-300 px-4 py-3 font-medium text-gray-900">
-                      Main d'œuvre
-                    </td>
-                    <td className="border border-gray-300 px-4 py-3 text-center">1</td>
-                    <td className="border border-gray-300 px-4 py-3 text-right">
-                      {formatCurrency(factureDetails.maindoeuvre)}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-3 text-right font-medium">
-                      {formatCurrency(factureDetails.maindoeuvre)}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Totaux */}
-        <div className="flex justify-end mb-8">
-          <div className="w-64">
-            <table className="w-full">
-              <tbody>
-                {factureDetails.totalHT && (
-                  <tr>
-                    <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
-                      TOTAL HT:
-                    </td>
-                    <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
-                      {formatCurrency(factureDetails.totalHT)}
-                    </td>
-                  </tr>
-                )}
-                {factureDetails.totalTVA && (
-                  <tr>
-                    <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
-                      TVA ({factureDetails.tvaRate || 20}%):
-                    </td>
-                    <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
-                      {formatCurrency(factureDetails.totalTVA)}
-                    </td>
-                  </tr>
-                )}
-                <tr className="bg-gray-100">
-                  <td className="px-4 py-3 text-right text-lg font-bold text-gray-800">
-                    TOTAL TTC:
-                  </td>
-                  <td className="px-4 py-3 text-right text-lg font-bold text-green-600">
-                    {formatCurrency(factureDetails.totalTTC)}
-                  </td>
-                </tr>
-                
-              
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Statut et notes */}
-        <div className="border-t border-gray-200 pt-6">
-          <div className="flex justify-between items-start">
-            <div>
-             
-              {factureDetails.notes && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium text-gray-700">Notes:</p>
-                  <p className="text-sm text-gray-600 mt-1">{factureDetails.notes}</p>
+                      {/* Ligne main d'œuvre si présente */}
+                      {factureDetails.maindoeuvre && factureDetails.maindoeuvre > 0 && (
+                        <tr className="bg-blue-50">
+                          <td className="border border-gray-300 px-4 py-3 font-medium text-gray-900">
+                            Main d'œuvre
+                          </td>
+                          <td className="border border-gray-300 px-4 py-3 text-center">1</td>
+                          <td className="border border-gray-300 px-4 py-3 text-right">
+                            {formatCurrency(factureDetails.maindoeuvre)}
+                          </td>
+                          <td className="border border-gray-300 px-4 py-3 text-right font-medium">
+                            {formatCurrency(factureDetails.maindoeuvre)}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               )}
-            </div>
-            
-            <div className="text-right text-xs text-gray-500">
-              <p>Merci pour votre confiance</p>
-            </div>
-          </div>
-          
-        </div>
-      </div>
 
-      {/* Boutons d'action en bas (non imprimables) */}
-      <div className="flex justify-end space-x-3 mt-6 pt-4 border-t no-print">
-        {factureDetails.paymentStatus !== 'paye' && (
-          <button
-            onClick={() => {
-              setSelectedFacture(factureDetails);
-              setShowDetailsModal(false);
-              setShowPaymentModal(true);
-            }}
-            className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-          >
-            Enregistrer un paiement
-          </button>
-        )}
-        <button
-          onClick={() => setShowDetailsModal(false)}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-        >
-          Fermer
-        </button>
-        <div className="flex space-x-2">
-          <button
-            onClick={() => window.print()}
-            className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
-            Imprimer
-          </button>
-         
-          
+              {/* Totaux */}
+              <div className="flex justify-end mb-8">
+                <div className="w-64">
+                  <table className="w-full">
+                    <tbody>
+                      {factureDetails.totalHT && (
+                        <tr>
+                          <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                            TOTAL HT:
+                          </td>
+                          <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                            {formatCurrency(factureDetails.totalHT)}
+                          </td>
+                        </tr>
+                      )}
+                      {factureDetails.totalTVA && (
+                        <tr>
+                          <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                            TVA ({factureDetails.tvaRate || 20}%):
+                          </td>
+                          <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                            {formatCurrency(factureDetails.totalTVA)}
+                          </td>
+                        </tr>
+                      )}
+                      <tr className="bg-gray-100">
+                        <td className="px-4 py-3 text-right text-lg font-bold text-gray-800">
+                          TOTAL TTC:
+                        </td>
+                        <td className="px-4 py-3 text-right text-lg font-bold text-green-600">
+                          {formatCurrency(factureDetails.totalTTC)}
+                        </td>
+                      </tr>
+
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Statut et notes */}
+              <div className="border-t border-gray-200 pt-6">
+                <div className="flex justify-between items-start">
+                  <div>
+
+                    {factureDetails.notes && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium text-gray-700">Notes:</p>
+                        <p className="text-sm text-gray-600 mt-1">{factureDetails.notes}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="text-right text-xs text-gray-500">
+                    <p>Merci pour votre confiance</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Boutons d'action en bas (non imprimables) */}
+            <div className="flex justify-end space-x-3 mt-6 pt-4 border-t no-print">
+              {factureDetails.paymentStatus !== 'paye' && (
+                <button
+                  onClick={() => {
+                    setSelectedFacture(factureDetails);
+                    setShowDetailsModal(false);
+                    setShowPaymentModal(true);
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                >
+                  Enregistrer un paiement
+                </button>
+              )}
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              >
+                Fermer
+              </button>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  Imprimer
+                </button>
+
+
+              </div>
+            </div>
+
+          </div>
         </div>
-      </div>
-      
-    </div>
-  </div>
-)}
+      )}
+      <div className="flex justify-between items-center mt-4">
+  <button
+    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+    disabled={currentPage === 1}
+    className="px-3 py-1 bg-bue-200 rounded disabled:opacity-20"
+  >
+    Précédent
+  </button>
+
+  <span>Page {currentPage} / {Math.ceil(filteredFactures.length / itemsPerPage)}</span>
+
+  <button
+    onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredFactures.length / itemsPerPage)))}
+    disabled={currentPage === Math.ceil(filteredFactures.length / itemsPerPage)}
+    className="px-3 py-1 bg-bue-200 rounded disabled:opacity-50"
+  >
+    Suivant
+  </button>
+</div>
+
     </div>
   );
 };

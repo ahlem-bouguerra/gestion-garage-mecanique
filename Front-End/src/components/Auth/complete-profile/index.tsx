@@ -18,6 +18,8 @@ export default function CompleteProfile() {
   const searchParams = useSearchParams();
 
   const [username, setUsername] = useState("");
+  const [garagenom, setGaragenom] = useState("");
+  const [matriculefiscal, setMatriculefiscal] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [governorateId, setGovernorateId] = useState("");
@@ -129,6 +131,8 @@ export default function CompleteProfile() {
         console.log('👤 Profil utilisateur récupéré:', user);
 
         setUsername(user.username || "");
+        setGaragenom(user.garagenom || "");
+        setMatriculefiscal(user.matriculefiscal || "");
         setEmail(user.email || "");
         setPhone(user.phone || "");
         setGovernorateId(user.governorateId || "");
@@ -275,7 +279,7 @@ export default function CompleteProfile() {
       return;
     }
 
-    if (!username.trim() || !phone.trim() || !governorateId || !cityId) {
+    if (!username.trim() ||!garagenom.trim()|| !matriculefiscal.trim() || !phone.trim() || !governorateId || !cityId) {
       setError("Veuillez remplir tous les champs obligatoires");
       setIsLoading(false);
       return;
@@ -300,6 +304,8 @@ export default function CompleteProfile() {
         "http://localhost:5000/api/complete-profile",
         {
           username: username.trim(),
+          garagenom: garagenom.trim(),
+          matriculefiscal: matriculefiscal.trim(),
           email,
           phone: phone.trim(),
           governorateId,
@@ -371,6 +377,8 @@ export default function CompleteProfile() {
       }}>
         <strong>🔍 Debug Info:</strong>
         <br />Username: {username || 'Non défini'}
+        <br />Garage Nom: {garagenom || 'Non défini'}
+        <br />Matricule Fiscal: {matriculefiscal || 'Non défini'}
         <br />Email: {email || 'Non défini'}
         <br />Phone: {phone || 'Non défini'}
         <br />Gouvernorat: {governorateId || 'Non sélectionné'}
@@ -386,6 +394,24 @@ export default function CompleteProfile() {
               value={username} 
               onChange={e => setUsername(e.target.value)} 
               required 
+              style={{ padding: 10, border: '1px solid #ddd', borderRadius: 4, width: '100%' }}
+            />
+          </div>
+          <div>
+            <label>Nom de garage *</label>
+            <input 
+              value={garagenom} 
+              onChange={e => setGaragenom(e.target.value)} 
+              required 
+              style={{ padding: 10, border: '1px solid #ddd', borderRadius: 4, width: '100%' }}
+            />
+          </div>
+          <div>
+            <label>Matricule Fiscale *</label>
+            <input 
+              value={matriculefiscal} 
+              onChange={e => setMatriculefiscal(e.target.value)} 
+              disabled
               style={{ padding: 10, border: '1px solid #ddd', borderRadius: 4, width: '100%' }}
             />
           </div>

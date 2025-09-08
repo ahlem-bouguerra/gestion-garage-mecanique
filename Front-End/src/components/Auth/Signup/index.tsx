@@ -12,6 +12,8 @@ interface SuccessPopupProps {
   isOpen: boolean;
   onClose: () => void;
   username: string;
+  garagenom: string;
+  matriculefiscal?: string;
   email: string;
   phone: string;
 }
@@ -21,10 +23,14 @@ export default function SignupForm() {
   const [isPasswordFocused, setPasswordFocused] = useState(false);
   const [isConfirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
   const [isUsernameFocused, setUsernameFocused] = useState(false);
+  const [isGaragenomFocused, setGaragenomFocused] = useState(false);
+  const [isMatriculefiscalFocused, setMatriculefiscalFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isPhoneFocused, setPhoneFocused] = useState(false);
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
+  const [garagenom, setGaragenom] = useState('');
+  const [matriculefiscal, setMatriculefiscal] = useState(''); // New state for matriculefiscal
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [ConfirmPassword, setConfirmPassword] = useState('');
@@ -190,7 +196,7 @@ export default function SignupForm() {
     e.preventDefault();
     setError('');
 
-    if (!username || !email || !password || !ConfirmPassword || !phone ) {
+    if (!username ||!garagenom || !matriculefiscal || !email || !password || !ConfirmPassword || !phone ) {
       setError("Veuillez remplir tous les champs.");
       return;
     }
@@ -218,6 +224,8 @@ export default function SignupForm() {
 
       const response = await axios.post("http://localhost:5000/api/signup", {
         username,
+        garagenom,
+        matriculefiscal,
         email,
         password,
         phone: cleanPhone
@@ -306,6 +314,28 @@ export default function SignupForm() {
               onBlur={() => setUsernameFocused(false)}
               value={username}
               onChange={(e) => setUsername(e.target.value.toLowerCase())}
+            />
+          </div>
+          <div className="mb-6">
+            <input
+              type="text"
+              placeholder={isGaragenomFocused ? '' : 'Garage Nom'}
+              className="w-full px-4 py-2 text-white bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-orange-500"
+              onFocus={() => setGaragenomFocused(true)}
+              onBlur={() => setGaragenomFocused(false)}
+              value={garagenom}
+              onChange={(e) => setGaragenom(e.target.value.toLowerCase())}
+            />
+          </div>
+          <div className="mb-6">
+            <input
+              type="text"
+              placeholder={isMatriculefiscalFocused ? '' : 'Matricule Fiscale'}
+              className="w-full px-4 py-2 text-white bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-orange-500"
+              onFocus={() => setMatriculefiscalFocused(true)}
+              onBlur={() => setMatriculefiscalFocused(false)}
+              value={matriculefiscal}
+              onChange={(e) => setMatriculefiscal(e.target.value.toLowerCase())}
             />
           </div>
  {/* Champ Téléphone avec validation */}
@@ -476,6 +506,8 @@ export default function SignupForm() {
         isOpen={showSuccessPopup}
         onClose={() => setShowSuccessPopup(false)}
         username={username}
+        matriculefiscal={matriculefiscal}
+        garagenom={garagenom}
         email={email}
         phone={phone}
       />
