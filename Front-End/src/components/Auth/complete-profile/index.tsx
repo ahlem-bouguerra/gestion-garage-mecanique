@@ -366,24 +366,7 @@ export default function CompleteProfile() {
     <div style={{ padding: 20, maxWidth: 1000, margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
       <h1 style={{ textAlign: 'center', marginBottom: 30 }}>🔧 Compléter votre profil de mécanicien</h1>
       
-      {/* 🔧 AJOUT D'UN MESSAGE DE DEBUG TEMPORAIRE */}
-      <div style={{ 
-        backgroundColor: '#f0f8ff', 
-        padding: 15, 
-        borderRadius: 8, 
-        marginBottom: 20,
-        fontSize: 14,
-        border: '1px solid #b0d4f1'
-      }}>
-        <strong>🔍 Debug Info:</strong>
-        <br />Username: {username || 'Non défini'}
-        <br />Garage Nom: {garagenom || 'Non défini'}
-        <br />Matricule Fiscal: {matriculefiscal || 'Non défini'}
-        <br />Email: {email || 'Non défini'}
-        <br />Phone: {phone || 'Non défini'}
-        <br />Gouvernorat: {governorateId || 'Non sélectionné'}
-        <br />Token présent: {getToken() ? '✅ Oui' : '❌ Non'}
-      </div>
+   
       
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* Informations personnelles */}

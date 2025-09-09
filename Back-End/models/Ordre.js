@@ -167,20 +167,16 @@ const OrdreTravailSchema = new Schema({
   toObject: { virtuals: true }
 });
 
-
-// Virtual pour calculer le pourcentage de progression
 OrdreTravailSchema.virtual('progressionPourcentage').get(function() {
   if (this.nombreTaches === 0) return 0;
   return Math.round((this.nombreTachesTerminees / this.nombreTaches) * 100);
 });
 
-// Virtual pour vérifier si l'ordre est en retard
 OrdreTravailSchema.virtual('enRetard').get(function() {
   if (!this.dateFinPrevue || this.status === 'termine') return false;
   return new Date() > this.dateFinPrevue;
 });
 
-// Middleware pour générer le numéro d'ordre automatiquement
 OrdreTravailSchema.pre('save', async function(next) {
   if (this.isNew && !this.numeroOrdre) {
     const count = await this.constructor.countDocuments();
@@ -206,7 +202,6 @@ OrdreTravailSchema.pre('save', async function(next) {
   next();
 });
 
-// Méthodes d'instance
 OrdreTravailSchema.methods.demarrerTache = function(tacheId, userId) {
   const tache = this.taches.id(tacheId);
   if (tache && tache.status === 'assignee') {
@@ -230,8 +225,6 @@ OrdreTravailSchema.methods.terminerTache = function(tacheId, heuresReelles, user
   throw new Error('Tâche non trouvée ou non en cours');
 };
 
-
-// Méthodes statiques
 OrdreTravailSchema.statics.findByStatus = function(status, options = {}) {
   const query = status ? { status } : {};
   return this.find(query)
@@ -283,5 +276,179 @@ OrdreTravailSchema.statics.getStatistiques = async function(atelierId = null) {
     totalHeuresReelles: 0
   };
 };
+
+OrdreTravailSchema.statics.getTempsMoyenInterventions = async function(atelierId, periode = 'jour') {
+  const match = atelierId ? { atelierId: new mongoose.Types.ObjectId(atelierId) } : {};
+  
+  let dateFilter = {};
+  
+  // Si la période est 'jour', filtrer pour aujourd'hui seulement
+  if (periode === 'jour') {
+    const aujourdhui = new Date();
+    const debutJour = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate());
+    const finJour = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate() + 1);
+    
+    dateFilter = {
+      dateCommence: {
+        $gte: debutJour,
+        $lt: finJour
+      }
+    };
+  }
+  
+  const finalMatch = { ...match, ...dateFilter };
+  
+  return await this.aggregate([
+    { $match: finalMatch },
+    {
+      $group: {
+        _id: null,
+        tempsMoyenEstime: { $avg: '$totalHeuresEstimees' },
+        nombreInterventions: { $sum: 1 }
+      }
+    }
+  ]);
+};
+
+OrdreTravailSchema.statics.getChargeParMecanicien = async function(atelierId, periode = 'jour') {
+  const match = atelierId ? { atelierId: new mongoose.Types.ObjectId(atelierId) } : {};
+  
+  let dateFilter = {};
+  
+  // Si la période est 'jour', filtrer pour aujourd'hui seulement
+  if (periode === 'jour') {
+    const aujourdhui = new Date();
+    const debutJour = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate());
+    const finJour = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate() + 1);
+    
+    dateFilter = {
+      dateCommence: {
+        $gte: debutJour,
+        $lt: finJour
+      }
+    };
+  }
+  
+  const finalMatch = { ...match, ...dateFilter };
+  
+  return await this.aggregate([
+    { $match: finalMatch },
+    { $unwind: '$taches' },
+    {
+      $group: {
+        _id: {
+          mecanicienId: '$taches.mecanicienId',
+          mecanicienNom: '$taches.mecanicienNom'
+        },
+        chargeEstimee: { $sum: '$taches.estimationHeures' },
+        nombreTaches: { $sum: 1 }
+      }
+    }
+  ]);
+};
+
+
+OrdreTravailSchema.statics.getStatutStats = async function(atelierId, periode = 'jour') {
+  const match = atelierId ? { atelierId: new mongoose.Types.ObjectId(atelierId) } : {};
+  
+  let dateFilter = {};
+  
+  // Si la période est 'jour', filtrer pour aujourd'hui seulement
+  if (periode === 'jour') {
+    const aujourdhui = new Date();
+    const debutJour = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate());
+    const finJour = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate() + 1);
+    
+    dateFilter = {
+      dateCommence: {
+        $gte: debutJour,
+        $lt: finJour
+      }
+    };
+  }
+  
+  const finalMatch = { ...match, ...dateFilter };
+  
+  return await this.aggregate([
+    { $match: finalMatch },
+    {
+      $group: {
+        _id: '$status', // Remplacez par le nom exact de votre champ statut
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+};
+
+
+OrdreTravailSchema.statics.getChargeAtelier = async function(atelierId, periode = 'jour') {
+  const match = atelierId ? { atelierId: new mongoose.Types.ObjectId(atelierId) } : {};
+  let dateFilter = {};
+  let groupBy;
+  
+  const maintenant = new Date();
+  
+  switch(periode) {
+    case 'jour':
+      // Aujourd'hui seulement
+      const debutJour = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate());
+      const finJour = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate() + 1);
+      
+      dateFilter = {
+        dateCommence: { $gte: debutJour, $lt: finJour }
+      };
+      groupBy = { $dateToString: { format: "%Y-%m-%d", date: "$dateCommence" } };
+      break;
+      
+    case 'semaine':
+      // Cette semaine seulement (lundi à dimanche)
+      const debutSemaine = new Date(maintenant);
+      const jourSemaine = maintenant.getDay(); // 0 = dimanche, 1 = lundi...
+      const joursARetirer = jourSemaine === 0 ? 6 : jourSemaine - 1; // Calculer depuis lundi
+      debutSemaine.setDate(maintenant.getDate() - joursARetirer);
+      debutSemaine.setHours(0, 0, 0, 0);
+      
+      const finSemaine = new Date(debutSemaine);
+      finSemaine.setDate(debutSemaine.getDate() + 7);
+      
+      dateFilter = {
+        dateCommence: { $gte: debutSemaine, $lt: finSemaine }
+      };
+      groupBy = { 
+        year: { $year: '$dateCommence' },
+        week: { $week: '$dateCommence' }
+      };
+      break;
+      
+    case 'mois':
+      // Ce mois seulement
+      const debutMois = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
+      const finMois = new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 1);
+      
+      dateFilter = {
+        dateCommence: { $gte: debutMois, $lt: finMois }
+      };
+      groupBy = { 
+        year: { $year: '$dateCommence' },
+        month: { $month: '$dateCommence' }
+      };
+      break;
+  }
+  
+  const finalMatch = { ...match, ...dateFilter };
+  
+  return await this.aggregate([
+    { $match: finalMatch },
+    {
+      $group: {
+        _id: groupBy,
+        chargeEstimee: { $sum: '$totalHeuresEstimees' },
+        nombreOrdres: { $sum: 1 }
+      }
+    },
+    { $sort: { '_id': 1 } }
+  ]);
+};
+
 
 export default mongoose.model('OrdreTravail', OrdreTravailSchema);

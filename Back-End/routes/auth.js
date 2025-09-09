@@ -20,9 +20,12 @@ import {getAllServices,getServiceById,createService,updateService,deleteService}
 import {createOrdreTravail,getOrdresTravail,getOrdreTravailById,updateStatusOrdreTravail,demarrerOrdre,terminerOrdre,getStatistiques,supprimerOrdreTravail,getOrdresParDevisId,getOrdresByStatus,getOrdresByAtelier,updateOrdreTravail} from '../controllers/ordreController.js';
 import { CreateFacture, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture } from '../controllers/facturesController.js';
 import { getCarnetByVehiculeId ,creerCarnetManuel} from '../controllers/carnetController.js';
+import {getDashboardData} from '../controllers/ChargeAtelier.js';
 
 const router = express.Router();
 
+
+router.get('/dashboard/charge-atelier', getDashboardData);
 router.post("/signup", register);
 
 router.get("/verify-email/:token", async (req, res) => {
