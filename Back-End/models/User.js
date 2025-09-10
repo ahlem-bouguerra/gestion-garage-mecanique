@@ -58,11 +58,19 @@ const userSchema = new mongoose.Schema({
     ref: "Governorate",
     default: null
   },
+  governorateName: {
+  type: String,
+  default: ""
+},
   cityId: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "City",
     default: null
   },
+  cityName: {
+  type: String,
+  default: ""
+},
   streetAddress: {
     type: String,
     default: ""

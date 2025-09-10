@@ -21,6 +21,7 @@ import {createOrdreTravail,getOrdresTravail,getOrdreTravailById,updateStatusOrdr
 import { CreateFacture, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture } from '../controllers/facturesController.js';
 import { getCarnetByVehiculeId ,creerCarnetManuel} from '../controllers/carnetController.js';
 import {getDashboardData} from '../controllers/ChargeAtelier.js';
+import { search } from '../controllers/ChercherGarage.js';
 
 const router = express.Router();
 
@@ -451,6 +452,11 @@ router.get('/stats/summary',StaticFacture);
 
 router.get('/carnet-entretien/vehicule/:vehiculeId',getCarnetByVehiculeId);
 router.post('/creer-manuel', creerCarnetManuel);
+
+
+
+router.get('/search', search);
+
 
 
 export default router;
