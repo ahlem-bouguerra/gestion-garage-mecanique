@@ -135,9 +135,10 @@ export default function CompleteProfile() {
         setMatriculefiscal(user.matriculefiscal || "");
         setEmail(user.email || "");
         setPhone(user.phone || "");
-        setGovernorateId(user.governorateId || "");
-        setCityId(user.cityId || "");
+        setGovernorateId(user.governorateId || "");  // ✅ Maintenant c'est l'ObjectId
+        setCityId(user.cityId || "");  
         setStreetAddress(user.streetAddress || "");
+        
         
         // Récupérer la position précise existante
         if (user.location?.coordinates) {
@@ -292,6 +293,8 @@ export default function CompleteProfile() {
     }
 
     const loadingToast = toast.loading('Mise à jour du profil...');
+    const selectedGovernorate = governoratesList.find(g => g._id === governorateId);
+    const selectedCity = citiesList.find(c => c._id === cityId);
 
     try {
       // Format GeoJSON pour MongoDB
@@ -311,7 +314,9 @@ export default function CompleteProfile() {
           governorateId,
           cityId,
           streetAddress: streetAddress.trim(),
-          location: locationData
+          location: locationData,
+          governorateName: selectedGovernorate?.name || "",
+          cityName: selectedCity?.name || "",
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );

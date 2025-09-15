@@ -22,6 +22,7 @@ import { CreateFacture, GetAllFactures, GetFactureById, getFactureByDevis, Marqu
 import { getCarnetByVehiculeId ,creerCarnetManuel} from '../controllers/carnetController.js';
 import {getDashboardData} from '../controllers/ChargeAtelier.js';
 import { search } from '../controllers/ChercherGarage.js';
+import { createReservation , getReservations ,updateReservation} from '../controllers/gererReservation.js'
 
 const router = express.Router();
 
@@ -454,8 +455,11 @@ router.get('/carnet-entretien/vehicule/:vehiculeId',getCarnetByVehiculeId);
 router.post('/creer-manuel', creerCarnetManuel);
 
 
-
 router.get('/search', search);
+
+router.post('/create-reservation',createReservation);
+router.get('/reservations',getReservations)
+router.put('/update/reservations/:id',updateReservation)
 
 
 
