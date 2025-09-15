@@ -399,7 +399,6 @@ export default function CompleteProfile() {
             <input 
               value={matriculefiscal} 
               onChange={e => setMatriculefiscal(e.target.value)} 
-              disabled
               style={{ padding: 10, border: '1px solid #ddd', borderRadius: 4, width: '100%' }}
             />
           </div>

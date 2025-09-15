@@ -8,10 +8,16 @@ const userSchema = new mongoose.Schema({
   garagenom: {
     type: String,
     required: true,
+        required: function() {
+      return !this.googleId;
+    }
   },
   matriculefiscal:{
     type: String,
-    required: true
+    required: true,
+        required: function() {
+      return !this.googleId;
+    }
   },
   email: {
     type: String,

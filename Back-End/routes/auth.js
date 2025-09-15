@@ -115,12 +115,14 @@ router.get(
       console.log('🔐 Token JWT généré pour Google OAuth');
 
       // ✅ FIX: Vérifier directement les propriétés de l'utilisateur depuis la DB
-      const isProfileComplete = !!(user.username && user.phone && user.governorateId);
+      const isProfileComplete = !!(user.username && user.phone && user.governorateId && user.matriculefiscal && user.garagenom);
       console.log('🔍 Vérification profil complet SERVEUR:', {
         isComplete: isProfileComplete,
         hasUsername: !!user.username,
         hasPhone: !!user.phone,
-        hasGovernorateId: !!user.governorateId
+        hasGovernorateId: !!user.governorateId,
+        hasMatriculeFiscale: !!user.matriculefiscal,
+        hasGarageNom : !!user.garagenom
       });
 
       // Page HTML avec traitement automatique côté client

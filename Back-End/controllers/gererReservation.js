@@ -114,32 +114,94 @@ export const updateReservation = async (req, res) => {
     const { id } = req.params;
     const { action, newDate, newHeureDebut, message } = req.body;
 
+    console.log('=== UPDATE RESERVATION ===');
+    console.log('ID:', id);
+    console.log('Action:', action);
+    console.log('Données reçues:', { newDate, newHeureDebut, message });
+
     const reservation = await Reservation.findById(id);
     if (!reservation) {
       return res.status(404).json({ error: "Réservation introuvable" });
     }
 
-    // Logique de mise à jour selon action
+    console.log('Réservation avant update:', {
+      status: reservation.status,
+      creneauDemande: reservation.creneauDemande,
+    });
+
+    // === ACTIONS DU GARAGE ===
     if (action === "accepter") {
+      // Le garage accepte le créneau demandé
       reservation.status = "accepte";
+      reservation.messageGarage = message || null;
+      
     } else if (action === "refuser") {
+      // Le garage refuse définitivement
       reservation.status = "refuse";
-      reservation.messageGarage = message;
+      reservation.messageGarage = message || "Demande refusée";
+      
     } else if (action === "contre_proposer") {
+      // Le garage propose un autre créneau
       reservation.status = "contre_propose";
-      // On modifie directement le créneau demandé
+      reservation.messageGarage = message || "Nouveau créneau proposé";
+
+    // === ACTIONS DU CLIENT ===
+    } else if (action === "accepter_contre_proposition") {
+      // Le client accepte la contre-proposition du garage
+      reservation.status = "accepte";
+      // On remplace le créneau demandé par celui proposé
       reservation.creneauDemande = {
-        date: newDate || reservation.creneauDemande.date,
-        heureDebut: newHeureDebut || reservation.creneauDemande.heureDebut,
+        date: reservation.creneauPropose.date,
+        heureDebut: reservation.creneauPropose.heureDebut
       };
-      reservation.messageGarage = message;
+      reservation.messageClient = message || "Contre-proposition acceptée";
+      
+    } else if (action === "annuler") {
+      // Le client annule sa demande
+      reservation.status = "annule";
+      reservation.messageClient = message || "Demande annulée par le client";
+      
+    } else if (action === "client_contre_proposer") {
+      // Le client fait une nouvelle contre-proposition
+      reservation.status = "en_attente"; // Retour en attente pour le garage
+      // On met à jour le créneau demandé avec la nouvelle proposition du client
+      reservation.creneauDemande = {
+        date: new Date(newDate),
+        heureDebut: newHeureDebut
+      };
+      // On efface l'ancienne contre-proposition du garage
+      reservation.creneauPropose = undefined;
+      reservation.messageClient = message || "Nouvelle proposition de créneau";
+      reservation.messageGarage = null; // Reset du message garage
+      
+    } else {
+      return res.status(400).json({ 
+        error: "Action non reconnue", 
+        validActions: ["accepter", "refuser", "contre_proposer", "accepter_contre_proposition", "annuler", "client_contre_proposer"]
+      });
     }
 
-    await reservation.save();
-    res.json({ success: true, reservation });
+    const updatedReservation = await reservation.save();
+    
+    console.log('Réservation après update:', {
+      status: updatedReservation.status,
+      creneauDemande: updatedReservation.creneauDemande,
+      messageGarage: updatedReservation.messageGarage,
+      messageClient: updatedReservation.messageClient
+    });
+
+    res.json({ 
+      success: true, 
+      reservation: updatedReservation,
+      message: "Réservation mise à jour avec succès"
+    });
+
   } catch (error) {
-    console.error("Erreur update reservation:", error);
-    res.status(500).json({ error: "Erreur serveur" });
+    console.error("=== ERREUR UPDATE RESERVATION ===");
+    console.error("Erreur:", error);
+    res.status(500).json({ 
+      error: "Erreur serveur lors de la mise à jour",
+      details: error.message
+    });
   }
 };
-

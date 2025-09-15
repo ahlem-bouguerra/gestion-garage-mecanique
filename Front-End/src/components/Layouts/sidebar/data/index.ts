@@ -69,6 +69,30 @@ export const NAV_DATA = [
         icon: Clipboard,
         items: [],
       },
+       {
+        title: "demande reservation  ",
+        url: "/demande-reservation",
+        icon: Clipboard,
+        items: [],
+      },
+      {
+        title: "chercher garage  ",
+        url: "/chercher-garage",
+        icon: Clipboard,
+        items: [],
+      },
+             {
+        title: "gestion des reservation par client ",
+        url: "/reservation-cote-client",
+        icon: Clipboard,
+        items: [],
+      },
+                   {
+        title: "gestion des reservation par garagiste ",
+        url: "/reservation-cote-garage",
+        icon: Clipboard,
+        items: [],
+      },
       
     ],
   },
