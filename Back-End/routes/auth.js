@@ -1,6 +1,6 @@
 import express from "express";
 import { register } from "../controllers/authController.js";
-import {login} from "../controllers/loginController.js";
+import {login, logout} from "../controllers/loginController.js";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 import passport from "../config/passport.js";
@@ -65,6 +65,9 @@ router.get("/verify-email/:token", async (req, res) => {
 });
 
 router.post("/login", login);
+router.post("/logout",logout);
+
+
 router.get(
   "/google", 
   passport.authenticate("google", {

@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
+
 export default function ClientReservationManagement() {
   const [reservations, setReservations] = useState([]);
   const [selectedReservation, setSelectedReservation] = useState(null);
@@ -11,26 +12,31 @@ export default function ClientReservationManagement() {
     newHeureDebut: '',
     message: ''
   });
-
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const playNotificationSound = () => {
+  const audio = new Audio('/sounds/mixkit-correct-answer-tone-2870.wav');
+  audio.play().catch(e => console.log('Erreur audio:', e));
   };
+  const messagesEndRef = useRef(null);
+  const scrollToBottom = () => {messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });};
+
+  const isDatePassed = (dateString) => {
+  const reservationDate = new Date(dateString);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset l'heure pour comparer seulement les dates
+  return reservationDate < today;
+};
 
   useEffect(() => {
-  const header = document.querySelector('header');
-  if (header) {
-    header.style.display = 'none';
-  }
-
-  // Cleanup
-  return () => {
+    const header = document.querySelector('header');
     if (header) {
-      header.style.display = '';
+      header.style.display = 'none';
     }
-  };
-}, []);
+    return () => {
+      if (header) {
+        header.style.display = '';
+      }
+    };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -40,7 +46,13 @@ export default function ClientReservationManagement() {
     const fetchReservations = async () => {
       try {
         const res = await axios.get("http://localhost:5000/api/reservations");
-        setReservations(res.data);
+        
+        // Filtrer les réservations avec dates non passées
+        const filteredReservations = res.data.filter(reservation => 
+          !isDatePassed(reservation.creneauDemande.date)
+        );
+        
+        setReservations(filteredReservations);
       } catch (err) {
         console.error("Erreur fetch reservations:", err);
       }
@@ -95,10 +107,15 @@ export default function ClientReservationManagement() {
       );
       
       console.log("Réponse serveur:", response.data);
+            playNotificationSound();
       
       // Recharger les réservations
       const res = await axios.get("http://localhost:5000/api/reservations");
-      setReservations(res.data);
+      const filteredReservations = res.data.filter(reservation => 
+        !isDatePassed(reservation.creneauDemande.date)
+      );
+
+      setReservations(filteredReservations);
       setSelectedReservation(null);
       setResponseData({
         action: '',
@@ -180,14 +197,15 @@ export default function ClientReservationManagement() {
                 <div className="flex items-start gap-3">
                   {/* Avatar - Garage */}
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                    G
+                    C
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-1">
                       <h3 className="font-semibold text-gray-900 truncate">
-                        Garage Auto Service
+                        {reservation.garageId?.username}
+                        
                       </h3>
                       {hasAction && (
                         <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse flex-shrink-0"></div>
@@ -227,8 +245,10 @@ export default function ClientReservationManagement() {
                 G
               </div>
               <div className="flex-1">
-                <h2 className="font-bold text-gray-900">Garage Auto Service</h2>
-                <p className="text-sm text-gray-500">Service: {selectedReservation.serviceName}</p>
+                <h2 className="font-bold text-gray-900"> {selectedReservation.garageId?.username}</h2>
+                <p className="text-sm text-gray-500">Service: {selectedReservation.serviceId?.name}</p>
+                <p className="text-sm text-gray-500">Numéro de téléphone du garage : {selectedReservation.garageId.phone}</p>
+
               </div>
               <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedReservation.status)}`}>
                 {getStatusIcon(selectedReservation.status)} {selectedReservation.status.replace('_', ' ')}
@@ -250,7 +270,7 @@ export default function ClientReservationManagement() {
                         <div className="text-sm font-medium mb-2">Ma demande de réservation</div>
                         <div className="space-y-2 text-sm">
                           <div className="bg-white/20 rounded-lg p-3">
-                            <div className="font-medium">Service: {selectedReservation.serviceName}</div>
+                            <div className="font-medium">Service: {selectedReservation.serviceId?.name}</div>
                             <div>📅 {new Date(selectedReservation.creneauDemande.date).toLocaleDateString('fr-FR')} à {selectedReservation.creneauDemande.heureDebut}</div>
                           </div>
                           <div className="bg-white/10 rounded-lg p-3">

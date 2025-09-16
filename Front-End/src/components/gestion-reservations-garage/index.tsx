@@ -12,11 +12,29 @@ export default function GarageReservationManagement() {
     message: ''
   });
 
+  const playNotificationSound = () => {
+  const audio = new Audio('/sounds/mixkit-correct-answer-tone-2870.wav');
+  audio.play().catch(e => console.log('Erreur audio:', e));
+  };
+
+  const isDatePassed = (dateString) => {
+  const reservationDate = new Date(dateString);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset l'heure pour comparer seulement les dates
+  return reservationDate < today;
+};
+
   useEffect(() => {
     const fetchReservations = async () => {
       try {
         const res = await axios.get("http://localhost:5000/api/reservations");
-        setReservations(res.data);
+        
+        // Filtrer les réservations avec dates non passées
+        const filteredReservations = res.data.filter(reservation => 
+          !isDatePassed(reservation.creneauDemande.date)
+        );
+        
+        setReservations(filteredReservations);
       } catch (err) {
         console.error("Erreur fetch reservations:", err);
       }
@@ -76,9 +94,12 @@ export default function GarageReservationManagement() {
           message: responseData.message || undefined
         }
       );
-      
+      playNotificationSound();
       const res = await axios.get("http://localhost:5000/api/reservations");
-      setReservations(res.data);
+      const filteredReservations = res.data.filter(reservation => 
+        !isDatePassed(reservation.creneauDemande.date)
+      );
+      setReservations(filteredReservations);
       setSelectedReservation(null);
       setResponseData({
         action: '',
@@ -175,7 +196,7 @@ export default function GarageReservationManagement() {
                     </div>
                     
                     <p className="text-sm text-gray-600 truncate mb-2">
-                      {reservation.serviceName}
+                      Service : {reservation.serviceId.name}
                     </p>
                     
                     <div className="flex items-center justify-between">
@@ -208,7 +229,7 @@ export default function GarageReservationManagement() {
               </div>
               <div className="flex-1">
                 <h2 className="font-bold text-gray-900">{selectedReservation.clientName}</h2>
-                <p className="text-sm text-gray-500">{selectedReservation.clientPhone}</p>
+                <p className="text-sm text-gray-500">Numéro de téléphone du client :{selectedReservation.clientPhone}</p>
               </div>
               <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedReservation.status)}`}>
                 {getStatusIcon(selectedReservation.status)} {selectedReservation.status.replace('_', ' ')}
@@ -226,7 +247,7 @@ export default function GarageReservationManagement() {
                   <div className="text-sm font-medium text-gray-900 mb-2">Demande de réservation</div>
                   <div className="space-y-2 text-sm text-gray-700">
                     <div className="bg-blue-50 p-3 rounded-lg">
-                      <div className="font-medium text-blue-900">Service: {selectedReservation.serviceName}</div>
+                      <div className="font-medium text-blue-900">Service: {selectedReservation.serviceId?.name}</div>
                       <div className="text-blue-700">📅 {new Date(selectedReservation.creneauDemande.date).toLocaleDateString('fr-FR')} à {selectedReservation.creneauDemande.heureDebut}</div>
                     </div>
                     <div className="bg-gray-50 p-3 rounded-lg">

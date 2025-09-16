@@ -98,16 +98,19 @@ export const createReservation = async (req, res) => {
 };
 
 
-export const getReservations =  async (req, res) => {
+export const getReservations = async (req, res) => {
   try {
-    const reservations = await Reservation.find();
-    res.json(reservations);
+    const reservations = await Reservation.find()
+      .populate('serviceId', 'name') // Populer seulement le champ 'name' du service
+      .populate('garageId', 'username phone') // Optionnel: populer aussi le garage
+      .sort({ createdAt: -1 }); // Trier par date de création décroissante
+
+    res.status(200).json(reservations);
   } catch (error) {
-    res.status(500).json({ error: "Erreur lors de la récupération" });
+    console.error('Erreur lors de la récupération des réservations:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
-
-
 
 export const updateReservation = async (req, res) => {
   try {

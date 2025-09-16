@@ -1,3 +1,4 @@
+import { title } from "process";
 import * as Icons from "../icons";
 import { FolderOpen,Car,Settings, Building,Plus, Edit, Trash2, User, Users,Building2, Calendar, Phone, UserCheck, AlertTriangle, CheckCircle ,FileText,FileCheck,Clipboard} from 'lucide-react';
 
@@ -11,13 +12,13 @@ export const NAV_DATA = [
         icon: Icons.HomeIcon,
         items: [
           {
-            title: "eCommerce",
-            url: "/",
+            title:"Charge Résèrevations",
+            url:"/dashboard-reservation"
           },
           {
             title: "Charge Atelier",
             url: "/dashboard",
-          },
+          }
         ],
       },
      {

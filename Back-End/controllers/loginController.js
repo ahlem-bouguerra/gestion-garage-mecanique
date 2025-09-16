@@ -2,6 +2,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 
+
+
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -26,5 +28,50 @@ export const login = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({
+        success: false,
+        message: "Header Authorization manquant",
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Token manquant",
+      });
+    }
+
+    // Vérification du token (optionnelle ici)
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log("✅ Token valide pour utilisateur:", decoded.userId);
+    } catch (jwtError) {
+      return res.status(401).json({
+        success: false,
+        message: "Token invalide",
+      });
+    }
+
+    // Réponse au client → il doit supprimer le token côté frontend
+    res.status(200).json({
+      success: true,
+      message: "Déconnexion réussie. Supprimez le token côté client.",
+    });
+
+  } catch (error) {
+    console.error("💥 Erreur dans logout:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur serveur lors de la déconnexion",
+      error: error.message,
+    });
   }
 };

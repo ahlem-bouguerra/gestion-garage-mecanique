@@ -18,6 +18,13 @@ interface SuccessPopupProps {
   phone: string;
 }
 
+// Nouveau composant pour le popup d'erreur
+interface ErrorPopupProps {
+  isOpen: boolean;
+  onClose: () => void;
+  message: string;
+}
+
 export default function SignupForm() {
   const [isEmailFocused, setEmailFocused] = useState(false);
   const [isPasswordFocused, setPasswordFocused] = useState(false);
@@ -37,6 +44,8 @@ export default function SignupForm() {
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const router = useRouter();
 
@@ -138,6 +147,43 @@ export default function SignupForm() {
       document.body // Rendre dans le body pour couvrir toute la page
     );
   };
+  
+
+  const ErrorPopup: React.FC<{isOpen: boolean, onClose: () => void, message: string}> = ({ isOpen, onClose, message }) => {
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+      <div className="absolute inset-0 bg-black bg-opacity-60 backdrop-blur-sm" onClick={onClose} />
+      
+      <div className="relative bg-white rounded-3xl shadow-2xl p-8 mx-4 max-w-md w-full">
+        <h2 className="text-3xl font-bold text-center mb-2 text-red-500">
+          ❌ Inscription impossible
+        </h2>
+        <p className="text-gray-600 text-center mb-6 text-lg">
+          {message}
+        </p>
+        
+        <div className="flex justify-center">
+          <button
+            onClick={onClose}
+            className="px-8 py-3 font-semibold text-white bg-red-500 rounded-full hover:bg-red-600"
+          >
+            Compris
+          </button>
+        </div>
+        
+        {/* Bouton X en haut à droite */}
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>,
+    document.body
+  );
+};
     // Fonction pour vérifier les critères du téléphone tunisien
   const getPhoneCriteria = (phone: string) => {
     // Nettoyer le numéro (enlever espaces, tirets, etc.)
@@ -238,18 +284,28 @@ export default function SignupForm() {
       
       // Optionnel: Réinitialiser le formulaire
       setUsername('');
+      setGaragenom('');
+      setMatriculefiscal('');
       setEmail('');
       setPassword('');
       setConfirmPassword('');
       setPhone('')
     
     } catch (err: any) {
-      console.error("❌ Erreur lors de l'inscription :", err);
-      setError(err.response?.data?.message || "Une erreur est survenue.");
+      const serverMessage = err.response?.data?.error || err.response?.data?.message || "Une erreur est survenue.";
+      
+      // Si c'est l'erreur de limite d'utilisateur (403), afficher le popup
+      if (err.response?.status === 403) {
+        setErrorMessage(serverMessage);
+        setShowErrorPopup(true);
+      } else {
+        // Pour les autres erreurs, afficher dans le formulaire
+        setError(serverMessage);
+      }
     } finally {
       setPending(false);
     }
-  };
+  }
 
   // Composant pour afficher les critères de validation
   const PasswordCriteriaIndicator = () => {
@@ -510,6 +566,12 @@ export default function SignupForm() {
         garagenom={garagenom}
         email={email}
         phone={phone}
+      />
+
+      <ErrorPopup
+        isOpen={showErrorPopup}
+        onClose={() => setShowErrorPopup(false)}
+        message={errorMessage}
       />
 
     </>
