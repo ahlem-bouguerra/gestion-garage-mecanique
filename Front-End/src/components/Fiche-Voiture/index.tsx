@@ -422,6 +422,9 @@ export default function VehiculeManagement() {
     const [visiteValidations, setVisiteValidations] = useState<{ [key: string]: FieldValidation }>({});
     const [rechercheGlobale, setRechercheGlobale] = useState("");
     const [vehiculesFiltres, setVehiculesFiltres] = useState<Vehicule[]>([]);
+      const getAuthToken = () => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
 
     useEffect(() => {
     if (!rechercheGlobale.trim()) {
@@ -546,7 +549,9 @@ export default function VehiculeManagement() {
     const fetchClients = async () => {
         try {
             setError("");
-            const response = await axios.get(`${API_BASE_URL}/clients/noms`);
+            const response = await axios.get(`${API_BASE_URL}/clients/noms`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
             console.log("🔍 Clients reçus:", response.data);
 
             if (Array.isArray(response.data)) {
@@ -565,7 +570,9 @@ export default function VehiculeManagement() {
     const fetchVehicules = async () => {
         try {
             setError("");
-            const response = await axios.get(`${API_BASE_URL}/vehicules`);
+            const response = await axios.get(`${API_BASE_URL}/vehicules`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
             setVehicules(response.data);
         } catch (error: any) {
             console.error("❌ Erreur lors du chargement des véhicules:", error);
@@ -730,10 +737,14 @@ export default function VehiculeManagement() {
             console.log("📤 Données à envoyer:", submitData);
 
             if (modalType === "add") {
-                await axios.post(`${API_BASE_URL}/vehicules`, submitData);
+                await axios.post(`${API_BASE_URL}/vehicules`, submitData, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
                 showSuccess("Véhicule ajouté avec succès!");
             } else if (modalType === "edit" && selectedVehicule) {
-                await axios.put(`${API_BASE_URL}/vehicules/${selectedVehicule._id}`, submitData);
+                await axios.put(`${API_BASE_URL}/vehicules/${selectedVehicule._id}`, submitData, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
                 showSuccess("Véhicule modifié avec succès!");
             }
 
@@ -751,7 +762,9 @@ export default function VehiculeManagement() {
     const deleteVehicule = async (vehicule: Vehicule) => {
         if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ?`)) {
             try {
-                await axios.delete(`${API_BASE_URL}/vehicules/${vehicule._id}`);
+                await axios.delete(`${API_BASE_URL}/vehicules/${vehicule._id}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });;
                 fetchVehicules();
                 showSuccess("Véhicule supprimé avec succès!");
             } catch (error: any) {

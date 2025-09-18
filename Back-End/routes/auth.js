@@ -371,21 +371,21 @@ router.get('/locations/search/:query', enhancedLocationRoutes.searchLocations);
 router.get('/locations/autocomplete', enhancedLocationRoutes.autocomplete);
 
 //creation de client , modif,getbyid, get all , delete 
-router.post("/Creation", createFicheClient);      
-router.get("/GetAll", getFicheClients); 
-router.get("/GetOne/:_id", getFicheClientById);         
-router.put("/updateOne/:_id", updateFicheClient);    
-router.delete("/deleteOne/:_id", deleteFicheClient); 
-router.get("/clients/noms", getFicheClientNoms);
-router.get('/clients/:clientId/historique', getHistoriqueVisiteByIdClient);
-router.get('/clients/:clientId/visites-resume',getHistoryVisite);
+router.post("/Creation",  createFicheClient);      
+router.get("/GetAll", authMiddleware, getFicheClients); 
+router.get("/GetOne/:_id", authMiddleware, getFicheClientById);         
+router.put("/updateOne/:_id", authMiddleware, updateFicheClient);    
+router.delete("/deleteOne/:_id", authMiddleware, deleteFicheClient); 
+router.get("/clients/noms", authMiddleware, getFicheClientNoms);
+router.get('/clients/:clientId/historique', authMiddleware, getHistoriqueVisiteByIdClient);
+router.get('/clients/:clientId/visites-resume', authMiddleware,getHistoryVisite);
 
-router.get('/vehicules', getAllVehicules);
-router.get('/vehicules/:id', getVehiculeById);
-router.post('/vehicules', createVehicule);
-router.put('/vehicules/:id', updateVehicule);
-router.delete('/vehicules/:id', deleteVehicule);
-router.get('/vehicules/proprietaire/:clientId', getVehiculesByProprietaire);
+router.get('/vehicules',authMiddleware, getAllVehicules);
+router.get('/vehicules/:id',authMiddleware, getVehiculeById);
+router.post('/vehicules',authMiddleware, createVehicule);
+router.put('/vehicules/:id',authMiddleware, updateVehicule);
+router.delete('/vehicules/:id',authMiddleware, deleteVehicule);
+router.get('/vehicules/proprietaire/:clientId',authMiddleware, getVehiculesByProprietaire);
 
 
 router.get('/pieces', getAllPieces);

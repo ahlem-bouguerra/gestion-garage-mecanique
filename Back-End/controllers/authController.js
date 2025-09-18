@@ -5,12 +5,6 @@ import { sendVerificationEmail } from "../utils/mailer.js";
 
 
 export const register = async (req, res) => {
-    const existingUsers = await User.countDocuments();
-  if (existingUsers >= 1) {
-    return res.status(403).json({ 
-      error: "Un seul compte garage autorisé par application" 
-    });
-  }
   const { username,garagenom,matriculefiscal, email, password, phone } = req.body;
 
   console.log("📥 Données reçues pour inscription :", req.body);

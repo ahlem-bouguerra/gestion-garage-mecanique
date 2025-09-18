@@ -4,10 +4,10 @@ import FicheClient from '../models/FicheClient.js';
 
 export const getAllVehicules = async (req, res) => {
   try {
-    const vehicules = await Vehicule.find({ statut: 'actif' })
+    const vehicules = await Vehicule.find({ statut: 'actif', garagisteId: req.user._id })
       .populate('proprietaireId', 'nom type telephone email')
       .sort({ createdAt: -1 });
-    
+
     console.log("✅ Véhicules récupérés:", vehicules.length);
     res.json(vehicules);
   } catch (error) {
@@ -19,14 +19,17 @@ export const getAllVehicules = async (req, res) => {
 export const getVehiculeById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const vehicule = await Vehicule.findById(id)
+
+    const vehicule = await Vehicule.findOne({
+      _id: id,
+      garagisteId: req.user._id  // ✅ Ajouter cette ligne
+    })
       .populate('proprietaireId', 'nom type telephone email');
-    
+
     if (!vehicule) {
       return res.status(404).json({ error: 'Véhicule non trouvé' });
     }
-    
+
     res.json(vehicule);
   } catch (error) {
     console.error("❌ Erreur getVehiculeById:", error);
@@ -51,29 +54,34 @@ export const createVehicule = async (req, res) => {
 
     // CORRECTION 1: Validation des champs requis
     if (!proprietaireId || !marque || !modele || !immatriculation) {
-      return res.status(400).json({ 
-        error: 'Les champs propriétaire, marque, modèle et immatriculation sont obligatoires' 
+      return res.status(400).json({
+        error: 'Les champs propriétaire, marque, modèle et immatriculation sont obligatoires'
       });
     }
 
-        // Vérifier l'unicité de l'immatriculation
+    // Vérifier l'unicité de l'immatriculation
     const immatriculationFormatee = immatriculation.toUpperCase().trim();
-    const existingVehicule = await Vehicule.findOne({ 
-      immatriculation: immatriculationFormatee 
+    // MODIFIER la vérification d'immatriculation :
+    const existingVehicule = await Vehicule.findOne({
+      immatriculation: immatriculationFormatee,
+      garagisteId: req.user._id  // ✅ Ajouter cette ligne
     });
-    
+
     if (existingVehicule) {
-      return res.status(400).json({ 
-        error: `Cette immatriculation (${immatriculationFormatee}) existe déjà` 
+      return res.status(400).json({
+        error: `Cette immatriculation (${immatriculationFormatee}) existe déjà`
       });
     }
 
     // CORRECTION 2: Vérifier que le propriétaire existe avec meilleure gestion d'erreur
-    const proprietaire = await FicheClient.findById(proprietaireId);
+    const proprietaire = await FicheClient.findOne({
+      _id: proprietaireId,
+      garagisteId: req.user._id  // ✅ Ajouter cette ligne
+    });
     if (!proprietaire) {
       console.log("❌ Propriétaire non trouvé:", proprietaireId);
-      return res.status(400).json({ 
-        error: `Propriétaire avec l'ID ${proprietaireId} non trouvé` 
+      return res.status(400).json({
+        error: `Propriétaire avec l'ID ${proprietaireId} non trouvé`
       });
     }
 
@@ -87,7 +95,8 @@ export const createVehicule = async (req, res) => {
       marque: marque.trim(),
       modele: modele.trim(),
       immatriculation: immatriculationFormatee,
-      statut: 'actif'
+      statut: 'actif',
+      garagisteId: req.user._id
     };
 
     // Ajouter les champs optionnels seulement s'ils sont fournis
@@ -109,8 +118,8 @@ export const createVehicule = async (req, res) => {
       if (carburantsValides.includes(typeCarburant.toLowerCase())) {
         vehiculeData.typeCarburant = typeCarburant.toLowerCase();
       } else {
-        return res.status(400).json({ 
-          error: `Type de carburant invalide. Valeurs acceptées: ${carburantsValides.join(', ')}` 
+        return res.status(400).json({
+          error: `Type de carburant invalide. Valeurs acceptées: ${carburantsValides.join(', ')}`
         });
       }
     }
@@ -129,7 +138,7 @@ export const createVehicule = async (req, res) => {
     // Créer le véhicule
     const nouveauVehicule = new Vehicule(vehiculeData);
     const vehiculeSauve = await nouveauVehicule.save();
-    
+
     // Peupler les données du propriétaire pour la réponse
     const vehiculeAvecProprietaire = await Vehicule.findById(vehiculeSauve._id)
       .populate('proprietaireId', 'nom type telephone email');
@@ -139,17 +148,17 @@ export const createVehicule = async (req, res) => {
 
   } catch (error) {
     console.error("❌ Erreur createVehicule:", error);
-    
+
     // CORRECTION 4: Meilleure gestion des erreurs
     if (error.code === 11000) {
       // Erreur de duplication
       const field = Object.keys(error.keyValue)[0];
       const value = error.keyValue[field];
-      return res.status(400).json({ 
-        error: `${field === 'immatriculation' ? 'Cette immatriculation' : 'Cette valeur'} (${value}) existe déjà` 
+      return res.status(400).json({
+        error: `${field === 'immatriculation' ? 'Cette immatriculation' : 'Cette valeur'} (${value}) existe déjà`
       });
     }
-    
+
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(e => e.message);
       return res.status(400).json({ error: errors.join(', ') });
@@ -158,7 +167,7 @@ export const createVehicule = async (req, res) => {
     if (error.name === 'CastError') {
       return res.status(400).json({ error: 'Format de données incorrect' });
     }
-    
+
     res.status(500).json({ error: `Erreur serveur: ${error.message}` });
   }
 };
@@ -188,10 +197,13 @@ export const updateVehicule = async (req, res) => {
 
     // Vérifier que le propriétaire existe si fourni
     if (proprietaireId) {
-      const proprietaire = await FicheClient.findById(proprietaireId);
+      const proprietaire = await FicheClient.findOne({
+        _id: proprietaireId,
+        garagisteId: req.user._id  // ✅ Ajouter cette ligne
+      });
       if (!proprietaire) {
-        return res.status(400).json({ 
-          error: `Propriétaire avec l'ID ${proprietaireId} non trouvé` 
+        return res.status(400).json({
+          error: `Propriétaire avec l'ID ${proprietaireId} non trouvé`
         });
       }
     }
@@ -199,27 +211,28 @@ export const updateVehicule = async (req, res) => {
     // Vérifier l'unicité de l'immatriculation (exclure le véhicule actuel)
     if (immatriculation) {
       const immatriculationFormatee = immatriculation.toUpperCase().trim();
-      const existingVehicule = await Vehicule.findOne({ 
+      const existingVehicule = await Vehicule.findOne({
         immatriculation: immatriculationFormatee,
-        _id: { $ne: id }
+        _id: { $ne: id },
+        garagisteId: req.user._id
       });
       if (existingVehicule) {
-        return res.status(400).json({ 
-          error: `Cette immatriculation (${immatriculationFormatee}) existe déjà` 
+        return res.status(400).json({
+          error: `Cette immatriculation (${immatriculationFormatee}) existe déjà`
         });
       }
     }
 
     // Préparer les données de mise à jour avec validation
     const updateData = {};
-    
+
     if (proprietaireId) updateData.proprietaireId = proprietaireId;
     if (marque && marque.trim()) updateData.marque = marque.trim();
     if (modele && modele.trim()) updateData.modele = modele.trim();
     if (immatriculation && immatriculation.trim()) {
       updateData.immatriculation = immatriculation.toUpperCase().trim();
     }
-    
+
     if (annee !== undefined) {
       if (annee === '' || annee === null) {
         updateData.annee = undefined;
@@ -232,22 +245,22 @@ export const updateVehicule = async (req, res) => {
         }
       }
     }
-    
+
     if (couleur !== undefined) {
       updateData.couleur = couleur ? couleur.trim() : '';
     }
-    
+
     if (typeCarburant && typeCarburant.trim()) {
       const carburantsValides = ['essence', 'diesel', 'hybride', 'electrique', 'gpl'];
       if (carburantsValides.includes(typeCarburant.toLowerCase())) {
         updateData.typeCarburant = typeCarburant.toLowerCase();
       } else {
-        return res.status(400).json({ 
-          error: `Type de carburant invalide. Valeurs acceptées: ${carburantsValides.join(', ')}` 
+        return res.status(400).json({
+          error: `Type de carburant invalide. Valeurs acceptées: ${carburantsValides.join(', ')}`
         });
       }
     }
-    
+
     if (kilometrage !== undefined) {
       if (kilometrage === '' || kilometrage === null) {
         updateData.kilometrage = undefined;
@@ -264,8 +277,11 @@ export const updateVehicule = async (req, res) => {
     console.log("🔄 Données de mise à jour:", updateData);
 
     // Mettre à jour le véhicule
-    const vehiculeModifie = await Vehicule.findByIdAndUpdate(
-      id,
+    const vehiculeModifie = await Vehicule.findOneAndUpdate(
+      {
+        _id: id,
+        garagisteId: req.user._id  // ✅ Ajouter cette ligne
+      },
       updateData,
       { new: true, runValidators: true }
     ).populate('proprietaireId', 'nom type telephone email');
@@ -275,15 +291,15 @@ export const updateVehicule = async (req, res) => {
 
   } catch (error) {
     console.error("❌ Erreur updateVehicule:", error);
-    
+
     if (error.code === 11000) {
       const field = Object.keys(error.keyValue)[0];
       const value = error.keyValue[field];
-      return res.status(400).json({ 
-        error: `${field === 'immatriculation' ? 'Cette immatriculation' : 'Cette valeur'} (${value}) existe déjà` 
+      return res.status(400).json({
+        error: `${field === 'immatriculation' ? 'Cette immatriculation' : 'Cette valeur'} (${value}) existe déjà`
       });
     }
-    
+
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(e => e.message);
       return res.status(400).json({ error: errors.join(', ') });
@@ -292,7 +308,7 @@ export const updateVehicule = async (req, res) => {
     if (error.name === 'CastError') {
       return res.status(400).json({ error: 'Format de données incorrect' });
     }
-    
+
     res.status(500).json({ error: `Erreur serveur: ${error.message}` });
   }
 };
@@ -304,31 +320,37 @@ export const deleteVehicule = async (req, res) => {
     console.log("🗑️ Suppression véhicule ID:", id);
 
     // Vérifier que le véhicule existe
-    const vehiculeExistant = await Vehicule.findById(id);
+    const vehiculeExistant = await Vehicule.findOne({
+      _id: id,
+      garagisteId: req.user._id  // ✅ Ajouter cette ligne
+    });
     if (!vehiculeExistant) {
       return res.status(404).json({ error: 'Véhicule non trouvé' });
     }
 
     // Soft delete : marquer comme inactif au lieu de supprimer
-    const vehicule = await Vehicule.findByIdAndUpdate(
-      id,
+    const vehicule = await Vehicule.findOneAndUpdate(
+      {
+        _id: id,
+        garagisteId: req.user._id  // ✅ Ajouter cette ligne
+      },
       { statut: 'inactif' },
       { new: true }
     );
 
     console.log("✅ Véhicule supprimé (soft delete):", vehicule.immatriculation);
-    res.json({ 
+    res.json({
       message: 'Véhicule supprimé avec succès',
       vehicule: vehicule
     });
 
   } catch (error) {
     console.error("❌ Erreur deleteVehicule:", error);
-    
+
     if (error.name === 'CastError') {
       return res.status(400).json({ error: 'ID de véhicule invalide' });
     }
-    
+
     res.status(500).json({ error: `Erreur serveur: ${error.message}` });
   }
 };
@@ -336,28 +358,32 @@ export const deleteVehicule = async (req, res) => {
 export const getVehiculesByProprietaire = async (req, res) => {
   try {
     const { clientId } = req.params;
-    
+
     console.log("🔍 Recherche véhicules pour client:", clientId);
-    
-    const client = await FicheClient.findById(clientId);
+
+    const client = await FicheClient.findOne({
+      _id: clientId,
+      garagisteId: req.user._id  // ✅ Ajouter cette ligne
+    });
     if (!client) {
       return res.status(404).json({ error: 'Client non trouvé' });
     }
-    
-    const vehicules = await Vehicule.find({ 
+
+    const vehicules = await Vehicule.find({
       proprietaireId: clientId,
+      garagisteId: req.user._id,  // ✅ Ajouter cette ligne
       statut: 'actif'
     }).sort({ createdAt: -1 });
-    
+
     console.log("✅ Véhicules trouvés pour", client.nom, ":", vehicules.length);
     res.json(vehicules);
   } catch (error) {
     console.error("❌ Erreur getVehiculesByProprietaire:", error);
-    
+
     if (error.name === 'CastError') {
       return res.status(400).json({ error: 'ID de client invalide' });
     }
-    
+
     res.status(500).json({ error: `Erreur serveur: ${error.message}` });
   }
 };

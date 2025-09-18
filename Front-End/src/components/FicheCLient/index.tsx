@@ -21,16 +21,13 @@ interface HistoriqueVisite {
   }>;
   servicesEffectues: string;
 }
-
 const API_BASE_URL = "http://localhost:5000/api";
-
 interface ContactSecondaire {
   nom: string;
   relation: string;
   telephone: string;
   email?: string;
 }
-
 interface Client {
   _id: string;
   id?: string | number;
@@ -43,7 +40,6 @@ interface Client {
   contactsSecondaires?: ContactSecondaire[];
   historiqueVisites?: HistoriqueVisite[];
 }
-
 interface FormData {
   nom: string;
   type: "particulier" | "professionnel";
@@ -51,7 +47,6 @@ interface FormData {
   telephone: string;
   email: string;
 }
-
 interface Vehicule {
   _id: string;
   proprietaireId: string;
@@ -91,6 +86,9 @@ export default function ClientForm() {
   const [clientVehicules, setClientVehicules] = useState<{ [clientId: string]: Vehicule[] }>({});
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [dateFilter, setDateFilter] = useState("tous");
+  const getAuthToken = () => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
 
   useEffect(() => {
     fetchAllClients();
@@ -118,7 +116,9 @@ export default function ClientForm() {
   const fetchAllVehicules = async (): Promise<void> => {
     try {
       console.log("🚗 Chargement de tous les véhicules...");
-      const response = await axios.get(`${API_BASE_URL}/vehicules`);
+      const response = await axios.get(`${API_BASE_URL}/vehicules`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       setVehicules(response.data);
 
       const vehiculesParClient: { [clientId: string]: Vehicule[] } = {};
@@ -242,7 +242,9 @@ const filteredClients = useMemo(() => {
   const fetchAllClients = async (): Promise<void> => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_BASE_URL}/GetAll`);
+      const response = await axios.get(`${API_BASE_URL}/GetAll`, {
+  headers: { Authorization: `Bearer ${getAuthToken()}` }
+});
       setClients(response.data);
       setError("");
     } catch (error) {
@@ -256,7 +258,9 @@ const filteredClients = useMemo(() => {
   const fetchClientById = async (id: string | number): Promise<Client | null> => {
     try {
       console.log("🔍 Récupération du client avec ID:", id);
-      const response = await axios.get(`${API_BASE_URL}/GetOne/${id}`);
+      const response = await axios.get(`${API_BASE_URL}/GetOne/${id}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       console.log("📥 Client récupéré:", response.data);
       return response.data;
     } catch (error) {
@@ -268,7 +272,9 @@ const filteredClients = useMemo(() => {
 
   const fetchClientResume = async (clientId: string) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/visites-resume`);
+      const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/visites-resume`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
 
       if (response.data.success) {
         setClientsResume(prev => ({
@@ -297,7 +303,9 @@ const filteredClients = useMemo(() => {
     try {
       console.log("📋 Chargement historique pour client:", clientId);
       setLoadingHistory(true);
-      const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/historique`);
+      const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/historique`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
 
       if (response.data.success) {
         const historique = response.data.historiqueVisites;
@@ -367,7 +375,9 @@ return date.toLocaleDateString('fr-FR');
 
   const createClient = async (clientData: any): Promise<any> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/Creation`, clientData);
+      const response = await axios.post(`${API_BASE_URL}/Creation`, clientData, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       return response.data;
     } catch (error: any) {
       if (error.response && error.response.data && error.response.data.error) {
@@ -386,7 +396,9 @@ return date.toLocaleDateString('fr-FR');
         throw new Error("ID du client non défini");
       }
 
-      const response = await axios.put(`${API_BASE_URL}/updateOne/${id}`, clientData);
+      const response = await axios.put(`${API_BASE_URL}/updateOne/${id}`, clientData, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       console.log("✅ Réponse serveur:", response.data);
       return response.data;
     } catch (error) {
@@ -409,7 +421,9 @@ return date.toLocaleDateString('fr-FR');
     }
 
     try {
-      await axios.delete(`${API_BASE_URL}/deleteOne/${id}`);
+      await axios.delete(`${API_BASE_URL}/deleteOne/${id}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       setClients(clients.filter(client => client._id !== id && client.id !== id));
       alert("Client supprimé avec succès !");
     } catch (error) {

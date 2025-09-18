@@ -27,6 +27,11 @@ const FicheClientSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  garagisteId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
   //derniereVisite: String, // ou Date si tu veux
 //  vehiculeAssocie:{
   //  type: String,

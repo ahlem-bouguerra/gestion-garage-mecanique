@@ -46,7 +46,12 @@ const vehiculeSchema = new mongoose.Schema({
     type: String,
     enum: ['actif', 'inactif'],
     default: 'actif'
-  }
+  },
+  garagisteId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    }
 }, {
   timestamps: true // Ajoute createdAt et updatedAt automatiquement
 });

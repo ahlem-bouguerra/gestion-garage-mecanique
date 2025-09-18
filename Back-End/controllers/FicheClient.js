@@ -4,43 +4,61 @@ import { validateTunisianPhone, validatePhoneMiddleware } from '../utils/phoneVa
 import mongoose from "mongoose";
 export const createFicheClient = async (req, res) => {
   try {
-        // Valider le téléphone
-        const phoneValidation = validateTunisianPhone(req.body.telephone);
-        if (!phoneValidation.isValid) {
-          return res.status(400).json({ error: phoneValidation.message });
-        }
-        
-        // Normaliser le numéro
-        req.body.telephone = phoneValidation.cleanNumber;
+    // Vérifier que le garagiste est authentifié
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ error: "Garagiste non authentifié" });
+    }
+
+    // Valider le téléphone
+    const phoneValidation = validateTunisianPhone(req.body.telephone);
+    if (!phoneValidation.isValid) {
+      return res.status(400).json({ error: phoneValidation.message });
+    }
+
+    // Normaliser le numéro
+    req.body.telephone = phoneValidation.cleanNumber;
+
+    // Associer le garagiste connecté
+    req.body.garagisteId = req.user._id;
 
     const fiche = new FicheClient(req.body);
     await fiche.save();
+
     res.status(201).json(fiche);
   } catch (error) {
-    // Gestion des erreurs d'unicité
     if (error.code === 11000) {
       return res.status(400).json({ error: "Téléphone ou email ou nom déjà utilisé" });
     }
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message }); // 500 car erreur serveur
   }
 };
 
-
 export const getFicheClients = async (req, res) => {
   try {
-    const fiches = await FicheClient.find();
+    // ✅ Filtrer par garagisteId
+    const fiches = await FicheClient.find({ 
+      garagisteId: req.user._id 
+    });
     res.json(fiches);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// CORRECTION: Utiliser _id au lieu de id dans la recherche
 export const getFicheClientById = async (req, res) => {
   try {
     console.log("🔍 Recherche client avec ID:", req.params._id);
-    const fiche = await FicheClient.findById(req.params._id);
-    if (!fiche) return res.status(404).json({ error: "client non trouvé" });
+    
+    // ✅ Filtrer par garagisteId ET par _id
+    const fiche = await FicheClient.findOne({
+      _id: req.params._id,
+      garagisteId: req.user._id
+    });
+    
+    if (!fiche) {
+      return res.status(404).json({ error: "Client non trouvé ou non autorisé" });
+    }
+    
     console.log("📋 Client trouvé:", fiche.nom);
     res.json(fiche);
   } catch (error) {
@@ -51,10 +69,12 @@ export const getFicheClientById = async (req, res) => {
 
 export const getFicheClientNoms = async (req, res) => {
   try {
-    // GARDER l'_id car le frontend en a besoin !
-    const clients = await FicheClient.find({}, { nom: 1, type: 1, _id: 1 }); 
-    // Retourne : [ { _id: "abc123", nom: "Ahlem", type: "particulier" }, ... ]
-   
+    // ✅ Filtrer par garagisteId
+    const clients = await FicheClient.find(
+      { garagisteId: req.user._id }, 
+      { nom: 1, type: 1, _id: 1 }
+    ); 
+    
     res.json(clients);
   } catch (error) {
     console.error("❌ Erreur:", error.message);
@@ -62,17 +82,25 @@ export const getFicheClientNoms = async (req, res) => {
   }
 };
 
-// CORRECTION: Utiliser _id au lieu de id dans la mise à jour
 export const updateFicheClient = async (req, res) => {
   try {
     console.log("✏️ Mise à jour client avec ID:", req.params._id);
     console.log("📝 Données:", req.body);
-    const fiche = await FicheClient.findByIdAndUpdate(
-      req.params._id,
+    
+    // ✅ Filtrer par garagisteId ET par _id
+    const fiche = await FicheClient.findOneAndUpdate(
+      { 
+        _id: req.params._id,
+        garagisteId: req.user._id
+      },
       req.body,
       { new: true }
     );
-    if (!fiche) return res.status(404).json({ error: "Client non trouvé" });
+    
+    if (!fiche) {
+      return res.status(404).json({ error: "Client non trouvé ou non autorisé" });
+    }
+    
     console.log("✅ Client mis à jour:", fiche.nom);
     res.json(fiche);
   } catch (error) {
@@ -81,12 +109,20 @@ export const updateFicheClient = async (req, res) => {
   }
 };
 
-// CORRECTION: Utiliser _id au lieu de id dans la suppression
 export const deleteFicheClient = async (req, res) => {
   try {
     console.log("🗑️ Suppression client avec ID:", req.params._id);
-    const fiche = await FicheClient.findByIdAndDelete(req.params._id);
-    if (!fiche) return res.status(404).json({ error: "Client non trouvé" });
+    
+    // ✅ Filtrer par garagisteId ET par _id
+    const fiche = await FicheClient.findOneAndDelete({
+      _id: req.params._id,
+      garagisteId: req.user._id
+    });
+    
+    if (!fiche) {
+      return res.status(404).json({ error: "Client non trouvé ou non autorisé" });
+    }
+    
     console.log("✅ Client supprimé:", fiche.nom);
     res.json({ message: "Client supprimé avec succès" });
   } catch (error) {
@@ -95,32 +131,35 @@ export const deleteFicheClient = async (req, res) => {
   }
 };
 
-
-// Route pour récupérer l'historique des visites d'un client
 export const getHistoriqueVisiteByIdClient = async (req, res) => {
   try {
     const { clientId } = req.params;
     
     console.log('🔍 Recherche historique pour client:', clientId);
 
-    // Vérifier que le client existe
-    const client = await FicheClient.findById(clientId);
+    // ✅ Vérifier que le client existe ET appartient au garagiste
+    const client = await FicheClient.findOne({
+      _id: clientId,
+      garagisteId: req.user._id
+    });
+    
     if (!client) {
       return res.status(404).json({
         success: false,
-        error: 'Client non trouvé'
+        error: 'Client non trouvé ou non autorisé'
       });
     }
 
-    // Rechercher tous les ordres terminés pour ce client
+    // ✅ Rechercher les ordres terminés pour ce client ET ce garagiste
     const ordresTermines = await OrdreTravail.find({
       'clientInfo.ClientId': new mongoose.Types.ObjectId(clientId),
+      garagisteId: req.user._id, // ✅ Ajouter cette ligne
       status: 'termine'
     })
     .populate('atelierId', 'name localisation')
     .populate('taches.serviceId', 'name')
     .populate('taches.mecanicienId', 'nom')
-    .sort({ dateFinPrevue: -1 }) // Trier par date de fin la plus récente
+    .sort({ dateFinPrevue: -1 })
     .select('numeroOrdre dateCommence dateFinPrevue atelierNom taches vehiculedetails totalHeuresEstimees');
 
     console.log(`✅ Trouvé ${ordresTermines.length} ordres terminés`);
@@ -140,7 +179,6 @@ export const getHistoriqueVisiteByIdClient = async (req, res) => {
         heuresReelles: tache.estimationHeures || 0,
         status: tache.status
       })),
-      // Résumé des services effectués
       servicesEffectues: [...new Set(ordre.taches.map(t => t.serviceNom))].join(', ')
     }));
 
@@ -172,20 +210,34 @@ export const getHistoriqueVisiteByIdClient = async (req, res) => {
   }
 };
 
-// Route pour récupérer un résumé rapide des visites (pour affichage sur la carte)
 export const getHistoryVisite = async (req, res) => {
   try {
     const { clientId } = req.params;
     
-    // Compter les ordres terminés
+    // ✅ Vérifier que le client appartient au garagiste
+    const client = await FicheClient.findOne({
+      _id: clientId,
+      garagisteId: req.user._id
+    });
+    
+    if (!client) {
+      return res.status(404).json({
+        success: false,
+        error: 'Client non trouvé ou non autorisé'
+      });
+    }
+    
+    // ✅ Compter les ordres terminés pour ce garagiste
     const nombreVisites = await OrdreTravail.countDocuments({
       'clientInfo.ClientId': new mongoose.Types.ObjectId(clientId),
+      garagisteId: req.user._id, // ✅ Ajouter cette ligne
       status: 'termine'
     });
 
-    // Trouver la dernière visite
+    // ✅ Trouver la dernière visite pour ce garagiste
     const derniereVisite = await OrdreTravail.findOne({
       'clientInfo.ClientId': new mongoose.Types.ObjectId(clientId),
+      garagisteId: req.user._id, // ✅ Ajouter cette ligne
       status: 'termine'
     })
     .sort({ dateFinPrevue: -1 })
@@ -196,7 +248,6 @@ export const getHistoryVisite = async (req, res) => {
       nombreVisites,
       derniereVisite: derniereVisite ? {
         date: derniereVisite.dateFinPrevue,
-        
       } : null
     });
 
