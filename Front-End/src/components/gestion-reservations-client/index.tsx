@@ -265,7 +265,7 @@ export default function ClientReservationManagement() {
           <>
             <div className="p-4 bg-white border-b border-gray-200 flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold">
-                G
+                Gbbbbb
               </div>
               <div className="flex-1">
                 <h2 className="font-bold text-gray-900">{selectedReservation.garageId?.username || 'Garage'}</h2>
