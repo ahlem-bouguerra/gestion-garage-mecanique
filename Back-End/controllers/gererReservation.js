@@ -134,23 +134,34 @@ export const updateReservation = async (req, res) => {
 
     // === ACTIONS DU GARAGE ===
     if (action === "accepter") {
-      // Le garage accepte le créneau demandé
       reservation.status = "accepte";
       reservation.messageGarage = message || null;
       
     } else if (action === "refuser") {
-      // Le garage refuse définitivement
       reservation.status = "refuse";
       reservation.messageGarage = message || "Demande refusée";
       
     } else if (action === "contre_proposer") {
-      // Le garage propose un autre créneau
+      // CORRECTION : Sauvegarder le créneau proposé par le garage
+      if (!newDate || !newHeureDebut) {
+        return res.status(400).json({ error: "Date et heure requises pour une contre-proposition" });
+      }
+      
       reservation.status = "contre_propose";
       reservation.messageGarage = message || "Nouveau créneau proposé";
+      // AJOUT : Sauvegarder le créneau proposé
+      reservation.creneauPropose = {
+        date: new Date(newDate),
+        heureDebut: newHeureDebut
+      };
 
     // === ACTIONS DU CLIENT ===
     } else if (action === "accepter_contre_proposition") {
-      // Le client accepte la contre-proposition du garage
+      // CORRECTION : Vérifier que creneauPropose existe
+      if (!reservation.creneauPropose || !reservation.creneauPropose.date) {
+        return res.status(400).json({ error: "Aucune contre-proposition à accepter" });
+      }
+      
       reservation.status = "accepte";
       // On remplace le créneau demandé par celui proposé
       reservation.creneauDemande = {
@@ -158,16 +169,20 @@ export const updateReservation = async (req, res) => {
         heureDebut: reservation.creneauPropose.heureDebut
       };
       reservation.messageClient = message || "Contre-proposition acceptée";
+      // AJOUT : Nettoyer la contre-proposition
+      reservation.creneauPropose = undefined;
       
     } else if (action === "annuler") {
-      // Le client annule sa demande
       reservation.status = "annule";
       reservation.messageClient = message || "Demande annulée par le client";
       
     } else if (action === "client_contre_proposer") {
-      // Le client fait une nouvelle contre-proposition
-      reservation.status = "en_attente"; // Retour en attente pour le garage
-      // On met à jour le créneau demandé avec la nouvelle proposition du client
+      // CORRECTION : Validation des données requises
+      if (!newDate || !newHeureDebut) {
+        return res.status(400).json({ error: "Date et heure requises pour une contre-proposition" });
+      }
+      
+      reservation.status = "en_attente";
       reservation.creneauDemande = {
         date: new Date(newDate),
         heureDebut: newHeureDebut
@@ -175,7 +190,7 @@ export const updateReservation = async (req, res) => {
       // On efface l'ancienne contre-proposition du garage
       reservation.creneauPropose = undefined;
       reservation.messageClient = message || "Nouvelle proposition de créneau";
-      reservation.messageGarage = null; // Reset du message garage
+      reservation.messageGarage = null;
       
     } else {
       return res.status(400).json({ 
@@ -184,11 +199,18 @@ export const updateReservation = async (req, res) => {
       });
     }
 
+    // CORRECTION : Marquer les champs modifiés explicitement
+    reservation.markModified('creneauDemande');
+    reservation.markModified('creneauPropose');
+    reservation.markModified('messageGarage');
+    reservation.markModified('messageClient');
+
     const updatedReservation = await reservation.save();
     
     console.log('Réservation après update:', {
       status: updatedReservation.status,
       creneauDemande: updatedReservation.creneauDemande,
+      creneauPropose: updatedReservation.creneauPropose,
       messageGarage: updatedReservation.messageGarage,
       messageClient: updatedReservation.messageClient
     });
@@ -201,7 +223,8 @@ export const updateReservation = async (req, res) => {
 
   } catch (error) {
     console.error("=== ERREUR UPDATE RESERVATION ===");
-    console.error("Erreur:", error);
+    console.error("Erreur complète:", error);
+    console.error("Stack trace:", error.stack);
     res.status(500).json({ 
       error: "Erreur serveur lors de la mise à jour",
       details: error.message

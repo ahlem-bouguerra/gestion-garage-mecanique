@@ -2,29 +2,34 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
-
 export default function ClientReservationManagement() {
   const [reservations, setReservations] = useState([]);
   const [selectedReservation, setSelectedReservation] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [responseData, setResponseData] = useState({
     action: '',
     newDate: '',
     newHeureDebut: '',
     message: ''
   });
+  
   const playNotificationSound = () => {
-  const audio = new Audio('/sounds/mixkit-correct-answer-tone-2870.wav');
-  audio.play().catch(e => console.log('Erreur audio:', e));
+    const audio = new Audio('/sounds/mixkit-correct-answer-tone-2870.wav');
+    audio.play().catch(e => console.log('Erreur audio:', e));
   };
+  
   const messagesEndRef = useRef(null);
-  const scrollToBottom = () => {messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });};
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const isDatePassed = (dateString) => {
-  const reservationDate = new Date(dateString);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset l'heure pour comparer seulement les dates
-  return reservationDate < today;
-};
+    const reservationDate = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return reservationDate < today;
+  };
 
   useEffect(() => {
     const header = document.querySelector('header');
@@ -46,15 +51,13 @@ export default function ClientReservationManagement() {
     const fetchReservations = async () => {
       try {
         const res = await axios.get("http://localhost:5000/api/reservations");
-        
-        // Filtrer les réservations avec dates non passées
         const filteredReservations = res.data.filter(reservation => 
           !isDatePassed(reservation.creneauDemande.date)
         );
-        
         setReservations(filteredReservations);
       } catch (err) {
         console.error("Erreur fetch reservations:", err);
+        setError("Erreur lors du chargement des réservations");
       }
     };
     fetchReservations();
@@ -62,6 +65,7 @@ export default function ClientReservationManagement() {
 
   const handleReservationClick = (reservation) => {
     setSelectedReservation(reservation);
+    setError(''); // Clear any previous errors
     
     const formatDate = (dateInput) => {
       if (!dateInput) return '';
@@ -79,17 +83,20 @@ export default function ClientReservationManagement() {
 
   const handleResponse = async () => {
     if (!responseData.action || !selectedReservation) {
-      alert("Veuillez sélectionner une action");
+      setError("Veuillez sélectionner une action");
       return;
     }
 
     // Validation pour les contre-propositions
     if (responseData.action === 'client_contre_proposer') {
       if (!responseData.newDate || !responseData.newHeureDebut) {
-        alert("Veuillez sélectionner une date et une heure");
+        setError("Veuillez sélectionner une date et une heure pour la contre-proposition");
         return;
       }
     }
+
+    setLoading(true);
+    setError('');
 
     console.log("=== ENVOI REQUÊTE CLIENT ===");
     console.log("Action:", responseData.action);
@@ -107,7 +114,7 @@ export default function ClientReservationManagement() {
       );
       
       console.log("Réponse serveur:", response.data);
-            playNotificationSound();
+      playNotificationSound();
       
       // Recharger les réservations
       const res = await axios.get("http://localhost:5000/api/reservations");
@@ -116,19 +123,30 @@ export default function ClientReservationManagement() {
       );
 
       setReservations(filteredReservations);
-      setSelectedReservation(null);
+      
+      // Mettre à jour la réservation sélectionnée avec les nouvelles données
+      const updatedReservation = filteredReservations.find(r => r._id === selectedReservation._id);
+      if (updatedReservation) {
+        setSelectedReservation(updatedReservation);
+      } else {
+        setSelectedReservation(null);
+      }
+      
       setResponseData({
         action: '',
         newDate: '',
         newHeureDebut: '',
         message: ''
       });
-
-      alert("Réponse envoyée avec succès !");
       
     } catch (err) {
-      console.error("Erreur:", err);
-      alert(`Erreur: ${err.response?.data?.error || err.message}`);
+      console.error("Erreur complète:", err);
+      console.error("Réponse serveur:", err.response?.data);
+      
+      const errorMessage = err.response?.data?.error || err.response?.data?.details || err.message || "Erreur inconnue";
+      setError(`Erreur: ${errorMessage}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -164,23 +182,32 @@ export default function ClientReservationManagement() {
   };
 
   const timeOptions = generateTimeOptions();
-
-  // Fonction pour déterminer si le client peut agir
-  const canClientAct = (reservation) => {
-    return reservation.status === 'contre_propose';
-  };
+  const canClientAct = (reservation) => reservation.status === 'contre_propose';
 
   return (
     <div className="h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-100 flex">
+      {/* Message d'erreur global */}
+      {error && (
+        <div className="fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50">
+          <div className="flex justify-between items-center">
+            <span>{error}</span>
+            <button 
+              onClick={() => setError('')}
+              className="ml-2 text-red-500 hover:text-red-700"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar - Liste des réservations */}
       <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-        {/* Header */}
         <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
           <h1 className="text-lg font-bold">Mes Réservations</h1>
           <p className="text-indigo-100 text-sm">Gérez vos demandes</p>
         </div>
 
-        {/* Liste des réservations */}
         <div className="flex-1 overflow-y-auto">
           {reservations.map(reservation => {
             const isActive = selectedReservation?._id === reservation._id;
@@ -195,17 +222,14 @@ export default function ClientReservationManagement() {
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  {/* Avatar - Garage */}
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                    C
+                    G
                   </div>
 
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-1">
                       <h3 className="font-semibold text-gray-900 truncate">
-                        {reservation.garageId?.username}
-                        
+                        {reservation.garageId?.username || 'Garage'}
                       </h3>
                       {hasAction && (
                         <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse flex-shrink-0"></div>
@@ -213,7 +237,7 @@ export default function ClientReservationManagement() {
                     </div>
                     
                     <p className="text-sm text-gray-600 truncate mb-2">
-                      {reservation.serviceName}
+                      {reservation.serviceId?.name || reservation.serviceName}
                     </p>
                     
                     <div className="flex items-center justify-between">
@@ -239,28 +263,25 @@ export default function ClientReservationManagement() {
       <div className="flex-1 flex flex-col">
         {selectedReservation ? (
           <>
-            {/* Header de conversation */}
             <div className="p-4 bg-white border-b border-gray-200 flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold">
                 G
               </div>
               <div className="flex-1">
-                <h2 className="font-bold text-gray-900"> {selectedReservation.garageId?.username}</h2>
+                <h2 className="font-bold text-gray-900">{selectedReservation.garageId?.username || 'Garage'}</h2>
                 <p className="text-sm text-gray-500">Service: {selectedReservation.serviceId?.name}</p>
-                <p className="text-sm text-gray-500">Numéro de téléphone du garage : {selectedReservation.garageId.phone}</p>
-
+                <p className="text-sm text-gray-500">Numéro: {selectedReservation.garageId?.phone}</p>
               </div>
               <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedReservation.status)}`}>
                 {getStatusIcon(selectedReservation.status)} {selectedReservation.status.replace('_', ' ')}
               </div>
             </div>
 
-            {/* Zone de messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {(() => {
                 const messages = [];
                 
-                // 1. Message initial du client (créé en premier)
+                // Message initial du client
                 messages.push({
                   type: 'client_initial',
                   timestamp: selectedReservation.createdAt,
@@ -289,7 +310,7 @@ export default function ClientReservationManagement() {
                   )
                 });
 
-                // 2. Message du garage (s'il existe)
+                // Message du garage
                 if (selectedReservation.messageGarage) {
                   messages.push({
                     type: 'garage',
@@ -301,10 +322,12 @@ export default function ClientReservationManagement() {
                         </div>
                         <div className="bg-white rounded-2xl rounded-tl-md p-4 shadow-sm border max-w-md">
                           <div className="text-sm text-gray-700">{selectedReservation.messageGarage}</div>
-                          {selectedReservation.creneauPropose && (
+                          {selectedReservation.creneauPropose && selectedReservation.creneauPropose.date && (
                             <div className="bg-indigo-50 rounded-lg p-3 mt-2">
                               <div className="text-sm font-medium text-indigo-900">Créneau proposé:</div>
-                              <div className="text-sm text-indigo-700">📅 {new Date(selectedReservation.creneauPropose.date).toLocaleDateString('fr-FR')} à {selectedReservation.creneauPropose.heureDebut}</div>
+                              <div className="text-sm text-indigo-700">
+                                📅 {new Date(selectedReservation.creneauPropose.date).toLocaleDateString('fr-FR')} à {selectedReservation.creneauPropose.heureDebut}
+                              </div>
                             </div>
                           )}
                           <div className="text-xs text-gray-400 mt-2">
@@ -316,7 +339,7 @@ export default function ClientReservationManagement() {
                   });
                 }
 
-                // 3. Message du client (réponse, s'il existe)
+                // Message du client (réponse)
                 if (selectedReservation.messageClient) {
                   messages.push({
                     type: 'client_response',
@@ -337,10 +360,8 @@ export default function ClientReservationManagement() {
                   });
                 }
 
-                // Trier les messages par timestamp
                 messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-                // Retourner les messages triés
                 return messages.map((message, index) => (
                   <div key={`${message.type}-${index}`}>
                     {message.content}
@@ -348,19 +369,17 @@ export default function ClientReservationManagement() {
                 ));
               })()}
               
-              {/* Élément invisible pour l'auto-scroll */}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Zone de réponse - seulement si le client peut agir */}
             {canClientAct(selectedReservation) && (
               <div className="p-4 bg-white border-t border-gray-200">
                 <div className="space-y-4">
-                  {/* Actions rapides */}
                   <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => setResponseData({...responseData, action: 'accepter_contre_proposition'})}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      disabled={loading}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all disabled:opacity-50 ${
                         responseData.action === 'accepter_contre_proposition' 
                           ? 'bg-emerald-500 text-white' 
                           : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
@@ -370,7 +389,8 @@ export default function ClientReservationManagement() {
                     </button>
                     <button
                       onClick={() => setResponseData({...responseData, action: 'client_contre_proposer'})}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      disabled={loading}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all disabled:opacity-50 ${
                         responseData.action === 'client_contre_proposer' 
                           ? 'bg-blue-500 text-white' 
                           : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
@@ -380,7 +400,8 @@ export default function ClientReservationManagement() {
                     </button>
                     <button
                       onClick={() => setResponseData({...responseData, action: 'annuler'})}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      disabled={loading}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all disabled:opacity-50 ${
                         responseData.action === 'annuler' 
                           ? 'bg-rose-500 text-white' 
                           : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
@@ -390,7 +411,6 @@ export default function ClientReservationManagement() {
                     </button>
                   </div>
 
-                  {/* Options de contre-proposition */}
                   {responseData.action === 'client_contre_proposer' && (
                     <div className="bg-blue-50 rounded-lg p-4 space-y-3">
                       <div className="text-sm font-medium text-blue-900">Proposer un nouveau créneau:</div>
@@ -401,11 +421,13 @@ export default function ClientReservationManagement() {
                           onChange={(e) => setResponseData({...responseData, newDate: e.target.value})}
                           min={new Date().toISOString().split('T')[0]}
                           className="flex-1 px-3 py-2 border border-blue-200 rounded-lg text-sm"
+                          disabled={loading}
                         />
                         <select
                           value={responseData.newHeureDebut}
                           onChange={(e) => setResponseData({...responseData, newHeureDebut: e.target.value})}
                           className="flex-1 px-3 py-2 border border-blue-200 rounded-lg text-sm"
+                          disabled={loading}
                         >
                           {timeOptions.map(time => (
                             <option key={time} value={time}>{time}</option>
@@ -415,7 +437,6 @@ export default function ClientReservationManagement() {
                     </div>
                   )}
 
-                  {/* Zone de texte */}
                   <div className="flex gap-3">
                     <input
                       type="text"
@@ -423,23 +444,27 @@ export default function ClientReservationManagement() {
                       onChange={(e) => setResponseData({...responseData, message: e.target.value})}
                       placeholder="Tapez votre message..."
                       className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:border-indigo-500 focus:outline-none"
-                      onKeyPress={(e) => e.key === 'Enter' && handleResponse()}
+                      onKeyPress={(e) => e.key === 'Enter' && !loading && handleResponse()}
+                      disabled={loading}
                     />
                     <button
                       onClick={handleResponse}
-                      disabled={!responseData.action || (responseData.action === 'client_contre_proposer' && (!responseData.newDate || !responseData.newHeureDebut))}
+                      disabled={loading || !responseData.action || (responseData.action === 'client_contre_proposer' && (!responseData.newDate || !responseData.newHeureDebut))}
                       className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:from-indigo-600 hover:to-purple-700 transition-all"
                     >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
-                      </svg>
+                      {loading ? (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                        </svg>
+                      )}
                     </button>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Message d'information pour les statuts non-modifiables */}
             {!canClientAct(selectedReservation) && (
               <div className="p-4 bg-gray-50 border-t border-gray-200">
                 <div className="text-center text-sm text-gray-600">
