@@ -18,7 +18,7 @@ export const CreateFacture = async (req, res) => {
     }
 
     // 1️⃣ Vérifier si le devis existe et est accepté
-    const devis = await Devis.findById(devisId);
+    const devis = await Devis.findOne({_id: devisId, garagisteId: req.user._id });
     if (!devis) {
       return res.status(404).json({ success: false, message: 'Devis non trouvé' });
     }
@@ -27,7 +27,7 @@ export const CreateFacture = async (req, res) => {
     }
 
     // 2️⃣ Vérifier si une facture existe déjà pour ce devis
-    const existingFacture = await Facture.findOne({ devisId: devis._id });
+    const existingFacture = await Facture.findOne({ devisId: devis._id , garagisteId: req.user._id  });
     if (existingFacture) {
       return res.status(400).json({ success: false, message: 'Une facture existe déjà pour ce devis', facture: existingFacture });
     }
@@ -40,13 +40,14 @@ export const CreateFacture = async (req, res) => {
     const factureData = {
       numeroFacture: numeroFacture,
       devisId: devis._id,
-       clientId: devis.clientId,   // ← ici
-  clientInfo: {
-    nom: devis.clientName,
-    telephone: devis.clientPhone,
-    email: devis.clientEmail,
-    adresse: devis.clientAddress
-  },
+       clientId: devis.clientId, 
+       garagisteId: req.user._id ,  // ← ici
+        clientInfo: {
+          nom: devis.clientName,
+          telephone: devis.clientPhone,
+          email: devis.clientEmail,
+          adresse: devis.clientAddress
+        },
       clientName: devis.clientName,
       vehicleInfo: devis.vehicleInfo,
       inspectionDate: devis.inspectionDate,
@@ -106,7 +107,7 @@ export const GetAllFactures = async (req, res) => {
     } = req.query;
 
     // Construction de la requête avec filtres
-    let query = {};
+    let query = {garagisteId: req.user._id};
 
     if (clientId && mongoose.Types.ObjectId.isValid(clientId)) {
       query.clientId = clientId;
@@ -172,10 +173,10 @@ export const GetFactureById = async (req, res) => {
       });
     }
 
-    const facture = await Facture.findById(id)
+    const facture = await Facture.findOne({ _id: id, garagisteId: req.user._id })
       .populate('clientId', 'nom email telephone adresse')
       .populate('devisId', 'id status')
-      .populate('services.pieceId', 'name description');
+      .populate('services', 'name description');
 
     if (!facture) {
       return res.status(404).json({
@@ -203,6 +204,7 @@ export const getFactureByDevis = async (req, res) => {
   try {
     // ✅ Chercher seulement les factures actives (pas annulées)
     const facture = await Facture.findOne({ 
+      garagisteId: req.user._id,
       devisId: req.params.devisId,
       status: 'active' // ✅ Exclut les factures annulées
     }).populate("devisId");
@@ -241,7 +243,7 @@ export const MarquerFacturePayed = async (req, res) => {
       });
     }
 
-    const facture = await Facture.findById(id);
+    const facture = await Facture.findOne({ _id: id, garagisteId: req.user._id });
     if (!facture) {
       return res.status(404).json({
         success: false,
@@ -287,7 +289,7 @@ export const UpdateFacture = async (req, res) => {
     }
 
     const updatedFacture = await Facture.findByIdAndUpdate(
-      id,
+      { _id: id, garagisteId: req.user._id },
       {
         notes,
         dueDate: dueDate ? new Date(dueDate) : undefined,
@@ -331,7 +333,7 @@ export const DeleteFacture = async (req, res) => {
       });
     }
 
-    const facture = await Facture.findById(id);
+    const facture = await Facture.findOne({ _id: id, garagisteId: req.user._id });;
     
     if (!facture) {
       return res.status(404).json({
@@ -370,7 +372,8 @@ export const StaticFacture = async (req, res) => {
     const stats = await Facture.aggregate([
   {
     $match: {
-      status: 'active' // <-- exclut les factures annulées
+      status: 'active', // <-- exclut les factures annulées
+      garagisteId: req.user._id 
     }
   },
   {
@@ -487,8 +490,11 @@ export const CreateFactureWithCredit = async (req, res) => {
       });
     }
 
-    // 1. Récupérer le devis
-    const devis = await Devis.findById(devisId);
+    // 1. Récupérer le devis avec filtrage garagiste
+    const devis = await Devis.findOne({ 
+      _id: devisId, 
+      garagisteId: req.user._id 
+    });
     if (!devis) {
       return res.status(404).json({ 
         success: false, 
@@ -496,8 +502,12 @@ export const CreateFactureWithCredit = async (req, res) => {
       });
     }
 
-    // 2. Vérifier si une facture existe déjà
-    const existingFacture = await Facture.findOne({ devisId: devisId, status: 'active' });
+    // 2. Vérifier si une facture existe déjà avec filtrage garagiste
+    const existingFacture = await Facture.findOne({ 
+      devisId: devisId, 
+      status: 'active',
+      garagisteId: req.user._id 
+    });
 
     let creditNote = null;
 
@@ -526,7 +536,8 @@ export const CreateFactureWithCredit = async (req, res) => {
         totalTTC: existingFacture.totalTTC,
         reason: 'Annulation suite à modification du devis',
         creditDate: new Date(),
-        createdBy: req.user?.id
+        createdBy: req.user?.id,
+        garagisteId: req.user._id
       });
       
       await creditNote.save();
@@ -564,7 +575,6 @@ export const CreateFactureWithCredit = async (req, res) => {
       vehicleInfo: devis.vehicleInfo,
       inspectionDate: devis.inspectionDate,
       services: devis.services.map(service => ({
-        pieceId: service.pieceId,
         piece: service.piece,
         quantity: service.quantity,
         unitPrice: service.unitPrice,
@@ -579,6 +589,7 @@ export const CreateFactureWithCredit = async (req, res) => {
       invoiceDate: new Date(),
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       createdBy: req.user?.id,
+      garagisteId: req.user._id,
       status: 'active'
     };
 
@@ -654,33 +665,41 @@ export const CreateFactureWithCredit = async (req, res) => {
   }
 };
 
-
 export const getCreditNoteById = async (req, res) => {
   try {
     const { creditNoteId } = req.params;
+    console.log('🔍 Recherche avoir ID:', creditNoteId);
+    console.log('👤 User ID:', req.user._id);
     
-    const creditNote = await CreditNote.findById(creditNoteId)
-      .populate('clientId', 'nom email telephone adresse')
-      .populate('originalFactureId', 'numeroFacture')
-      .populate('services.pieceId', 'name description');
+    // Vérifiez d'abord si l'avoir existe (sans filtre garagisteId)
+    const existsCheck = await CreditNote.findById(creditNoteId);
+    console.log('💾 Avoir existe?', !!existsCheck);
     
+    const creditNote = await CreditNote.findOne({
+      _id: creditNoteId,
+      garagisteId: req.user._id
+    })
+    .populate('clientId', 'nom email telephone adresse')
+    .populate('originalFactureId', 'numeroFacture')
+    .populate('services', 'name description');
+
     if (!creditNote) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Avoir non trouvé' 
+      console.log('❌ Avoir non trouvé pour cet utilisateur');
+      return res.status(404).json({
+        success: false,
+        message: 'Avoir non trouvé'
       });
     }
-    
-    res.json({ 
-      success: true, 
-      data: creditNote 
+
+    res.json({
+      success: true,
+      data: creditNote
     });
-    
   } catch (error) {
-    console.error('Erreur récupération avoir:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    console.error('❌ Erreur récupération avoir:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };

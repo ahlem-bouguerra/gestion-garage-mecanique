@@ -45,10 +45,6 @@ const creditNoteSchema = new mongoose.Schema({
 
   // Services annulés (copie exacte de la facture originale)
   services: [{
-    pieceId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Piece'
-    },
     piece: {
       type: String,
       required: true
@@ -108,6 +104,11 @@ const creditNoteSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },
+  garagisteId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
   }
 }, {
   timestamps: true

@@ -53,10 +53,6 @@ clientInfo: {
 
   // Services/Pièces (snapshot des données du devis)
   services: [{
-    pieceId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Piece'
-    },
     piece: {
       type: String,
       required: true
@@ -188,6 +184,11 @@ clientInfo: {
   // Date d'annulation
   cancelledAt: {
     type: Date
+  },
+  garagisteId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
   }
 }, {
   timestamps: true

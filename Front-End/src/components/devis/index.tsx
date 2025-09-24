@@ -32,7 +32,7 @@ const GarageQuoteSystem = () => {
   const router = useRouter();
   const [filters, setFilters] = useState({status: '',clientName: '',dateDebut: '',dateFin: ''});
   const [newQuote, setNewQuote] = useState({clientName: '',vehicleInfo: '',vehiculeId: '',inspectionDate: '',services: [{ piece: '', quantity: 1, unitPrice: 0 }]});
-  const [newquote, setNewquote] = useState({services: [{pieceId: '',piece: '',quantity: 1,unitPrice: 0}]});
+  const [newquote, setNewquote] = useState({services: [{piece: '',quantity: 1,unitPrice: 0}]});
   const statusColors = {brouillon: 'bg-gray-100 text-gray-800',envoye: 'bg-blue-100 text-blue-800',accepte: 'bg-green-100 text-green-800',refuse: 'bg-red-100 text-red-800'};
   const statusIcons = {brouillon: FileText,envoye: Send,accepte: Check,refuse: X};
   const [currentUser, setCurrentUser] = useState(null);
@@ -1398,7 +1398,9 @@ const checkActiveFactureExists = async (devisId) => {
                               onClick={async () => {
                                 try {
                                   const response = await axios.get(
-                                    `http://localhost:5000/api/factureByDevis/${quote._id}`
+                                    `http://localhost:5000/api/factureByDevis/${quote._id}`,{
+                                      headers: { Authorization: `Bearer ${getAuthToken()}` }
+                                    }
                                   );
                                   setSelectedFacture(response.data);
                                   setShowFactureModal(true);

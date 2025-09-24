@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, FileText, DollarSign, Clock, AlertTriangle, X, User, Calendar, Car } from 'lucide-react';
 import axios from 'axios';
 
-
 interface FactureDetails extends Facture {
   clientId?: {
     nom: string;
@@ -16,10 +15,8 @@ interface FactureDetails extends Facture {
     status: string;
   };
   services?: Array<{
-    pieceId?: {
       name: string;
       description: string;
-    };
     piece: string;
     quantity: number;
     unitPrice: number;
@@ -57,7 +54,6 @@ interface Facture {
   paymentAmount?: number;
   ordreId: string;
 }
-
 interface Stats {
   totalFactures: number;
   totalTTC: number;
@@ -104,6 +100,9 @@ const GestionFactures: React.FC = () => {
   const indexOfLastFacture = currentPage * itemsPerPage;
   const indexOfFirstFacture = indexOfLastFacture - itemsPerPage;
   const currentFactures = filteredFactures.slice(indexOfFirstFacture, indexOfLastFacture);
+  const getAuthToken = () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+  };
 
 
   // Récupérer les factures
@@ -125,7 +124,9 @@ const GestionFactures: React.FC = () => {
 
   const fetchFactures = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/getFactures');
+      const response = await axios.get('http://localhost:5000/api/getFactures', {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       const data = await response.data;
       if (data.success) {
         setFactures(data.data);
@@ -140,7 +141,9 @@ const GestionFactures: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/stats/summary');
+      const response = await axios.get('http://localhost:5000/api/stats/summary', {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       const data = await response.data;
       if (data.success) {
         setStats(data.data);
@@ -152,7 +155,9 @@ const GestionFactures: React.FC = () => {
   const fetchFactureDetails = async (factureId: string) => {
     setLoadingDetails(true);
     try {
-      const response = await axios.get(`http://localhost:5000/api/getFacture/${factureId}`);
+      const response = await axios.get(`http://localhost:5000/api/getFacture/${factureId}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       const data = await response.data;
       if (data.success) {
         setFactureDetails(data.data);
@@ -165,19 +170,32 @@ const GestionFactures: React.FC = () => {
     }
   };
 
-  const fetchCreditNoteDetails = async (creditNoteId) => {
+const fetchCreditNoteDetails = async (creditNoteId) => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/credit-note/${creditNoteId}`);
-    const data = await response.data;
+    console.log('🚀 Appel API pour ID:', creditNoteId);
+    console.log('🔑 Token:', getAuthToken());
+    
+    const response = await axios.get(`http://localhost:5000/api/credit-note/${creditNoteId}`, {
+      headers: { Authorization: `Bearer ${getAuthToken()}` }
+    });
+    
+    const data = response.data;
     if (data.success) {
       setCreditNoteDetails(data.data);
       setShowCreditNoteModal(true);
     }
   } catch (error) {
-    console.error('Erreur lors de la récupération de l\'avoir:', error);
+    console.error('❌ Erreur détaillée:', {
+      status: error.response?.status,
+      message: error.response?.data?.message,
+      url: error.config?.url
+    });
+    
+    if (error.response?.status === 404) {
+      alert('Avoir non trouvé ou vous n\'avez pas les droits d\'accès');
+    }
   }
 };
-
 
   useEffect(() => {
     const fetchUserWithLocation = async () => {
@@ -218,25 +236,69 @@ const GestionFactures: React.FC = () => {
     setFilteredFactures(filtered);
   }, [searchTerm, statusFilter, factures]);
 
-  const handlePayment = async (factureId: string, paymentData: any) => {
-    try {
-      const response = await axios.put(
-        `http://localhost:5000/api/${factureId}/payment`,
-        paymentData, // Axios gère automatiquement JSON.stringify
-        {
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
-
-      if (response.data.success) {
-        fetchFactures();
-        fetchStats();
-        setShowPaymentModal(false);
-      }
-    } catch (error: any) {
-      console.error('Erreur lors du paiement:', error.response?.data || error.message);
+const handlePayment = async (factureId: string, paymentData: any) => {
+  try {
+    const token = localStorage.getItem("token");
+    
+    // Vérification que le token existe
+    if (!token) {
+      alert('❌ Erreur: Token d\'authentification manquant. Veuillez vous reconnecter.');
+      // Rediriger vers la page de connexion ou actualiser
+      window.location.href = '/login';
+      return;
     }
-  };
+    
+    console.log('🔍 Tentative paiement pour facture:', factureId);
+    console.log('📊 Données paiement:', paymentData);
+    console.log('🔐 Token présent:', token ? 'Oui' : 'Non');
+    
+    const response = await axios.put(
+      `http://localhost:5000/api/${factureId}/payment`,
+      paymentData,
+      {
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Format standard Bearer
+        }
+      }
+    );
+
+    console.log('✅ Réponse paiement:', response.data);
+
+    if (response.data.success) {
+      fetchFactures();
+      fetchStats();
+      setShowPaymentModal(false);
+      
+      // Afficher un message de succès
+      alert('✅ Paiement enregistré avec succès !');
+    } else {
+      console.error('❌ Échec paiement:', response.data.message);
+      alert('❌ Erreur: ' + response.data.message);
+    }
+  } catch (error: any) {
+    console.error('❌ Erreur lors du paiement:', error);
+    
+    // Gestion spécifique des erreurs d'authentification
+    if (error.response?.status === 401) {
+      alert('❌ Session expirée. Veuillez vous reconnecter.');
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      return;
+    }
+    
+    console.error('📝 Détails erreur:', error.response?.data);
+    console.error('🔢 Status HTTP:', error.response?.status);
+    
+    // Affichage d'erreur plus détaillé
+    const errorMessage = error.response?.data?.message || 
+                        error.response?.data?.error || 
+                        error.message ||
+                        'Erreur de connexion au serveur';
+    
+    alert('❌ Erreur lors du paiement: ' + errorMessage);
+  }
+};
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-TN', {
@@ -743,8 +805,8 @@ const GestionFactures: React.FC = () => {
                           <td className="border border-gray-300 px-4 py-3">
                             <div>
                               <p className="font-medium text-gray-900">{service.piece}</p>
-                              {service.pieceId && (
-                                <p className="text-xs text-gray-500">{service.pieceId.description}</p>
+                              {service && (
+                                <p className="text-xs text-gray-500">{service.description}</p>
                               )}
                             </div>
                           </td>

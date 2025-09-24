@@ -11,7 +11,6 @@ import { completeProfile, getProfile } from "../controllers/ProfileContoller.js"
 import { enhancedLocationRoutes } from "../apiDataFetcher.js"; 
 import {createFicheClient,getFicheClients,getFicheClientById,updateFicheClient,deleteFicheClient,getFicheClientNoms, getHistoriqueVisiteByIdClient, getHistoryVisite} from "../controllers/FicheClient.js";
 import {getAllVehicules,getVehiculeById,createVehicule,updateVehicule,deleteVehicule,getVehiculesByProprietaire} from '../controllers/vehiculeController.js';
-import {getAllPieces,getPieceById,createPiece,updatePiece,deletePiece}from '../controllers/piecesController.js';
 import {createDevis,getAllDevis,getDevisById,getDevisByNum,updateDevisStatus,updateDevis,deleteDevis, acceptDevis,refuseDevis,updateFactureId}from '../controllers/devisController.js';
 import { sendDevisByEmail } from '../utils/sendDevis.js';
 import {createMecanicien,updateMecanicien,deleteMecanicien,getAllMecaniciens,getMecanicienById,getMecaniciensByService} from "../controllers/mecanicienController.js";
@@ -388,13 +387,6 @@ router.delete('/vehicules/:id',authMiddleware, deleteVehicule);
 router.get('/vehicules/proprietaire/:clientId',authMiddleware, getVehiculesByProprietaire);
 
 
-router.get('/pieces', getAllPieces);
-router.get('/pieces/:id', getPieceById);
-router.post('/pieces', createPiece);
-router.put('/pieces/:id', updatePiece);
-router.delete('/pieces/:id', deletePiece);
-
-
 router.post('/createdevis',authMiddleware,createDevis);
 router.get('/Devis',authMiddleware,getAllDevis);
 router.get('/Devis/:id',authMiddleware,getDevisById);
@@ -446,16 +438,16 @@ router.get("/ordres/status/:status", getOrdresByStatus);
 router.get("/ordres/atelier/:atelierId", getOrdresByAtelier);
 
 
-router.post('/create/:devisId', CreateFacture);
-router.post('/create-with-credit/:devisId', CreateFactureWithCredit);
-router.get('/getFactures',GetAllFactures);
-router.get('/getFacture/:id',GetFactureById);
-router.get('/factureByDevis/:devisId', getFactureByDevis);
-router.put('/:id/payment',MarquerFacturePayed);
-router.put('/:id',UpdateFacture);
-router.delete('/:id',DeleteFacture);
-router.get('/stats/summary',StaticFacture);
-router.get('/credit-note/:creditNoteId', getCreditNoteById);
+router.post('/create/:devisId',authMiddleware, CreateFacture);
+router.post('/create-with-credit/:devisId',authMiddleware, CreateFactureWithCredit);
+router.get('/getFactures',authMiddleware,GetAllFactures);
+router.get('/getFacture/:id',authMiddleware,GetFactureById);
+router.get('/factureByDevis/:devisId',authMiddleware, getFactureByDevis);
+router.put('/:id/payment',authMiddleware,MarquerFacturePayed);
+router.put('/:id',authMiddleware,UpdateFacture);
+router.delete('/:id',authMiddleware,DeleteFacture);
+router.get('/stats/summary',authMiddleware,StaticFacture);
+router.get('/credit-note/:creditNoteId',authMiddleware, getCreditNoteById);
 
 
 router.get('/carnet-entretien/vehicule/:vehiculeId',authMiddleware,getCarnetByVehiculeId);
