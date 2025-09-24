@@ -10,7 +10,7 @@ export const getCarnetByVehiculeId = async (req, res) => {
     console.log("🔍 Recherche ordres pour vehiculeId:", vehiculeId);
 
     // Récupérer les carnets existants
-    const carnetsExistants = await CarnetEntretien.find({ vehiculeId })
+    const carnetsExistants = await CarnetEntretien.find({ vehiculeId, garagisteId: req.user._id })
       .populate({
         path: 'devisId',
         select: 'id inspectionDate services totalTTC status'
@@ -41,7 +41,8 @@ export const getCarnetByVehiculeId = async (req, res) => {
       // Récupérer les ordres de travail terminés
       let ordresTermines = await OrdreTravail.find({
         'vehiculedetails.vehiculeId': vehiculeId,
-        status: 'termine'
+        status: 'termine',
+        garagisteId: req.user._id
       }).sort({ dateFinReelle: -1 });
 
       console.log("📋 Ordres trouvés (string):", ordresTermines.length);
@@ -51,7 +52,8 @@ export const getCarnetByVehiculeId = async (req, res) => {
         console.log("🔄 Tentative avec ObjectId...");
         ordresTermines = await OrdreTravail.find({
           'vehiculedetails.vehiculeId': new mongoose.Types.ObjectId(vehiculeId),
-          status: 'termine'
+          status: 'termine',
+          garagisteId: req.user._id
         }).sort({ dateFinReelle: -1 });
 
         console.log("📋 Ordres avec ObjectId:", ordresTermines.length);
@@ -142,7 +144,7 @@ export const getCarnetByVehiculeId = async (req, res) => {
     }
 
     // Récupérer le véhicule
-    const vehicule = await Vehicule.findById(vehiculeId)
+    const vehicule = await Vehicule.findOne({ _id: vehiculeId, garagisteId: req.user._id })
       .populate('proprietaireId', 'nom type telephone');
 
     console.log("🚗 Véhicule récupéré:", vehicule);
@@ -181,7 +183,7 @@ export const Statistiques = async (req, res) => {
   try {
     const { vehiculeId } = req.params;
 
-    const carnets = await CarnetEntretien.find({ vehiculeId })
+    const carnets = await CarnetEntretien.find({ vehiculeId, garagisteId: req.user._id })
       .sort({ dateCommencement: -1 });
 
     if (carnets.length === 0) {
@@ -230,14 +232,14 @@ export const creerCarnetManuel = async (req, res) => {
     const { vehiculeId, date, taches, cout } = req.body;
 
     // Validation des données
-    if (!vehiculeId || !date || !taches || taches.length === 0 || !cout) {
+    if (!vehiculeId || !date || !taches || taches.length === 0) {
       return res.status(400).json({ 
         error: 'Données manquantes: vehiculeId, date, taches et cout sont requis' 
       });
     }
 
     // Vérifier que le véhicule existe
-    const vehicule = await Vehicule.findById(vehiculeId);
+    const vehicule = await Vehicule.findOne({ _id: vehiculeId, garagisteId: req.user._id });
     if (!vehicule) {
       return res.status(404).json({ error: 'Véhicule non trouvé' });
     }
@@ -248,6 +250,7 @@ export const creerCarnetManuel = async (req, res) => {
       dateCommencement: new Date(date),
       dateFinCompletion: new Date(date), // Même date car c'est un entretien déjà effectué
       typeEntretien: 'maintenance',
+      garagisteId: req.user._id,
       statut: 'termine',
       totalTTC: parseFloat(cout),
       services: taches.map(tache => ({

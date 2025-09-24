@@ -422,9 +422,9 @@ export default function VehiculeManagement() {
     const [visiteValidations, setVisiteValidations] = useState<{ [key: string]: FieldValidation }>({});
     const [rechercheGlobale, setRechercheGlobale] = useState("");
     const [vehiculesFiltres, setVehiculesFiltres] = useState<Vehicule[]>([]);
-      const getAuthToken = () => {
-  return localStorage.getItem('token') || sessionStorage.getItem('token');
-};
+    const getAuthToken = () => {
+      return localStorage.getItem('token') || sessionStorage.getItem('token');
+    };
 
     useEffect(() => {
     if (!rechercheGlobale.trim()) {

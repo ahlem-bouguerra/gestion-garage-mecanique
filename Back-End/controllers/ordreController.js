@@ -458,7 +458,7 @@ export const getOrdresParDevisId = async (req, res) => {
     const { devisId } = req.params;
     
     // Chercher un ordre existant pour ce devis
-    const existingOrdre = await OrdreTravail.findOne({ devisId: devisId });
+    const existingOrdre = await OrdreTravail.findOne({ devisId: devisId ,garagisteId: req.user._id });
     
     if (existingOrdre) {
       return res.json({

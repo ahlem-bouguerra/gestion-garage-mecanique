@@ -36,6 +36,7 @@ export const createDevis = async (req, res) => {
       id: devisId,
       clientId,
       clientName,
+      garagisteId: req.user._id,
       vehicleInfo,
       vehiculeId,
       inspectionDate,
@@ -76,6 +77,7 @@ export const getAllDevis = async (req, res) => {
   try {
     const { status, clientName, dateDebut, dateFin } = req.query;
     const filters = {};
+    filters.garagisteId = req.user._id;
 
     if (status && status !== 'tous') filters.status = status.toLowerCase();
     if (clientName) filters.clientName = { $regex: clientName, $options: 'i' };
@@ -121,10 +123,10 @@ export const getDevisById = async (req, res) => {
     // Vérifier si l'ID ressemble à un ObjectId MongoDB (24 caractères hex)
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
       // C'est un ObjectId MongoDB
-      devis = await Devis.findById(id);
+      devis = await Devis.findById(id).where({ garagisteId: req.user._id });
     } else {
       // C'est un ID personnalisé (DEV001, DEV002, etc.)
-      devis = await Devis.findOne({ id: id });
+      devis = await Devis.findOne({ id: id, garagisteId: req.user._id });
     }
     
     if (!devis) {
@@ -143,7 +145,7 @@ export const getDevisByNum = async (req, res) => {
     const { id } = req.params; // ex: "DEV017"
 
     // 🔎 Recherche du devis via le champ "id" (pas _id)
-    const devis = await Devis.findOne({ id: id });
+    const devis = await Devis.findOne({ id: id, garagisteId: req.user._id });
 
     if (!devis) {
       return res.status(404).json({ error: `Devis avec id ${id} non trouvé` });
@@ -170,7 +172,7 @@ export const updateDevisStatus = async (req, res) => {
     const { status } = req.body;
 
     const updatedDevis = await Devis.findOneAndUpdate(
-      { id },
+      { id, garagisteId: req.user._id }, 
       { status },
       { new: true }
     );
@@ -205,7 +207,7 @@ export const updateDevis = async (req, res) => {
     console.log('📥 Nouvelles données:', req.body);
 
     // Vérifier que le devis existe
-    const existingDevis = await Devis.findOne({ id });
+    const existingDevis = await Devis.findOne({ id, garagisteId: req.user._id });
     if (!existingDevis) {
       return res.status(404).json({
         success: false,
@@ -232,7 +234,7 @@ export const updateDevis = async (req, res) => {
 
     // Mettre à jour le devis
     const updatedDevis = await Devis.findOneAndUpdate(
-      { id },
+      { id, garagisteId: req.user._id },
       {
         clientId,
         clientName,
@@ -283,7 +285,7 @@ export const updateFactureId = async (req, res) => {
     console.log('🔄 Mise à jour devis:', id);
     console.log('📥 Nouvelles données:', updateData);
 
-    const existingDevis = await Devis.findById(id);
+    const existingDevis = await Devis.findById(id).where({ garagisteId: req.user._id });
     if (!existingDevis) {
       return res.status(404).json({ success: false, message: 'Devis non trouvé' });
     }
@@ -306,10 +308,11 @@ export const updateFactureId = async (req, res) => {
       updateData.status = 'brouillon';
     }
 
-    const updatedDevis = await Devis.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true
-    });
+    const updatedDevis = await Devis.findOneAndUpdate(
+      { _id: id, garagisteId: req.user._id }, 
+      updateData, 
+      { new: true, runValidators: true }
+    );
 
     res.json({ success: true, message: 'Devis mis à jour avec succès', data: updatedDevis });
   } catch (error) {
@@ -323,7 +326,7 @@ export const deleteDevis = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const devis = await Devis.findOne({ id });
+    const devis = await Devis.findOne({ id, garagisteId: req.user._id });
     if (!devis) {
       return res.status(404).json({
         success: false,
@@ -338,7 +341,7 @@ export const deleteDevis = async (req, res) => {
       });
     }
 
-    await Devis.findOneAndDelete({ id });
+    await Devis.findOneAndDelete({ id, garagisteId: req.user._id });
 
     res.json({
       success: true,

@@ -1,11 +1,6 @@
 import mongoose from "mongoose";
 
 const serviceSchema = new mongoose.Schema({
-  pieceId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Piece',
-    required: true
-  },
   piece: {
     type: String,
     required: true
@@ -118,6 +113,11 @@ const devisSchema = new mongoose.Schema({
     type: String,
     enum: ['brouillon', 'envoye', 'accepte', 'refuse'],
     default: 'brouillon'
+  },
+  garagisteId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
   }
 }, {
   timestamps: true

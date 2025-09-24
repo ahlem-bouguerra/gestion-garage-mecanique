@@ -168,6 +168,26 @@ clientInfo: {
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+    status: {
+    type: String,
+    enum: ['active', 'cancelled'],
+    default: 'active'
+  },
+    // Référence à l'avoir qui annule cette facture (si applicable)
+  creditNoteId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CreditNote'
+  },
+  // Référence à la facture qui remplace celle-ci (si applicable)
+  replacedByFactureId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Facture'
+  },
+
+  // Date d'annulation
+  cancelledAt: {
+    type: Date
   }
 }, {
   timestamps: true

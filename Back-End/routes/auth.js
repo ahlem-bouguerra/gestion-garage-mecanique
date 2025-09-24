@@ -18,7 +18,7 @@ import {createMecanicien,updateMecanicien,deleteMecanicien,getAllMecaniciens,get
 import {getAllAteliers,getAtelierById,createAtelier,updateAtelier,deleteAtelier}from '../controllers/atelierController.js';
 import {getAllServices,getServiceById,createService,updateService,deleteService}from '../controllers/serviceController.js';
 import {createOrdreTravail,getOrdresTravail,getOrdreTravailById,updateStatusOrdreTravail,demarrerOrdre,terminerOrdre,getStatistiques,supprimerOrdreTravail,getOrdresParDevisId,getOrdresByStatus,getOrdresByAtelier,updateOrdreTravail} from '../controllers/ordreController.js';
-import { CreateFacture, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture } from '../controllers/facturesController.js';
+import { CreateFacture,CreateFactureWithCredit, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture ,getCreditNoteById} from '../controllers/facturesController.js';
 import { getCarnetByVehiculeId ,creerCarnetManuel} from '../controllers/carnetController.js';
 import {getDashboardData} from '../controllers/ChargeAtelier.js';
 import { search } from '../controllers/ChercherGarage.js';
@@ -371,7 +371,7 @@ router.get('/locations/search/:query', enhancedLocationRoutes.searchLocations);
 router.get('/locations/autocomplete', enhancedLocationRoutes.autocomplete);
 
 //creation de client , modif,getbyid, get all , delete 
-router.post("/Creation",  createFicheClient);      
+router.post("/Creation",authMiddleware,createFicheClient);      
 router.get("/GetAll", authMiddleware, getFicheClients); 
 router.get("/GetOne/:_id", authMiddleware, getFicheClientById);         
 router.put("/updateOne/:_id", authMiddleware, updateFicheClient);    
@@ -395,16 +395,16 @@ router.put('/pieces/:id', updatePiece);
 router.delete('/pieces/:id', deletePiece);
 
 
-router.post('/createdevis',createDevis);
-router.get('/Devis',getAllDevis);
-router.get('/Devis/:id',getDevisById);
-router.get('/devis/code/:id', getDevisByNum);
-router.put('/Devis/:id/status',updateDevisStatus);
-router.put('/Devis/:id', updateDevis);
-router.put('/updateId/:id', updateFactureId);
-router.delete('/Devis/:id',deleteDevis);
-router.get("/devis/:devisId/accept", acceptDevis);
-router.get("/devis/:devisId/refuse", refuseDevis);
+router.post('/createdevis',authMiddleware,createDevis);
+router.get('/Devis',authMiddleware,getAllDevis);
+router.get('/Devis/:id',authMiddleware,getDevisById);
+router.get('/devis/code/:id',authMiddleware, getDevisByNum);
+router.put('/Devis/:id/status',authMiddleware,updateDevisStatus);
+router.put('/Devis/:id',authMiddleware, updateDevis);
+router.put('/updateId/:id',authMiddleware, updateFactureId);
+router.delete('/Devis/:id',authMiddleware,deleteDevis);
+router.get("/devis/:devisId/accept",authMiddleware, acceptDevis);
+router.get("/devis/:devisId/refuse",authMiddleware, refuseDevis);
 router.post('/devis/:devisId/send-email',authMiddleware, sendDevisByEmail);
 
 
@@ -441,12 +441,13 @@ router.put('/ordre-travail/:id/terminer', terminerOrdre);
 router.delete('/:id', supprimerOrdreTravail);
 router.put('/modifier/:id',updateOrdreTravail);
 router.get('/statistiques', getStatistiques);
-router.get('/ordre-travail/by-devis/:devisId',getOrdresParDevisId);
+router.get('/ordre-travail/by-devis/:devisId',authMiddleware,getOrdresParDevisId);
 router.get("/ordres/status/:status", getOrdresByStatus);
 router.get("/ordres/atelier/:atelierId", getOrdresByAtelier);
 
 
 router.post('/create/:devisId', CreateFacture);
+router.post('/create-with-credit/:devisId', CreateFactureWithCredit);
 router.get('/getFactures',GetAllFactures);
 router.get('/getFacture/:id',GetFactureById);
 router.get('/factureByDevis/:devisId', getFactureByDevis);
@@ -454,10 +455,11 @@ router.put('/:id/payment',MarquerFacturePayed);
 router.put('/:id',UpdateFacture);
 router.delete('/:id',DeleteFacture);
 router.get('/stats/summary',StaticFacture);
+router.get('/credit-note/:creditNoteId', getCreditNoteById);
 
 
-router.get('/carnet-entretien/vehicule/:vehiculeId',getCarnetByVehiculeId);
-router.post('/creer-manuel', creerCarnetManuel);
+router.get('/carnet-entretien/vehicule/:vehiculeId',authMiddleware,getCarnetByVehiculeId);
+router.post('/creer-manuel',authMiddleware, creerCarnetManuel);
 
 
 router.get('/search', search);

@@ -94,6 +94,11 @@ const carnetEntretienSchema = new mongoose.Schema({
   // Mécanicien/technicien responsable
   technicien: {
     type: String
+  },
+  garagisteId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
   }
   
 }, {

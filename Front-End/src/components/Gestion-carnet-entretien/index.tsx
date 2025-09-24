@@ -99,6 +99,9 @@ const CarnetEntretien: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const vehiculeId = searchParams.get('vehiculeId');
+  const getAuthToken = () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+  };
 
   useEffect(() => {
     if (vehiculeId) {
@@ -114,7 +117,9 @@ const CarnetEntretien: React.FC = () => {
       setLoading(true);
       setError("");
 
-      const response = await axios.get(`${API_BASE_URL}/carnet-entretien/vehicule/${vehiculeId}`);
+      const response = await axios.get(`${API_BASE_URL}/carnet-entretien/vehicule/${vehiculeId}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       setData(response.data);
     } catch (error: any) {
       console.error("Erreur chargement carnet d'entretien:", error);
@@ -153,7 +158,10 @@ const CarnetEntretien: React.FC = () => {
           prix: tache.prix
         })),
         cout: formData.cout
+        }, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
+
 
       // Rafraîchir les données
       await fetchCarnetEntretien(vehiculeId);

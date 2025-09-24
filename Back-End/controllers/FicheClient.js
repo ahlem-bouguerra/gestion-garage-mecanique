@@ -2,10 +2,15 @@ import FicheClient from "../models/FicheClient.js";
 import OrdreTravail from "../models/Ordre.js";
 import { validateTunisianPhone, validatePhoneMiddleware } from '../utils/phoneValidator.js';
 import mongoose from "mongoose";
+
 export const createFicheClient = async (req, res) => {
   try {
     // Vérifier que le garagiste est authentifié
-    if (!req.user || !req.user._id) {
+    if (!req.user) {
+      return res.status(401).json({ error: "Garagiste non authentifié" });
+    }
+    const garagisteId = req.user._id || req.user.userId; // <-- la clé qui existe
+    if (!garagisteId) {
       return res.status(401).json({ error: "Garagiste non authentifié" });
     }
 
@@ -19,7 +24,7 @@ export const createFicheClient = async (req, res) => {
     req.body.telephone = phoneValidation.cleanNumber;
 
     // Associer le garagiste connecté
-    req.body.garagisteId = req.user._id;
+    req.body.garagisteId = garagisteId;
 
     const fiche = new FicheClient(req.body);
     await fiche.save();

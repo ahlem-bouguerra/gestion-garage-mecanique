@@ -2,10 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Eye, Send, Check, X, Car, User, Calendar, FileText, Euro, AlertCircle, Trash2 } from 'lucide-react';
 import axios from 'axios';
-import { redirect } from 'next/dist/server/api-utils';
 import { useRouter } from 'next/navigation';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+
 
 const GarageQuoteSystem = () => {
   const [activeTab, setActiveTab] = useState('list');
@@ -33,25 +32,20 @@ const GarageQuoteSystem = () => {
   const router = useRouter();
   const [filters, setFilters] = useState({status: '',clientName: '',dateDebut: '',dateFin: ''});
   const [newQuote, setNewQuote] = useState({clientName: '',vehicleInfo: '',vehiculeId: '',inspectionDate: '',services: [{ piece: '', quantity: 1, unitPrice: 0 }]});
-  const [pieces, setPieces] = useState([]);
-  const [loadingPieces, setLoadingPieces] = useState(false);
   const [newquote, setNewquote] = useState({services: [{pieceId: '',piece: '',quantity: 1,unitPrice: 0}]});
-  const [showAddPieceModal, setShowAddPieceModal] = useState(false);
-  const [currentServiceIndex, setCurrentServiceIndex] = useState(null);
-  const [newPiece, setNewPiece] = useState({name: '',prix: 0,description: ''});
   const statusColors = {brouillon: 'bg-gray-100 text-gray-800',envoye: 'bg-blue-100 text-blue-800',accepte: 'bg-green-100 text-green-800',refuse: 'bg-red-100 text-red-800'};
   const statusIcons = {brouillon: FileText,envoye: Send,accepte: Check,refuse: X};
   const [currentUser, setCurrentUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
-const [currentPage, setCurrentPage] = useState(1);
-const itemsPerPage = 5;
-
-const indexOfLastDevis = currentPage * itemsPerPage;
-const indexOfFirstDevis = indexOfLastDevis - itemsPerPage;
-const currentDevis = quotes.slice(indexOfFirstDevis, indexOfLastDevis);
-const totalPages = Math.ceil(quotes.length / itemsPerPage);
-
-
+  const indexOfLastDevis = currentPage * itemsPerPage;
+  const indexOfFirstDevis = indexOfLastDevis - itemsPerPage;
+  const currentDevis = quotes.slice(indexOfFirstDevis, indexOfLastDevis);
+  const totalPages = Math.ceil(quotes.length / itemsPerPage);
+  const getAuthToken = () => {
+      return localStorage.getItem('token') || sessionStorage.getItem('token');
+  };
 
 useEffect(() => {
   const fetchUserWithLocation = async () => {
@@ -70,9 +64,6 @@ useEffect(() => {
 
   fetchUserWithLocation();
 }, []);
-
-
-
 
   useEffect(() => {
     const header = document.querySelector('header');
@@ -335,11 +326,6 @@ const printInvoice = async () => {
   }
 };
 
-
-
-
-
-  // 🔧 2. FONCTION POUR GÉRER LES CHANGEMENTS DE FILTRES
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({
       ...prev,
@@ -347,7 +333,6 @@ const printInvoice = async () => {
     }));
   };
 
-  // 🔧 3. FONCTION POUR RÉINITIALISER LES FILTRES
   const resetFilters = () => {
     setFilters({
       status: '',
@@ -360,9 +345,7 @@ const printInvoice = async () => {
   };
 
 const applyFilters = () => {
-  // Construire l'objet de filtres pour l'API
   const apiFilters = {};
-
   if (filters.status && filters.status !== 'Tous') {
     apiFilters.status = filters.status.toLowerCase();
   }
@@ -385,8 +368,6 @@ const applyFilters = () => {
   console.log('🔍 Filtres appliqués:', apiFilters);
   loadDevisWithFactures(apiFilters);
 };
-
-
 
   const calculateTotal = (services, maindoeuvre = 0) => {
     const totalServicesHT = services.reduce((sum, service) => {
@@ -463,7 +444,7 @@ const applyFilters = () => {
         return;
       }
 
-      if (newQuote.services.some(s => !s.pieceId || s.quantity <= 0 || s.unitPrice < 0)) {
+      if (newQuote.services.some(s => !s.piece || s.quantity <= 0 || s.unitPrice < 0)){
         showError('Veuillez vérifier les services (pièces, quantités, prix)');
         return;
       }
@@ -497,7 +478,7 @@ const applyFilters = () => {
         clientName: '',
         vehicleInfo: '',
         inspectionDate: '',
-        services: [{ pieceId: '', piece: '', quantity: 1, unitPrice: 0 }]
+        services: [{ piece: '', quantity: 1, unitPrice: 0 }]
       });
       setSelectedClientId('');
       setSelectedVehiculeId('');
@@ -604,7 +585,9 @@ const applyFilters = () => {
 
   const fetchClients = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/clients/noms');
+      const response = await fetch('http://localhost:5000/api/clients/noms', {
+  headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+});
       const data = await response.json();
       // Puisque l'API retourne directement le tableau, pas besoin de data.data
       setClients(data);
@@ -623,7 +606,9 @@ const applyFilters = () => {
 
     setLoadingVehicules(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/vehicules/proprietaire/${clientId}`);
+      const response = await fetch(`http://localhost:5000/api/vehicules/proprietaire/${clientId}`, {
+  headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+});
 
       if (!response.ok) {
         throw new Error(`Erreur ${response.status}: ${response.statusText}`);
@@ -639,28 +624,6 @@ const applyFilters = () => {
       // Optionnel: afficher une notification d'erreur à l'utilisateur
     } finally {
       setLoadingVehicules(false);
-    }
-  };
-
-  const loadPieces = async () => {
-    setLoadingPieces(true);
-    try {
-      const response = await fetch('http://localhost:5000/api/pieces');
-
-      if (!response.ok) {
-        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
-      }
-
-      const piecesData = await response.json();
-      setPieces(piecesData);
-
-      console.log(`✅ ${piecesData.length} pièces chargées`);
-    } catch (error) {
-      console.error('❌ Erreur lors du chargement des pièces:', error);
-      setPieces([]);
-      // Optionnel: afficher une notification d'erreur
-    } finally {
-      setLoadingPieces(false);
     }
   };
 
@@ -698,24 +661,6 @@ const applyFilters = () => {
     });
   };
 
-  // Fonction spéciale pour gérer le changement de pièce
-  const handlePieceChange = (index, pieceId) => {
-    const selectedPiece = pieces.find(p => p._id === pieceId);
-
-    const updatedServices = [...newQuote.services];
-    updatedServices[index] = {
-      ...updatedServices[index],
-      pieceId: pieceId,
-      piece: selectedPiece ? selectedPiece.name : '',
-      unitPrice: selectedPiece ? selectedPiece.prix : 0
-    };
-
-    setNewQuote({
-      ...newQuote,
-      services: updatedServices
-    });
-  };
-
   // Fonction pour supprimer un service
   const removeService = (index) => {
     const updatedServices = newQuote.services.filter((_, i) => i !== index);
@@ -732,7 +677,6 @@ const applyFilters = () => {
       services: [
         ...newQuote.services,
         {
-          pieceId: '',
           piece: '',
           quantity: 1,
           unitPrice: 0
@@ -742,52 +686,17 @@ const applyFilters = () => {
   };
 
 
-  const createNewPiece = async () => {
-    try {
-      if (!newPiece.name.trim()) {
-        showError('Le nom de la pièce est obligatoire');
-        return;
-      }
-
-      if (newPiece.prix < 0) {
-        showError('Le prix ne peut pas être négatif');
-        return;
-      }
-
-      const response = await axios.post('http://localhost:5000/api/pieces', newPiece);
-      const createdPiece = response.data;
-
-      // Ajouter la nouvelle pièce à la liste
-      setPieces([...pieces, createdPiece]);
-
-      // Sélectionner automatiquement la nouvelle pièce dans le service
-      if (currentServiceIndex !== null) {
-        handlePieceChange(currentServiceIndex, createdPiece._id);
-      }
-
-      // Reset et fermer le modal
-      setNewPiece({ name: '', prix: 0, description: '' });
-      setShowAddPieceModal(false);
-      setCurrentServiceIndex(null);
-
-      showSuccess('Pièce créée avec succès !');
-
-    } catch (error) {
-      console.error('Erreur lors de la création de la pièce:', error);
-      showError(error.response?.data?.message || 'Erreur lors de la création de la pièce');
-    }
-  };
-
   const devisApi = {
     create: async (devisData, token) => {
       try {
+        const token = localStorage.getItem("token");
         const response = await axios.post(
           "http://localhost:5000/api/createdevis",
           devisData,
           {
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`, // ✅ IMPORTANT
+              "Authorization": `Bearer ${token}`,
             },
           }
         );
@@ -803,7 +712,10 @@ const applyFilters = () => {
 
     getAll: async (filters = {}) => {
       try {
-        const response = await axios.get("http://localhost:5000/api/Devis", { params: filters });
+        const response = await axios.get("http://localhost:5000/api/Devis", { 
+          params: filters,
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        });
         return response.data;
       } catch (error) {
         throw new Error(error.response?.data?.message || "Erreur lors de la récupération des devis");
@@ -812,7 +724,10 @@ const applyFilters = () => {
 
     updateStatus: async (devisId, status) => {
       try {
-        const response = await axios.put(`http://localhost:5000/api/Devis/${devisId}/status`, { status });
+        const response = await axios.put(`http://localhost:5000/api/Devis/${devisId}/status`, 
+          { status },
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        );
         return response.data;
       } catch (error) {
         throw new Error(error.response?.data?.message || "Erreur lors du changement de statut");
@@ -820,7 +735,10 @@ const applyFilters = () => {
     },
     update: async (devisId, devisData) => {
       try {
-        const response = await axios.put(`http://localhost:5000/api/Devis/${devisId}`, devisData);
+        const response = await axios.put(`http://localhost:5000/api/Devis/${devisId}`, 
+          devisData,
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        );
         return response.data;
       } catch (error) {
         throw new Error(error.response?.data?.message || "Erreur lors de la mise à jour du devis");
@@ -829,7 +747,9 @@ const applyFilters = () => {
 
     delete: async (devisId) => {
       try {
-        const response = await axios.delete(`http://localhost:5000/api/Devis/${devisId}`);
+        const response = await axios.delete(`http://localhost:5000/api/Devis/${devisId}`,
+  { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+);
         return response.data;
       } catch (error) {
         throw new Error(error.response?.data?.message || "Erreur lors de la suppression");
@@ -854,7 +774,6 @@ const applyFilters = () => {
       vehicleInfo: quote.vehicleInfo,
       inspectionDate: quote.inspectionDate,
       services: quote.services.map(service => ({
-        pieceId: service.pieceId || '',
         piece: service.piece,
         quantity: service.quantity,
         unitPrice: service.unitPrice,
@@ -888,7 +807,8 @@ const applyFilters = () => {
   const createWorkOrder = async (quote) => {
     try {
       // Vérifier si un ordre existe déjà pour ce devis
-      const response = await axios.get(`http://localhost:5000/api/ordre-travail/by-devis/${quote.id}`);
+      const response = await axios.get(`http://localhost:5000/api/ordre-travail/by-devis/${quote.id}`,
+         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
 
       if (response.data.exists) {
         // Ordre existe déjà - rediriger vers les détails
@@ -908,20 +828,15 @@ const applyFilters = () => {
   // Ajouter après les autres useState
   useEffect(() => {
     fetchClients();
-    loadPieces();
     loadDevisWithFactures();
 
   }, []);
 
-  const openAddPieceModal = (serviceIndex) => {
-    setCurrentServiceIndex(serviceIndex);
-    setShowAddPieceModal(true);
-  };
-
 
   const checkFactureExists = async (devisId) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/devis/${devisId}`);
+      const response = await axios.get(`http://localhost:5000/api/devis/${devisId}` ,
+         {headers: { Authorization: `Bearer ${getAuthToken()}` }});
       return response.data.success ? response.data.data : null;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -934,117 +849,237 @@ const applyFilters = () => {
 
 
 
-  // 3. Fonction pour créer une facture à partir d'un devis
-  const createFactureFromDevis = async (devis) => {
-    try {
-      setLoading(true);
+const createFactureFromDevis = async (devis) => {
+  try {
+    setLoading(true);
+    
+    const devisId = devis._id || devis.id;
+    console.log('🔍 Création facture pour devis:', devisId);
 
-      // Vérifier d'abord si une facture existe déjà
-      const existingFacture = await checkFactureExists(devis._id);
+    // Vérifier si une facture active existe déjà
+    const existingFacture = await checkActiveFactureExists(devisId);
 
-      if (existingFacture) {
+    if (existingFacture) {
+      // Vérifier si le devis a été modifié
+      const isDevisModified = checkIfDevisModified(devis, existingFacture);
+
+      if (isDevisModified) {
+        // Proposer les options à l'utilisateur
+        const userChoice = await showImprovedFactureModal(existingFacture, devis);
+        
+        switch (userChoice) {
+          case 'view_existing':
+            setSelectedFacture(existingFacture);
+            setShowFactureModal(true);
+            showSuccess('Facture existante affichée');
+            return;
+            
+          case 'replace_with_credit':
+            await replaceFactureWithCredit(devis, existingFacture);
+            return;
+            
+          case 'cancel':
+            return;
+        }
+      } else {
+        // Pas de modification - afficher la facture existante
         setSelectedFacture(existingFacture);
         setShowFactureModal(true);
-        showSuccess('Facture déjà existante pour ce devis');
+        showSuccess('Facture existante affichée');
         return;
       }
+    } else {
+      // Créer nouvelle facture (première fois)
+      await createNewFacture(devis);
+    }
 
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        `http://localhost:5000/api/create/${devis._id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+  } catch (error) {
+    console.error('❌ Erreur:', error);
+    showError(error.response?.data?.message || 'Erreur lors de la gestion de facture');
+  } finally {
+    setLoading(false);
+  }
+};
+const checkIfDevisModified = (devis, facture) => {
+  if (!devis.updatedAt || !facture.createdAt) return false;
+  
+  const devisModifiedDate = new Date(devis.updatedAt);
+  const factureCreatedDate = new Date(facture.createdAt);
+  
+  return devisModifiedDate > factureCreatedDate;
+};
+
+const showImprovedFactureModal = (existingFacture, devis) => {
+  return new Promise((resolve) => {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+      <div class="bg-white rounded-lg shadow-xl max-w-lg w-full m-4 p-6">
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Facture existante trouvée</h3>
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p class="text-sm text-blue-800 mb-2">
+              <strong>Facture N°:</strong> ${existingFacture.numeroFacture}<br>
+              <strong>Montant:</strong> ${existingFacture.totalTTC?.toFixed(3) || '0.000'} DT<br>
+              <strong>Date:</strong> ${new Date(existingFacture.createdAt).toLocaleDateString('fr-FR')}
+            </p>
+            <div class="bg-orange-100 border border-orange-300 rounded p-3 mt-3">
+              <p class="text-xs text-orange-700">
+                ⚠️ <strong>Attention:</strong> Le devis a été modifié après la création de cette facture.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="space-y-3 mb-6">
+          <button data-action="view_existing" class="modal-btn w-full bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors text-left">
+            <div class="font-medium">📄 Consulter la facture actuelle</div>
+            <div class="text-sm opacity-90">Afficher la facture sans modification</div>
+          </button>
+          
+          <button data-action="replace_with_credit" class="modal-btn w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors text-left">
+            <div class="font-medium">✅ Remplacer par nouvelle facture</div>
+            <div class="text-sm opacity-90">Crée un avoir d'annulation + nouvelle facture (procédure légale)</div>
+          </button>
+          
+          <button data-action="cancel" class="modal-btn w-full bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition-colors">
+            ❌ Annuler
+          </button>
+        </div>
+        
+        <div class="bg-green-50 border border-green-200 p-4 rounded-lg">
+          <div class="text-xs text-green-700">
+            <p class="font-semibold mb-2">💡 Procédure recommandée:</p>
+            <ul class="list-disc list-inside space-y-1">
+              <li>Un avoir d'annulation annule l'ancienne facture</li>
+              <li>Une nouvelle facture est créée avec les données actuelles</li>
+              <li>Traçabilité complète et conformité légale garantie</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    const cleanup = () => {
+      if (document.body.contains(modal)) {
+        document.body.removeChild(modal);
+      }
+    };
+    
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        cleanup();
+        resolve('cancel');
+        return;
+      }
+      
+      const button = e.target.closest('.modal-btn');
+      if (button) {
+        const action = button.getAttribute('data-action');
+        cleanup();
+        resolve(action);
+      }
+    });
+  });
+};
+
+// ✅ Fonction pour remplacer une facture avec avoir (utilise votre endpoint existant)
+const replaceFactureWithCredit = async (devis, oldFacture) => {
+  try {
+    const token = localStorage.getItem("token");
+    
+    // ✅ Utilise votre endpoint existant avec createCreditNote: true
+    const response = await axios.post(
+      `http://localhost:5000/api/create-with-credit/${devis._id || devis.id}`,
+      {
+        createCreditNote: true // ✅ Force la création d'avoir
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.data.success) {
+      const { facture: newFacture, creditNote } = response.data;
+      
+      setSelectedFacture(newFacture);
+      setShowFactureModal(true);
+      
+      showSuccess(
+        `✅ Remplacement effectué ! Avoir N°${creditNote.creditNumber} créé, nouvelle facture N°${newFacture.numeroFacture} générée.`
       );
 
-      if (response.data.success) {
-        const factureData = response.data.facture;
-        const factureId = factureData._id || factureData.id;
-
-        try {
-          await axios.put(`http://localhost:5000/api/updateId/${devis._id}`, {
-            factureId: factureId
-          });
-          console.log('Devis mis à jour avec factureId:', factureId);
-        } catch (error) {
-          console.error('Erreur mise à jour devis:', error);
-        }
-
-        setSelectedFacture(factureData);
-        setShowFactureModal(true);
-        showSuccess('Facture créée avec succès !');
-
-
-        // Mettre à jour l'état local avec l'ID de la facture
-        setFactureExists(prev => ({
-          ...prev,
-          [devis.id]: factureData  // ✅ Stocke la facture avec son ID
-        }));
-
-        console.log('ID de la facture créée:', factureData.factureId); // Pour debug
-      }
-    } catch (error) {
-      console.error('Erreur lors de la création de facture:', error);
-      showError(error.response?.data?.message || 'Erreur lors de la création de facture');
-    } finally {
-      setLoading(false);
+      // Mettre à jour l'état local
+      setFactureExists(prev => ({
+        ...prev,
+        [devis.id]: newFacture
+      }));
     }
-  };
+  } catch (error) {
+    console.error('❌ Erreur:', error);
+    showError(error.response?.data?.message || 'Erreur lors du remplacement de la facture');
+  }
+};
 
-  // Fonction pour voir/gérer une facture existante
-  const viewFacture = async (devisId) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/factureByDevis/${devisId}`);
-
-      if (response.data) {
-        const factureWithId = {
-          ...response.data,
-          factureId: response.data._id || response.data.id  // ✅ Ajoute l'ID
-        };
-
-        setSelectedFacture(factureWithId);
-        setShowFactureModal(true);
-
-        console.log('ID de la facture existante:', factureWithId.factureId); // Pour debug
+// ✅ Créer une nouvelle facture (première fois) - utilise votre endpoint simple
+const createNewFacture = async (devis) => {
+  try {
+    const token = localStorage.getItem("token");
+    
+    // ✅ Utilise l'endpoint simple pour première création
+    const response = await axios.post(
+      `http://localhost:5000/api/create/${devis._id || devis.id}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       }
-    } catch (error) {
-      if (error.response?.status === 404) {
-        showError('Aucune facture trouvée pour ce devis');
-      } else {
-        showError('Erreur lors de la récupération de la facture');
-      }
+    );
+
+    if (response.data.success) {
+      const newFacture = response.data.facture;
+      
+      setSelectedFacture(newFacture);
+      setShowFactureModal(true);
+      
+      showSuccess(`✅ Facture créée avec succès (N°${newFacture.numeroFacture}) !`);
+
+      setFactureExists(prev => ({
+        ...prev,
+        [devis.id]: newFacture
+      }));
     }
-  };
+  } catch (error) {
+    console.error('❌ Erreur:', error);
+    showError(error.response?.data?.message || 'Erreur lors de la création de facture');
+  }
+};
 
-
-  // 5. Fonction pour marquer une facture comme payée
-  const markFactureAsPaid = async (factureId, paymentData) => {
-    try {
-      setLoading(true);
-      const response = await axios.put(
-        `http://localhost:5000/api/${factureId}/payment`,
-        paymentData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.data.success) {
-        setSelectedFacture(response.data.facture);
-        showSuccess('Paiement enregistré avec succès');
-      }
-    } catch (error) {
-      showError('Erreur lors de l\'enregistrement du paiement');
-    } finally {
-      setLoading(false);
+// ✅ Fonction pour vérifier facture active (exclut les factures annulées)
+const checkActiveFactureExists = async (devisId) => {
+  try {
+    const response = await axios.get(`http://localhost:5000/api/factureByDevis/${devisId}`, {
+      headers: { Authorization: `Bearer ${getAuthToken()}` }
+    });
+    
+    // Vérifier que la facture est active (pas annulée)
+    const facture = response.data;
+    return facture && facture.status !== 'cancelled' ? facture : null;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return null;
     }
-  };
+    console.error('Erreur vérification facture:', error);
+    return null;
+  }
+};
 
 
 
@@ -1601,126 +1636,18 @@ const applyFilters = () => {
                       {/* Sélecteur de pièce */}
 
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Pièce *
-                        </label>
-                        <div className="flex space-x-2">
-                          <select
-                            value={service.pieceId}
-                            onChange={(e) => handlePieceChange(index, e.target.value)}
-                            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            disabled={loadingPieces}
-                          >
-                            <option value="">
-                              {loadingPieces ? "Chargement des pièces..." : "-- Sélectionner une pièce --"}
-                            </option>
-                            {pieces.map((piece) => (
-                              <option key={piece._id} value={piece._id}>
-                                {piece.name}
-                              </option>
-                            ))}
-                          </select>
-
-                          {/* Bouton pour ajouter une nouvelle pièce */}
-                          <button
-                            type="button"
-                            onClick={() => openAddPieceModal(index)}
-                            className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-1"
-                            title="Ajouter une nouvelle pièce"
-                          >
-                            <Plus className="h-4 w-4" />
-                            <span className="hidden sm:inline">Nouvelle</span>
-                          </button>
-                        </div>
-
-                        {/* Indicateur de chargement pour les pièces */}
-                        {loadingPieces && (
-                          <div className="mt-1 text-sm text-blue-600 flex items-center">
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Chargement...
-                          </div>
-                        )}
-                      </div>
-
-
-                      {/* Modal pour ajouter une nouvelle pièce */}
-                      {showAddPieceModal && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                          <div className="bg-white rounded-lg shadow-xl max-w-md w-full m-4">
-                            <div className="p-6 border-b border-gray-200">
-                              <div className="flex justify-between items-center">
-                                <h3 className="text-lg font-medium text-gray-900">Ajouter une nouvelle pièce</h3>
-                                <button
-                                  onClick={() => {
-                                    setShowAddPieceModal(false);
-                                    setCurrentServiceIndex(null);
-                                    setNewPiece({ name: '', prix: 0, description: '' });
-                                  }}
-                                  className="text-gray-500 hover:text-gray-700"
-                                >
-                                  <X className="h-5 w-5" />
-                                </button>
-                              </div>
-                            </div>
-
-                            <div className="p-6 space-y-4">
-                              {/* Nom de la pièce */}
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                  Nom de la pièce *
-                                </label>
-                                <input
-                                  type="text"
-                                  value={newPiece.name}
-                                  onChange={(e) => setNewPiece({ ...newPiece, name: e.target.value })}
-                                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  placeholder="Ex: Filtre à huile, Plaquette de frein..."
-                                />
-                              </div>
-
-                              {/* Prix */}
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                  Prix (Dinnar) *
-                                </label>
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  value={newPiece.prix}
-                                  onChange={(e) => setNewPiece({ ...newPiece, prix: parseFloat(e.target.value) || 0 })}
-                                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  placeholder="0.00"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
-                              <button
-                                onClick={() => {
-                                  setShowAddPieceModal(false);
-                                  setCurrentServiceIndex(null);
-                                  setNewPiece({ name: '', prix: 0, description: '' });
-                                }}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
-                              >
-                                Annuler
-                              </button>
-                              <button
-                                onClick={createNewPiece}
-                                className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
-                              >
-                                <Plus className="h-4 w-4" />
-                                <span>Créer la pièce</span>
-                              </button>
-                            </div>
-
-                          </div>
-                        </div>
-                      )}
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Pièce *
+  </label>
+  <input
+    type="text"
+    value={service.piece}
+    onChange={(e) => updateService(index, 'piece', e.target.value)}
+    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    placeholder="Nom de la pièce ou service"
+    required
+  />
+</div>
 
                       {/* Quantité */}
                       <div>
