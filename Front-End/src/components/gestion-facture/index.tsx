@@ -125,8 +125,8 @@ const GestionFactures: React.FC = () => {
 
   const fetchFactures = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/getFactures');
-      const data = await response.json();
+      const response = await axios.get('http://localhost:5000/api/getFactures');
+      const data = await response.data;
       if (data.success) {
         setFactures(data.data);
         setFilteredFactures(data.data);
@@ -140,8 +140,8 @@ const GestionFactures: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/stats/summary');
-      const data = await response.json();
+      const response = await axios.get('http://localhost:5000/api/stats/summary');
+      const data = await response.data;
       if (data.success) {
         setStats(data.data);
       }
@@ -152,8 +152,8 @@ const GestionFactures: React.FC = () => {
   const fetchFactureDetails = async (factureId: string) => {
     setLoadingDetails(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/getFacture/${factureId}`);
-      const data = await response.json();
+      const response = await axios.get(`http://localhost:5000/api/getFacture/${factureId}`);
+      const data = await response.data;
       if (data.success) {
         setFactureDetails(data.data);
         setShowDetailsModal(true);
@@ -167,8 +167,8 @@ const GestionFactures: React.FC = () => {
 
   const fetchCreditNoteDetails = async (creditNoteId) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/credit-note/${creditNoteId}`);
-    const data = await response.json();
+    const response = await axios.get(`http://localhost:5000/api/credit-note/${creditNoteId}`);
+    const data = await response.data;
     if (data.success) {
       setCreditNoteDetails(data.data);
       setShowCreditNoteModal(true);
@@ -220,20 +220,21 @@ const GestionFactures: React.FC = () => {
 
   const handlePayment = async (factureId: string, paymentData: any) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/${factureId}/payment`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentData)
-      });
+      const response = await axios.put(
+        `http://localhost:5000/api/${factureId}/payment`,
+        paymentData, // Axios gère automatiquement JSON.stringify
+        {
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
 
-      const data = await response.json();
-      if (data.success) {
+      if (response.data.success) {
         fetchFactures();
         fetchStats();
         setShowPaymentModal(false);
       }
-    } catch (error) {
-      console.error('Erreur lors du paiement:', error);
+    } catch (error: any) {
+      console.error('Erreur lors du paiement:', error.response?.data || error.message);
     }
   };
 
@@ -670,7 +671,7 @@ const GestionFactures: React.FC = () => {
                       {currentUser?.username || "Nom du garage"}
                     </h1>
                     <div className="mt-2 text-gray-600">
-                      <p>{currentUser?.governorateId.name}-{currentUser?.cityId.name}-{currentUser?.streetAddress || "Adresse non renseignée"}</p>
+                      <p>{currentUser?.governorateName}-{currentUser?.cityName}-{currentUser?.streetAddress || "Adresse non renseignée"}</p>
                       <p>Tél: {currentUser?.phone || "Non renseigné"}</p>
                       <p>Email: {currentUser?.email || "Non renseigné"}</p>
                     </div>
