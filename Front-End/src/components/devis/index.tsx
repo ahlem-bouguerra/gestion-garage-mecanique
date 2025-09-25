@@ -808,7 +808,7 @@ const applyFilters = () => {
     try {
       // Vérifier si un ordre existe déjà pour ce devis
       const response = await axios.get(`http://localhost:5000/api/ordre-travail/by-devis/${quote.id}`,
-         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+         { headers: { Authorization: `Bearer ${getAuthToken()}` }});
 
       if (response.data.exists) {
         // Ordre existe déjà - rediriger vers les détails

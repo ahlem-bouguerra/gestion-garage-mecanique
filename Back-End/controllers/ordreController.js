@@ -20,7 +20,10 @@ export const createOrdreTravail = async (req, res) => {
     }
 
     // Vérifier que le devis existe
-    const devis = await Devis.findOne({ id: devisId });
+    const devis = await Devis.findOne({ 
+      id: devisId,
+      garagisteId: req.user._id 
+    });
     if (!devis) {
       return res.status(404).json({
         success: false,
@@ -29,7 +32,10 @@ export const createOrdreTravail = async (req, res) => {
     }
 
     // Vérifier si un ordre existe déjà pour ce devis
-    const existingOrdre = await OrdreTravail.findOne({ devisId });
+    const existingOrdre = await OrdreTravail.findOne({ 
+      devisId,
+      garagisteId: req.user._id 
+    });
     if (existingOrdre) {
       return res.status(400).json({
         success: false,
@@ -95,6 +101,7 @@ export const createOrdreTravail = async (req, res) => {
     // Créer l'ordre de travail avec le numéro généré
     const ordreTravail = new OrdreTravail({
       devisId: devis.id,
+      garagisteId: req.user._id,
       clientInfo: {
         nom: devis.clientName,
         ClientId : devis.clientId,
@@ -119,6 +126,7 @@ export const createOrdreTravail = async (req, res) => {
     });
 
     const ordreSauve = await ordreTravail.save();
+    console.log("📥 Données reçues pour ordre de travail:", ordreTravail);
 
     // Populer les références pour la réponse
     await ordreSauve.populate([
@@ -158,7 +166,9 @@ export const getOrdresTravail = async (req, res) => {
     } = req.query;
 
     // Construction du filtre
-    const filter = {};
+    const filter = {
+      garagisteId: req.user._id  
+    };
     
     // ✅ AJOUT : Exclure les ordres supprimés
     filter.status = { $ne: 'supprime' };
@@ -229,7 +239,10 @@ export const getOrdreTravailById = async (req, res) => {
     
     console.log('Recherche ordre avec ID:', id); // Debug
     
-    const ordre = await OrdreTravail.findById(id)
+    const ordre = await OrdreTravail.findOne({
+      _id: id,
+      garagisteId: req.user._id
+    })
       .populate('devisId', 'id clientName vehicleInfo inspectionDate services')
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name description')
@@ -274,8 +287,11 @@ export const updateStatusOrdreTravail = async (req, res) => {
       });
     }
 
-    const ordre = await OrdreTravail.findByIdAndUpdate(
-      id,
+    const ordre = await OrdreTravail.findOneAndUpdate(
+      { 
+        _id: id,
+        garagisteId: req.user._id
+      },
       { 
         status, 
         updatedBy: req.user?.id,
@@ -311,7 +327,7 @@ export const demarrerOrdre = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const ordre = await OrdreTravail.findById(id);
+    const ordre = await OrdreTravail.findOne({_id: id,garagisteId: req.user._id})
     if (!ordre) {
       return res.status(404).json({
         success: false,
@@ -344,7 +360,10 @@ export const terminerOrdre = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const ordre = await OrdreTravail.findById(id);
+    const ordre = await OrdreTravail.findOne({
+      _id: id,
+      garagisteId: req.user._id
+    });
     if (!ordre) {
       return res.status(404).json({
         success: false,
@@ -378,11 +397,16 @@ export const getStatistiques = async (req, res) => {
   try {
     const { atelierId } = req.query;
 
-    const stats = await OrdreTravail.getStatistiques(atelierId);
+    const stats = await OrdreTravail.getStatistiques(atelierId, req.user._id);
 
     // Statistiques additionnelles
     const statsParPriorite = await OrdreTravail.aggregate([
-      ...(atelierId ? [{ $match: { atelierId: new mongoose.Types.ObjectId(atelierId) } }] : []),
+      {
+        $match: {
+          garagisteId: new mongoose.Types.ObjectId(req.user._id),
+          ...(atelierId && { atelierId: new mongoose.Types.ObjectId(atelierId) })
+        }
+      },
       {
         $group: {
           _id: '$priorite',
@@ -411,12 +435,14 @@ export const getStatistiques = async (req, res) => {
   }
 };
 
-
 export const supprimerOrdreTravail = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const ordre = await OrdreTravail.findById(id);
+    const ordre = await OrdreTravail.findOne({
+      _id: id,
+      garagisteId: req.user._id
+    });
     if (!ordre) {
       return res.status(404).json({
         success: false,
@@ -451,14 +477,15 @@ export const supprimerOrdreTravail = async (req, res) => {
   }
 };
 
-
-
 export const getOrdresParDevisId = async (req, res) => {
   try {
     const { devisId } = req.params;
     
     // Chercher un ordre existant pour ce devis
-    const existingOrdre = await OrdreTravail.findOne({ devisId: devisId ,garagisteId: req.user._id });
+    const existingOrdre = await OrdreTravail.findOne({ 
+      devisId: devisId,
+      garagisteId: req.user._id 
+    });
     
     if (existingOrdre) {
       return res.json({
@@ -483,8 +510,15 @@ export const getOrdresByStatus = async (req, res) => {
     // ✅ AJOUT : Si on cherche des ordres supprimés explicitement, les inclure
     // Sinon, les exclure toujours
     const filter = status === 'supprime' 
-      ? { status: 'supprime' }
-      : { status: status, $and: [{ status: { $ne: 'supprime' } }] };
+      ? { 
+          status: 'supprime',
+          garagisteId: req.user._id
+        }
+      : { 
+          status: status, 
+          garagisteId: req.user._id,
+          $and: [{ status: { $ne: 'supprime' } }] 
+        };
 
     const options = {
       sort: { createdAt: -1 },
@@ -518,15 +552,15 @@ export const getOrdresByStatus = async (req, res) => {
   }
 };
 
-
 export const getOrdresByAtelier = async (req, res) => {
   try {
     const { atelierId } = req.params;
     const { page = 1, limit = 10 } = req.query;
 
-    // ✅ AJOUT : Exclure les ordres supprimés
+    // ✅ AJOUT : Exclure les ordres supprimés + filtrer par garagiste
     const filter = { 
       atelierId: atelierId,
+      garagisteId: req.user._id,
       status: { $ne: 'supprime' }
     };
 
@@ -576,8 +610,11 @@ export const updateOrdreTravail = async (req, res) => {
     console.log('Modification ordre ID:', id);
     console.log('Données reçues:', req.body);
 
-    // Chercher l'ordre existant
-    const ordre = await OrdreTravail.findById(id);
+    // Chercher l'ordre existant avec filtrage par garagiste
+    const ordre = await OrdreTravail.findOne({
+      _id: id,
+      garagisteId: req.user._id
+    });
     if (!ordre) {
       return res.status(404).json({
         success: false,
@@ -606,7 +643,7 @@ export const updateOrdreTravail = async (req, res) => {
     }
 
     if (atelierId) {
-      const atelier = await Atelier.findById(atelierId);
+    const atelier = await Atelier.findById(atelierId);
       if (!atelier) {
         return res.status(404).json({
           success: false,
@@ -639,7 +676,7 @@ export const updateOrdreTravail = async (req, res) => {
         }
 
         const service = await Service.findById(tache.serviceId);
-        const mecanicien = await Mecanicien.findById(tache.mecanicienId);
+        const mecanicien = await Mecanicien.findById(tache.mecanicienId)
 
         if (!service) {
           return res.status(404).json({
@@ -713,6 +750,68 @@ export const updateOrdreTravail = async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message || 'Erreur serveur lors de la mise à jour'
+    });
+  }
+};
+
+export const getOrdresSupprimes = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Filtrer par garagiste connecté et statut supprimé
+    const filter = {
+      garagisteId: req.user._id,
+      status: 'supprime'
+    };
+
+    console.log("📋 Recherche ordres supprimés:", filter);
+
+    // Compter le total d'ordres supprimés
+    const total = await OrdreTravail.countDocuments(filter);
+
+    // Récupérer les ordres supprimés avec pagination
+    const ordres = await OrdreTravail.find(filter)
+      .populate([
+        { 
+          path: 'atelierId', 
+          select: 'name localisation' 
+        },
+        { 
+          path: 'taches.serviceId', 
+          select: 'name' 
+        },
+        { 
+          path: 'taches.mecanicienId', 
+          select: 'nom prenom' 
+        }
+      ])
+      .sort({ updatedAt: -1 }) // Trier par dernière modification (suppression)
+      .skip(skip)
+      .limit(limit)
+      .lean(); // Pour de meilleures performances
+
+    console.log(`📊 ${ordres.length} ordres supprimés trouvés sur ${total} total`);
+
+    res.status(200).json({
+      success: true,
+      ordres,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: page < Math.ceil(total / limit),
+        hasPrevPage: page > 1
+      }
+    });
+
+  } catch (error) {
+    console.error('Erreur récupération ordres supprimés:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Erreur serveur lors de la récupération des ordres supprimés'
     });
   }
 };

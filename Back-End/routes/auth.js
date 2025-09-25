@@ -16,7 +16,7 @@ import { sendDevisByEmail } from '../utils/sendDevis.js';
 import {createMecanicien,updateMecanicien,deleteMecanicien,getAllMecaniciens,getMecanicienById,getMecaniciensByService} from "../controllers/mecanicienController.js";
 import {getAllAteliers,getAtelierById,createAtelier,updateAtelier,deleteAtelier}from '../controllers/atelierController.js';
 import {getAllServices,getServiceById,createService,updateService,deleteService}from '../controllers/serviceController.js';
-import {createOrdreTravail,getOrdresTravail,getOrdreTravailById,updateStatusOrdreTravail,demarrerOrdre,terminerOrdre,getStatistiques,supprimerOrdreTravail,getOrdresParDevisId,getOrdresByStatus,getOrdresByAtelier,updateOrdreTravail} from '../controllers/ordreController.js';
+import {createOrdreTravail,getOrdresTravail,getOrdreTravailById,updateStatusOrdreTravail,demarrerOrdre,terminerOrdre,getStatistiques,supprimerOrdreTravail,getOrdresParDevisId,getOrdresByStatus,getOrdresSupprimes,getOrdresByAtelier,updateOrdreTravail} from '../controllers/ordreController.js';
 import { CreateFacture,CreateFactureWithCredit, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture ,getCreditNoteById} from '../controllers/facturesController.js';
 import { getCarnetByVehiculeId ,creerCarnetManuel} from '../controllers/carnetController.js';
 import {getDashboardData} from '../controllers/ChargeAtelier.js';
@@ -423,19 +423,20 @@ router.put('/updateService/:id', updateService);
 router.delete('/deleteService/:id', deleteService);
 
 
-router.post('/', createOrdreTravail);
-router.get('/', getOrdresTravail);
-router.get('/getOrdreTravailById/:id', getOrdreTravailById);
+router.post('/createOrdre',authMiddleware, createOrdreTravail);
+router.get('/',authMiddleware, getOrdresTravail);
+router.get('/getOrdreTravailById/:id',authMiddleware, getOrdreTravailById);
 // Routes de mise à jour
-router.put('/:id/status', updateStatusOrdreTravail);
-router.put('/ordre-travail/:id/demarrer', demarrerOrdre);
-router.put('/ordre-travail/:id/terminer', terminerOrdre);
-router.delete('/:id', supprimerOrdreTravail);
-router.put('/modifier/:id',updateOrdreTravail);
-router.get('/statistiques', getStatistiques);
+router.put('/:id/status',authMiddleware, updateStatusOrdreTravail);
+router.put('/ordre-travail/:id/demarrer',authMiddleware, demarrerOrdre);
+router.put('/ordre-travail/:id/terminer',authMiddleware, terminerOrdre);
+router.delete('/:id', authMiddleware,supprimerOrdreTravail);
+router.put('/modifier/:id',authMiddleware,updateOrdreTravail);
+router.get('/statistiques',authMiddleware, getStatistiques);
 router.get('/ordre-travail/by-devis/:devisId',authMiddleware,getOrdresParDevisId);
-router.get("/ordres/status/:status", getOrdresByStatus);
-router.get("/ordres/atelier/:atelierId", getOrdresByAtelier);
+router.get("/ordres/status/:status",authMiddleware, getOrdresByStatus);
+router.get('/ordres/status/supprime', authMiddleware, getOrdresSupprimes);
+router.get("/ordres/atelier/:atelierId", authMiddleware,getOrdresByAtelier);
 
 
 router.post('/create/:devisId',authMiddleware, CreateFacture);

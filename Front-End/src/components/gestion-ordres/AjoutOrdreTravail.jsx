@@ -1,76 +1,21 @@
+"use client"
 import React, { useState, useEffect } from 'react';
-import { User, Car, Calendar, Save, Clock, UserCheck } from 'lucide-react';
-import axios from 'axios';
+import { User, Car, Calendar, Save, UserCheck, Clock } from 'lucide-react';
+import { ordresTravailAPI } from './services/ordresTravailAPI';
 
-interface Atelier {
-  _id: string;
-  name: string;
-  localisation: string;
-}
-
-interface Service {
-  _id: string;
-  name: string;
-}
-
-interface Mecanicien {
-  _id: string;
-  nom: string;
-}
-
-interface Tache {
-  id: number;
-  description: string;
-  quantite: number;
-  serviceId: string;
-  serviceNom?: string;
-  mecanicienId: string;
-  mecanicienNom?: string;
-  estimationHeures: number;
-  notes: string;
-}
-
-interface OrdreTravail {
-  devisId: string;
-  dateCommence: string;
-  atelier: string;
-  priorite: 'faible' | 'normale' | 'elevee' | 'urgente';
-  description: string;
-  taches: Tache[];
-}
-
-interface QuoteData {
-  id: string;
-  clientName: string;
-  vehicleInfo: string;
-  inspectionDate: string;
-  services: Array<{
-    piece: string;
-    quantity: number;
-  }>;
-}
-
-interface CreateOrdreFormProps {
-  onSuccess: (message: string) => void;
-  onError: (message: string) => void;
-}
-
-const CreateOrdreForm: React.FC<CreateOrdreFormProps> = ({ onSuccess, onError }) => {
-  const [selectedQuote, setSelectedQuote] = useState('');
-  const [quoteData, setQuoteData] = useState<QuoteData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [services, setServices] = useState<Service[]>([]);
-  const [ateliers, setAteliers] = useState<Atelier[]>([]);
-  const [mecaniciens, setMecaniciens] = useState<Mecanicien[]>([]);
-
-  const prioriteOptions = {
-    'faible': { label: 'Faible', color: 'bg-gray-100 text-gray-800' },
-    'normale': { label: 'Normale', color: 'bg-blue-100 text-blue-800' },
-    'elevee': { label: 'Élevée', color: 'bg-orange-100 text-orange-800' },
-    'urgente': { label: 'Urgente', color: 'bg-red-100 text-red-800' }
-  };
-
-  const [ordreTravail, setOrdreTravail] = useState<OrdreTravail>({
+const AjoutOrdreTravail = ({
+  services,
+  ateliers,
+  mecaniciens,
+  onLoadMecaniciensByService,
+  onOrdreSaved,
+  onError,
+  loading,
+  setLoading
+}) => {
+  const [selectedQuote, setSelectedQuote] = useState(null);
+  const [quoteData, setQuoteData] = useState(null);
+  const [ordreTravail, setOrdreTravail] = useState({
     devisId: '',
     dateCommence: '',
     atelier: '',
@@ -79,57 +24,51 @@ const CreateOrdreForm: React.FC<CreateOrdreFormProps> = ({ onSuccess, onError })
     taches: []
   });
 
-  const loadAteliers = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/getAllAteliers');
-      setAteliers(response.data);
-    } catch (error) {
-      console.error('Erreur chargement ateliers:', error);
-      setAteliers([]);
-    }
+  const prioriteOptions = {
+    'faible': { label: 'Faible', color: 'bg-gray-100 text-gray-800' },
+    'normale': { label: 'Normale', color: 'bg-blue-100 text-blue-800' },
+    'elevee': { label: 'Élevée', color: 'bg-orange-100 text-orange-800' },
+    'urgente': { label: 'Urgente', color: 'bg-red-100 text-red-800' }
   };
 
-  const loadServices = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/getAllServices');
-      setServices(response.data);
-    } catch (error) {
-      console.error('Erreur chargement services:', error);
-      setServices([]);
-    }
-  };
-
-  const loadMecaniciensByService = async (serviceId: string) => {
-    try {
-      if (!serviceId) {
-        setMecaniciens([]);
-        return;
+  useEffect(() => {
+    // Vérifier le localStorage seulement côté client
+    if (typeof window !== 'undefined') {
+      const savedQuote = localStorage.getItem('selectedQuoteForOrder');
+      if (savedQuote) {
+        const quote = JSON.parse(savedQuote);
+        setSelectedQuote(quote.id);
+        loadDevisById(quote.id);
+        localStorage.removeItem('selectedQuoteForOrder');
       }
-      const response = await axios.get(`http://localhost:5000/api/mecaniciens/by-service/${serviceId}`);
-      setMecaniciens(response.data);
-    } catch (error) {
-      console.error('Erreur chargement mécaniciens:', error);
-      setMecaniciens([]);
     }
-  };
+  }, []);
 
-  const loadDevisById = async (devisId: string) => {
+  const loadDevisById = async (devisId) => {
     if (!devisId) return;
 
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:5000/api/devis/code/${devisId}`);
-      const { devis, ordres } = response.data;
+      const response = await ordresTravailAPI.getDevisByCode(devisId);
+      const { devis, ordres } = response;
 
       if (ordres && ordres.length > 0) {
         onError(`Un ordre de travail existe déjà pour le devis ${devis.id} (ex: ${ordres[0].numeroOrdre})`);
         setQuoteData(null);
+        setOrdreTravail({
+          devisId: '',
+          dateCommence: '',
+          atelier: '',
+          priorite: 'normale',
+          description: '',
+          taches: []
+        });
         return;
       }
 
       setQuoteData(devis);
 
-      const tachesFromServices = devis.services.map((service: any, index: number) => ({
+      const tachesFromServices = devis.services.map((service, index) => ({
         id: index + 1,
         description: service.piece,
         quantite: service.quantity || 1,
@@ -148,34 +87,34 @@ const CreateOrdreForm: React.FC<CreateOrdreFormProps> = ({ onSuccess, onError })
         taches: tachesFromServices
       });
 
-    } catch (err: any) {
-      onError(`Erreur lors du chargement du devis: ${err.response?.data?.error || err.message}`);
+    } catch (err) {
+      onError(`Erreur lors du chargement du devis: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const assignServiceToTache = (tacheId: number, serviceId: string) => {
+  const assignServiceToTache = (tacheId, serviceId) => {
     const service = services.find(s => s._id === serviceId);
-    loadMecaniciensByService(serviceId);
+    onLoadMecaniciensByService(serviceId);
 
     setOrdreTravail(prev => ({
       ...prev,
       taches: prev.taches.map(tache =>
         tache.id === tacheId
           ? {
-              ...tache,
-              serviceId: serviceId,
-              serviceNom: service ? service.name : '',
-              mecanicienId: '',
-              mecanicienNom: ''
-            }
+            ...tache,
+            serviceId: serviceId,
+            serviceNom: service ? service.name : '',
+            mecanicienId: '',
+            mecanicienNom: ''
+          }
           : tache
       )
     }));
   };
 
-  const assignMecanicienToTache = (tacheId: number, mecanicienId: string) => {
+  const assignMecanicienToTache = (tacheId, mecanicienId) => {
     const mecanicien = mecaniciens.find(m => m._id === mecanicienId);
 
     setOrdreTravail(prev => ({
@@ -183,10 +122,10 @@ const CreateOrdreForm: React.FC<CreateOrdreFormProps> = ({ onSuccess, onError })
       taches: prev.taches.map(tache =>
         tache.id === tacheId
           ? {
-              ...tache,
-              mecanicienId: mecanicienId,
-              mecanicienNom: mecanicien ? mecanicien.nom : ''
-            }
+            ...tache,
+            mecanicienId: mecanicienId,
+            mecanicienNom: mecanicien ? mecanicien.nom : ''
+          }
           : tache
       )
     }));
@@ -226,29 +165,32 @@ const CreateOrdreForm: React.FC<CreateOrdreFormProps> = ({ onSuccess, onError })
         }))
       };
 
-      const response = await axios.post('http://localhost:5000/api/', ordreData);
+      await ordresTravailAPI.createOrdre(ordreData);
 
-      if (response.data.success) {
-        onSuccess(response.data.message || 'Ordre de travail créé avec succès !');
-        resetForm();
-      } else {
-        throw new Error(response.data.error || 'Erreur lors de la création');
-      }
+      // Reset du formulaire
+      setOrdreTravail({
+        devisId: '',
+        dateCommence: '',
+        atelier: '',
+        priorite: 'normale',
+        description: '',
+        taches: []
+      });
+      setQuoteData(null);
+      setSelectedQuote('');
 
-    } catch (err: any) {
-      let errorMessage = 'Erreur lors de la sauvegarde';
-      if (err.response?.data?.error) {
-        errorMessage = err.response.data.error;
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-      onError(errorMessage);
+      onOrdreSaved();
+
+    } catch (err) {
+      onError(err.message || 'Erreur lors de la sauvegarde');
     } finally {
       setLoading(false);
     }
   };
 
   const resetForm = () => {
+    setQuoteData(null);
+    setSelectedQuote('');
     setOrdreTravail({
       devisId: '',
       dateCommence: '',
@@ -257,26 +199,19 @@ const CreateOrdreForm: React.FC<CreateOrdreFormProps> = ({ onSuccess, onError })
       description: '',
       taches: []
     });
-    setQuoteData(null);
-    setSelectedQuote('');
   };
-
-  useEffect(() => {
-    loadAteliers();
-    loadServices();
-  }, []);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h2 className="text-xl font-semibold text-gray-900 mb-6">Créer un Ordre de Travail</h2>
 
-      {/* Section de recherche de devis */}
+      {/* Section recherche devis */}
       <div className="mb-8 bg-gray-50 rounded-lg p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Rechercher un Devis</h3>
         <div className="flex space-x-4">
           <input
             type="text"
-            value={selectedQuote}
+            value={selectedQuote || ''}
             onChange={(e) => setSelectedQuote(e.target.value)}
             placeholder="Entrez l'ID du devis"
             className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -291,9 +226,9 @@ const CreateOrdreForm: React.FC<CreateOrdreFormProps> = ({ onSuccess, onError })
         </div>
       </div>
 
-      {/* Informations du devis chargé */}
       {quoteData && (
         <>
+          {/* Informations devis */}
           <div className="mb-8 bg-blue-50 rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Informations du Devis</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -321,7 +256,7 @@ const CreateOrdreForm: React.FC<CreateOrdreFormProps> = ({ onSuccess, onError })
             </div>
           </div>
 
-          {/* Paramètres de l'ordre de travail */}
+          {/* Paramètres ordre */}
           <div className="mb-8">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Paramètres de l'Ordre de Travail</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -362,7 +297,7 @@ const CreateOrdreForm: React.FC<CreateOrdreFormProps> = ({ onSuccess, onError })
                 </label>
                 <select
                   value={ordreTravail.priorite}
-                  onChange={(e) => setOrdreTravail(prev => ({ ...prev, priorite: e.target.value as any }))}
+                  onChange={(e) => setOrdreTravail(prev => ({ ...prev, priorite: e.target.value }))}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   {Object.entries(prioriteOptions).map(([key, option]) => (
@@ -387,7 +322,7 @@ const CreateOrdreForm: React.FC<CreateOrdreFormProps> = ({ onSuccess, onError })
             />
           </div>
 
-          {/* Attribution des tâches */}
+          {/* Attribution tâches */}
           <div className="mb-8">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Attribution des Tâches</h3>
             <div className="space-y-4">
@@ -520,4 +455,4 @@ const CreateOrdreForm: React.FC<CreateOrdreFormProps> = ({ onSuccess, onError })
   );
 };
 
-export default CreateOrdreForm;
+export default AjoutOrdreTravail;
