@@ -3,7 +3,7 @@ import Service from '../models/Service.js';
 
 export const getAllServices = async (req, res) => {
   try {
-    const services = await Service.find({});
+    const services = await Service.find({garagisteId: req.user._id});
     console.log("✅ services récupérées:", services.length);
     res.json(services);
   } catch (error) {
@@ -16,7 +16,7 @@ export const getAllServices = async (req, res) => {
 export const getServiceById = async (req, res) => {
   try {
     const { id } = req.params;
-    const service = await Service.findById(id);
+    const service = await Service.findOne({_id:id , garagisteId: req.user._id});
 
     if (!service) {
       return res.status(404).json({ error: 'service non trouvée' });
@@ -38,11 +38,12 @@ export const createService = async (req, res) => {
 
     if (!name || !description ) {
       return res.status(400).json({ 
-        error: 'Les champs nom est obligatoire' 
+        error: 'Les champs nom et description sont obligatoires'
+ 
       });
     }
 
-    const service = new Service({ name ,description,statut});
+    const service = new Service({ name,description,statut,garagisteId: req.user._id});
     await service.save();
 
     console.log("✅ service créée:", service);
@@ -60,8 +61,8 @@ export const updateService = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
-    const serviceModifie = await Service.findByIdAndUpdate(
-      id,
+    const serviceModifie = await Service.findOneAndUpdate(
+      { _id: id, garagisteId: req.user._id },
       updateData,
       { new: true, runValidators: true }
     );
@@ -84,7 +85,7 @@ export const deleteService = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const serviceSupprimee = await Service.findByIdAndDelete(id);
+    const serviceSupprimee = await Service.findOneAndDelete({_id: id, garagisteId: req.user._id });
 
     if (!serviceSupprimee) {
       return res.status(404).json({ error: 'service non trouvée' });

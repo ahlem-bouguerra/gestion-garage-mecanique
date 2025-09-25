@@ -10,6 +10,9 @@ const AtelierManager = () => {
   const [editingAtelier, setEditingAtelier] = useState(null);
   const [formData, setFormData] = useState({ name: '', localisation: '' });
   const [error, setError] = useState('');
+    const getAuthToken = () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+  };
 
   // Configuration de l'API - Ajustez l'URL selon votre backend
   const API_BASE_URL = 'http://localhost:5000/api'; // Modifiez selon votre configuration
@@ -23,7 +26,9 @@ const AtelierManager = () => {
     const fetchAteliers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/getAllAteliers`);
+      const response = await axios.get(`${API_BASE_URL}/getAllAteliers`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       setAteliers(response.data);
     } catch (error) {
       console.error('Erreur lors du chargement des services:', error);
@@ -32,81 +37,78 @@ const AtelierManager = () => {
     }
   };
 
-  // Création d'un nouvel atelier
-  const createAtelier = async (data) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/createAtelier`, {
-        method: 'POST',
+// Création d'un atelier
+const createAtelier = async (data) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/createAtelier`,
+      data,
+      {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAuthToken()}`,
         },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        const newAtelier = await response.json();
-        setAteliers([...ateliers, newAtelier]);
-        return true;
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Erreur lors de la création');
-        return false;
       }
-    } catch (err) {
-      setError('Erreur de connexion au serveur');
-      console.error('Erreur:', err);
-      return false;
-    }
-  };
+    );
 
-  // Mise à jour d'un atelier
-  const updateAtelier = async (id, data) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/updateAtelier/${id}`, {
-        method: 'PUT',
+    const newAtelier = response.data;
+    setAteliers([...ateliers, newAtelier]);
+    return true;
+
+  } catch (err: any) {
+    setError(err.response?.data?.error || 'Erreur lors de la création');
+    console.error('Erreur:', err);
+    return false;
+  }
+};
+
+// Mise à jour d'un atelier
+const updateAtelier = async (id, data) => {
+  try {
+    const response = await axios.put(
+      `${API_BASE_URL}/updateAtelier/${id}`,
+      data,
+      {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAuthToken()}`,
         },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        const updatedAtelier = await response.json();
-        setAteliers(ateliers.map(a => a._id === id ? updatedAtelier : a));
-        return true;
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Erreur lors de la mise à jour');
-        return false;
       }
-    } catch (err) {
-      setError('Erreur de connexion au serveur');
-      console.error('Erreur:', err);
-      return false;
-    }
-  };
+    );
 
-  // Suppression d'un atelier
-  const deleteAtelier = async (id) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet atelier ?')) {
-      return;
-    }
+    const updatedAtelier = response.data;
+    setAteliers(ateliers.map(a => a._id === id ? updatedAtelier : a));
+    return true;
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/deleteAtelier/${id}`, {
-        method: 'DELETE',
-      });
+  } catch (err: any) {
+    setError(err.response?.data?.error || 'Erreur lors de la mise à jour');
+    console.error('Erreur:', err);
+    return false;
+  }
+};
 
-      if (response.ok) {
-        setAteliers(ateliers.filter(a => a._id !== id));
-      } else {
-        setError('Erreur lors de la suppression');
+// Suppression d'un atelier
+const deleteAtelier = async (id) => {
+  if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet atelier ?')) return;
+
+  try {
+    await axios.delete(
+      `${API_BASE_URL}/deleteAtelier/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
       }
-    } catch (err) {
-      setError('Erreur de connexion au serveur');
-      console.error('Erreur:', err);
-    }
-  };
+    );
+
+    setAteliers(ateliers.filter(a => a._id !== id));
+
+  } catch (err: any) {
+    setError(err.response?.data?.error || 'Erreur lors de la suppression');
+    console.error('Erreur:', err);
+  }
+};
+
 
   // Gestion du formulaire
   const handleSubmit = async () => {

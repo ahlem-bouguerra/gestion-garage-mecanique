@@ -22,6 +22,12 @@ const Servicechema = new mongoose.Schema({
     },
     default: "Actif" 
   },
+
+      garagisteId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+      }
 });
 
 

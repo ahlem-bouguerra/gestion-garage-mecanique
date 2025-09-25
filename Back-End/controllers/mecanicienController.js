@@ -15,7 +15,10 @@ export const createMecanicien = async (req, res) => {
     // Normaliser le numéro
     req.body.telephone = phoneValidation.cleanNumber;
     
-    const mecanicien = new Mecanicien(req.body);
+    const mecanicien = new Mecanicien({
+      ...req.body,
+      garagisteId: req.user._id   // ✅ lien avec le garagiste
+    });
     await mecanicien.save();
     res.status(201).json(mecanicien);
   } catch (err) {
@@ -37,7 +40,16 @@ export const updateMecanicien = async (req, res) => {
     }
     
     const { id } = req.params;
-    const mecanicien = await Mecanicien.findByIdAndUpdate(id, req.body, { new: true });
+    const mecanicien = await Mecanicien.findOneAndUpdate(
+      { _id: id, garagisteId: req.user._id },  // ✅ filtrage par garagisteId
+      req.body,                               // champs à mettre à jour
+      { new: true }
+    );
+
+    if (!mecanicien) {
+      return res.status(404).json({ error: 'Mécanicien non trouvé pour ce garagiste' });
+    }
+
     if (!mecanicien) return res.status(404).json({ error: "Mécanicien non trouvé" });
     res.json(mecanicien);
   } catch (err) {
@@ -49,7 +61,7 @@ export const updateMecanicien = async (req, res) => {
 export const deleteMecanicien = async (req, res) => {
   try {
     const { id } = req.params;
-    const mecanicien = await Mecanicien.findByIdAndDelete(id);
+    const mecanicien = await Mecanicien.findOneAndDelete({_id: id, garagisteId: req.user._id });
     if (!mecanicien) return res.status(404).json({ error: "Mécanicien non trouvé" });
     res.json({ message: "Mécanicien supprimé avec succès" });
   } catch (err) {
@@ -60,7 +72,7 @@ export const deleteMecanicien = async (req, res) => {
 // 📌 Récupérer tous les mécaniciens
 export const getAllMecaniciens = async (req, res) => {
   try {
-    const mecaniciens = await Mecanicien.find();
+    const mecaniciens = await Mecanicien.find({ garagisteId: req.user._id });
     res.json(mecaniciens);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -71,7 +83,7 @@ export const getAllMecaniciens = async (req, res) => {
 export const getMecanicienById = async (req, res) => {
   try {
     const { id } = req.params;
-    const mecanicien = await Mecanicien.findById(id);
+    const mecanicien = await Mecanicien.findOne({ id, garagisteId: req.user._id });
     if (!mecanicien) return res.status(404).json({ error: "Mécanicien non trouvé" });
     res.json(mecanicien);
   } catch (err) {
@@ -90,7 +102,8 @@ export const getMecaniciensByService = async (req, res) => {
 
     // recherche dans le tableau "services"
     const mecaniciens = await Mecanicien.find({
-      "services.serviceId": serviceObjectId
+      "services.serviceId": serviceObjectId,
+      garagisteId: req.user._id 
     });
 
     if (!mecaniciens || mecaniciens.length === 0) {

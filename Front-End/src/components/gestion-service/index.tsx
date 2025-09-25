@@ -43,12 +43,17 @@ const ServicesManager = () => {
     statut: 'Actif'
   });
   const API_BASE_URL = 'http://localhost:5000/api';
+  const getAuthToken = () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+  };
 
   // Fetch all services
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/getAllServices`);
+      const response = await axios.get(`${API_BASE_URL}/getAllServices`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       setServices(response.data);
     } catch (error) {
       console.error('Erreur lors du chargement des services:', error);
@@ -60,7 +65,9 @@ const ServicesManager = () => {
   // Create service
   const createService = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/createService`, formData);
+      await axios.post(`${API_BASE_URL}/createService`, formData, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       await fetchServices();
       closeModal();
     } catch (error) {
@@ -77,7 +84,10 @@ const updateService = async () => {
       `${API_BASE_URL}/updateService/${selectedService._id}`,
       formData, // objet JSON classique
       {
-        headers: { "Content-Type": "application/json" }, // très important
+        headers: {
+          "Content-Type": "application/json", // obligatoire pour JSON
+          Authorization: `Bearer ${getAuthToken()}` // ton token
+        }
       }
     );
     await fetchServices();
@@ -93,7 +103,9 @@ const updateService = async () => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce service ?')) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/deleteService/${id}`);
+      await axios.delete(`${API_BASE_URL}/deleteService/${id}` ,{
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       await fetchServices();
     } catch (error) {
       console.error('Erreur lors de la suppression du service:', error);

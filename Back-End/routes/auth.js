@@ -400,27 +400,27 @@ router.get("/devis/:devisId/refuse",authMiddleware, refuseDevis);
 router.post('/devis/:devisId/send-email',authMiddleware, sendDevisByEmail);
 
 
-router.post("/createMecanicien", createMecanicien);     
-router.get("/getAllMecaniciens", getAllMecaniciens);         
-router.get("/getMecanicienById/:id", getMecanicienById);      
-router.put("/updateMecanicien/:id", updateMecanicien);       
-router.delete("/deleteMecanicien/:id", deleteMecanicien);
-router.get('/mecaniciens/by-service/:serviceId', getMecaniciensByService);
+router.post("/createMecanicien",authMiddleware, createMecanicien);     
+router.get("/getAllMecaniciens",authMiddleware, getAllMecaniciens);         
+router.get("/getMecanicienById/:id",authMiddleware, getMecanicienById);      
+router.put("/updateMecanicien/:id",authMiddleware, updateMecanicien);       
+router.delete("/deleteMecanicien/:id",authMiddleware, deleteMecanicien);
+router.get('/mecaniciens/by-service/:serviceId',authMiddleware, getMecaniciensByService);
 
 
 
-router.get('/getAllAteliers', getAllAteliers);
-router.get('/getAtelierById/:id', getAtelierById);
-router.post('/createAtelier', createAtelier);
-router.put('/updateAtelier/:id', updateAtelier);
-router.delete('/deleteAtelier/:id', deleteAtelier);
+router.get('/getAllAteliers',authMiddleware, getAllAteliers);
+router.get('/getAtelierById/:id',authMiddleware, getAtelierById);
+router.post('/createAtelier',authMiddleware, createAtelier);
+router.put('/updateAtelier/:id',authMiddleware, updateAtelier);
+router.delete('/deleteAtelier/:id',authMiddleware, deleteAtelier);
 
 
-router.get('/getAllServices', getAllServices);
-router.get('/getServiceById/:id', getServiceById);
-router.post('/createService', createService);
-router.put('/updateService/:id', updateService);
-router.delete('/deleteService/:id', deleteService);
+router.get('/getAllServices',authMiddleware, getAllServices);
+router.get('/getServiceById/:id', authMiddleware,getServiceById);
+router.post('/createService',authMiddleware, createService);
+router.put('/updateService/:id',authMiddleware, updateService);
+router.delete('/deleteService/:id', authMiddleware,deleteService);
 
 
 router.post('/createOrdre',authMiddleware, createOrdreTravail);

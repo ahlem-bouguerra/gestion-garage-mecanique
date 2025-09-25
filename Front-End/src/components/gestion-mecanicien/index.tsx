@@ -58,6 +58,9 @@ const MecaniciensManager = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [availableServices, setAvailableServices] = useState<{ _id: string; name: string }[]>([]);
+  const getAuthToken = () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+  };
 
   // Formulaire pour nouveau/modifier mécanicien
   const [formData, setFormData] = useState<FormData>({
@@ -80,18 +83,24 @@ const MecaniciensManager = () => {
 
   const mecaniciensApi = {
     getAll: async (): Promise<Mecanicien[]> => {
-      const { data } = await axios.get(`${API_BASE_URL}/getAllMecaniciens`);
+      const { data } = await axios.get(`${API_BASE_URL}/getAllMecaniciens`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       return data;
     },
 
     getById: async (id: string): Promise<Mecanicien> => {
-      const { data } = await axios.get(`${API_BASE_URL}/getMecanicienById/${id}`);
+      const { data } = await axios.get(`${API_BASE_URL}/getMecanicienById/${id}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       return data;
     },
 
     create: async (data: object): Promise<Mecanicien> => {
       try {
-        const res = await axios.post(`${API_BASE_URL}/createMecanicien`, data);
+        const res = await axios.post(`${API_BASE_URL}/createMecanicien`, data, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
         return res.data;
       } catch (error: any) {
         throw new Error(error.response?.data?.error || "Erreur lors de la création");
@@ -100,7 +109,9 @@ const MecaniciensManager = () => {
 
     update: async (id: string, data: object): Promise<Mecanicien> => {
       try {
-        const res = await axios.put(`${API_BASE_URL}/updateMecanicien/${id}`, data);
+        const res = await axios.put(`${API_BASE_URL}/updateMecanicien/${id}`, data, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
         return res.data;
       } catch (error: any) {
         throw new Error(error.response?.data?.error || "Erreur lors de la modification");
@@ -109,7 +120,9 @@ const MecaniciensManager = () => {
 
     delete: async (id: string): Promise<void> => {
       try {
-        await axios.delete(`${API_BASE_URL}/deleteMecanicien/${id}`);
+        await axios.delete(`${API_BASE_URL}/deleteMecanicien/${id}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       } catch (error: any) {
         throw new Error(error.response?.data?.error || "Erreur lors de la suppression");
       }
@@ -136,7 +149,9 @@ const MecaniciensManager = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/getAllServices');
+        const response = await axios.get('http://localhost:5000/api/getAllServices', {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
         setAvailableServices(response.data);
       } catch (error) {
         console.error('Erreur lors du chargement des services:', error);

@@ -109,6 +109,11 @@ services: [
     enum: ["A", "B", "C", "D", "E"],
     default: "B" 
   },
+  garagisteId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  }
 
 }, {
   timestamps: true

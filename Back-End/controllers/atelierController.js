@@ -3,7 +3,7 @@ import Atelier from '../models/Atelier.js';
 
 export const getAllAteliers = async (req, res) => {
   try {
-    const ateliers = await Atelier.find({});
+    const ateliers = await Atelier.find({garagisteId: req.user._id});
     console.log("✅ aleliers récupérées:", ateliers.length);
     res.json(ateliers);
   } catch (error) {
@@ -16,7 +16,7 @@ export const getAllAteliers = async (req, res) => {
 export const getAtelierById = async (req, res) => {
   try {
     const { id } = req.params;
-    const atelier = await Atelier.findById(id);
+    const atelier = await Atelier.findOne({_id:id , garagisteId: req.user._id});
 
     if (!atelier) {
       return res.status(404).json({ error: 'atelier non trouvée' });
@@ -42,7 +42,7 @@ export const createAtelier = async (req, res) => {
       });
     }
 
-    const atelier = new Atelier({ name ,localisation});
+    const atelier = new Atelier({ name ,localisation ,garagisteId: req.user._id });
     await atelier.save();
 
     console.log("✅ Atelier créée:", atelier);
@@ -60,8 +60,8 @@ export const updateAtelier = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
-    const atelierModifie = await Atelier.findByIdAndUpdate(
-      id,
+    const atelierModifie = await Atelier.findOneAndUpdate(
+      { _id: id, garagisteId: req.user._id },
       updateData,
       { new: true, runValidators: true }
     );
@@ -84,7 +84,7 @@ export const deleteAtelier = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const atelierSupprimee = await Atelier.findByIdAndDelete(id);
+    const atelierSupprimee = await Atelier.findOneAndDelete({_id: id, garagisteId: req.user._id });
 
     if (!atelierSupprimee) {
       return res.status(404).json({ error: 'atelier non trouvée' });
