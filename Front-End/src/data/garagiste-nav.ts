@@ -1,5 +1,5 @@
-// src/data/garagiste-nav.ts
-import * as Icons from "../icons";
+// 1. Créez src/data/garagiste-nav.ts
+import * as Icons from "../components/Layouts/sidebar/icons";
 import { FolderOpen, Car, Building, Users, FileText, Clipboard, Calendar } from 'lucide-react';
 
 export const GARAGISTE_NAV_DATA = [

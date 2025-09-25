@@ -8,15 +8,14 @@ import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import type { PropsWithChildren } from "react";
 import { Providers } from "./providers";
-import { LayoutWrapper } from "@/components/LayoutWrapper";
+import { LayoutWrapper } from "@/components/LayoutWrapper"; // Import LayoutWrapper
 
 export const metadata: Metadata = {
   title: {
     template: "%s | NextAdmin - Next.js Dashboard Kit",
     default: "NextAdmin - Next.js Dashboard Kit",
   },
-  description:
-    "Next.js admin dashboard toolkit with 200+ templates, UI components, and integrations for fast dashboard development.",
+  description: "Next.js admin dashboard toolkit",
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {
@@ -27,10 +26,11 @@ export default function RootLayout({ children }: PropsWithChildren) {
           <NextTopLoader color="#5750F1" showSpinner={false} />
           <LayoutWrapper>
             {children}
-            <Toaster position="top-right" reverseOrder={false} />
           </LayoutWrapper>
+          <Toaster position="top-right" reverseOrder={false} />
         </Providers>
       </body>
     </html>
   );
 }
+

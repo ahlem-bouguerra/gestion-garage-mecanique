@@ -333,7 +333,7 @@ export default function SignupForm() {
           <div className="mb-6">
             <input
               type="text"
-              placeholder={isUsernameFocused ? '' : 'Nom'}
+              placeholder={isUsernameFocused ? '' : 'Nom et Prénom'}
               className="w-full px-4 py-2 text-white bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-orange-500"
               onFocus={() => setUsernameFocused(true)}
               onBlur={() => setUsernameFocused(false)}
@@ -361,6 +361,18 @@ export default function SignupForm() {
               onBlur={() => setMatriculefiscalFocused(false)}
               value={matriculefiscal}
               onChange={(e) => setMatriculefiscal(e.target.value.toLowerCase())}
+            />
+          </div>
+                    {/* Champ Email */}
+          <div className="relative mb-6">
+            <input
+              type="email"
+              placeholder={isEmailFocused ? '' : 'Adresse e-mail'}
+              className="w-full px-4 py-2 text-white bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-orange-500"
+              onFocus={() => setEmailFocused(true)}
+              onBlur={() => setEmailFocused(false)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value.toLowerCase())}
             />
           </div>
  {/* Champ Téléphone avec validation */}
@@ -475,18 +487,6 @@ export default function SignupForm() {
             )}
           </div>
 
-          {/* Champ Email */}
-          <div className="relative mb-6">
-            <input
-              type="email"
-              placeholder={isEmailFocused ? '' : 'Adresse e-mail'}
-              className="w-full px-4 py-2 text-white bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-orange-500"
-              onFocus={() => setEmailFocused(true)}
-              onBlur={() => setEmailFocused(false)}
-              value={email}
-              onChange={(e) => setEmail(e.target.value.toLowerCase())}
-            />
-          </div>
 
           {/* Affichage des erreurs */}
           {error && (

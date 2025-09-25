@@ -1,11 +1,12 @@
+// src/components/LayoutWrapper.tsx - VERSION CORRIGÉE
 "use client";
-
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/Layouts/sidebar";
 import { Header } from "@/components/Layouts/header";
+import { SidebarProvider } from "@/components/Layouts/sidebar/sidebar-context";
 import type { PropsWithChildren } from "react";
 
-// ✅ Ajoutez ici les routes où vous ne voulez pas de sidebar/navbar
+// Pages sans layout
 const pagesWithoutLayout = [
   "/login",
   "/register",
@@ -19,13 +20,38 @@ const pagesWithoutLayout = [
   "/auth/complete-profile",
   "/auth/google-callback",
   "/Auth/SigninForm",
-  
-  // Ajoutez d'autres routes ici selon vos besoins
+];
+
+// Routes garagiste
+const garagisteRoutes = [
+  "/dashboard",
+  "/dashboard-reservation",
+  "/fiche-client",
+  "/fiche-voiture",
+  "/devis",
+  "/gestion-factures",
+  "/gestion-mecanicien",
+  "/gestion-ordres",
+  "/reservation-cote-garage",
+];
+
+// Routes client  
+const clientRoutes = [
+  "/profile",
+  "/mes-reservations",
+  "/mon-garage",
 ];
 
 export function LayoutWrapper({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const hideLayout = pagesWithoutLayout.includes(pathname);
+  
+  // Déterminer le type d'utilisateur selon la route
+  const userType = garagisteRoutes.some(route => pathname.startsWith(route)) 
+    ? 'garagiste' 
+    : clientRoutes.some(route => pathname.startsWith(route))
+    ? 'client'
+    : 'garagiste'; // par défaut
 
   if (hideLayout) {
     return (
@@ -36,14 +62,16 @@ export function LayoutWrapper({ children }: PropsWithChildren) {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="w-full bg-gray-2 dark:bg-[#020d1a]">
-        <Header />
-        <main className="isolate mx-auto w-full max-w-screen-2xl overflow-hidden p-4 md:p-6 2xl:p-10">
-          {children}
-        </main>
+    <SidebarProvider>
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="w-full bg-gray-2 dark:bg-[#020d1a]">
+          <Header userType={userType} />
+          <main className="isolate mx-auto w-full max-w-screen-2xl overflow-hidden p-4 md:p-6 2xl:p-10">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
