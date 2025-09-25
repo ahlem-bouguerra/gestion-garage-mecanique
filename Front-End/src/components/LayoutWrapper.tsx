@@ -1,4 +1,3 @@
-// src/components/LayoutWrapper.tsx - VERSION CORRIGÉE
 "use client";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/Layouts/sidebar";
@@ -8,6 +7,7 @@ import type { PropsWithChildren } from "react";
 
 // Pages sans layout
 const pagesWithoutLayout = [
+  "/",
   "/login",
   "/register",
   "/forgot-password",
@@ -35,11 +35,18 @@ const garagisteRoutes = [
   "/reservation-cote-garage",
 ];
 
-// Routes client  
+// Routes client
 const clientRoutes = [
-  "/profile",
-  "/mes-reservations",
-  "/mon-garage",
+  "/client/dashboard",
+  "/client/reservations",
+  "/client/vehicules",
+  "/client/factures",
+  "/client/devis",
+  "/client/historique",
+  "/client/garages",
+  "/client/paiements",
+  "/client/profil",
+  "/client/parametres",
 ];
 
 export function LayoutWrapper({ children }: PropsWithChildren) {
@@ -47,10 +54,10 @@ export function LayoutWrapper({ children }: PropsWithChildren) {
   const hideLayout = pagesWithoutLayout.includes(pathname);
   
   // Déterminer le type d'utilisateur selon la route
-  const userType = garagisteRoutes.some(route => pathname.startsWith(route)) 
-    ? 'garagiste' 
-    : clientRoutes.some(route => pathname.startsWith(route))
+  const userType = clientRoutes.some(route => pathname.startsWith(route))
     ? 'client'
+    : garagisteRoutes.some(route => pathname.startsWith(route))
+    ? 'garagiste'
     : 'garagiste'; // par défaut
 
   if (hideLayout) {
@@ -64,7 +71,7 @@ export function LayoutWrapper({ children }: PropsWithChildren) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen">
-        <Sidebar />
+        <Sidebar userType={userType} />
         <div className="w-full bg-gray-2 dark:bg-[#020d1a]">
           <Header userType={userType} />
           <main className="isolate mx-auto w-full max-w-screen-2xl overflow-hidden p-4 md:p-6 2xl:p-10">

@@ -5,22 +5,30 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { GARAGISTE_NAV_DATA } from "@/data/garagiste-nav"; // Import corrigé
+import { GARAGISTE_NAV_DATA } from "@/data/garagiste-nav";
+import { CLIENT_NAV_DATA } from "@/data/client-nav";
 import { ArrowLeftIcon, ChevronUp } from "./icons";
 import { MenuItem } from "./menu-item";
 import { useSidebarContext } from "./sidebar-context";
 
-export function Sidebar() {
+interface SidebarProps {
+  userType?: 'garagiste' | 'client';
+}
+
+export function Sidebar({ userType = 'garagiste' }: SidebarProps) {
   const pathname = usePathname();
   const { setIsOpen, isOpen, isMobile, toggleSidebar } = useSidebarContext();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+
+  // Choisir les données de navigation selon le type d'utilisateur
+  const NAV_DATA = userType === 'client' ? CLIENT_NAV_DATA : GARAGISTE_NAV_DATA;
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) => (prev.includes(title) ? [] : [title]));
   };
 
   useEffect(() => {
-    GARAGISTE_NAV_DATA.some((section) => {
+    NAV_DATA.some((section) => {
       return section.items.some((item) => {
         return item.items?.some((subItem) => {
           if (subItem.url === pathname) {
@@ -32,7 +40,12 @@ export function Sidebar() {
         });
       });
     });
-  }, [pathname]);
+  }, [pathname, NAV_DATA]);
+
+  // Styles selon le type d'utilisateur
+  const sidebarStyles = userType === 'client'
+    ? "max-w-[290px] overflow-hidden border-r border-blue-200 bg-blue-50 transition-[width] duration-200 ease-linear dark:border-blue-800 dark:bg-blue-900"
+    : "max-w-[290px] overflow-hidden border-r border-gray-200 bg-white transition-[width] duration-200 ease-linear dark:border-gray-800 dark:bg-gray-dark";
 
   return (
     <>
@@ -47,7 +60,7 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          "max-w-[290px] overflow-hidden border-r border-gray-200 bg-white transition-[width] duration-200 ease-linear dark:border-gray-800 dark:bg-gray-dark",
+          sidebarStyles,
           isMobile ? "fixed bottom-0 top-0 z-50" : "sticky top-0 h-screen",
           isOpen ? "w-full" : "w-0",
         )}
@@ -58,11 +71,18 @@ export function Sidebar() {
         <div className="flex h-full flex-col py-10 pl-[25px] pr-[7px]">
           <div className="relative pr-4.5">
             <Link
-              href={"/"}
+              href={userType === 'client' ? "/client/dashboard" : "/dashboard"}
               onClick={() => isMobile && toggleSidebar()}
               className="px-0 py-2.5 min-[850px]:py-0"
             >
               <Logo />
+              <div className="mt-2">
+                <span className={`text-sm font-medium ${
+                  userType === 'client' ? 'text-blue-600' : 'text-gray-600'
+                }`}>
+                  {userType === 'client' ? 'Espace Client' : 'Espace Garagiste'}
+                </span>
+              </div>
             </Link>
 
             {isMobile && (
@@ -78,9 +98,13 @@ export function Sidebar() {
 
           {/* Navigation */}
           <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto pr-3 min-[850px]:mt-10">
-            {GARAGISTE_NAV_DATA.map((section) => (
+            {NAV_DATA.map((section) => (
               <div key={section.label} className="mb-6">
-                <h2 className="mb-5 text-sm font-medium text-dark-4 dark:text-dark-6">
+                <h2 className={`mb-5 text-sm font-medium ${
+                  userType === 'client' 
+                    ? 'text-blue-600 dark:text-blue-400' 
+                    : 'text-dark-4 dark:text-dark-6'
+                }`}>
                   {section.label}
                 </h2>
 
@@ -95,6 +119,7 @@ export function Sidebar() {
                                 ({ url }) => url === pathname,
                               )}
                               onClick={() => toggleExpanded(item.title)}
+                              userType={userType}
                             >
                               <item.icon
                                 className="size-6 shrink-0"
@@ -122,6 +147,7 @@ export function Sidebar() {
                                       as="link"
                                       href={subItem.url}
                                       isActive={pathname === subItem.url}
+                                      userType={userType}
                                     >
                                       <span>{subItem.title}</span>
                                     </MenuItem>
@@ -131,24 +157,19 @@ export function Sidebar() {
                             )}
                           </div>
                         ) : (
-                          (() => {
-                            const href = item.url || "/" + item.title.toLowerCase().split(" ").join("-");
-
-                            return (
-                              <MenuItem
-                                className="flex items-center gap-3 py-3"
-                                as="link"
-                                href={href}
-                                isActive={pathname === href}
-                              >
-                                <item.icon
-                                  className="size-6 shrink-0"
-                                  aria-hidden="true"
-                                />
-                                <span>{item.title}</span>
-                              </MenuItem>
-                            );
-                          })()
+                          <MenuItem
+                            className="flex items-center gap-3 py-3"
+                            as="link"
+                            href={item.url}
+                            isActive={pathname === item.url}
+                            userType={userType}
+                          >
+                            <item.icon
+                              className="size-6 shrink-0"
+                              aria-hidden="true"
+                            />
+                            <span>{item.title}</span>
+                          </MenuItem>
                         )}
                       </li>
                     ))}
