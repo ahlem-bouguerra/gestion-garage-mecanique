@@ -15,7 +15,8 @@ const DetailOrdreTravail = ({
     'en_attente': { label: 'En attente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
     'en_cours': { label: 'En cours', color: 'bg-blue-100 text-blue-800', icon: Wrench },
     'termine': { label: 'Terminé', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-    'suspendu': { label: 'Suspendu', color: 'bg-red-100 text-red-800', icon: Clock }
+    'suspendu': { label: 'Suspendu', color: 'bg-red-100 text-red-800', icon: Clock },
+    'supprime': { label: 'supprime', color: 'bg-red-100 text-red-800', icon: X },
   };
 
   const prioriteOptions = {

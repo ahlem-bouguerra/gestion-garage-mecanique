@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { Play, Eye, Edit2, Trash2, CheckCircle, Clock, Wrench, AlertCircle } from 'lucide-react';
+import { X,Play, Eye, Edit2, Trash2, CheckCircle, Clock, Wrench, AlertCircle } from 'lucide-react';
 import { ordresTravailAPI } from './services/ordresTravailAPI';
 
 const ListeOrdresTravail = ({
@@ -23,7 +23,9 @@ const ListeOrdresTravail = ({
     'en_attente': { label: 'En attente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
     'en_cours': { label: 'En cours', color: 'bg-blue-100 text-blue-800', icon: Wrench },
     'termine': { label: 'Terminé', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-    'suspendu': { label: 'Suspendu', color: 'bg-red-100 text-red-800', icon: AlertCircle }
+    'suspendu': { label: 'Suspendu', color: 'bg-red-100 text-red-800', icon: AlertCircle },
+    'supprime': { label: 'supprime', color: 'bg-red-100 text-red-800', icon: X },
+
   };
 
   const prioriteOptions = {
@@ -252,9 +254,9 @@ const loadOrdresSupprimes = async () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusOptions[ordre.status]?.color || statusOptions.en_attente.color}`}>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusOptions[ordre.status]?.color}`}>
                           <StatusIcon className="h-3 w-3 mr-1" />
-                          {statusOptions[ordre.status]?.label || 'En attente'}
+                          {statusOptions[ordre.status]?.label}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
