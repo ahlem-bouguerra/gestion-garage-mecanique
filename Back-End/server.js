@@ -12,9 +12,10 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000", "http://localhost:3001"], // ← plusieurs origines
   credentials: true,
 }));
+
 
 app.use(express.json());
 

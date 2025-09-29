@@ -2,7 +2,7 @@
 import * as Icons from "../icons";
 import { FolderOpen, Car, Building, Users, FileText, Clipboard, Calendar } from 'lucide-react';
 
-export const GARAGISTE_NAV_DATA = [
+export const NAV_DATA = [
   {
     label: "GESTION GARAGE",
     items: [

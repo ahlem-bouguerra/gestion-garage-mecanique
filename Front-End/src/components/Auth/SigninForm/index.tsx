@@ -1,14 +1,11 @@
-// Version avec logs de débogage détaillés
 "use client";
 
-import { createPortal } from "react-dom";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { EmailIcon, PasswordIcon } from "@/assets/icons";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import InputGroup from "../../FormElements/InputGroup";
-import { Checkbox } from "../../FormElements/checkbox";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Cookies from "js-cookie";
@@ -36,6 +33,7 @@ const GoogleIcon = () => (
 
 export default function SigninWithPassword() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [data, setData] = useState({
     email: process.env.NEXT_PUBLIC_DEMO_USER_MAIL || "",
@@ -43,12 +41,51 @@ export default function SigninWithPassword() {
     remember: false,
   });
 
-  const searchParams = useSearchParams();
   const verified = searchParams.get("verified");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  
+  // ✅ AJOUT : Gérer le retour du callback Google
+  useEffect(() => {
+    const token = searchParams.get("token");
+    const userEncoded = searchParams.get("user");
+
+    // Si on a un token et des données user dans l'URL (retour Google)
+    if (token && userEncoded) {
+      console.log("🔐 Token Google reçu dans l'URL");
+      console.log("👤 User data reçue dans l'URL");
+      
+      try {
+        // Décoder les données utilisateur (Base64)
+        const userDataString = atob(decodeURIComponent(userEncoded));
+        const userData = JSON.parse(userDataString);
+
+        console.log("👤 Données utilisateur décodées:", userData);
+
+        // Sauvegarder dans localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(userData));
+
+        // Sauvegarder dans les cookies
+        Cookies.set("token", token, { expires: 7, path: "/" });
+
+        console.log("💾 Token sauvegardé dans localStorage:", localStorage.getItem("token"));
+        console.log("💾 User sauvegardé dans localStorage:", localStorage.getItem("user"));
+
+        toast.success("🎉 Connexion Google réussie !");
+
+        // Nettoyer l'URL et rediriger
+        setTimeout(() => {
+          router.push("/chercher-garage");
+        }, 1000);
+
+      } catch (error) {
+        console.error("❌ Erreur lors du traitement des données Google:", error);
+        toast.error("Erreur lors de la connexion Google");
+      }
+    }
+  }, [searchParams, router]);
+
   useEffect(() => {
     if (verified === "true") {
       toast.success("✅ Email vérifié avec succès !");
@@ -65,62 +102,48 @@ export default function SigninWithPassword() {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setLoading(true);
-  setError("");
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-  try {
-    const response = await axios.post("http://localhost:5000/api/login", {
-      email: data.email,
-      password: data.password,
-    });
-
-    if (response.data.token) {
-      const token = response.data.token;
-      localStorage.setItem("token", token);
-      Cookies.set("token", token, { expires: 7, path: "/" });
-      toast.success("Connexion réussie !");
-      
-
-      // Récupérer le profil pour vérifier la complétion
-      const profileResponse = await axios.get("http://localhost:5000/api/get-profile", {
-        headers: { Authorization: `Bearer ${token}` },
+    try {
+      const response = await axios.post("http://localhost:5000/api/login", {
+        email: data.email,
+        password: data.password,
       });
 
-      const user = profileResponse.data;
-      localStorage.setItem("user", JSON.stringify(user));
-      const isComplete = user.username && user.phone && user.governorateId;
+      if (response.data.token) {
+        const token = response.data.token;
+        localStorage.setItem("token", token);
+        Cookies.set("token", token, { expires: 7, path: "/" });
+        toast.success("Connexion réussie !");
+        const user = response.data.user;
+        localStorage.setItem("user", JSON.stringify(user));
+        router.push("/chercher-garage");
+        console.log("💾 Token dans localStorage:", localStorage.getItem("token"));
+        console.log("💾 User dans localStorage:", localStorage.getItem("user"));
 
-      if (isComplete) {
-        router.push("/");  // Profil complet, vers accueil
       } else {
-        router.push("/auth/complete-profile");  // Profil incomplet, compléter
+        throw new Error("Token non reçu");
       }
-       console.log("💾 Token dans localStorage:", localStorage.getItem("token"));
-      console.log("💾 User dans localStorage:", localStorage.getItem("user"));
-
-    } else {
-      throw new Error("Token non reçu");
+    } catch (error: any) {
+      console.error('Erreur login:', error);
+      toast.error(error.response?.data?.message || "Erreur lors de la connexion");
+    } finally {
+      setLoading(false);
     }
-  } catch (error: any) {
-    console.error('Erreur login:', error);
-    toast.error(error.response?.data?.message || "Erreur lors de la connexion");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // Déclencher la connexion Google
   const handleGoogleSignIn = () => {
     console.log("🔄 Démarrage connexion Google...");
     setGoogleLoading(true);
-    
+
     const googleAuthUrl = "http://localhost:5000/api/google";
     console.log("🔗 Redirection vers:", googleAuthUrl);
-    
+
     // Ouvrir dans la même fenêtre pour une meilleure UX
     window.location.href = googleAuthUrl;
-    
   };
 
   return (
@@ -203,7 +226,7 @@ export default function SigninWithPassword() {
         <div className="text-center pt-4 border-t border-orange-500/20">
           <p className="text-sm text-orange-100/70">
             Don't have an account?{" "}
-            <Link 
+            <Link
               href="/auth/sign-up"
               className="group font-semibold text-orange-400 hover:text-orange-300 transition-colors duration-200"
             >

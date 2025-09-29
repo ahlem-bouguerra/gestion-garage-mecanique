@@ -4,6 +4,7 @@ import {login, logout} from "../controllers/loginController.js";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 import passport from "../config/passport.js";
+import passportClient from "../config/passportCLient.js";
 import { forgotPassword } from "../controllers/ForgotPassword.js";
 import { resetPassword } from "../controllers/ResetPassword.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -23,12 +24,16 @@ import {getDashboardData} from '../controllers/ChargeAtelier.js';
 import { search } from '../controllers/ChercherGarage.js';
 import { createReservation , getReservations ,updateReservation} from '../controllers/gererReservation.js'
 
+
+import {registerClient} from "../controllers/RegisterClient.js";
+import { loginClient } from "../controllers/loginCLientController.js";
+import { verifEmailCLient } from "../controllers/VerifEmailClientController.js";
+import { resetPasswordClient } from "../controllers/ResetPasswordClient.js";
+import { forgotPasswordClient } from "../controllers/ForgotPasswordClient.js";
+
 const router = express.Router();
-
-
 router.get('/dashboard/charge-atelier', getDashboardData);
 router.post("/signup", register);
-
 router.get("/verify-email/:token", async (req, res) => {
   const token = req.params.token;
 
@@ -62,14 +67,17 @@ router.get("/verify-email/:token", async (req, res) => {
     return res.redirect(`${process.env.FRONTEND_URL}/auth/sign-in?error=verification_failed`);
   }
 });
-
 router.post("/login", login);
 router.post("/logout",logout);
-
-
 router.get(
   "/google", 
   passport.authenticate("google", {
+    scope: ["profile", "email"]
+  })
+);
+router.get(
+  "/google/client", 
+  passportClient.authenticate("google", {
     scope: ["profile", "email"]
   })
 );
@@ -324,6 +332,76 @@ router.get(
     }
   }
 );
+
+// ✅ SOLUTION : Redirection avec token dans l'URL
+router.get(
+  "/google/callback/client", 
+  passportClient.authenticate("google", { 
+    failureRedirect: "http://localhost:3001/auth/sign-in?error=google_auth_failed",
+    session: false
+  }),
+  async (req, res) => {
+    try {
+      console.log('📥 Google API Callback - Début traitement');
+      const client = req.user; 
+
+      if (!client) {
+        console.error('❌ Pas d\'utilisateur dans req.client');
+        return res.redirect("http://localhost:3001/auth/sign-in?error=no_user");
+      }
+
+      console.log('👤 Utilisateur Google authentifié:', {
+        id: client._id,
+        email: client.email,
+        username: client.username,
+      });
+
+      if (!process.env.JWT_SECRET) {
+        console.error('❌ JWT_SECRET non défini');
+        return res.redirect("http://localhost:3001/auth/sign-in?error=server_config_error");
+      }
+
+      // Générer token JWT
+      const token = jwt.sign(
+        {
+          userId: client._id,
+          email: client.email,
+          isVerified: client.isVerified || true
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      console.log('🔐 Token JWT généré pour Google OAuth');
+
+      // ✅ Encoder les données utilisateur en Base64 pour l'URL
+      const userData = {
+        id: client._id,
+        name: client.username || client.email?.split('@')[0] || 'Utilisateur',
+        username: client.username,
+        email: client.email,
+        phone: client.phone || '',
+        img: client.profilePicture || '/images/user/user-03.png',
+        isVerified: client.isVerified || true
+      };
+
+      const userDataEncoded = Buffer.from(JSON.stringify(userData)).toString('base64');
+
+      console.log('📦 Données utilisateur préparées et encodées');
+
+      // ✅ Redirection vers sign-in avec token et userData dans l'URL
+      const redirectUrl = `http://localhost:3001/auth/sign-in?token=${token}&user=${encodeURIComponent(userDataEncoded)}`;
+      
+      console.log('➡️ Redirection vers:', redirectUrl);
+      
+      return res.redirect(redirectUrl);
+
+    } catch (error) {
+      console.error("❌ Erreur dans callback Google API:", error);
+      return res.redirect(`http://localhost:3001/auth/sign-in?error=callback_error&message=${encodeURIComponent(error.message)}`);
+    }
+  }
+);
 router.get("/verify-token", async (req, res) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
@@ -461,6 +539,14 @@ router.post('/create-reservation',createReservation);
 router.get('/reservations',getReservations)
 router.put('/update/reservations/:id',updateReservation)
 
+///////////////////////////CLient////////////////////////////////////////////////////
+
+router.post("/client/signup", registerClient);
+router.post("/client/login", loginClient);
+router.post("/client/logout",logout);
+router.get("/client/verify-token/:token",verifEmailCLient);
+router.post("/client/reset-password", resetPasswordClient);
+router.post("/client/forgot-password", forgotPasswordClient);
 
 
 export default router;
