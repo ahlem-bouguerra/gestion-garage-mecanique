@@ -2,11 +2,14 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Client } from "../models/Client.js";
 
-passport.serializeUser((client, done) => {
+// Créer une instance séparée pour les clients
+const passportClient = new passport.Passport();
+
+passportClient.serializeUser((client, done) => {
   done(null, client.id);
 });
 
-passport.deserializeUser(async (id, done) => {
+passportClient.deserializeUser(async (id, done) => {
   try {
     const client = await Client.findById(id);
     done(null, client);
@@ -15,10 +18,10 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID, // depuis .env
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET, // depuis .env
-  callbackURL: "/api/google/callback/client"
+passportClient.use('google-client', new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: "/api/google/callback/client" // Callback pour port 3001
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let client = await Client.findOne({ googleId: profile.id });
@@ -33,9 +36,8 @@ passport.use(new GoogleStrategy({
         city: "",
         location: {
           type: "Point",
-          coordinates: [0, 0] // placeholder valide pour éviter l'erreur
+          coordinates: [0, 0]
         }
-
       });
     }
     return done(null, client);
@@ -44,4 +46,4 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-export default passport;
+export default passportClient;
