@@ -1,7 +1,7 @@
-import Facture from '../models/Facture.js';
-import Devis from '../models/Devis.js';
+import Facture from '../../models/Facture.js';
+import Devis from '../../models/Devis.js';
 import mongoose from 'mongoose'; // ✅ Import ajouté
-import CreditNote from '../models/CreditNote.js';
+import CreditNote from '../../models/CreditNote.js';
 
 
 

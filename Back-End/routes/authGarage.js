@@ -1,21 +1,40 @@
 import express from "express";
 import passportGarage from "../config/passportGarage.js";
-
+import { register } from "../controllers/garagiste/authController.js";
+import { login, logout } from "../controllers/garagiste/loginController.js";
 import jwt from "jsonwebtoken";
+import { User } from "../models/User.js";
+import { forgotPassword } from "../controllers/garagiste/ForgotPassword.js";
+import { resetPassword } from "../controllers/garagiste/ResetPassword.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
+import { completeProfile, getProfile } from "../controllers/garagiste/ProfileContoller.js";
+import { enhancedLocationRoutes } from "../apiDataFetcher.js";
+import { createFicheClient, getFicheClients, getFicheClientById, updateFicheClient, deleteFicheClient, getFicheClientNoms, getHistoriqueVisiteByIdClient, getHistoryVisite } from "../controllers/garagiste/FicheClient.js";
+import { getAllVehicules, getVehiculeById, createVehicule, updateVehicule, deleteVehicule, getVehiculesByProprietaire } from '../controllers/vehiculeController.js';
+import { createDevis, getAllDevis, getDevisById, getDevisByNum, updateDevisStatus, updateDevis, deleteDevis, acceptDevis, refuseDevis, updateFactureId } from '../controllers/garagiste/devisController.js';
+import { sendDevisByEmail } from '../utils/sendDevis.js';
+import { createMecanicien, updateMecanicien, deleteMecanicien, getAllMecaniciens, getMecanicienById, getMecaniciensByService } from "../controllers/garagiste/mecanicienController.js";
+import { getAllAteliers, getAtelierById, createAtelier, updateAtelier, deleteAtelier } from '../controllers/garagiste/atelierController.js';
+import { getAllServices, getServiceById, createService, updateService, deleteService } from '../controllers/garagiste/serviceController.js';
+import { createOrdreTravail, getOrdresTravail, getOrdreTravailById, updateStatusOrdreTravail, demarrerOrdre, terminerOrdre, getStatistiques, supprimerOrdreTravail, getOrdresParDevisId, getOrdresByStatus, getOrdresSupprimes, getOrdresByAtelier, updateOrdreTravail } from '../controllers/garagiste/ordreController.js';
+import { CreateFacture, CreateFactureWithCredit, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture, getCreditNoteById } from '../controllers/garagiste/facturesController.js';
+import { getCarnetByVehiculeId, creerCarnetManuel } from '../controllers/garagiste/carnetController.js';
+import { getDashboardData } from '../controllers/garagiste/ChargeAtelier.js';
+import { search } from '../controllers/clients/ChercherGarage.js';
+import { createReservation, getReservations, updateReservation } from '../controllers/gererReservation.js';
 
 const router = express.Router();
 
-// Route pour initier l'authentification Google (GARAGE)
+// ========== GOOGLE OAUTH (GARAGE) ==========
 router.get(
-  "/google",
+  "/garage/google",
   passportGarage.authenticate("google-garage", {
     scope: ["profile", "email"]
   })
 );
 
-// Callback Google pour GARAGE (port 3000)
 router.get(
-  "/google/callback",
+  "/garage/google/callback",
   passportGarage.authenticate("google-garage", {
     failureRedirect: "http://localhost:3000/auth/sign-in?error=google_auth_failed",
     session: false
@@ -54,16 +73,15 @@ router.get(
       console.log('🔐 Token JWT généré pour Garage OAuth');
 
       const isProfileComplete = !!(
-        user.username && 
-        user.phone && 
-        user.governorateId && 
-        user.matriculefiscal && 
+        user.username &&
+        user.phone &&
+        user.governorateId &&
+        user.matriculefiscal &&
         user.garagenom
       );
 
       console.log('🔍 Profil complet:', isProfileComplete);
 
-      // Page HTML pour port 3000
       const html = `
         <!DOCTYPE html>
         <html lang="fr">
@@ -146,7 +164,7 @@ router.get(
         </body>
         </html>
       `;
-      
+
       return res.send(html);
 
     } catch (error) {
@@ -155,5 +173,177 @@ router.get(
     }
   }
 );
+
+// ========== AUTH CLASSIQUE (GARAGE) ==========
+router.post("/garage/signup", register);
+router.post("/garage/login", login);
+router.post("/garage/logout", logout);
+
+router.get("/garage/verify-email/:token", async (req, res) => {
+  const token = req.params.token;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      console.log("❌ Utilisateur non trouvé pour la vérification");
+      return res.redirect(`${process.env.FRONTEND_URL}/auth/sign-in?error=user_not_found`);
+    }
+
+    if (user.isVerified) {
+      console.log("ℹ️ Compte déjà vérifié pour:", user.email);
+      return res.redirect(`${process.env.FRONTEND_URL}/auth/sign-in?verified=already`);
+    }
+
+    user.isVerified = true;
+    user.token = undefined;
+    await user.save();
+
+    console.log("✅ Email vérifié avec succès pour:", user.email);
+    return res.redirect(`${process.env.FRONTEND_URL}/auth/sign-in?verified=true`);
+
+  } catch (error) {
+    console.error("❌ Erreur lors de la vérification de l'email :", error);
+    return res.redirect(`${process.env.FRONTEND_URL}/auth/sign-in?error=verification_failed`);
+  }
+});
+
+router.get("/garage/verify-token", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+
+    if (!token) {
+      return res.status(401).json({ error: 'Token manquant' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+
+    res.json({
+      valid: true,
+      user: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        isVerified: user.isVerified
+      }
+    });
+
+  } catch (error) {
+    console.error('Erreur vérification token:', error);
+    res.status(401).json({ error: 'Token invalide' });
+  }
+});
+
+router.post("/garage/forgot-password", forgotPassword);
+router.post("/garage/reset-password", resetPassword);
+router.post("/garage/complete-profile", authMiddleware, completeProfile);
+router.get("/garage/get-profile", authMiddleware, getProfile);
+
+// ========== LOCATIONS ==========
+router.get('/governorates', enhancedLocationRoutes.getAllGovernoratesWithCount);
+router.get('/cities/:governorateId', enhancedLocationRoutes.getCitiesWithCoordinates);
+router.get('/locations/search/:query', enhancedLocationRoutes.searchLocations);
+router.get('/locations/autocomplete', enhancedLocationRoutes.autocomplete);
+
+// ========== CLIENTS ==========
+router.post("/Creation", authMiddleware, createFicheClient);
+router.get("/GetAll", authMiddleware, getFicheClients);
+router.get("/GetOne/:_id", authMiddleware, getFicheClientById);
+router.put("/updateOne/:_id", authMiddleware, updateFicheClient);
+router.delete("/deleteOne/:_id", authMiddleware, deleteFicheClient);
+router.get("/clients/noms", authMiddleware, getFicheClientNoms);
+router.get('/clients/:clientId/historique', authMiddleware, getHistoriqueVisiteByIdClient);
+router.get('/clients/:clientId/visites-resume', authMiddleware, getHistoryVisite);
+
+// ========== VEHICULES ==========
+router.get('/vehicules', authMiddleware, getAllVehicules);
+router.get('/vehicules/:id', authMiddleware, getVehiculeById);
+router.post('/vehicules', authMiddleware, createVehicule);
+router.put('/vehicules/:id', authMiddleware, updateVehicule);
+router.delete('/vehicules/:id', authMiddleware, deleteVehicule);
+router.get('/vehicules/proprietaire/:clientId', authMiddleware, getVehiculesByProprietaire);
+
+// ========== DEVIS ==========
+router.post('/createdevis', authMiddleware, createDevis);
+router.get('/Devis', authMiddleware, getAllDevis);
+router.get('/Devis/:id', authMiddleware, getDevisById);
+router.get('/devis/code/:id', authMiddleware, getDevisByNum);
+router.put('/Devis/:id/status', authMiddleware, updateDevisStatus);
+router.put('/Devis/:id', authMiddleware, updateDevis);
+router.put('/updateId/:id', authMiddleware, updateFactureId);
+router.delete('/Devis/:id', authMiddleware, deleteDevis);
+router.get("/devis/:devisId/accept", authMiddleware, acceptDevis);
+router.get("/devis/:devisId/refuse", authMiddleware, refuseDevis);
+router.post('/devis/:devisId/send-email', authMiddleware, sendDevisByEmail);
+
+// ========== MECANICIENS ==========
+router.post("/createMecanicien", authMiddleware, createMecanicien);
+router.get("/getAllMecaniciens", authMiddleware, getAllMecaniciens);
+router.get("/getMecanicienById/:id", authMiddleware, getMecanicienById);
+router.put("/updateMecanicien/:id", authMiddleware, updateMecanicien);
+router.delete("/deleteMecanicien/:id", authMiddleware, deleteMecanicien);
+router.get('/mecaniciens/by-service/:serviceId', authMiddleware, getMecaniciensByService);
+
+// ========== ATELIERS ==========
+router.get('/getAllAteliers', authMiddleware, getAllAteliers);
+router.get('/getAtelierById/:id', authMiddleware, getAtelierById);
+router.post('/createAtelier', authMiddleware, createAtelier);
+router.put('/updateAtelier/:id', authMiddleware, updateAtelier);
+router.delete('/deleteAtelier/:id', authMiddleware, deleteAtelier);
+
+// ========== SERVICES ==========
+router.get('/getAllServices', authMiddleware, getAllServices);
+router.get('/getServiceById/:id', authMiddleware, getServiceById);
+router.post('/createService', authMiddleware, createService);
+router.put('/updateService/:id', authMiddleware, updateService);
+router.delete('/deleteService/:id', authMiddleware, deleteService);
+
+// ========== ORDRES DE TRAVAIL ==========
+router.post('/createOrdre', authMiddleware, createOrdreTravail);
+router.get('/', authMiddleware, getOrdresTravail);
+router.get('/getOrdreTravailById/:id', authMiddleware, getOrdreTravailById);
+router.put('/:id/status', authMiddleware, updateStatusOrdreTravail);
+router.put('/ordre-travail/:id/demarrer', authMiddleware, demarrerOrdre);
+router.put('/ordre-travail/:id/terminer', authMiddleware, terminerOrdre);
+router.delete('/:id', authMiddleware, supprimerOrdreTravail);
+router.put('/modifier/:id', authMiddleware, updateOrdreTravail);
+router.get('/statistiques', authMiddleware, getStatistiques);
+router.get('/ordre-travail/by-devis/:devisId', authMiddleware, getOrdresParDevisId);
+router.get("/ordres/status/:status", authMiddleware, getOrdresByStatus);
+router.get('/ordres/status/supprime', authMiddleware, getOrdresSupprimes);
+router.get("/ordres/atelier/:atelierId", authMiddleware, getOrdresByAtelier);
+
+// ========== FACTURES ==========
+router.post('/create/:devisId', authMiddleware, CreateFacture);
+router.post('/create-with-credit/:devisId', authMiddleware, CreateFactureWithCredit);
+router.get('/getFactures', authMiddleware, GetAllFactures);
+router.get('/getFacture/:id', authMiddleware, GetFactureById);
+router.get('/factureByDevis/:devisId', authMiddleware, getFactureByDevis);
+router.put('/:id/payment', authMiddleware, MarquerFacturePayed);
+router.put('/:id', authMiddleware, UpdateFacture);
+router.delete('/:id', authMiddleware, DeleteFacture);
+router.get('/stats/summary', authMiddleware, StaticFacture);
+router.get('/credit-note/:creditNoteId', authMiddleware, getCreditNoteById);
+
+// ========== CARNET ENTRETIEN ==========
+router.get('/carnet-entretien/vehicule/:vehiculeId', authMiddleware, getCarnetByVehiculeId);
+router.post('/creer-manuel', authMiddleware, creerCarnetManuel);
+
+// ========== DASHBOARD ==========
+router.get('/dashboard/charge-atelier', getDashboardData);
+
+// ========== SEARCH ==========
+router.get('/search', search);
+
+// ========== RESERVATIONS ==========
+router.post('/create-reservation', createReservation);
+router.get('/reservations', getReservations);
+router.put('/update/reservations/:id', updateReservation);
 
 export default router;

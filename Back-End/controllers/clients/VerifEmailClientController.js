@@ -1,4 +1,4 @@
-import {Client} from '../models/Client.js';
+import {Client} from '../../models/Client.js';
 import jwt from "jsonwebtoken";
 
 export const verifEmailCLient = async (req, res) => {

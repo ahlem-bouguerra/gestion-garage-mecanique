@@ -1,6 +1,6 @@
-import FicheClient from "../models/FicheClient.js";
-import OrdreTravail from "../models/Ordre.js";
-import { validateTunisianPhone, validatePhoneMiddleware } from '../utils/phoneValidator.js';
+import FicheClient from "../../models/FicheClient.js";
+import OrdreTravail from "../../models/Ordre.js";
+import { validateTunisianPhone, validatePhoneMiddleware } from '../../utils/phoneValidator.js';
 import mongoose from "mongoose";
 
 export const createFicheClient = async (req, res) => {

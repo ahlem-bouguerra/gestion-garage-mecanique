@@ -1,5 +1,5 @@
-import Devis from "../models/Devis.js";
-import OrdreTravail from '../models/Ordre.js'; 
+import Devis from "../../models/Devis.js";
+import OrdreTravail from '../../models/Ordre.js'; 
 
 export const createDevis = async (req, res) => {
   try {

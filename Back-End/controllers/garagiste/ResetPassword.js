@@ -1,24 +1,24 @@
 
 import bcrypt from "bcryptjs";
-import { Client } from "../models/Client.js";
+import { User } from "../../models/User.js";
 
 
-export const resetPasswordClient = async (req , res )=>{
+export const resetPassword = async (req , res )=>{
     try{
         const {email,token,newPassword} = req.body;
-        const client = await Client.findOne({email});
+        const user = await User.findOne({email});
 
-        if (!client || !client.resetPasswordToken || !client.resetPasswordExpires){
+        if (!user || !user.resetPasswordToken || !user.resetPasswordExpires){
              return res.status(400).json({message: "Lien invalide ou expiré."});
         }
 
          // Vérifier expiration
-        if (client.resetPasswordExpires < Date.now()) {
+        if (user.resetPasswordExpires < Date.now()) {
         return res.status(400).json({ message: "Lien expiré." });
         }
 
             // Vérifier token
-        const isMatch = await bcrypt.compare(token, client.resetPasswordToken);
+        const isMatch = await bcrypt.compare(token, user.resetPasswordToken);
         if (!isMatch) {
         return res.status(400).json({ message: "Lien invalide." });
         }
@@ -26,15 +26,15 @@ export const resetPasswordClient = async (req , res )=>{
 
         // Hacher le nouveau mot de passe
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        client.password = hashedPassword;
+        user.password = hashedPassword;
 
 
         // Supprimer token
-        client.resetPasswordToken = null;
-        client.resetPasswordExpires = null;
+        user.resetPasswordToken = null;
+        user.resetPasswordExpires = null;
 
 
-        await client.save();
+        await user.save();
 
         res.json({ message: "Mot de passe réinitialisé avec succès." });
         

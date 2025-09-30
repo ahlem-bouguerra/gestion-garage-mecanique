@@ -1,7 +1,7 @@
 // controllers/ProfileController.js - Version corrigée
-import { User } from "../models/User.js";
-import Governorate from "../models/Governorate.js";
-import City from "../models/City.js";
+import { User } from "../../models/User.js";
+import Governorate from "../../models/Governorate.js";
+import City from "../../models/City.js";
 
 export const getProfile = async (req, res) => {
   try {

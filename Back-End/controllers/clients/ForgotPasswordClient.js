@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import { Client } from "../models/Client.js";
-import { sendForgotPasswordMailerClient } from "../utils/sendForgotPasswordMailerClient.js";
+import { Client } from "../../models/Client.js";
+import { sendForgotPasswordMailerClient } from "../../utils/sendForgotPasswordMailerClient.js";
 
 export const forgotPasswordClient = async(req,res) =>{
     try{

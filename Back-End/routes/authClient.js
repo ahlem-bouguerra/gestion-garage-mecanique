@@ -1,20 +1,25 @@
 import express from "express";
 import passportClient from "../config/passportClient.js";
 import jwt from "jsonwebtoken";
+import { logout } from "../controllers/garagiste/loginController.js";
+import { registerClient } from "../controllers/clients/RegisterClient.js";
+import { loginClient } from "../controllers/clients/loginCLientController.js";
+import { verifEmailCLient } from "../controllers/clients/VerifEmailClientController.js";
+import { resetPasswordClient } from "../controllers/clients/ResetPasswordClient.js";
+import { forgotPasswordClient } from "../controllers/clients/ForgotPasswordClient.js";
 
 const router = express.Router();
 
-// Route pour initier l'authentification Google (CLIENT)
+// ========== GOOGLE OAUTH (CLIENT) ==========
 router.get(
-  "/google/client",
+  "/client/google",
   passportClient.authenticate("google-client", {
     scope: ["profile", "email"]
   })
 );
 
-// Callback Google pour CLIENT (port 3001)
 router.get(
-  "/google/callback/client",
+  "/client/google/callback",
   passportClient.authenticate("google-client", {
     failureRedirect: "http://localhost:3001/auth/sign-in?error=google_auth_failed",
     session: false
@@ -58,9 +63,8 @@ router.get(
 
       const userDataEncoded = Buffer.from(JSON.stringify(userData)).toString('base64');
 
-      // Redirection vers port 3001
       const redirectUrl = `http://localhost:3001/auth/sign-in?token=${token}&user=${encodeURIComponent(userDataEncoded)}`;
-      
+
       console.log('➡️ Redirection vers CLIENT port 3001');
       return res.redirect(redirectUrl);
 
@@ -70,5 +74,13 @@ router.get(
     }
   }
 );
+
+// ========== AUTH CLASSIQUE (CLIENT) ==========
+router.post("/client/signup", registerClient);
+router.post("/client/login", loginClient);
+router.post("/client/logout", logout);
+router.get("/client/verify-token/:token", verifEmailCLient);
+router.post("/client/reset-password", resetPasswordClient);
+router.post("/client/forgot-password", forgotPasswordClient);
 
 export default router;

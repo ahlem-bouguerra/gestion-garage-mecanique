@@ -1,21 +1,21 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { User } from "../models/User.js";
-import { sendVerificationEmail } from "../utils/mailer.js";
+import { Client } from "../../models/Client.js";
+import { sendVerificationEmail } from "../../utils/mailer.js";
 
 
-export const register = async (req, res) => {
-  const { username,garagenom,matriculefiscal, email, password, phone } = req.body;
+export const registerClient = async (req, res) => {
+  const { username,email, password, phone } = req.body;
 
   console.log("📥 Données reçues pour inscription :", req.body);
 
-  if (!username ||!garagenom || !matriculefiscal || !email || !password || !phone) {
+  if (!username ||!email || !password || !phone) {
     console.warn("⚠️ Champs manquants !");
     return res.status(400).json({ message: "Tous les champs sont requis." });
   }
 
   try {
-    const existing = await User.findOne({ email });
+    const existing = await Client.findOne({ email });
     if (existing) {
       console.warn("⚠️ Email déjà utilisé :", email);
       return res.status(400).json({ message: "Email déjà utilisé." });
@@ -24,30 +24,26 @@ export const register = async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
 
     // ✅ CRÉER UTILISATEUR - SANS AUCUNE MENTION DE LOCATION
-    const userData = {
+    const clientData = {
       username,
-      garagenom,
-      matriculefiscal,
       email,
       password: hashed,
       phone,
       isVerified: false
-      // ❌ ABSOLUMENT RIEN sur location
     };
 
-    console.log("📦 Données utilisateur à créer:", userData);
+    console.log("📦 Données utilisateur à créer:", clientData);
 
-    const user = await User.create(userData);
+    const client = await Client.create(clientData);
 
     console.log("✅ Utilisateur créé:", {
-      id: user._id,
-      email: user.email,
-      hasLocation: !!user.location
+      id: client._id,
+      email: client.email,
     });
 
     // Token pour vérification email
     const verificationToken = jwt.sign(
-      { userId: user._id, purpose: 'email_verification' }, 
+      { clientId: client._id, purpose: 'email_verification' }, 
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -57,7 +53,7 @@ export const register = async (req, res) => {
 
     res.status(201).json({ 
       message: "Inscription réussie. Vérifie ton email.",
-      userId: user._id 
+      clientId: client._id 
     });
 
   } catch (err) {

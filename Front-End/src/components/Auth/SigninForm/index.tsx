@@ -139,7 +139,7 @@ export default function SigninWithPassword() {
     console.log("🔄 Démarrage connexion Google...");
     setGoogleLoading(true);
 
-    const googleAuthUrl = "http://localhost:5000/api/google";
+    const googleAuthUrl = "http://localhost:5000/api/garage/google";
     console.log("🔗 Redirection vers:", googleAuthUrl);
 
     // Ouvrir dans la même fenêtre pour une meilleure UX

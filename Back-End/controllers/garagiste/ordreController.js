@@ -1,8 +1,8 @@
-import OrdreTravail from '../models/Ordre.js';
-import Devis from '../models/Devis.js';
-import Atelier from '../models/Atelier.js';
-import Service from '../models/Service.js';
-import Mecanicien from '../models/Mecanicien.js';
+import OrdreTravail from '../../models/Ordre.js';
+import Devis from '../../models/Devis.js';
+import Atelier from '../../models/Atelier.js';
+import Service from '../../models/Service.js';
+import Mecanicien from '../../models/Mecanicien.js';
 import mongoose from 'mongoose';
 
 

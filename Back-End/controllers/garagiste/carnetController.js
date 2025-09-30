@@ -1,7 +1,7 @@
-import CarnetEntretien from '../models/CarnetEntretien.js';
-import Devis from '../models/Devis.js';
-import Vehicule from '../models/Vehicule.js';
-import OrdreTravail from '../models/Ordre.js';
+import CarnetEntretien from '../../models/CarnetEntretien.js';
+import Devis from '../../models/Devis.js';
+import Vehicule from '../../models/Vehicule.js';
+import OrdreTravail from '../../models/Ordre.js';
 import mongoose from 'mongoose';
 
 export const getCarnetByVehiculeId = async (req, res) => {

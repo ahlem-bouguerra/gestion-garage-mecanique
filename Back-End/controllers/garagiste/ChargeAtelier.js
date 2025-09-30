@@ -1,4 +1,4 @@
-import OrdreTravail from '../models/Ordre.js';
+import OrdreTravail from '../../models/Ordre.js';
 
 export const getDashboardData = async (req, res) => {
   try {

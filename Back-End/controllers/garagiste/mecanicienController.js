@@ -1,5 +1,5 @@
-import Mecanicien from '../models/Mecanicien.js';
-import { validateTunisianPhone, validatePhoneMiddleware } from '../utils/phoneValidator.js';
+import Mecanicien from '../../models/Mecanicien.js';
+import { validateTunisianPhone, validatePhoneMiddleware } from '../../utils/phoneValidator.js';
 import mongoose from "mongoose";
 
 

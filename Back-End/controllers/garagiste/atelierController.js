@@ -1,4 +1,4 @@
-import Atelier from '../models/Atelier.js';
+import Atelier from '../../models/Atelier.js';
 
 
 export const getAllAteliers = async (req, res) => {

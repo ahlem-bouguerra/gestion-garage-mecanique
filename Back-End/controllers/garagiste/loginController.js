@@ -1,39 +1,30 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { Client } from '../models/Client.js';
+import { User } from '../../models/User.js';
 
 
 
-export const loginClient = async (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const client = await Client.findOne({ email });
-    if (!client) return res.status(401).json({ message: "Utilisateur non trouvé" });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(401).json({ message: "Utilisateur non trouvé" });
 
-    if (!client.isVerified) {
+    if (!user.isVerified) {
       return res.status(403).json({ message: "Compte non vérifié. Vérifiez votre email." });
     }
 
-    const passwordMatch = await bcrypt.compare(password, client.password);
+    const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) return res.status(401).json({ message: "Mot de passe incorrect" });
 
     // Générer token JWT ou session ici
-    const token = jwt.sign({ clientId: client._id ,email: client.email ,phone: client.phone ,username: client.username}, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ userId: user._id ,email: user.email ,phone: user.phone ,username: user.username , garagenom: user.garagenom ,matriculefiscal: user.matriculefiscal}, process.env.JWT_SECRET, { expiresIn: '1d' });
 
 
-    console.log(`Utilisateur connecté : ${client.email} (token: ${token})`);
+    console.log(`Utilisateur connecté : ${user.email} (token: ${token})`);
 
-    res.json({ 
-      message: "Connexion réussie", 
-      token,
-      user: {
-        username: client.username,
-        email: client.email,
-        phone: client.phone,
-        img: client.img || "/images/user/user-03.png"
-      }
-    });
+    res.json({ message: "Connexion réussie", token });
 
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur" });
