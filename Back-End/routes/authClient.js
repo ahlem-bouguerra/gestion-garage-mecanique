@@ -1,12 +1,14 @@
 import express from "express";
 import passportClient from "../config/passportClient.js";
 import jwt from "jsonwebtoken";
+import { clientauthMiddleware } from "../middlewares/clientauthMiddleware.js";
 import { logout } from "../controllers/garagiste/loginController.js";
 import { registerClient } from "../controllers/clients/RegisterClient.js";
 import { loginClient } from "../controllers/clients/loginCLientController.js";
 import { verifEmailCLient } from "../controllers/clients/VerifEmailClientController.js";
 import { resetPasswordClient } from "../controllers/clients/ResetPasswordClient.js";
 import { forgotPasswordClient } from "../controllers/clients/ForgotPasswordClient.js";
+import { getProfile,updateProfile } from "../controllers/clients/profileContoller.js";
 
 const router = express.Router();
 
@@ -82,5 +84,7 @@ router.post("/client/logout", logout);
 router.get("/client/verify-token/:token", verifEmailCLient);
 router.post("/client/reset-password", resetPasswordClient);
 router.post("/client/forgot-password", forgotPasswordClient);
+router.get("/client/profile",clientauthMiddleware,getProfile);
+router.put('/client/update-profile', clientauthMiddleware,updateProfile);
 
 export default router;

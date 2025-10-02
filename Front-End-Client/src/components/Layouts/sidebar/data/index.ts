@@ -25,13 +25,13 @@ export const NAV_DATA = [
           },
           {
             title: "Nouvelle réservation",
-            url: "/client/reservations/nouvelle",
+            url: "/reservation-cote-client",
           },
         ],
       },
       {
         title: "Mes Véhicules",
-        url: "/client/vehicules",
+        url: "/vehicules",
         icon: Car,
         items: [
           {
@@ -40,7 +40,7 @@ export const NAV_DATA = [
           },
           {
             title: "Ajouter véhicule",
-            url: "/client/vehicules/ajouter",
+            url: "/Voiture",
           },
         ],
       },
@@ -89,7 +89,7 @@ export const NAV_DATA = [
     items: [
       {
         title: "Mon Profil",
-        url: "/client/profil",
+        url: "/profil",
         icon: User,
         items: [],
       },
