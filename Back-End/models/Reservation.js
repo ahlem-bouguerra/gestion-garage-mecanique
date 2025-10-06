@@ -7,6 +7,12 @@ const reservationSchema = new mongoose.Schema({
     required: true
   },
   
+  vehiculeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vehicule',
+    default: null
+  },
+
   clientName: {
     type: String,
     required: true,

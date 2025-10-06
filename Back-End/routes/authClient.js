@@ -12,7 +12,7 @@ import { getProfile,updateProfile } from "../controllers/clients/profileContolle
 import { getMesVehicules, createVehiculeClient, updateMonVehicule, deleteMonVehicule } from "../controllers/clients/vehiculeController.js";
 import { getServicesByGarageId } from "../controllers/clients/serviceController.js";
 import {getClientProfile} from "../controllers/clients/profileController.js";
-import { ClientCreateReservation, ClientGetReservations, ClientUpdateReservation } from '../controllers/clients/revervationController.js';
+import { ClientCreateReservation, ClientGetReservations, ClientUpdateReservation,ClientCancelReservation } from '../controllers/clients/revervationController.js';
 const router = express.Router();
 
 // ========== GOOGLE OAUTH (CLIENT) ==========
@@ -103,5 +103,6 @@ router.get("/get-Client-profile",clientauthMiddleware, getClientProfile);
 router.post('/create-reservation',clientauthMiddleware, ClientCreateReservation);
 router.get('/client-reservations/',clientauthMiddleware, ClientGetReservations);
 router.put('/client-update/reservations/:id',clientauthMiddleware, ClientUpdateReservation);
+router.put('/cancel-reservation/:reservationId', clientauthMiddleware, ClientCancelReservation);
 
 export default router;

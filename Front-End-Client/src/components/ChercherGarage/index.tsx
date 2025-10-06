@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Search, MapPin, List, Map, Navigation, Phone, Mail, Clock, Car } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import axios from 'axios';
+import ClientReservationManagement from '../gestion-reservations-client'; // Ajuste le chemin
 
 // Types pour TypeScript
 interface Governorate {
@@ -50,7 +51,7 @@ const GarageSearch = () => {
   const [garages, setGarages] = useState<Garage[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('map');
-  const [userLocation, setUserLocation] = useState<{latitude: number, longitude: number} | null>(null);
+  const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number } | null>(null);
   const [userAddress, setUserAddress] = useState('');
   const [filters, setFilters] = useState({
     governorate: '',
@@ -67,7 +68,23 @@ const GarageSearch = () => {
   const [loadingLocations, setLoadingLocations] = useState(false);
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   const [selectedGarage, setSelectedGarage] = useState<Garage | null>(null);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [showChatModal, setShowChatModal] = useState(false);
 
+  const checkUnreadMessages = async () => {
+    try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const res = await axios.get("http://localhost:5000/api/client-reservations/", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Compter les réservations avec status 'contre_propose' (nécessitant une action)
+      const unread = res.data.reservations.filter(r => r.status === 'contre_propose').length;
+      setUnreadMessages(unread);
+    } catch (err) {
+      console.error("Erreur check messages:", err);
+    }
+  };
   // Fonction pour obtenir l'adresse à partir des coordonnées
   const getUserAddress = async (latitude: number, longitude: number) => {
     try {
@@ -75,7 +92,7 @@ const GarageSearch = () => {
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=fr`
       );
       const data = await response.json();
-      
+
       if (data.display_name) {
         const address = `${data.address?.city || data.address?.town || data.address?.village || ''}, ${data.address?.state || ''}`;
         setUserAddress(address);
@@ -85,24 +102,30 @@ const GarageSearch = () => {
     }
   };
 
+
+  useEffect(() => {
+    checkUnreadMessages();
+    const interval = setInterval(checkUnreadMessages, 30000); // Vérifier toutes les 30 secondes
+    return () => clearInterval(interval);
+  }, []);
   // Charger les gouvernorats depuis l'API
   useEffect(() => {
     const loadGovernorates = async () => {
       setLoadingLocations(true);
       try {
         const response = await fetch('http://localhost:5000/api/governorates');
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
           throw new Error('La réponse n\'est pas du JSON valide');
         }
 
         const data = await response.json();
-        
+
         if (Array.isArray(data)) {
           setGovernorates(data.map(gov => ({
             _id: gov._id,
@@ -122,6 +145,18 @@ const GarageSearch = () => {
     loadGovernorates();
   }, []);
 
+
+  useEffect(() => {
+    const header = document.querySelector('header');
+    if (!header) return;
+
+    if (showChatModal ) {
+      header.classList.add("hidden");
+    } else {
+      header.classList.remove("hidden");
+    }
+  }, [showChatModal]);
+
   // Charger les villes quand un gouvernorat est sélectionné
   useEffect(() => {
     const loadCities = async () => {
@@ -133,18 +168,18 @@ const GarageSearch = () => {
       setLoadingLocations(true);
       try {
         const response = await fetch(`http://localhost:5000/api/cities/${filters.governorate}`);
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
           throw new Error('La réponse n\'est pas du JSON valide');
         }
 
         const data = await response.json();
-        
+
         if (Array.isArray(data)) {
           setCities(data.map(city => ({
             _id: city._id,
@@ -174,7 +209,7 @@ const GarageSearch = () => {
             longitude: position.coords.longitude
           };
           setUserLocation(location);
-          
+
           // Obtenir l'adresse
           await getUserAddress(location.latitude, location.longitude);
         },
@@ -188,22 +223,22 @@ const GarageSearch = () => {
   // Calcul de distance amélioré avec la formule de Haversine
   const calculateDistance = (garage: Garage) => {
     if (!userLocation || !garage.location?.coordinates) return null;
-    
+
     const [garageLng, garageLat] = garage.location.coordinates;
     const { latitude: userLat, longitude: userLng } = userLocation;
-    
+
     const R = 6371; // Rayon de la Terre en km
     const dLat = (garageLat - userLat) * Math.PI / 180;
     const dLng = (garageLng - userLng) * Math.PI / 180;
-    
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(userLat * Math.PI / 180) * Math.cos(garageLat * Math.PI / 180) * 
-      Math.sin(dLng/2) * Math.sin(dLng/2);
-    
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(userLat * Math.PI / 180) * Math.cos(garageLat * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
-    
+
     return distance;
   };
 
@@ -226,7 +261,7 @@ const GarageSearch = () => {
           const route = data.routes[0];
           const distanceKm = route.distance / 1000;
           const durationMinutes = Math.round(route.duration / 60);
-          
+
           return {
             distance: distanceKm,
             duration: durationMinutes
@@ -236,7 +271,7 @@ const GarageSearch = () => {
     } catch (error) {
       console.error('Erreur calcul distance routière:', error);
     }
-    
+
     return null;
   };
 
@@ -245,7 +280,7 @@ const GarageSearch = () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      
+
       if (searchTerm) params.append('search', searchTerm);
       if (filters.governorate) params.append('governorate', filters.governorate);
       if (filters.city) params.append('city', filters.city);
@@ -263,13 +298,13 @@ const GarageSearch = () => {
       });
 
       const response = await fetch(`http://localhost:5000/api/search?${params}`);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success && Array.isArray(data.garages)) {
         // Calculer les distances pour chaque garage
         const garagesWithDistances = await Promise.all(
@@ -283,11 +318,11 @@ const GarageSearch = () => {
                 const drivingData = await calculateDrivingDistance(garage);
                 if (drivingData) {
                   garage.drivingDistance = drivingData.distance;
-                  
+
                   // Calcul du temps estimé plus précis
                   const hours = Math.floor(drivingData.duration / 60);
                   const minutes = drivingData.duration % 60;
-                  
+
                   if (hours > 0) {
                     garage.estimatedTime = `${hours}h ${minutes}min`;
                   } else {
@@ -341,18 +376,18 @@ const GarageSearch = () => {
     return () => clearTimeout(timer);
   }, [searchTerm, filters]);
 
-const handleGarageSelect = (garageId: string) => {
-  const garage = garages.find(g => g._id === garageId);
-  if (garage) {
-    setSelectedGarage(garage); // Mettre le garage sélectionné dans le state
-  }
-};
+  const handleGarageSelect = (garageId: string) => {
+    const garage = garages.find(g => g._id === garageId);
+    if (garage) {
+      setSelectedGarage(garage); // Mettre le garage sélectionné dans le state
+    }
+  };
 
   const getDirections = (garage) => {
     if (!garage.location?.coordinates) return;
-    
+
     const [lng, lat] = garage.location.coordinates;
-    
+
     // Ouvrir Google Maps avec directions
     if (userLocation) {
       const url = `https://www.google.com/maps/dir/${userLocation.latitude},${userLocation.longitude}/${lat},${lng}`;
@@ -364,58 +399,58 @@ const handleGarageSelect = (garageId: string) => {
   };
 
   useEffect(() => {
-  const fetchServices = async () => {
-  if (!selectedGarage) {
-    setServices([]);
-    return;
-  }
+    const fetchServices = async () => {
+      if (!selectedGarage) {
+        setServices([]);
+        return;
+      }
 
-  try {
-    // ❌ FAUX : axios.get("http://localhost:5000/api/services/garage/:garageId")
-    // ✅ CORRECT : Remplacer :garageId par selectedGarage._id
-    const res = await axios.get(`http://localhost:5000/api/services/garage/${selectedGarage._id}`);
-    
-    if (Array.isArray(res.data)) {
-      setServices(res.data);
-    } else if (res.data.success && Array.isArray(res.data.services)) {
-      setServices(res.data.services);
-    } else {
-      setServices([]);
-    }
-  } catch (err: any) {
-    console.error("❌ Erreur lors du chargement des services:", err.response?.data || err.message);
-    setServices([]);
-  }
-};
+      try {
+        // ❌ FAUX : axios.get("http://localhost:5000/api/services/garage/:garageId")
+        // ✅ CORRECT : Remplacer :garageId par selectedGarage._id
+        const res = await axios.get(`http://localhost:5000/api/services/garage/${selectedGarage._id}`);
 
-  fetchServices();
-}, [selectedGarage]);
+        if (Array.isArray(res.data)) {
+          setServices(res.data);
+        } else if (res.data.success && Array.isArray(res.data.services)) {
+          setServices(res.data.services);
+        } else {
+          setServices([]);
+        }
+      } catch (err: any) {
+        console.error("❌ Erreur lors du chargement des services:", err.response?.data || err.message);
+        setServices([]);
+      }
+    };
 
-const handleReservation = (garage) => {
-  // Stocker les données du garage dans localStorage ou les passer via query params
-  const garageData = {
-    id: garage._id,
-    name: garage.garagenom,
-    address: garage.streetAddress,
-    city: garage.cityId?.name,
-    governorate: garage.governorateId?.name,
-    phone: garage.phone,
-    email: garage.email,
+    fetchServices();
+  }, [selectedGarage]);
+
+  const handleReservation = (garage) => {
+    // Stocker les données du garage dans localStorage ou les passer via query params
+    const garageData = {
+      id: garage._id,
+      name: garage.garagenom,
+      address: garage.streetAddress,
+      city: garage.cityId?.name,
+      governorate: garage.governorateId?.name,
+      phone: garage.phone,
+      email: garage.email,
+    };
+
+    // Passer les données via query params (plus fiable que localStorage)
+    const queryParams = new URLSearchParams({
+      garageId: garage._id,
+      garageName: garage.garagenom,
+      garageAddress: garage.streetAddress || '',
+      garageCity: garage.cityId?.name || '',
+      garageGovernorate: garage.governorateId?.name || '',
+      garagePhone: garage.phone || '',
+      garageEmail: garage.email || ''
+    }).toString();
+
+    router.push(`/demande-reservation?${queryParams}`);
   };
-  
-  // Passer les données via query params (plus fiable que localStorage)
-  const queryParams = new URLSearchParams({
-    garageId: garage._id,
-    garageName: garage.garagenom,
-    garageAddress: garage.streetAddress || '',
-    garageCity: garage.cityId?.name || '',
-    garageGovernorate: garage.governorateId?.name || '',
-    garagePhone: garage.phone || '',
-    garageEmail: garage.email || ''
-  }).toString();
-  
-  router.push(`/demande-reservation?${queryParams}`);
-};
 
 
   return (
@@ -425,7 +460,7 @@ const handleReservation = (garage) => {
         <h1 className="text-2xl font-bold text-gray-800 mb-6">
           Trouvez un garage près de chez vous
         </h1>
-        
+
         {/* Barre de recherche principale */}
         <div className="relative mb-4">
           <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -441,10 +476,10 @@ const handleReservation = (garage) => {
         {/* Filtres */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {/* Sélection gouvernorat */}
-          <select 
+          <select
             className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             value={filters.governorate}
-            onChange={(e) => setFilters({...filters, governorate: e.target.value, city: ''})}
+            onChange={(e) => setFilters({ ...filters, governorate: e.target.value, city: '' })}
             disabled={loadingLocations}
           >
             <option value="">Tous les gouvernorats</option>
@@ -454,27 +489,27 @@ const handleReservation = (garage) => {
               </option>
             ))}
           </select>
-          
+
           {/* Sélection ville */}
-          <select 
+          <select
             className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             value={filters.city}
-            onChange={(e) => setFilters({...filters, city: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, city: e.target.value })}
             disabled={!filters.governorate || loadingLocations}
           >
             <option value="">Toutes les villes</option>
             {cities.map((city) => (
               <option key={city._id} value={city._id}>
-                {city.name} 
+                {city.name}
               </option>
             ))}
           </select>
-          
+
           {/* Sélection rayon - MODIFIÉ avec des options plus larges */}
-          <select 
+          <select
             className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             value={filters.radius}
-            onChange={(e) => setFilters({...filters, radius: parseInt(e.target.value)})}
+            onChange={(e) => setFilters({ ...filters, radius: parseInt(e.target.value) })}
           >
             <option value="10000">Dans un rayon de 10km</option>
             <option value="25000">Dans un rayon de 25km</option>
@@ -488,47 +523,45 @@ const handleReservation = (garage) => {
         {/* Toggle vue liste/carte */}
         <div className="flex justify-between items-center">
           <div className="flex flex-col gap-4">
-  <p className="text-gray-600">
-    {garages.length} garage{garages.length > 1 ? 's' : ''} trouvé{garages.length > 1 ? 's' : ''}
-  </p>
-  
-  {userLocation && (
-    <div className="text-sm bg-green-50 px-3 py-2 rounded-lg border border-green-200">
-      <div className="flex items-center gap-2 text-green-700">
-        <span className="text-green-600">📍</span>
-        <span className="font-medium">Position détectée</span>
-      </div>
-      {userAddress && (
-        <div className="text-green-600 text-xs mt-1">
-          📍 {userAddress}
-        </div>
-      )}
-      <div className="text-green-500 text-xs mt-1">
-        Coordonnées: {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
-      </div>
-      <div className="text-blue-500 text-xs mt-1 font-medium">
-        Rayon de recherche: {filters.radius / 1000}km
-      </div>
-    </div>
-  )}
-</div>
+            <p className="text-gray-600">
+              {garages.length} garage{garages.length > 1 ? 's' : ''} trouvé{garages.length > 1 ? 's' : ''}
+            </p>
 
-          
+            {userLocation && (
+              <div className="text-sm bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                <div className="flex items-center gap-2 text-green-700">
+                  <span className="text-green-600">📍</span>
+                  <span className="font-medium">Position détectée</span>
+                </div>
+                {userAddress && (
+                  <div className="text-green-600 text-xs mt-1">
+                    📍 {userAddress}
+                  </div>
+                )}
+                <div className="text-green-500 text-xs mt-1">
+                  Coordonnées: {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+                </div>
+                <div className="text-blue-500 text-xs mt-1 font-medium">
+                  Rayon de recherche: {filters.radius / 1000}km
+                </div>
+              </div>
+            )}
+          </div>
+
+
           <div className="flex bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode('list')}
-              className={`px-4 py-2 rounded-md flex items-center gap-2 ${
-                viewMode === 'list' ? 'bg-white shadow' : 'text-gray-600'
-              }`}
+              className={`px-4 py-2 rounded-md flex items-center gap-2 ${viewMode === 'list' ? 'bg-white shadow' : 'text-gray-600'
+                }`}
             >
               <List className="h-4 w-4" />
               Liste
             </button>
             <button
               onClick={() => setViewMode('map')}
-              className={`px-4 py-2 rounded-md flex items-center gap-2 ${
-                viewMode === 'map' ? 'bg-white shadow' : 'text-gray-600'
-              }`}
+              className={`px-4 py-2 rounded-md flex items-center gap-2 ${viewMode === 'map' ? 'bg-white shadow' : 'text-gray-600'
+                }`}
             >
               <Map className="h-4 w-4" />
               Carte
@@ -546,8 +579,8 @@ const handleReservation = (garage) => {
         <>
           {viewMode === 'map' ? (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <MapView 
-                garages={garages} 
+              <MapView
+                garages={garages}
                 userLocation={userLocation}
                 userAddress={userAddress}
                 onGarageSelect={handleGarageSelect}
@@ -580,7 +613,7 @@ const handleReservation = (garage) => {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2 text-gray-600">
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />
@@ -589,14 +622,14 @@ const handleReservation = (garage) => {
                           {garage.cityId?.name}, {garage.governorateId?.name}
                         </span>
                       </div>
-                      
+
                       {garage.phone && (
                         <div className="flex items-center gap-2">
                           <Phone className="h-4 w-4" />
                           <span className="text-sm">{garage.phone}</span>
                         </div>
                       )}
-                      
+
                       {garage.email && (
                         <div className="flex items-center gap-2">
                           <Mail className="h-4 w-4" />
@@ -613,15 +646,15 @@ const handleReservation = (garage) => {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="mt-4 flex gap-2">
-                      <button 
+                      <button
                         onClick={() => handleGarageSelect(garage._id)}
                         className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
                       >
                         Voir détails
                       </button>
-                      <button 
+                      <button
                         onClick={() => getDirections(garage)}
                         className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1"
                       >
@@ -634,138 +667,137 @@ const handleReservation = (garage) => {
               ))}
             </div>
           )}
-        </>  
+        </>
       )}
-{selectedGarage && (
-  <div className="bg-white rounded-lg shadow-lg p-6 mt-6 border-l-4 border-blue-500">
-    <div className="flex justify-between items-start mb-4">
-      <h2 className="text-2xl font-bold text-gray-800">{selectedGarage.garagenom}</h2>
-      <button 
-        onClick={() => setSelectedGarage(null)}
-        className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200"
-        aria-label="Fermer"
-      >
-        ×
-      </button>
-    </div>
-    
-    <div className="grid lg:grid-cols-2 gap-8">
-      {/* Informations principales */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
-          Informations du garage
-        </h3>
-        
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-blue-600">👤</span>
-            </div>
-            <span className="font-medium">{selectedGarage.username || 'Propriétaire non spécifié'}</span>
+      {selectedGarage && (
+        <div className="bg-white rounded-lg shadow-lg p-6 mt-6 border-l-4 border-blue-500">
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-2xl font-bold text-gray-800">{selectedGarage.garagenom}</h2>
+            <button
+              onClick={() => setSelectedGarage(null)}
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200"
+              aria-label="Fermer"
+            >
+              ×
+            </button>
           </div>
-          
-          <div className="flex items-start gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-              <span className="text-blue-600">📍</span>
-            </div>
-            <div className="flex-1">
-              <p className="font-medium">
-                {selectedGarage.streetAddress && `${selectedGarage.streetAddress}`}
-              </p>
-              <p className="text-sm text-gray-500">
-                {selectedGarage.cityId?.name}, {selectedGarage.governorateId?.name}
-              </p>
-            </div>
-          </div>
-          
-          {selectedGarage.phone && (
-            <div className="flex items-center gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600">📞</span>
-              </div>
-              <a 
-                href={`tel:${selectedGarage.phone}`} 
-                className="font-medium hover:text-blue-600 transition-colors"
-              >
-                {selectedGarage.phone}
-              </a>
-            </div>
-          )}
-          
-          {selectedGarage.email && (
-            <div className="flex items-center gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                <span className="text-purple-600">✉️</span>
-              </div>
-              <a 
-                href={`mailto:${selectedGarage.email}`} 
-                className="font-medium hover:text-blue-600 transition-colors"
-              >
-                {selectedGarage.email}
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* Services proposés */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2 flex items-center gap-2">
-          <span className="text-blue-600">🔧</span>
-          Services proposés
-        </h3>
-        
-        {services.length > 0 ? (
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {services.map((service) => (
-              <div 
-                key={service._id} 
-                className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors border-l-4 border-blue-200"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-gray-800">{service.name}</h4>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    service.statut === 'Actif' || service.statut === 'actif' 
-                      ? 'bg-green-100 text-green-700' 
-                      : service.statut === 'Inactif' || service.statut === 'inactif'
-                      ? 'bg-red-100 text-red-700'
-                      : 'bg-red-100 text-red-700'
-                  }`}>
-                    {service.statut || 'Non défini'}
-                  </span>
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Informations principales */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                Informations du garage
+              </h3>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600">👤</span>
+                  </div>
+                  <span className="font-medium">{selectedGarage.username || 'Propriétaire non spécifié'}</span>
                 </div>
-                
-                {service.description && (
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {service.description}
-                  </p>
+
+                <div className="flex items-start gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+                    <span className="text-blue-600">📍</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">
+                      {selectedGarage.streetAddress && `${selectedGarage.streetAddress}`}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {selectedGarage.cityId?.name}, {selectedGarage.governorateId?.name}
+                    </p>
+                  </div>
+                </div>
+
+                {selectedGarage.phone && (
+                  <div className="flex items-center gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <span className="text-green-600">📞</span>
+                    </div>
+                    <a
+                      href={`tel:${selectedGarage.phone}`}
+                      className="font-medium hover:text-blue-600 transition-colors"
+                    >
+                      {selectedGarage.phone}
+                    </a>
+                  </div>
+                )}
+
+                {selectedGarage.email && (
+                  <div className="flex items-center gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                      <span className="text-purple-600">✉️</span>
+                    </div>
+                    <a
+                      href={`mailto:${selectedGarage.email}`}
+                      className="font-medium hover:text-blue-600 transition-colors"
+                    >
+                      {selectedGarage.email}
+                    </a>
+                  </div>
                 )}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 bg-gray-50 rounded-lg">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-              <span className="text-gray-400 text-2xl">🔧</span>
             </div>
-            <p className="text-gray-500 font-medium">Aucun service disponible</p>
-            <p className="text-gray-400 text-sm mt-1">Ce garage n'a pas encore ajouté de services.</p>
-          </div>
-        )}
-      </div>
-    </div>
 
-    {/* Footer optionnel pour actions */}
-    <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end gap-3">
-<button 
-  onClick={() => handleReservation(selectedGarage)}
-  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
->
-  Réserver
-</button>
-    </div>
-  </div>
-)}
+            {/* Services proposés */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2 flex items-center gap-2">
+                <span className="text-blue-600">🔧</span>
+                Services proposés
+              </h3>
+
+              {services.length > 0 ? (
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {services.map((service) => (
+                    <div
+                      key={service._id}
+                      className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors border-l-4 border-blue-200"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-semibold text-gray-800">{service.name}</h4>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${service.statut === 'Actif' || service.statut === 'actif'
+                            ? 'bg-green-100 text-green-700'
+                            : service.statut === 'Inactif' || service.statut === 'inactif'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                          {service.statut || 'Non défini'}
+                        </span>
+                      </div>
+
+                      {service.description && (
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                          {service.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-gray-400 text-2xl">🔧</span>
+                  </div>
+                  <p className="text-gray-500 font-medium">Aucun service disponible</p>
+                  <p className="text-gray-400 text-sm mt-1">Ce garage n'a pas encore ajouté de services.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Footer optionnel pour actions */}
+          <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end gap-3">
+            <button
+              onClick={() => handleReservation(selectedGarage)}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Réserver
+            </button>
+          </div>
+        </div>
+      )}
 
 
       {/* Message si aucun résultat */}
@@ -780,7 +812,30 @@ const handleReservation = (garage) => {
           )}
         </div>
       )}
+      {/* Bouton chat flottant */}
+{/* Bouton chat flottant */}
+{/* Bouton chat flottant */}
+<button
+  onClick={() => setShowChatModal(true)}
+  className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center z-50 hover:scale-110"
+>
+  <Mail className="h-6 w-6" />
+  {unreadMessages > 0 && (
+    <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+      {unreadMessages}
+    </span>
+  )}
+</button>
+
+{/* Modal de chat */}
+{showChatModal && (
+  <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <ClientReservationManagement onClose={() => setShowChatModal(false)} />
+  </div>
+)}
     </div>
+    
+
   );
 };
 

@@ -250,6 +250,10 @@ export default function GarageReservationManagement() {
                       <div className="font-medium text-blue-900">Service: {selectedReservation.serviceId?.name}</div>
                       <div className="text-blue-700">📅 {new Date(selectedReservation.creneauDemande.date).toLocaleDateString('fr-FR')} à {selectedReservation.creneauDemande.heureDebut}</div>
                     </div>
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <div className="font-medium text-blue-900">Véhicule:</div>
+                      <div className="text-blue-700">{selectedReservation.vehiculeId?.marque} - {selectedReservation.vehiculeId?.modele}- {selectedReservation.vehiculeId?.immatriculation}</div>
+                    </div>
                     <div className="bg-gray-50 p-3 rounded-lg">
                       <div className="font-medium text-gray-700 mb-1">Description:</div>
                       <div className="text-gray-600">{selectedReservation.descriptionDepannage}</div>

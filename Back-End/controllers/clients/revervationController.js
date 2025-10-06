@@ -2,12 +2,13 @@ import { User } from "../../models/User.js";
 import  Service  from "../../models/Service.js";
 import  Reservation  from "../../models/Reservation.js";
 import { Client } from "../../models/Client.js";
+import Vehicule from "../../models/Vehicule.js";
 
 
 
 export const ClientCreateReservation = async (req, res) => {
   try {
-    const {garageId,clientId,clientName,clientPhone,clientEmail,serviceId,creneauDemande,descriptionDepannage} = req.body;
+    const {garageId,clientId,vehiculeId,clientName,clientPhone,clientEmail,serviceId,creneauDemande,descriptionDepannage} = req.body;
 
     // Vérifier que le client existe (optionnel mais recommandé)
     if (clientId) {
@@ -19,6 +20,17 @@ export const ClientCreateReservation = async (req, res) => {
         });
       }
     }
+
+    if (vehiculeId) {
+      const vehicule = await Vehicule.findById(vehiculeId);
+      if (!vehicule) {
+        return res.status(404).json({
+          success: false,
+          message: "vehicule non trouvé",
+        });
+      }
+    }
+
 
     // Vérifier que le garage existe
     const garage = await User.findById(garageId);
@@ -60,6 +72,7 @@ export const ClientCreateReservation = async (req, res) => {
     // Créer la réservation
     const reservation = new Reservation({
       garageId,
+      vehiculeId,
       clientId,
       clientName: clientName.trim(),
       clientPhone: clientPhone.trim(),
@@ -79,7 +92,8 @@ export const ClientCreateReservation = async (req, res) => {
     await savedReservation.populate([
       { path: "garageId", select: "name address city phone email" },
       { path: "serviceId", select: "name description" },
-      { path: "clientId", select: "username email phone" }
+      { path: "clientId", select: "username email phone" },
+      { path: "vehiculeId", select: "marque modele immatriculation annee typeCarburant kilometrage" }
     ]);
 
     res.status(201).json({
@@ -118,6 +132,9 @@ export const ClientGetReservations = async (req, res) => {
     const reservations = await Reservation.find({ clientId })
       .populate('serviceId', 'name')
       .populate('garageId', 'username phone')
+      .populate('vehiculeId', 'immatriculation marque modele annee couleur typeCarburant kilometrage')
+
+
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -249,6 +266,51 @@ export const ClientUpdateReservation = async (req, res) => {
     res.status(500).json({ 
       error: "Erreur serveur lors de la mise à jour",
       details: error.message
+    });
+  }
+};
+
+export const ClientCancelReservation = async (req, res) => {
+  try {
+    const clientId = req.client._id;
+    const { reservationId } = req.params; // ou req.body
+    
+    // Trouver la réservation
+    const reservation = await Reservation.findOne({ 
+      _id: reservationId, 
+      clientId 
+    });
+    
+    if (!reservation) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Réservation non trouvée' 
+      });
+    }
+    
+    // Vérifier si elle peut être annulée
+    if (reservation.status === 'annule') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Réservation déjà annulée' 
+      });
+    }
+    
+    // Annuler la réservation
+    reservation.status = 'annule';
+    await reservation.save();
+    
+    res.status(200).json({ 
+      success: true, 
+      message: 'Réservation annulée avec succès',
+      reservation 
+    });
+    
+  } catch (error) {
+    console.error('Erreur:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erreur serveur' 
     });
   }
 };

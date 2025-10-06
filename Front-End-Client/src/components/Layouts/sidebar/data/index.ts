@@ -5,6 +5,12 @@ export const NAV_DATA = [
     label: "MON ESPACE",
     items: [
       {
+        title: "Trouver un garage",
+        url: "/chercher-garage",
+        icon: MapPin,
+        items: [],
+      },
+      {
         title: "Tableau de bord",
         url: "/client/dashboard",
         icon: User,
@@ -16,12 +22,8 @@ export const NAV_DATA = [
         icon: Calendar,
         items: [
           {
-            title: "Réservations en cours",
-            url: "/client/reservations/en-cours",
-          },
-          {
             title: "Historique",
-            url: "/client/reservations/historique",
+            url: "/historique-reservation",
           },
           {
             title: "Nouvelle réservation",
@@ -66,12 +68,6 @@ export const NAV_DATA = [
   {
     label: "SERVICES",
     items: [
-      {
-        title: "Trouver un garage",
-        url: "/chercher-garage",
-        icon: MapPin,
-        items: [],
-      },
       {
         title: "Paiements",
         url: "/client/paiements",

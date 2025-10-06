@@ -103,6 +103,7 @@ export const getReservations = async (req, res) => {
     const reservations = await Reservation.find()
       .populate('serviceId', 'name') // Populer seulement le champ 'name' du service
       .populate('garageId', 'username phone') // Optionnel: populer aussi le garage
+      .populate('vehiculeId', 'immatriculation marque modele annee couleur typeCarburant kilometrage')
       .sort({ createdAt: -1 }); // Trier par date de création décroissante
 
     res.status(200).json(reservations);

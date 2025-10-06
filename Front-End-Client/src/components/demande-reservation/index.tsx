@@ -14,6 +14,7 @@ interface Service {
 
 
 const ReservationForm = () => {
+    const [voitures, setVoitures] = useState([]); // Liste de voitures
     const router = useRouter();
     const searchParams = useSearchParams();
     const [garageData, setGarageData] = useState<any>({});
@@ -23,6 +24,7 @@ const ReservationForm = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const [formData, setFormData] = useState({
         clientID:'',
+        vehiculeId:'',
         clientName: '',
         clientPhone: '',
         clientEmail: '',
@@ -70,6 +72,24 @@ const ReservationForm = () => {
 
         fetchUserWithLocation();
     }, []);
+
+      useEffect(() => {
+    const fetchVoitures = async () => {
+         const token = localStorage.getItem("token");
+            if (!token) return;
+      try {
+        const res = await axios.get("http://localhost:5000/api/get-all-mes-vehicules",{
+                    headers: { Authorization: `Bearer ${token}` },
+                }); 
+        // ✅ adapte cette URL à ton API réelle
+        setVoitures(res.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des voitures :", error);
+      }
+    };
+
+    fetchVoitures();
+  }, []);
 
 useEffect(() => {
   const fetchServices = async () => {
@@ -163,6 +183,7 @@ const handleSubmit = async () => {
         const reservationData = {
             garageId: garageData.id,
             clientId: currentUser?._id,
+            vehiculeId: formData.vehiculeId,
             clientName: formData.clientName.trim(),
             clientPhone: formData.clientPhone.trim(),
             clientEmail: formData.clientEmail.trim() || null,
@@ -356,6 +377,46 @@ const handleSubmit = async () => {
                                     </select>
                                     {errors.serviceId && <p className="text-red-500 text-xs mt-1">{errors.serviceId}</p>}
                                 </div>
+
+
+
+                                <div className="p-4">
+      <label htmlFor="voiture" className="block mb-2 font-semibold text-gray-700">
+        Sélectionner une voiture :
+      </label>
+      <select
+        id="voiture"
+        value={formData.vehiculeId}
+        onChange={(e) => setFormData({...formData, vehiculeId: e.target.value})}
+        className="border border-gray-300 rounded-md p-2 w-full"
+      >
+        <option value="">-- Choisir une voiture --</option>
+
+        {voitures.map((voiture) => (
+  <option key={voiture._id} value={voiture._id}>
+            {voiture.marque} {voiture.modele} ({voiture.immatriculation})
+          </option>
+        ))}
+      </select>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <div>
