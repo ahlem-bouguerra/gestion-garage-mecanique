@@ -2,11 +2,20 @@
 import mongoose from 'mongoose';
 
 const vehiculeSchema = new mongoose.Schema({
+  // ✅ MODIFIÉ : proprietaireId peut pointer vers Client OU FicheClient
   proprietaireId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'FicheClient', // Référence vers votre modèle Client
+    refPath: 'proprietaireModel', // Dynamique !
     required: true
   },
+  
+  // ✅ NOUVEAU : Indique si c'est un Client plateforme ou FicheClient
+  proprietaireModel: {
+    type: String,
+    required: true,
+    enum: ['Client', 'FicheClient']
+  },
+  
   marque: {
     type: String,
     required: true,
@@ -20,7 +29,7 @@ const vehiculeSchema = new mongoose.Schema({
   immatriculation: {
     type: String,
     required: true,
-    unique: true,
+    unique: true, // ✅ GLOBAL : une immatriculation = unique dans tout le système
     uppercase: true,
     trim: true
   },
@@ -47,14 +56,44 @@ const vehiculeSchema = new mongoose.Schema({
     enum: ['actif', 'inactif'],
     default: 'actif'
   },
+  
+  // ✅ NOUVEAU : Pour tracer qui l'a créé
+  creePar: {
+    type: String,
+    enum: ['client', 'garagiste'],
+    required: true
+  },
+  
+  // ✅ MODIFIÉ : garagisteId devient OPTIONNEL (seulement si créé par garage)
   garagisteId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: false // ✅ Nullable si créé par client
+  },
+  paysImmatriculation: {
+  type: String,
+  enum: ['tunisie', 'autre'],
+  default: 'tunisie'
+},
+  
+  // ✅ NOUVEAU : Historique des garages qui ont travaillé sur ce véhicule
+  historique_garages: [{
+    garageId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true
+      ref: "User"
+    },
+    datePremiereVisite: {
+      type: Date,
+      default: Date.now
     }
+  }]
+  
 }, {
-  timestamps: true // Ajoute createdAt et updatedAt automatiquement
+  timestamps: true
 });
 
+// ✅ Index pour recherche rapide
+vehiculeSchema.index({ immatriculation: 1 });
+vehiculeSchema.index({ proprietaireId: 1 });
 
 export default mongoose.model('Vehicule', vehiculeSchema);

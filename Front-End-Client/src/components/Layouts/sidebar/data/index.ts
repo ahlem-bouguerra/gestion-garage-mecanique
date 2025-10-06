@@ -35,11 +35,7 @@ export const NAV_DATA = [
         icon: Car,
         items: [
           {
-            title: "Liste véhicules",
-            url: "/client/vehicules/liste",
-          },
-          {
-            title: "Ajouter véhicule",
+            title: "véhicules",
             url: "/Voiture",
           },
         ],

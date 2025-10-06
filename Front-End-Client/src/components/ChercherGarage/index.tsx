@@ -365,23 +365,28 @@ const handleGarageSelect = (garageId: string) => {
 
   useEffect(() => {
   const fetchServices = async () => {
-    if (!selectedGarage) return; // pas de garage => pas de services
+  if (!selectedGarage) {
+    setServices([]);
+    return;
+  }
 
-    try {
-      const res = await axios.get("http://localhost:5000/api/getAllServices");
-      
-      if (Array.isArray(res.data)) {
-        setServices(res.data);
-      } else if (res.data.success && Array.isArray(res.data.services)) {
-        setServices(res.data.services);
-      } else {
-        setServices([]);
-      }
-    } catch (err: any) {
-      console.error("❌ Erreur lors du chargement des services:", err.response?.data || err.message);
+  try {
+    // ❌ FAUX : axios.get("http://localhost:5000/api/services/garage/:garageId")
+    // ✅ CORRECT : Remplacer :garageId par selectedGarage._id
+    const res = await axios.get(`http://localhost:5000/api/services/garage/${selectedGarage._id}`);
+    
+    if (Array.isArray(res.data)) {
+      setServices(res.data);
+    } else if (res.data.success && Array.isArray(res.data.services)) {
+      setServices(res.data.services);
+    } else {
       setServices([]);
     }
-  };
+  } catch (err: any) {
+    console.error("❌ Erreur lors du chargement des services:", err.response?.data || err.message);
+    setServices([]);
+  }
+};
 
   fetchServices();
 }, [selectedGarage]);
@@ -395,7 +400,7 @@ const handleReservation = (garage) => {
     city: garage.cityId?.name,
     governorate: garage.governorateId?.name,
     phone: garage.phone,
-    email: garage.email
+    email: garage.email,
   };
   
   // Passer les données via query params (plus fiable que localStorage)

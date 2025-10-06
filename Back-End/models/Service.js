@@ -30,12 +30,6 @@ const Servicechema = new mongoose.Schema({
       }
 });
 
-
-
-
-
-
-
 // 🔹 Générer matricule auto : EMP001, EMP002, ...
 Servicechema.pre("save", async function (next) {
   if (!this.isNew) return next();

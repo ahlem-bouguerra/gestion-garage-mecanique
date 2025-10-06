@@ -92,7 +92,12 @@ const reservationSchema = new mongoose.Schema({
     type: String,
     trim: true,
     default: null
-  }
+  },
+  clientId: { 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Client",
+        required: true
+   },
 }, {
   timestamps: true,
   // Assure-t-il que les champs undefined ne sont pas sauvés comme null

@@ -30,6 +30,9 @@ export default function ClientReservationManagement() {
     today.setHours(0, 0, 0, 0);
     return reservationDate < today;
   };
+  const getAuthToken = () => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
 
   useEffect(() => {
     const header = document.querySelector('header');
@@ -50,8 +53,10 @@ export default function ClientReservationManagement() {
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/reservations");
-        const filteredReservations = res.data.filter(reservation => 
+        const res = await axios.get("http://localhost:5000/api/client-reservations/", {
+      headers: { Authorization: `Bearer ${getAuthToken()}` }
+    });
+        const filteredReservations = res.data.reservations.filter(reservation => 
           !isDatePassed(reservation.creneauDemande.date)
         );
         setReservations(filteredReservations);
@@ -104,21 +109,25 @@ export default function ClientReservationManagement() {
 
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/update/reservations/${selectedReservation._id}`,
+        `http://localhost:5000/api/client-update/reservations/${selectedReservation._id}`,
         {
           action: responseData.action,
           newDate: responseData.newDate || undefined,
           newHeureDebut: responseData.newHeureDebut || undefined,
           message: responseData.message || undefined
-        }
+        }, {
+      headers: { Authorization: `Bearer ${getAuthToken()}` }
+    }
       );
       
       console.log("Réponse serveur:", response.data);
       playNotificationSound();
       
       // Recharger les réservations
-      const res = await axios.get("http://localhost:5000/api/reservations");
-      const filteredReservations = res.data.filter(reservation => 
+      const res = await axios.get("http://localhost:5000/api/client-reservations/", {
+      headers: { Authorization: `Bearer ${getAuthToken()}` }
+    });
+      const filteredReservations = res.data.reservations.filter(reservation => 
         !isDatePassed(reservation.creneauDemande.date)
       );
 

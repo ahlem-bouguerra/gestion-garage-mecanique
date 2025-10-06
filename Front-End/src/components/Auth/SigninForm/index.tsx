@@ -45,39 +45,49 @@ export default function SigninWithPassword() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // ✅ AJOUT : Gérer le retour du callback Google
+  // ✅ CORRECTION : Gérer le retour du callback Google
   useEffect(() => {
     const token = searchParams.get("token");
     const userEncoded = searchParams.get("user");
+    const redirect = searchParams.get("redirect");
 
-    // Si on a un token et des données user dans l'URL (retour Google)
+    console.log("🔍 Paramètres URL détectés:", { 
+      hasToken: !!token, 
+      hasUser: !!userEncoded,
+      redirect 
+    });
+
     if (token && userEncoded) {
-      console.log("🔐 Token Google reçu dans l'URL");
-      console.log("👤 User data reçue dans l'URL");
+      console.log("🔐 Token Google reçu dans l'URL:", token.substring(0, 20) + "...");
       
       try {
-        // Décoder les données utilisateur (Base64)
         const userDataString = atob(decodeURIComponent(userEncoded));
         const userData = JSON.parse(userDataString);
 
         console.log("👤 Données utilisateur décodées:", userData);
 
-        // Sauvegarder dans localStorage
+        // ✅ Stocker dans localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(userData));
-
-        // Sauvegarder dans les cookies
+        
+        // ✅ Stocker dans les cookies
         Cookies.set("token", token, { expires: 7, path: "/" });
 
-        console.log("💾 Token sauvegardé dans localStorage:", localStorage.getItem("token"));
-        console.log("💾 User sauvegardé dans localStorage:", localStorage.getItem("user"));
+        console.log("💾 Token stocké:", localStorage.getItem("token")?.substring(0, 20) + "...");
+        console.log("💾 User stocké:", localStorage.getItem("user"));
 
         toast.success("🎉 Connexion Google réussie !");
 
-        // Nettoyer l'URL et rediriger
+        // ✅ Rediriger après un court délai
         setTimeout(() => {
-          router.push("/chercher-garage");
-        }, 1000);
+          if (redirect === "dashboard") {
+            console.log("➡️ Redirection vers /dashboard-reservation");
+            router.replace("/dashboard-reservation");
+          } else {
+            console.log("➡️ Redirection par défaut vers /dashboard-reservation");
+            router.replace("/dashboard-reservation");
+          }
+        }, 1500);
 
       } catch (error) {
         console.error("❌ Erreur lors du traitement des données Google:", error);
@@ -119,10 +129,11 @@ export default function SigninWithPassword() {
         toast.success("Connexion réussie !");
         const user = response.data.user;
         localStorage.setItem("user", JSON.stringify(user));
-        router.push("/chercher-garage");
+        
         console.log("💾 Token dans localStorage:", localStorage.getItem("token"));
         console.log("💾 User dans localStorage:", localStorage.getItem("user"));
-
+        
+        router.push("/dashboard-reservation");
       } else {
         throw new Error("Token non reçu");
       }

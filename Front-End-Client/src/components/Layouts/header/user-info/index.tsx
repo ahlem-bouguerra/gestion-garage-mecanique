@@ -20,7 +20,7 @@ export function UserInfo() {
   useEffect(() => {
     // 🔹 Ne s'exécute que côté client
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+    if (storedUser && storedUser !== "undefined") { 
       try {
         const parsedUser = JSON.parse(storedUser);
         setUser({

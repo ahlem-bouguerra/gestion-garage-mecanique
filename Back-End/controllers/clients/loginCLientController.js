@@ -61,7 +61,7 @@ export const logout = async (req, res) => {
     // Vérification du token (optionnelle ici)
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log("✅ Token valide pour utilisateur:", decoded.userId);
+      console.log("✅ Token valide pour utilisateur:", decoded.clientId);
     } catch (jwtError) {
       return res.status(401).json({
         success: false,

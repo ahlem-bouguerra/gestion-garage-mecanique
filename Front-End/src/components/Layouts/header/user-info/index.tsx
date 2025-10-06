@@ -24,7 +24,7 @@ export function UserInfo() {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUser({
-          name: parsedUser.username || "Utilisateur",
+          name: parsedUser.name || parsedUser.username || "Utilisateur",
           email: parsedUser.email || "",
           img: parsedUser.img || "/images/user/user-03.png",
         });

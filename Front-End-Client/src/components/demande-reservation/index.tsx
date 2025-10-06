@@ -22,6 +22,7 @@ const ReservationForm = () => {
     const [submitting, setSubmitting] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [formData, setFormData] = useState({
+        clientID:'',
         clientName: '',
         clientPhone: '',
         clientEmail: '',
@@ -32,6 +33,10 @@ const ReservationForm = () => {
     });
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState(false);
+    const [selectedGarage, setSelectedGarage] = useState<Garage | null>(null);
+    const getAuthToken = () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+    };
 
     useEffect(() => {
         if (searchParams) {
@@ -54,7 +59,7 @@ const ReservationForm = () => {
             if (!token) return;
 
             try {
-                const response = await axios.get("http://localhost:5000/api/get-profile", {
+                const response = await axios.get("http://localhost:5000/api/get-Client-profile", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setCurrentUser(response.data);
@@ -66,26 +71,33 @@ const ReservationForm = () => {
         fetchUserWithLocation();
     }, []);
 
-    useEffect(() => {
-        const fetchServices = async () => {
-            try {
-            const res = await axios.get("http://localhost:5000/api/getAllServices");
-            
-            if (Array.isArray(res.data)) {
-                setServices(res.data);
-            } else if (res.data.success && Array.isArray(res.data.services)) {
-                setServices(res.data.services);
-            } else {
-                setServices([]);
-            }
-            } catch (err: any) {
-            console.error("❌ Erreur lors du chargement des services:", err.response?.data || err.message);
-            setServices([]);
-            }
-        };
+useEffect(() => {
+  const fetchServices = async () => {
+    if (!garageData.id) {  // ← Utilise garageData.id
+      setServices([]);
+      return;
+    }
 
-        fetchServices();
-    }, []);
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/services/garage/${garageData.id}`  // ← ICI
+      );
+    
+    if (Array.isArray(res.data)) {
+      setServices(res.data);
+    } else if (res.data.success && Array.isArray(res.data.services)) {
+      setServices(res.data.services);
+    } else {
+      setServices([]);
+    }
+   } catch (err: any) {
+      console.error("❌ Erreur:", err.response?.data || err.message);
+      setServices([]);
+    }
+  };
+
+  fetchServices();
+}, [garageData.id]);  
 
     // Générer les options d'heures (8h à 18h)
     const generateTimeOptions = () => {
@@ -150,6 +162,7 @@ const handleSubmit = async () => {
     try {
         const reservationData = {
             garageId: garageData.id,
+            clientId: currentUser?._id,
             clientName: formData.clientName.trim(),
             clientPhone: formData.clientPhone.trim(),
             clientEmail: formData.clientEmail.trim() || null,
@@ -164,7 +177,9 @@ const handleSubmit = async () => {
         // 🔹 Appel API POST réel
         const response = await axios.post(
             'http://localhost:5000/api/create-reservation',
-            reservationData,
+            reservationData,{
+      headers: { Authorization: `Bearer ${getAuthToken()}` }
+    }
         );
 
         if (response.data.success) {

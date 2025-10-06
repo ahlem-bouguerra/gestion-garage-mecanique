@@ -9,7 +9,10 @@ import { verifEmailCLient } from "../controllers/clients/VerifEmailClientControl
 import { resetPasswordClient } from "../controllers/clients/ResetPasswordClient.js";
 import { forgotPasswordClient } from "../controllers/clients/ForgotPasswordClient.js";
 import { getProfile,updateProfile } from "../controllers/clients/profileContoller.js";
-
+import { getMesVehicules, createVehiculeClient, updateMonVehicule, deleteMonVehicule } from "../controllers/clients/vehiculeController.js";
+import { getServicesByGarageId } from "../controllers/clients/serviceController.js";
+import {getClientProfile} from "../controllers/clients/profileController.js";
+import { ClientCreateReservation, ClientGetReservations, ClientUpdateReservation } from '../controllers/clients/revervationController.js';
 const router = express.Router();
 
 // ========== GOOGLE OAUTH (CLIENT) ==========
@@ -86,5 +89,19 @@ router.post("/client/reset-password", resetPasswordClient);
 router.post("/client/forgot-password", forgotPasswordClient);
 router.get("/client/profile",clientauthMiddleware,getProfile);
 router.put('/client/update-profile', clientauthMiddleware,updateProfile);
+
+
+router.get('/get-all-mes-vehicules',clientauthMiddleware, getMesVehicules);
+router.post('/create-mes-vehicules',clientauthMiddleware, createVehiculeClient);
+router.put('/update-mes-vehicules/:vehiculeId',clientauthMiddleware, updateMonVehicule);
+router.delete('/delete-mes-vehicules/:vehiculeId',clientauthMiddleware, deleteMonVehicule);
+
+router.get('/services/garage/:garageId', getServicesByGarageId);
+
+router.get("/get-Client-profile",clientauthMiddleware, getClientProfile);
+
+router.post('/create-reservation',clientauthMiddleware, ClientCreateReservation);
+router.get('/client-reservations/',clientauthMiddleware, ClientGetReservations);
+router.put('/client-update/reservations/:id',clientauthMiddleware, ClientUpdateReservation);
 
 export default router;

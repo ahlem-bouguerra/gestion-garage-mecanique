@@ -10,7 +10,7 @@ import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { completeProfile, getProfile } from "../controllers/garagiste/ProfileContoller.js";
 import { enhancedLocationRoutes } from "../apiDataFetcher.js";
 import { createFicheClient, getFicheClients, getFicheClientById, updateFicheClient, deleteFicheClient, getFicheClientNoms, getHistoriqueVisiteByIdClient, getHistoryVisite } from "../controllers/garagiste/FicheClient.js";
-import { getAllVehicules, getVehiculeById, createVehicule, updateVehicule, deleteVehicule, getVehiculesByProprietaire } from '../controllers/vehiculeController.js';
+import { getAllVehicules, getVehiculeById, createVehicule, updateVehicule, dissocierVehicule, getVehiculesByProprietaire } from '../controllers/garagiste/vehiculeController.js';
 import { createDevis, getAllDevis, getDevisById, getDevisByNum, updateDevisStatus, updateDevis, deleteDevis, acceptDevis, refuseDevis, updateFactureId } from '../controllers/garagiste/devisController.js';
 import { sendDevisByEmail } from '../utils/sendDevis.js';
 import { createMecanicien, updateMecanicien, deleteMecanicien, getAllMecaniciens, getMecanicienById, getMecaniciensByService } from "../controllers/garagiste/mecanicienController.js";
@@ -21,7 +21,7 @@ import { CreateFacture, CreateFactureWithCredit, GetAllFactures, GetFactureById,
 import { getCarnetByVehiculeId, creerCarnetManuel } from '../controllers/garagiste/carnetController.js';
 import { getDashboardData } from '../controllers/garagiste/ChargeAtelier.js';
 import { search } from '../controllers/clients/ChercherGarage.js';
-import { createReservation, getReservations, updateReservation } from '../controllers/gererReservation.js';
+import { getReservations, updateReservation } from '../controllers/garagiste/gererReservation.js';
 
 const router = express.Router();
 
@@ -32,7 +32,6 @@ router.get(
     scope: ["profile", "email"]
   })
 );
-
 router.get(
   "/garage/google/callback",
   passportGarage.authenticate("google-garage", {
@@ -81,6 +80,24 @@ router.get(
       );
 
       console.log('🔍 Profil complet:', isProfileComplete);
+
+      // ✅ Préparer les données utilisateur
+      const userData = {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        phone: user.phone || '',
+        isVerified: user.isVerified || true,
+        isProfileComplete: isProfileComplete
+      };
+
+      // ✅ Encoder les données utilisateur en base64
+      const userDataEncoded = Buffer.from(JSON.stringify(userData)).toString('base64');
+      
+      console.log('📦 Données à transmettre:');
+      console.log('   - Token (extrait):', token.substring(0, 30) + '...');
+      console.log('   - User encodé (extrait):', userDataEncoded.substring(0, 30) + '...');
+      console.log('   - Profil complet:', isProfileComplete);
 
       const html = `
         <!DOCTYPE html>
@@ -134,23 +151,22 @@ router.get(
 
           <script>
             const token = "${token}";
+            const userDataEncoded = "${userDataEncoded}";
             const isComplete = ${isProfileComplete};
             
             console.log('🔐 Token Garage reçu');
             console.log('📋 Profil complet:', isComplete);
             
             try {
-              localStorage.setItem('token', token);
-              document.cookie = \`token=\${token}; path=/; max-age=604800\`;
-              console.log('💾 Token sauvegardé');
-              
+              // ✅ CORRECTION : Toujours rediriger vers /auth/sign-in d'abord
+              // pour que le composant puisse traiter le token
               setTimeout(() => {
                 if (isComplete) {
-                  console.log('➡️ Redirection vers accueil Garage (port 3000)');
-                  window.location.href = 'http://localhost:3000/';
+                  console.log('➡️ Redirection vers sign-in avec token (profil complet)');
+                  window.location.href = \`http://localhost:3000/auth/sign-in?token=\${token}&user=\${encodeURIComponent(userDataEncoded)}&redirect=dashboard\`;
                 } else {
                   console.log('➡️ Redirection vers completion profil Garage');
-                  window.location.href = 'http://localhost:3000/auth/complete-profile';
+                  window.location.href = \`http://localhost:3000/auth/complete-profile?token=\${token}&user=\${encodeURIComponent(userDataEncoded)}\`;
                 }
               }, 1000);
               
@@ -173,11 +189,10 @@ router.get(
     }
   }
 );
-
 // ========== AUTH CLASSIQUE (GARAGE) ==========
-router.post("/garage/signup", register);
-router.post("/garage/login", login);
-router.post("/garage/logout", logout);
+router.post("/signup", register);
+router.post("/login", login);
+router.post("/logout", logout);
 
 router.get("/garage/verify-email/:token", async (req, res) => {
   const token = req.params.token;
@@ -240,10 +255,10 @@ router.get("/garage/verify-token", async (req, res) => {
   }
 });
 
-router.post("/garage/forgot-password", forgotPassword);
-router.post("/garage/reset-password", resetPassword);
-router.post("/garage/complete-profile", authMiddleware, completeProfile);
-router.get("/garage/get-profile", authMiddleware, getProfile);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
+router.post("/complete-profile", authMiddleware, completeProfile);
+router.get("/get-profile", authMiddleware, getProfile);
 
 // ========== LOCATIONS ==========
 router.get('/governorates', enhancedLocationRoutes.getAllGovernoratesWithCount);
@@ -266,7 +281,7 @@ router.get('/vehicules', authMiddleware, getAllVehicules);
 router.get('/vehicules/:id', authMiddleware, getVehiculeById);
 router.post('/vehicules', authMiddleware, createVehicule);
 router.put('/vehicules/:id', authMiddleware, updateVehicule);
-router.delete('/vehicules/:id', authMiddleware, deleteVehicule);
+router.delete('/vehicules/:id', authMiddleware, dissocierVehicule);
 router.get('/vehicules/proprietaire/:clientId', authMiddleware, getVehiculesByProprietaire);
 
 // ========== DEVIS ==========
@@ -342,7 +357,6 @@ router.get('/dashboard/charge-atelier', getDashboardData);
 router.get('/search', search);
 
 // ========== RESERVATIONS ==========
-router.post('/create-reservation', createReservation);
 router.get('/reservations', getReservations);
 router.put('/update/reservations/:id', updateReservation);
 
