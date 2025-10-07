@@ -293,8 +293,8 @@ router.put('/Devis/:id/status', authMiddleware, updateDevisStatus);
 router.put('/Devis/:id', authMiddleware, updateDevis);
 router.put('/updateId/:id', authMiddleware, updateFactureId);
 router.delete('/Devis/:id', authMiddleware, deleteDevis);
-router.get("/devis/:devisId/accept", authMiddleware, acceptDevis);
-router.get("/devis/:devisId/refuse", authMiddleware, refuseDevis);
+router.get("/devis/:devisId/accept", acceptDevis);
+router.get("/devis/:devisId/refuse", refuseDevis);
 router.post('/devis/:devisId/send-email', authMiddleware, sendDevisByEmail);
 
 // ========== MECANICIENS ==========

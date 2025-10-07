@@ -13,6 +13,8 @@ import { getMesVehicules, createVehiculeClient, updateMonVehicule, deleteMonVehi
 import { getServicesByGarageId } from "../controllers/clients/serviceController.js";
 import {getClientProfile} from "../controllers/clients/profileController.js";
 import { ClientCreateReservation, ClientGetReservations, ClientUpdateReservation,ClientCancelReservation } from '../controllers/clients/revervationController.js';
+import {getClientDevis, getClientDevisById, getClientDevisStats } from '../controllers/clients/clientDevisController.js';
+
 const router = express.Router();
 
 // ========== GOOGLE OAUTH (CLIENT) ==========
@@ -104,5 +106,9 @@ router.post('/create-reservation',clientauthMiddleware, ClientCreateReservation)
 router.get('/client-reservations/',clientauthMiddleware, ClientGetReservations);
 router.put('/client-update/reservations/:id',clientauthMiddleware, ClientUpdateReservation);
 router.put('/cancel-reservation/:reservationId', clientauthMiddleware, ClientCancelReservation);
+
+router.get('/all-mes-devis', clientauthMiddleware, getClientDevis);
+router.get('/mes-devis/stats', clientauthMiddleware, getClientDevisStats);
+router.get('/mes-devis/:devisId', clientauthMiddleware, getClientDevisById);
 
 export default router;

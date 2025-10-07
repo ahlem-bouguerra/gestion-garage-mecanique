@@ -1,101 +1,9 @@
 import { User } from "../../models/User.js";
 import  Service  from "../../models/Service.js";
 import  Reservation  from "../../models/Reservation.js";
+import FicheClient from "../../models/FicheClient.js";
+import FicheClientVehicule from "../../models/FicheClientVehicule.js";
 
-
-
-export const createReservation = async (req, res) => {
-  try {
-    const {garageId,clientName,clientPhone,clientEmail,serviceId,creneauDemande,descriptionDepannage} = req.body;
-
-    // Vérifier que le garage existe
-    const garage = await User.findById(garageId);
-    if (!garage) {
-      return res.status(404).json({
-        success: false,
-        message: "Garage non trouvé",
-      });
-    }
-
-    // Vérifier que le service existe
-    const service = await Service.findById(serviceId);
-    if (!service) {
-      return res.status(404).json({
-        success: false,
-        message: "Service non trouvé",
-      });
-    }
-
-    const conflictingReservations = await Reservation.find({
-      garageId,
-      "creneauDemande.date": creneauDemande.date,
-      "creneauDemande.heureDebut": creneauDemande.heureDebut,
-      status: { $in: ["en_attente", "confirmé"] },
-    });
-
-    if (conflictingReservations.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: "Ce créneau n'est pas disponible",
-        conflictingReservations: conflictingReservations.map((r) => ({
-          date: r.creneauDemande.date,
-          heureDebut: r.creneauDemande.heureDebut,
-          status: r.status,
-        })),
-      });
-    }
-
-    // Créer la réservation
-    const reservation = new Reservation({
-      garageId,
-      clientName: clientName.trim(),
-      clientPhone: clientPhone.trim(),
-      clientEmail: clientEmail?.trim() || null,
-      serviceId,
-      creneauDemande: {
-        date: new Date(creneauDemande.date),
-        heureDebut: creneauDemande.heureDebut,
-      },
-      descriptionDepannage: descriptionDepannage.trim(),
-      status: "en_attente",
-    });
-
-    const savedReservation = await reservation.save();
-
-    // Peupler les données pour la réponse
-    await savedReservation.populate([
-      { path: "garageId", select: "name address city phone email" },
-      { path: "serviceId", select: "name description" },
-    ]);
-
-    res.status(201).json({
-      success: true,
-      message: "Réservation créée avec succès",
-      data: savedReservation,
-    });
-  } catch (error) {
-    console.error("Erreur lors de la création de la réservation:", error);
-
-    if (error.name === "ValidationError") {
-      const validationErrors = Object.values(error.errors).map((err) => ({
-        field: err.path,
-        message: err.message,
-      }));
-
-      return res.status(400).json({
-        success: false,
-        message: "Erreurs de validation",
-        errors: validationErrors,
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Erreur interne du serveur",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
-    });
-  }
-};
 
 
 export const getReservations = async (req, res) => {
@@ -221,6 +129,59 @@ export const updateReservation = async (req, res) => {
       reservation: updatedReservation,
       message: "Réservation mise à jour avec succès"
     });
+    if (action === "accepter") {
+  console.log("🔵 DÉBUT ACCEPTATION");
+  
+  reservation.status = "accepte";
+  reservation.messageGarage = message || null;
+  
+  // ✅ CRÉER/RÉCUPÉRER LA FICHE CLIENT (ICI, DANS LE IF)
+  try {
+    console.log("clientPhone:", reservation.clientPhone);
+    console.log("garageId:", reservation.garageId);
+    
+    let ficheClient = await FicheClient.findOne({
+      telephone: reservation.clientPhone,
+      garagisteId: reservation.garageId
+    });
+    
+    console.log("Fiche trouvée?", ficheClient);
+    
+    if (!ficheClient) {
+      console.log("🟢 Création fiche client");
+      ficheClient = await FicheClient.create({
+        nom: reservation.clientName,
+        type: "particulier",
+        telephone: reservation.clientPhone,
+        email: reservation.clientEmail || `${reservation.clientPhone}@temp.com`,
+        garagisteId: reservation.garageId
+      });
+      console.log("✅ Fiche créée:", ficheClient._id);
+    }
+    
+    // ✅ ASSOCIER LE VÉHICULE
+    if (reservation.vehiculeId) {
+      console.log("🔵 Vérif association véhicule");
+      const existingAssoc = await FicheClientVehicule.findOne({
+        ficheClientId: ficheClient._id,
+        vehiculeId: reservation.vehiculeId
+      });
+      
+      if (!existingAssoc) {
+        console.log("🟢 Création association");
+        await FicheClientVehicule.create({
+          ficheClientId: ficheClient._id,
+          vehiculeId: reservation.vehiculeId,
+          garageId: reservation.garageId,
+          notes: `Ajouté via réservation ${reservation._id}`
+        });
+        console.log("✅ Association créée");
+      }
+    }
+  } catch (ficheErr) {
+    console.error("❌ Erreur création fiche:", ficheErr.message);
+  }
+}
 
   } catch (error) {
     console.error("=== ERREUR UPDATE RESERVATION ===");
@@ -231,4 +192,6 @@ export const updateReservation = async (req, res) => {
       details: error.message
     });
   }
+
+  
 };

@@ -1,46 +1,79 @@
 import Vehicule from '../../models/Vehicule.js';
 import FicheClient from '../../models/FicheClient.js';
 import FicheClientVehicule from '../../models/FicheClientVehicule.js';
+import {Client} from '../../models/Client.js';
 
+// ==========================================
+// 📋 RÉCUPÉRER TOUS LES VÉHICULES DU GARAGE
+// ==========================================
 export const getAllVehicules = async (req, res) => {
   try {
-    // Récupérer les IDs des ficheClients du garage
     const mesClients = await FicheClient.find({ 
       garagisteId: req.user._id 
     }).select('_id');
     
     const clientIds = mesClients.map(c => c._id);
     
-    // Récupérer les véhicules liés via la table de liaison
     const liaisons = await FicheClientVehicule.find({
       ficheClientId: { $in: clientIds },
       garageId: req.user._id
-    }).select('vehiculeId');
+    }).select('vehiculeId ficheClientId'); // ✅ Inclure ficheClientId
     
     const vehiculeIds = liaisons.map(l => l.vehiculeId);
     
-    // Récupérer les véhicules
+    // ✅ Récupérer les véhicules SANS populate
     const vehicules = await Vehicule.find({
       _id: { $in: vehiculeIds },
       statut: 'actif'
-    })
-    .populate('proprietaireId')
-    .sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 });
 
-    console.log("✅ Véhicules récupérés:", vehicules.length);
-    res.json(vehicules);
+    // ✅ Créer un map des liaisons
+    const liaisonMap = {};
+    liaisons.forEach(l => {
+      liaisonMap[l.vehiculeId.toString()] = l.ficheClientId;
+    });
+
+    // ✅ Récupérer toutes les fiches clients correspondantes
+    const fichesClients = await FicheClient.find({
+      _id: { $in: Object.values(liaisonMap) }
+    });
+
+    const ficheMap = {};
+    fichesClients.forEach(f => {
+      ficheMap[f._id.toString()] = f;
+    });
+
+    // ✅ Enrichir les véhicules avec les infos de FicheClient
+    const vehiculesAvecClient = vehicules.map(vehicule => {
+      const vehiculeObj = vehicule.toObject();
+      const ficheClientId = liaisonMap[vehicule._id.toString()];
+      const ficheClient = ficheMap[ficheClientId?.toString()];
+      
+      // ✅ Remplacer proprietaireId par les données de la FicheClient
+      vehiculeObj.proprietaireId = ficheClient || {
+        nom: 'Client inconnu',
+        type: 'particulier',
+        telephone: 'N/A'
+      };
+      
+      return vehiculeObj;
+    });
+
+    console.log("✅ Véhicules récupérés:", vehiculesAvecClient.length);
+    res.json(vehiculesAvecClient);
   } catch (error) {
     console.error("❌ Erreur getAllVehicules:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
-
+// ==========================================
+// 🔍 RÉCUPÉRER UN VÉHICULE PAR ID
+// ==========================================
 export const getVehiculeById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Vérifier que le garage a accès à ce véhicule
     const liaison = await FicheClientVehicule.findOne({
       vehiculeId: id,
       garageId: req.user._id
@@ -50,24 +83,80 @@ export const getVehiculeById = async (req, res) => {
       return res.status(403).json({ error: 'Vous n\'avez pas accès à ce véhicule' });
     }
 
-    const vehicule = await Vehicule.findById(id)
-      .populate('proprietaireId');
+    const vehicule = await Vehicule.findById(id);
 
     if (!vehicule) {
       return res.status(404).json({ error: 'Véhicule non trouvé' });
     }
 
-    res.json(vehicule);
+    // ✅ Récupérer la FicheClient du garage
+    const ficheClient = await FicheClient.findById(liaison.ficheClientId);
+
+    const vehiculeAvecClient = vehicule.toObject();
+    vehiculeAvecClient.proprietaireId = ficheClient || {
+      nom: 'Client inconnu',
+      type: 'particulier'
+    };
+
+    res.json(vehiculeAvecClient);
   } catch (error) {
     console.error("❌ Erreur getVehiculeById:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
+// ==========================================
+// 🚗 VÉHICULES D'UN CLIENT
+// ==========================================
+export const getVehiculesByProprietaire = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+
+    console.log("🔍 Recherche véhicules pour ficheClient:", clientId);
+
+    const ficheClient = await FicheClient.findOne({
+      _id: clientId,
+      garagisteId: req.user._id
+    });
+    
+    if (!ficheClient) {
+      return res.status(404).json({ error: 'Client non trouvé dans votre garage' });
+    }
+
+    const liaisons = await FicheClientVehicule.find({
+      ficheClientId: clientId,
+      garageId: req.user._id
+    }).select('vehiculeId');
+    
+    const vehiculeIds = liaisons.map(l => l.vehiculeId);
+    
+    const vehicules = await Vehicule.find({
+      _id: { $in: vehiculeIds },
+      statut: 'actif'
+    }).sort({ createdAt: -1 });
+
+    // ✅ Enrichir avec les infos de FicheClient
+    const vehiculesAvecClient = vehicules.map(v => {
+      const vObj = v.toObject();
+      vObj.proprietaireId = ficheClient;
+      return vObj;
+    });
+
+    console.log("✅ Véhicules trouvés pour", ficheClient.nom, ":", vehiculesAvecClient.length);
+    res.json(vehiculesAvecClient);
+  } catch (error) {
+    console.error("❌ Erreur getVehiculesByProprietaire:", error);
+    res.status(500).json({ error: `Erreur serveur: ${error.message}` });
+  }
+};
+
+// ==========================================
+// ➕ CRÉER UN VÉHICULE (GARAGE)
+// ==========================================
 export const createVehicule = async (req, res) => {
   try {
     const {
-      proprietaireId, // ID de la ficheClient
+      proprietaireId,
       marque,
       modele,
       immatriculation,
@@ -79,7 +168,6 @@ export const createVehicule = async (req, res) => {
 
     console.log("📝 Création véhicule - Données reçues:", req.body);
 
-    // Validation
     if (!proprietaireId || !marque || !modele || !immatriculation) {
       return res.status(400).json({
         error: 'Les champs propriétaire, marque, modèle et immatriculation sont obligatoires'
@@ -88,16 +176,13 @@ export const createVehicule = async (req, res) => {
 
     const immatriculationFormatee = immatriculation.toUpperCase().trim();
 
-    // ✅ MODIFIÉ : Vérifier l'immatriculation GLOBALEMENT (pas par garage)
     const vehiculeExistant = await Vehicule.findOne({
       immatriculation: immatriculationFormatee
     });
 
     if (vehiculeExistant) {
-      // ✅ Le véhicule existe déjà - Juste créer la liaison
       console.log("ℹ️ Véhicule existe déjà, création liaison uniquement");
       
-      // Vérifier que la ficheClient appartient au garage
       const ficheClient = await FicheClient.findOne({
         _id: proprietaireId,
         garagisteId: req.user._id
@@ -107,7 +192,6 @@ export const createVehicule = async (req, res) => {
         return res.status(400).json({ error: 'Client non trouvé dans votre garage' });
       }
       
-      // Vérifier si la liaison existe déjà
       const liaisonExistante = await FicheClientVehicule.findOne({
         ficheClientId: proprietaireId,
         vehiculeId: vehiculeExistant._id,
@@ -118,14 +202,12 @@ export const createVehicule = async (req, res) => {
         return res.status(400).json({ error: 'Ce véhicule est déjà associé à ce client' });
       }
       
-      // Créer la liaison
       await FicheClientVehicule.create({
         ficheClientId: proprietaireId,
         vehiculeId: vehiculeExistant._id,
         garageId: req.user._id
       });
       
-      // Ajouter le garage à l'historique si pas déjà présent
       const dejaVisiteParGarage = vehiculeExistant.historique_garages.some(
         h => h.garageId.toString() === req.user._id.toString()
       );
@@ -138,16 +220,17 @@ export const createVehicule = async (req, res) => {
         await vehiculeExistant.save();
       }
       
-      const vehiculeAvecProprietaire = await Vehicule.findById(vehiculeExistant._id)
-        .populate('proprietaireId');
+      // ✅ Retourner avec FicheClient
+      const vehiculeAvecClient = vehiculeExistant.toObject();
+      vehiculeAvecClient.proprietaireId = ficheClient;
       
       return res.status(200).json({
         message: 'Véhicule existant associé au client',
-        vehicule: vehiculeAvecProprietaire
+        vehicule: vehiculeAvecClient
       });
     }
 
-    // ✅ Nouveau véhicule - Créer
+    // ✅ NOUVEAU VÉHICULE
     const ficheClient = await FicheClient.findOne({
       _id: proprietaireId,
       garagisteId: req.user._id
@@ -157,22 +240,38 @@ export const createVehicule = async (req, res) => {
       return res.status(400).json({ error: 'Client non trouvé' });
     }
 
+    let proprietaireIdFinal;
+    let proprietaireModelFinal;
+    
+    const clientPlateforme = await Client.findOne({ 
+      telephone: ficheClient.telephone 
+    });
+    
+    if (clientPlateforme) {
+      proprietaireIdFinal = clientPlateforme._id;
+      proprietaireModelFinal = 'Client';
+      console.log("👤 Propriétaire: Client plateforme", clientPlateforme._id);
+    } else {
+      proprietaireIdFinal = ficheClient._id;
+      proprietaireModelFinal = 'FicheClient';
+      console.log("📋 Propriétaire: FicheClient", ficheClient._id);
+    }
+
     const vehiculeData = {
-      proprietaireId: ficheClient.clientId || proprietaireId, // Si ficheClient a un lien vers Client, utiliser celui-là
-      proprietaireModel: ficheClient.clientId ? 'Client' : 'FicheClient',
+      proprietaireId: proprietaireIdFinal,
+      proprietaireModel: proprietaireModelFinal,
       marque: marque.trim(),
       modele: modele.trim(),
       immatriculation: immatriculationFormatee,
       statut: 'actif',
       creePar: 'garagiste',
-      garagisteCreateurId: req.user._id,
+      garagisteId: req.user._id,
       historique_garages: [{
         garageId: req.user._id,
         datePremiereVisite: new Date()
       }]
     };
 
-    // Champs optionnels
     if (annee && !isNaN(parseInt(annee))) {
       const anneeInt = parseInt(annee);
       if (anneeInt >= 1900 && anneeInt <= 2025) {
@@ -191,23 +290,21 @@ export const createVehicule = async (req, res) => {
       if (kmInt >= 0) vehiculeData.kilometrage = kmInt;
     }
 
-    console.log("📝 Données véhicule à sauvegarder:", vehiculeData);
-
     const nouveauVehicule = new Vehicule(vehiculeData);
     const vehiculeSauve = await nouveauVehicule.save();
 
-    // Créer la liaison
     await FicheClientVehicule.create({
       ficheClientId: proprietaireId,
       vehiculeId: vehiculeSauve._id,
       garageId: req.user._id
     });
 
-    const vehiculeAvecProprietaire = await Vehicule.findById(vehiculeSauve._id)
-      .populate('proprietaireId');
+    // ✅ Retourner avec FicheClient
+    const vehiculeAvecClient = vehiculeSauve.toObject();
+    vehiculeAvecClient.proprietaireId = ficheClient;
 
-    console.log("✅ Véhicule créé avec succès:", vehiculeAvecProprietaire);
-    res.status(201).json(vehiculeAvecProprietaire);
+    console.log("✅ Véhicule créé avec succès");
+    res.status(201).json(vehiculeAvecClient);
 
   } catch (error) {
     console.error("❌ Erreur createVehicule:", error);
@@ -222,6 +319,9 @@ export const createVehicule = async (req, res) => {
   }
 };
 
+// ==========================================
+// 🔄 MODIFIER UN VÉHICULE
+// ==========================================
 export const updateVehicule = async (req, res) => {
   try {
     const { id } = req.params;
@@ -236,9 +336,6 @@ export const updateVehicule = async (req, res) => {
       kilometrage
     } = req.body;
 
-    console.log("🔄 Modification véhicule ID:", id);
-
-    // ✅ NOUVEAU : Vérifier accès via liaison
     const liaison = await FicheClientVehicule.findOne({
       vehiculeId: id,
       garageId: req.user._id
@@ -250,30 +347,25 @@ export const updateVehicule = async (req, res) => {
       });
     }
 
-    // Vérifier que le véhicule existe
     const vehiculeExistant = await Vehicule.findById(id);
     if (!vehiculeExistant) {
       return res.status(404).json({ error: 'Véhicule non trouvé' });
     }
 
-    // ⚠️ INTERDIRE modification de l'immatriculation (car partagée entre garages)
     if (immatriculation && immatriculation !== vehiculeExistant.immatriculation) {
       return res.status(403).json({
-        error: 'Impossible de modifier l\'immatriculation d\'un véhicule existant'
+        error: 'Impossible de modifier l\'immatriculation'
       });
     }
 
-    // ⚠️ INTERDIRE changement de propriétaire (car impact autres garages)
     if (proprietaireId && proprietaireId !== vehiculeExistant.proprietaireId.toString()) {
       return res.status(403).json({
-        error: 'Impossible de modifier le propriétaire d\'un véhicule partagé'
+        error: 'Impossible de modifier le propriétaire'
       });
     }
 
-    // Préparer les données de mise à jour (champs non-critiques uniquement)
     const updateData = {};
 
-    // ✅ Autorisé : infos techniques du véhicule
     if (marque && marque.trim()) updateData.marque = marque.trim();
     if (modele && modele.trim()) updateData.modele = modele.trim();
 
@@ -318,17 +410,19 @@ export const updateVehicule = async (req, res) => {
       }
     }
 
-    console.log("🔄 Données de mise à jour:", updateData);
-
-    // Mettre à jour le véhicule
     const vehiculeModifie = await Vehicule.findByIdAndUpdate(
       id,
       updateData,
       { new: true, runValidators: true }
-    ).populate('proprietaireId', 'nom type telephone email');
+    );
 
-    console.log("✅ Véhicule modifié:", vehiculeModifie);
-    res.json(vehiculeModifie);
+    // ✅ Récupérer la FicheClient
+    const ficheClient = await FicheClient.findById(liaison.ficheClientId);
+    
+    const vehiculeAvecClient = vehiculeModifie.toObject();
+    vehiculeAvecClient.proprietaireId = ficheClient;
+
+    res.json(vehiculeAvecClient);
 
   } catch (error) {
     console.error("❌ Erreur updateVehicule:", error);
@@ -346,7 +440,9 @@ export const updateVehicule = async (req, res) => {
   }
 };
 
-// ✅ Supprimer liaison (pas le véhicule lui-même)
+// ==========================================
+// 🗑️ DISSOCIER UN VÉHICULE
+// ==========================================
 export const dissocierVehicule = async (req, res) => {
   try {
     const { ficheClientId, vehiculeId } = req.params;
@@ -366,44 +462,5 @@ export const dissocierVehicule = async (req, res) => {
   } catch (error) {
     console.error("❌ Erreur dissocierVehicule:", error);
     res.status(500).json({ error: error.message });
-  }
-};
-
-export const getVehiculesByProprietaire = async (req, res) => {
-  try {
-    const { clientId } = req.params;
-
-    console.log("🔍 Recherche véhicules pour ficheClient:", clientId);
-
-    // Vérifier que le client appartient au garage
-    const ficheClient = await FicheClient.findOne({
-      _id: clientId,
-      garagisteId: req.user._id
-    });
-    
-    if (!ficheClient) {
-      return res.status(404).json({ error: 'Client non trouvé dans votre garage' });
-    }
-
-    // Récupérer les véhicules via la liaison
-    const liaisons = await FicheClientVehicule.find({
-      ficheClientId: clientId,
-      garageId: req.user._id
-    }).select('vehiculeId');
-    
-    const vehiculeIds = liaisons.map(l => l.vehiculeId);
-    
-    const vehicules = await Vehicule.find({
-      _id: { $in: vehiculeIds },
-      statut: 'actif'
-    })
-    .populate('proprietaireId')
-    .sort({ createdAt: -1 });
-
-    console.log("✅ Véhicules trouvés pour", ficheClient.nom, ":", vehicules.length);
-    res.json(vehicules);
-  } catch (error) {
-    console.error("❌ Erreur getVehiculesByProprietaire:", error);
-    res.status(500).json({ error: `Erreur serveur: ${error.message}` });
   }
 };

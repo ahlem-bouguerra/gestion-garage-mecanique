@@ -53,7 +53,7 @@ export const NAV_DATA = [
           },
           {
             title: "Mes devis",
-            url: "/client/devis/liste",
+            url: "/client-devis",
           },
         ],
       },

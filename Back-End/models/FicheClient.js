@@ -6,7 +6,6 @@ const FicheClientSchema = new mongoose.Schema({
     nom: {
     type: String,
     required: true,
-    unique: true,
   },
     type: {
     type: String,
@@ -15,7 +14,7 @@ const FicheClientSchema = new mongoose.Schema({
   },
    adresse: {
     type: String,
-    required: true,
+    required: false,
   },
    telephone: {
     type: String,

@@ -22,7 +22,20 @@ const OrdreTravailSystem = () => {
   const [mecaniciens, setMecaniciens] = useState([]);
   const [ordresTravail, setOrdresTravail] = useState([]);
   const [statistiques, setStatistiques] = useState(null);
-  
+
+
+      useEffect(() => {
+    const header = document.querySelector('header');
+    if (!header) return;
+
+    if (selectedOrdre|| editMode) {
+      header.classList.add("hidden");
+    } else {
+      header.classList.remove("hidden");
+    }
+  }, [selectedOrdre, editMode]);
+
+
   // États de pagination et filtres
   const [pagination, setPagination] = useState({
     page: 1,
