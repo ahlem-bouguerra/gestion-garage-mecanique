@@ -153,8 +153,9 @@ export const updateReservation = async (req, res) => {
         nom: reservation.clientName,
         type: "particulier",
         telephone: reservation.clientPhone,
-        email: reservation.clientEmail || `${reservation.clientPhone}@temp.com`,
-        garagisteId: reservation.garageId
+        email: reservation.clientEmail || `${reservation.clientPhone}`,
+        garagisteId: reservation.garageId,
+        clientId: reservation.clientId
       });
       console.log("✅ Fiche créée:", ficheClient._id);
     }

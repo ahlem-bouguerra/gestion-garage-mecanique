@@ -31,6 +31,11 @@ const FicheClientSchema = new mongoose.Schema({
     ref: "User",
     required: true
   },
+    clientId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Client",
+    required: false
+  },
   //derniereVisite: String, // ou Date si tu veux
 //  vehiculeAssocie:{
   //  type: String,

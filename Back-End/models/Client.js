@@ -30,7 +30,6 @@ const clientSchema = new mongoose.Schema({
   // ✅ CORRECTION: googleId avec sparse index
   googleId: {
     type: String,
-    unique: true,
     sparse: true, // ✅ IMPORTANT: Permet plusieurs valeurs null
     default: null,
   },

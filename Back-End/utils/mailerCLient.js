@@ -11,9 +11,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendVerificationEmail = async (to, token) => {
+export const sendVerificationEmailForCient = async (to, token) => {
   // ✅ CORRIGER L'URL - Pointer directement vers l'API backend
-  const verificationUrl = `${process.env.FRONTEND_URL_CLIENT || 'http://localhost:5000'}/api/client/verify-token/${token}`;
+  const verificationUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/client/verify-token/${token}`;
   
   const mailOptions = {
     from: process.env.MAIL_USER,

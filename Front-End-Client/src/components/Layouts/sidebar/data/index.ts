@@ -44,12 +44,11 @@ export const NAV_DATA = [
       },
       {
         title: "Factures & Devis",
-        url: "/client/factures",
         icon: FileText,
         items: [
           {
             title: "Mes factures",
-            url: "/client/factures/liste",
+            url: "/client-facture",
           },
           {
             title: "Mes devis",

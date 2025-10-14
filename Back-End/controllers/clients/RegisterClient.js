@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Client } from "../../models/Client.js";
-import { sendVerificationEmail } from "../../utils/mailer.js";
+import { sendVerificationEmailForCient } from "../../utils/mailerCLient.js";
 
 
 export const registerClient = async (req, res) => {
@@ -48,7 +48,7 @@ export const registerClient = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    await sendVerificationEmail(email, verificationToken);
+    await sendVerificationEmailForCient(email, verificationToken);
     console.log("📧 Email de vérification envoyé à :", email);
 
     res.status(201).json({ 

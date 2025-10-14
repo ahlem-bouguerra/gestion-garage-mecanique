@@ -14,6 +14,7 @@ import { getServicesByGarageId } from "../controllers/clients/serviceController.
 import {getClientProfile} from "../controllers/clients/profileController.js";
 import { ClientCreateReservation, ClientGetReservations, ClientUpdateReservation,ClientCancelReservation } from '../controllers/clients/revervationController.js';
 import {getClientDevis, getClientDevisById, getClientDevisStats } from '../controllers/clients/clientDevisController.js';
+import { getClientFactures, GetClientFactureById, GetClientFactureStats,getClientCreditNoteById } from '../controllers/clients/clientFactureController.js';
 
 const router = express.Router();
 
@@ -111,4 +112,9 @@ router.get('/all-mes-devis', clientauthMiddleware, getClientDevis);
 router.get('/mes-devis/stats', clientauthMiddleware, getClientDevisStats);
 router.get('/mes-devis/:devisId', clientauthMiddleware, getClientDevisById);
 
+
+router.get('/client/factures', clientauthMiddleware, getClientFactures);
+router.get('/client/factures/stats', clientauthMiddleware, GetClientFactureStats);
+router.get('/client/factures/:id', clientauthMiddleware, GetClientFactureById);
+router.get('/client/credit-note/:creditNoteId', clientauthMiddleware, getClientCreditNoteById);
 export default router;
