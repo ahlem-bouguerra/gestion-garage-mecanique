@@ -21,6 +21,11 @@ const factureSchema = new mongoose.Schema({
   ref: 'FicheClient',
   required: true
 },
+realClientId: {  // ← NOUVEAU : vrai compte Client
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Client',
+  required: false  // false car anciennes factures n'ont pas ça
+},
 clientInfo: {
   nom: String,
   telephone: String,

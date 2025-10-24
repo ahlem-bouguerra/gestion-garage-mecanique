@@ -2,6 +2,7 @@ import Facture from '../../models/Facture.js';
 import Devis from '../../models/Devis.js';
 import mongoose from 'mongoose'; // ✅ Import ajouté
 import CreditNote from '../../models/CreditNote.js';
+import FicheClient from '../../models/FicheClient.js'; 
 
 
 
@@ -26,6 +27,8 @@ export const CreateFacture = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Seuls les devis acceptés peuvent être facturés' });
     }
 
+    const ficheClient = await FicheClient.findById(devis.clientId);
+
     // 2️⃣ Vérifier si une facture existe déjà pour ce devis
     const existingFacture = await Facture.findOne({ devisId: devis._id , garagisteId: req.user._id  });
     if (existingFacture) {
@@ -40,7 +43,8 @@ export const CreateFacture = async (req, res) => {
     const factureData = {
       numeroFacture: numeroFacture,
       devisId: devis._id,
-       clientId: devis.clientId, 
+       clientId: devis.clientId,
+       realClientId: ficheClient?.clientId || null,
        garagisteId: req.user._id ,  // ← ici
         clientInfo: {
           nom: devis.clientName,

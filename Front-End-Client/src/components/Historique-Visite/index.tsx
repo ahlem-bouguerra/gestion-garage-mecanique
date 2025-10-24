@@ -91,7 +91,7 @@ const currentMonthCount = reservations.filter(reservation => {
       },
         contre_propose: {
         label: 'contre_propose',
-        color: 'bg-red-100 text-red-800',
+        color: 'bg-yellow-100 text-yellow-800',
         icon: <XCircle className="w-4 h-4" />
       },
       annule: {

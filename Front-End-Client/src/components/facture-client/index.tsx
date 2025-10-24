@@ -1,111 +1,82 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, FileText, DollarSign, Clock, AlertTriangle, X, User, Calendar, Car } from 'lucide-react';
+import { Search, Filter, FileText, DollarSign, Clock, AlertTriangle, X, User, Calendar, Car, Download, CreditCard } from 'lucide-react';
 import axios from 'axios';
 
-interface FactureDetails extends Facture {
-  clientId?: {
+interface GarageInfo {
+  username: string;
+  email: string;
+  phone: string;
+  governorateName: string;
+  cityName: string;
+  streetAddress: string;
+}
+
+interface FactureDetails {
+  _id: string;
+  numeroFacture: number;
+  garagisteId: GarageInfo;
+  clientInfo: {
     nom: string;
+  };
+  realClientId:{
     email: string;
-    telephone: string;
-    adresse?: string;
+    phone: string;
   };
-  devisId?: {
-    id: string;
-    status: string;
-  };
+  vehicleInfo: string;
+  totalTTC: number;
+  totalHT?: number;
+  totalTVA?: number;
+  tvaRate?: number;
+  paymentStatus: 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye' | 'annule';
+  invoiceDate: string;
+  dueDate: string;
+  paymentAmount?: number;
   services?: Array<{
-      name: string;
-      description: string;
+    name: string;
+    description: string;
     piece: string;
     quantity: number;
     unitPrice: number;
     total: number;
   }>;
-  maindoeuvre?: number; // C'est juste un nombre selon votre schéma
-  tvaRate?: number;
-  totalHT?: number;
-  totalTVA?: number;
-  estimatedTime?: {
-    days: number;
-    hours: number;
-    minutes: number;
-  };
+  maindoeuvre?: number;
   notes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-interface Facture {
-  _id: string;
-  numeroFacture: number;
   creditNoteId?: string;
-  replacedByFactureId?: string;
   status?: 'active' | 'cancelled';
-  clientInfo: {
-    nom: string;
-    email: string;
-    telephone: string;
-  };
-  vehicleInfo: string;
-  totalTTC: number;
-  paymentStatus: 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye' | 'annule';
-  invoiceDate: string;
-  dueDate: string;
-  paymentAmount?: number;
-  ordreId: string;
 }
+
 interface Stats {
   totalFactures: number;
   totalTTC: number;
   totalPaye: number;
-  totalPayePartiel: number; // ✅ Nouveau
-  totalEncaisse: number; // ✅ Nouveau
   totalImpaye: number;
-  facturesPayees: number;
   facturesEnRetard: number;
-  facturesPartiellesPayees: number; // ✅ Nouveau
-  facturesEnAttente: number; // ✅ Nouveau
-  tauxPaiement: number; // ✅ Nouveau
 }
 
-const GestionClientFactures: React.FC = () => {
-  const [factures, setFactures] = useState<Facture[]>([]);
-  const [filteredFactures, setFilteredFactures] = useState<Facture[]>([]);
+const ClientFactures: React.FC = () => {
+  const [factures, setFactures] = useState<FactureDetails[]>([]);
+  const [filteredFactures, setFilteredFactures] = useState<FactureDetails[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalFactures: 0,
     totalTTC: 0,
     totalPaye: 0,
-    totalPayePartiel: 0, // ✅ Nouveau
-    totalEncaisse: 0, // ✅ Nouveau
     totalImpaye: 0,
-    facturesPayees: 0,
-    facturesEnRetard: 0,
-    facturesPartiellesPayees: 0, // ✅ Nouveau
-    facturesEnAttente: 0, // ✅ Nouveau
-    tauxPaiement: 0 // ✅ Nouveau
+    facturesEnRetard: 0
   });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('tous');
-  const [selectedFacture, setSelectedFacture] = useState<Facture | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [factureDetails, setFactureDetails] = useState<FactureDetails | null>(null);
+  const [selectedFacture, setSelectedFacture] = useState<FactureDetails | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [loadingDetails, setLoadingDetails] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [creditNoteDetails, setCreditNoteDetails] = useState(null);
-  const [showCreditNoteModal, setShowCreditNoteModal] = useState(false);
   const itemsPerPage = 5;
-  const indexOfLastFacture = currentPage * itemsPerPage;
-  const indexOfFirstFacture = indexOfLastFacture - itemsPerPage;
-  const currentFactures = filteredFactures.slice(indexOfFirstFacture, indexOfLastFacture);
+
   const getAuthToken = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
 
-
-  // Récupérer les factures
   useEffect(() => {
     fetchFactures();
     fetchStats();
@@ -115,22 +86,21 @@ const GestionClientFactures: React.FC = () => {
     const header = document.querySelector('header');
     if (!header) return;
 
-    if (factureDetails || selectedFacture || creditNoteDetails) {
+    if (selectedFacture || showDetailsModal || showPaymentModal) {
       header.classList.add("hidden");
     } else {
       header.classList.remove("hidden");
     }
-  }, [factureDetails, selectedFacture ,creditNoteDetails]);
+  }, [selectedFacture, showDetailsModal, showPaymentModal]);
 
   const fetchFactures = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/client/factures', {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
-      const data = await response.data;
-      if (data.success) {
-        setFactures(data.data);
-        setFilteredFactures(data.data);
+      if (response.data.success) {
+        setFactures(response.data.data);
+        setFilteredFactures(response.data.data);
       }
     } catch (error) {
       console.error('Erreur lors de la récupération des factures:', error);
@@ -144,161 +114,80 @@ const GestionClientFactures: React.FC = () => {
       const response = await axios.get('http://localhost:5000/api/client/factures/stats', {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
-      const data = await response.data;
-      if (data.success) {
-        setStats(data.data);
+      if (response.data.success) {
+        setStats(response.data.data);
       }
     } catch (error) {
       console.error('Erreur lors de la récupération des stats:', error);
     }
   };
-  const fetchFactureDetails = async (factureId: string) => {
-    setLoadingDetails(true);
+
+  const handlePayment = async (factureId: string, paymentData: any) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/client/factures/${factureId}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-      const data = await response.data;
-      if (data.success) {
-        setFactureDetails(data.data);
-        setShowDetailsModal(true);
+      const token = getAuthToken();
+      
+      if (!token) {
+        alert('❌ Erreur: Session expirée. Veuillez vous reconnecter.');
+        window.location.href = '/login';
+        return;
       }
-    } catch (error) {
-      console.error('Erreur lors de la récupération des détails:', error);
-    } finally {
-      setLoadingDetails(false);
+      
+      console.log('🔍 Tentative paiement client pour facture:', factureId);
+      
+      const response = await axios.post(
+        `http://localhost:5000/api/client/factures/${factureId}/payment`,
+        paymentData,
+        {
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      if (response.data.success) {
+        alert('✅ Paiement enregistré avec succès !');
+        fetchFactures();
+        fetchStats();
+        setShowPaymentModal(false);
+        setSelectedFacture(null);
+      }
+    } catch (error: any) {
+      console.error('❌ Erreur lors du paiement:', error);
+      
+      if (error.response?.status === 401) {
+        alert('❌ Session expirée. Veuillez vous reconnecter.');
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          'Erreur de connexion au serveur';
+      
+      alert('❌ Erreur lors du paiement: ' + errorMessage);
     }
   };
 
-const fetchCreditNoteDetails = async (creditNoteId) => {
-  try {
-    console.log('🚀 Appel API pour ID:', creditNoteId);
-    console.log('🔑 Token:', getAuthToken());
-    
-    const response = await axios.get(`http://localhost:5000/api/client/credit-note/${creditNoteId}`, {
-      headers: { Authorization: `Bearer ${getAuthToken()}` }
-    });
-    
-    const data = response.data;
-    if (data.success) {
-      setCreditNoteDetails(data.data);
-      setShowCreditNoteModal(true);
-    }
-  } catch (error) {
-    console.error('❌ Erreur détaillée:', {
-      status: error.response?.status,
-      message: error.response?.data?.message,
-      url: error.config?.url
-    });
-    
-    if (error.response?.status === 404) {
-      alert('Avoir non trouvé ou vous n\'avez pas les droits d\'accès');
-    }
-  }
-};
-
-  useEffect(() => {
-    const fetchUserWithLocation = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      try {
-        const response = await axios.get("http://localhost:5000/api/get-Client-profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCurrentUser(response.data);
-      } catch (error) {
-        console.error("Erreur:", error);
-      }
-    };
-
-    fetchUserWithLocation();
-  }, []);
-
-  // Filtrer les factures
   useEffect(() => {
     let filtered = factures;
 
-    // Filtre par terme de recherche
     if (searchTerm) {
       filtered = filtered.filter(facture =>
-        facture.clientInfo.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        facture.numeroFacture.toString().includes(searchTerm) ||
         facture.vehicleInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        facture.numeroFacture.toString().includes(searchTerm)
+        facture.garagisteId?.username.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Filtre par statut
     if (statusFilter !== 'tous') {
       filtered = filtered.filter(facture => facture.paymentStatus === statusFilter);
     }
 
     setFilteredFactures(filtered);
+    setCurrentPage(1);
   }, [searchTerm, statusFilter, factures]);
-
-const handlePayment = async (factureId: string, paymentData: any) => {
-  try {
-    const token = localStorage.getItem("token");
-    
-    // Vérification que le token existe
-    if (!token) {
-      alert('❌ Erreur: Token d\'authentification manquant. Veuillez vous reconnecter.');
-      // Rediriger vers la page de connexion ou actualiser
-      window.location.href = '/login';
-      return;
-    }
-    
-    console.log('🔍 Tentative paiement pour facture:', factureId);
-    console.log('📊 Données paiement:', paymentData);
-    console.log('🔐 Token présent:', token ? 'Oui' : 'Non');
-    
-    const response = await axios.put(
-      `http://localhost:5000/api/${factureId}/payment`,
-      paymentData,
-      {
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Format standard Bearer
-        }
-      }
-    );
-
-    console.log('✅ Réponse paiement:', response.data);
-
-    if (response.data.success) {
-      fetchFactures();
-      fetchStats();
-      setShowPaymentModal(false);
-      
-      // Afficher un message de succès
-      alert('✅ Paiement enregistré avec succès !');
-    } else {
-      console.error('❌ Échec paiement:', response.data.message);
-      alert('❌ Erreur: ' + response.data.message);
-    }
-  } catch (error: any) {
-    console.error('❌ Erreur lors du paiement:', error);
-    
-    // Gestion spécifique des erreurs d'authentification
-    if (error.response?.status === 401) {
-      alert('❌ Session expirée. Veuillez vous reconnecter.');
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-      return;
-    }
-    
-    console.error('📝 Détails erreur:', error.response?.data);
-    console.error('🔢 Status HTTP:', error.response?.status);
-    
-    // Affichage d'erreur plus détaillé
-    const errorMessage = error.response?.data?.message || 
-                        error.response?.data?.error || 
-                        error.message ||
-                        'Erreur de connexion au serveur';
-    
-    alert('❌ Erreur lors du paiement: ' + errorMessage);
-  }
-};
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-TN', {
@@ -315,7 +204,7 @@ const handlePayment = async (factureId: string, paymentData: any) => {
     const styles = {
       'paye': 'bg-green-100 text-green-800 border border-green-200',
       'en_attente': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-      'en_retard': 'bg-red-100 text-red-800 border border-red-200 animate-pulse', // ✅ Animation pour attirer l'attention
+      'en_retard': 'bg-red-100 text-red-800 border border-red-200 animate-pulse',
       'partiellement_paye': 'bg-blue-100 text-blue-800 border border-blue-200',
       'annule': 'bg-gray-200 text-gray-800 border border-gray-300',
     };
@@ -323,7 +212,7 @@ const handlePayment = async (factureId: string, paymentData: any) => {
     const labels = {
       'paye': '✅ Payée',
       'en_attente': '⏳ En attente',
-      'en_retard': '🚨 En retard', // ✅ Emoji pour plus de visibilité
+      'en_retard': '🚨 En retard',
       'partiellement_paye': '💰 Partielle',
       'annule': '❌ Annulée',
     };
@@ -335,20 +224,28 @@ const handlePayment = async (factureId: string, paymentData: any) => {
     );
   };
 
+  const indexOfLastFacture = currentPage * itemsPerPage;
+  const indexOfFirstFacture = indexOfLastFacture - itemsPerPage;
+  const currentFactures = filteredFactures.slice(indexOfFirstFacture, indexOfLastFacture);
+
   if (loading) {
-    return <div className="flex justify-center items-center h-64">Chargement...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Factures</h1>
-        <p className="text-gray-600">Gérez vos factures et suivez les paiements</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Mes Factures</h1>
+        <p className="text-gray-600">Consultez et payez vos factures</p>
       </div>
 
       {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <FileText className="h-8 w-8 text-blue-500" />
@@ -363,18 +260,8 @@ const handlePayment = async (factureId: string, paymentData: any) => {
           <div className="flex items-center">
             <DollarSign className="h-8 w-8 text-green-500" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Chiffre d'Affaires</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalTTC)}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <DollarSign className="h-8 w-8 text-blue-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Encaissé</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalEncaisse)}</p>
+              <p className="text-sm font-medium text-gray-600">Total Payé</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalPaye)}</p>
             </div>
           </div>
         </div>
@@ -383,7 +270,7 @@ const handlePayment = async (factureId: string, paymentData: any) => {
           <div className="flex items-center">
             <Clock className="h-8 w-8 text-yellow-500" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">En Attente</p>
+              <p className="text-sm font-medium text-gray-600">À Payer</p>
               <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalImpaye)}</p>
             </div>
           </div>
@@ -400,23 +287,21 @@ const handlePayment = async (factureId: string, paymentData: any) => {
         </div>
       </div>
 
-      {/* Filtres et Actions */}
+      {/* Filtres */}
       <div className="bg-white rounded-lg shadow mb-6">
         <div className="p-6 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* Recherche */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
                 type="text"
-                placeholder="Rechercher par client, immatriculation ou numéro..."
+                placeholder="Rechercher par numéro, véhicule ou garage..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            {/* Filtre par statut */}
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <select
@@ -443,7 +328,7 @@ const handlePayment = async (factureId: string, paymentData: any) => {
                   N° Facture
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Client
+                  Garage
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Véhicule
@@ -452,16 +337,10 @@ const handlePayment = async (factureId: string, paymentData: any) => {
                   Montant
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Crédit
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date d'échéance
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Statut
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Avoir
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -470,117 +349,74 @@ const handlePayment = async (factureId: string, paymentData: any) => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {currentFactures.map((facture) => (
-
                 <tr
                   key={facture._id}
-                  className={`hover:bg-gray-50 ${facture.paymentStatus === 'en_retard'
-                    ? 'bg-red-50 border-l-4 border-red-500'
-                    : ''
-                    }`}
+                  className={`hover:bg-gray-50 ${
+                    facture.paymentStatus === 'en_retard'
+                      ? 'bg-red-50 border-l-4 border-red-500'
+                      : ''
+                  }`}
                 >
-
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {facture.numeroFacture.toString().padStart(4, '0')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{facture.clientInfo.nom}</div>
-
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm text-gray-900">
-                        {facture.vehicleInfo}
+                      <div className="text-sm font-medium text-gray-900">
+                        {facture.garagisteId?.username || 'N/A'}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {facture.garagisteId?.phone || 'N/A'}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {formatCurrency(facture.totalTTC)}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {facture.vehicleInfo}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="space-y-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        {formatCurrency(facture.totalTTC)}
+                      </p>
                       {facture.paymentAmount > 0 && (
                         <p className="text-xs text-blue-600">
                           Payé: {formatCurrency(facture.paymentAmount)}
                         </p>
                       )}
                       {facture.paymentStatus === 'partiellement_paye' && (
-                        <div>
-                          <p className="text-xs text-red-600 font-medium">
-                            Reste: {formatCurrency(facture.totalTTC - (facture.paymentAmount || 0))}
-                          </p>
-                        </div>
-                      )}
-                      {facture.paymentStatus === 'en_retard' && (
-                        <div>
-                          <p className="text-xs text-red-700 font-bold">
-                            ⚠️ RETARD
-                          </p>
-                          {facture.paymentAmount > 0 ? (
-                            <p className="text-xs text-red-600">
-                              Reste: {formatCurrency(facture.totalTTC - (facture.paymentAmount || 0))}
-                            </p>
-                          ) : (
-                            <p className="text-xs text-red-600">
-                              Non payé
-                            </p>
-                          )}
-                        </div>
-                      )}
-                      {facture.paymentStatus === 'en_attente' && (
-                        <p className="text-xs text-gray-500">
-                          Aucun paiement
-                        </p>
-                      )}
-                      {facture.paymentStatus === 'paye' && (
-                        <p className="text-xs text-green-600 font-medium">
-                          ✅ Soldé
+                        <p className="text-xs text-red-600 font-medium">
+                          Reste: {formatCurrency(facture.totalTTC - (facture.paymentAmount || 0))}
                         </p>
                       )}
                     </div>
                   </td>
-
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(facture.dueDate)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(facture.paymentStatus)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {facture.creditNoteId ? (
-                      <button 
-                        onClick={() => fetchCreditNoteDetails(facture.creditNoteId)}
-                        className="text-red-600 hover:text-red-800 underline text-xs"
-                      >
-                        📄 Voir avoir
-                      </button>
-                    ) : (
-                      <span className="text-gray-400 text-xs">-</span>
-                    )}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
-
                       <button
-                        onClick={() => fetchFactureDetails(facture._id)}
-                        disabled={loadingDetails || facture.paymentStatus === "annule"}
-                        className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          setSelectedFacture(facture);
+                          setShowDetailsModal(true);
+                        }}
+                        disabled={facture.paymentStatus === 'annule'}
+                        className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
                       >
-                        {loadingDetails ? "Chargement..." : "Voir"}
+                        Voir
                       </button>
-
-
-
-                      {facture.paymentStatus !== 'paye' && (
+                      {facture.paymentStatus !== 'paye' && facture.paymentStatus !== 'annule' && (
                         <button
                           onClick={() => {
                             setSelectedFacture(facture);
                             setShowPaymentModal(true);
                           }}
-                          disabled={facture.paymentStatus === 'annule'}
-                          className="text-green-600 hover:text-green-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="text-green-600 hover:text-green-900"
                         >
+                          <CreditCard className="h-4 w-4 inline mr-1" />
                           Payer
                         </button>
                       )}
@@ -598,26 +434,279 @@ const handlePayment = async (factureId: string, paymentData: any) => {
             <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune facture</h3>
             <p className="mt-1 text-sm text-gray-500">
               {searchTerm || statusFilter !== 'tous'
-                ? 'Aucune facture ne correspond à vos critères de recherche.'
-                : 'Commencez par créer une facture à partir d\'un ordre terminé.'
+                ? 'Aucune facture ne correspond à vos critères.'
+                : 'Vous n\'avez pas encore de factures.'
               }
             </p>
           </div>
         )}
       </div>
 
+      {/* Modal de détails */}
+      {showDetailsModal && selectedFacture && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-5 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+            <div className="flex justify-between items-center mb-6 no-print">
+              <h3 className="text-xl font-bold text-gray-900">
+                Facture N° {selectedFacture.numeroFacture.toString().padStart(4, '0')}
+              </h3>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="invoice-content bg-white" id="invoice-print">
+              {/* En-tête garage */}
+              <div className="border-b-2 border-gray-200 pb-6 mb-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h1 className="text-3xl font-bold text-blue-600">
+                      {selectedFacture.garagisteId?.username || 'Garage'}
+                    </h1>
+                    <div className="mt-2 text-gray-600">
+                      <p>{selectedFacture.garagisteId?.governorateName} - {selectedFacture.garagisteId?.cityName}</p>
+                      <p>{selectedFacture.garagisteId?.streetAddress}</p>
+                      <p>Tél: {selectedFacture.garagisteId?.phone}</p>
+                      <p>Email: {selectedFacture.garagisteId?.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <h2 className="text-2xl font-bold text-gray-800">FACTURE</h2>
+                    <div className="mt-2 text-gray-600">
+                      <p><span className="font-medium">N°:</span> {selectedFacture.numeroFacture.toString().padStart(4, '0')}</p>
+                      <p><span className="font-medium">Date:</span> {formatDate(selectedFacture.invoiceDate)}</p>
+                      <p><span className="font-medium">Échéance:</span> {formatDate(selectedFacture.dueDate)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Client et véhicule */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">
+                    CLIENT
+                  </h3>
+                  <div className="space-y-1 text-gray-700">
+                    <p className="font-medium text-lg">{selectedFacture.clientInfo.nom}</p>
+                    <p>Tél: {selectedFacture.realClientId.phone}</p>
+                    <p>Email: {selectedFacture.realClientId.email}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">
+                    VÉHICULE
+                  </h3>
+                  <div className="space-y-1 text-gray-700">
+                    <p className="font-medium">{selectedFacture.vehicleInfo}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Services */}
+              {selectedFacture.services && selectedFacture.services.length > 0 && (
+                <div className="mb-8">
+                  <table className="w-full border-collapse border border-gray-300">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold">
+                          DESCRIPTION
+                        </th>
+                        <th className="border border-gray-300 px-4 py-3 text-center text-sm font-semibold">
+                          QTÉ
+                        </th>
+                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold">
+                          PRIX UNITAIRE
+                        </th>
+                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold">
+                          TOTAL
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedFacture.services.map((service, index) => (
+                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="border border-gray-300 px-4 py-3">
+                            <p className="font-medium">{service.piece}</p>
+                            {service.description && (
+                              <p className="text-xs text-gray-500">{service.description}</p>
+                            )}
+                          </td>
+                          <td className="border border-gray-300 px-4 py-3 text-center">
+                            {service.quantity}
+                          </td>
+                          <td className="border border-gray-300 px-4 py-3 text-right">
+                            {formatCurrency(service.unitPrice)}
+                          </td>
+                          <td className="border border-gray-300 px-4 py-3 text-right font-medium">
+                            {formatCurrency(service.total)}
+                          </td>
+                        </tr>
+                      ))}
+
+                      {selectedFacture.maindoeuvre && selectedFacture.maindoeuvre > 0 && (
+                        <tr className="bg-blue-50">
+                          <td className="border border-gray-300 px-4 py-3 font-medium">
+                            Main d'œuvre
+                          </td>
+                          <td className="border border-gray-300 px-4 py-3 text-center">1</td>
+                          <td className="border border-gray-300 px-4 py-3 text-right">
+                            {formatCurrency(selectedFacture.maindoeuvre)}
+                          </td>
+                          <td className="border border-gray-300 px-4 py-3 text-right font-medium">
+                            {formatCurrency(selectedFacture.maindoeuvre)}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Totaux */}
+              <div className="flex justify-end mb-8">
+                <div className="w-64">
+                  <table className="w-full">
+                    <tbody>
+                      {selectedFacture.totalHT && (
+                        <tr>
+                          <td className="px-4 py-2 text-right font-medium text-gray-700 border-b">
+                            TOTAL HT:
+                          </td>
+                          <td className="px-4 py-2 text-right border-b">
+                            {formatCurrency(selectedFacture.totalHT)}
+                          </td>
+                        </tr>
+                      )}
+                      {selectedFacture.totalTVA && (
+                        <tr>
+                          <td className="px-4 py-2 text-right font-medium text-gray-700 border-b">
+                            TVA ({selectedFacture.tvaRate || 20}%):
+                          </td>
+                          <td className="px-4 py-2 text-right border-b">
+                            {formatCurrency(selectedFacture.totalTVA)}
+                          </td>
+                        </tr>
+                      )}
+                      <tr className="bg-gray-100">
+                        <td className="px-4 py-3 text-right text-lg font-bold">
+                          TOTAL TTC:
+                        </td>
+                        <td className="px-4 py-3 text-right text-lg font-bold text-green-600">
+                          {formatCurrency(selectedFacture.totalTTC)}
+                        </td>
+                      </tr>
+                      {selectedFacture.paymentAmount > 0 && (
+                        <>
+                          <tr>
+                            <td className="px-4 py-2 text-right font-medium text-blue-700">
+                              Payé:
+                            </td>
+                            <td className="px-4 py-2 text-right text-blue-700">
+                              {formatCurrency(selectedFacture.paymentAmount)}
+                            </td>
+                          </tr>
+                          {selectedFacture.paymentStatus !== 'paye' && (
+                            <tr className="bg-yellow-50">
+                              <td className="px-4 py-3 text-right font-bold text-red-700">
+                                RESTE À PAYER:
+                              </td>
+                              <td className="px-4 py-3 text-right font-bold text-red-700">
+                                {formatCurrency(selectedFacture.totalTTC - selectedFacture.paymentAmount)}
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {selectedFacture.notes && (
+                <div className="border-t pt-4">
+                  <p className="text-sm font-medium text-gray-700">Notes:</p>
+                  <p className="text-sm text-gray-600 mt-1">{selectedFacture.notes}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6 pt-4 border-t no-print">
+              {selectedFacture.paymentStatus !== 'paye' && selectedFacture.paymentStatus !== 'annule' && (
+                <button
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    setShowPaymentModal(true);
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                >
+                  <CreditCard className="h-4 w-4 inline mr-2" />
+                  Payer cette facture
+                </button>
+              )}
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              >
+                <Download className="h-4 w-4 inline mr-2" />
+                Imprimer
+              </button>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal de paiement */}
       {showPaymentModal && selectedFacture && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
-              Enregistrer le paiement
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-gray-900">
+                Effectuer un paiement
+              </h3>
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">Facture N°:</span> {selectedFacture.numeroFacture.toString().padStart(4, '0')}
+              </p>
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">Montant total:</span> {formatCurrency(selectedFacture.totalTTC)}
+              </p>
+              {selectedFacture.paymentAmount > 0 && (
+                <>
+                  <p className="text-sm text-blue-600">
+                    <span className="font-medium">Déjà payé:</span> {formatCurrency(selectedFacture.paymentAmount)}
+                  </p>
+                  <p className="text-sm text-red-600 font-medium">
+                    <span className="font-medium">Reste:</span> {formatCurrency(selectedFacture.totalTTC - selectedFacture.paymentAmount)}
+                  </p>
+                </>
+              )}
+            </div>
+
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
               handlePayment(selectedFacture._id, {
-                paymentAmount: formData.get('amount'),
+                paymentAmount: Number(formData.get('amount')),
                 paymentMethod: formData.get('method'),
                 paymentDate: formData.get('date'),
                 reference: formData.get('reference')
@@ -625,27 +714,26 @@ const handlePayment = async (factureId: string, paymentData: any) => {
             }}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Montant payé
+                  Montant à payer *
                 </label>
-                {selectedFacture.paymentAmount > 0 && (
-                  <p className="text-sm text-gray-600 mb-2">
-                    Déjà payé: {formatCurrency(selectedFacture.paymentAmount)}
-                  </p>
-                )}
                 <input
                   type="number"
                   name="amount"
                   step="0.001"
+                  min="0.001"
                   max={selectedFacture.totalTTC - (selectedFacture.paymentAmount || 0)}
                   defaultValue={selectedFacture.totalTTC - (selectedFacture.paymentAmount || 0)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Maximum: {formatCurrency(selectedFacture.totalTTC - (selectedFacture.paymentAmount || 0))}
+                </p>
               </div>
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Méthode de paiement
+                  Méthode de paiement *
                 </label>
                 <select
                   name="method"
@@ -653,21 +741,22 @@ const handlePayment = async (factureId: string, paymentData: any) => {
                   required
                 >
                   <option value="">Sélectionner...</option>
-                  <option value="especes">Espèces</option>
-                  <option value="cheque">Chèque</option>
-                  <option value="virement">Virement</option>
-                  <option value="carte">Carte bancaire</option>
+                  <option value="especes">💵 Espèces</option>
+                  <option value="cheque">📝 Chèque</option>
+                  <option value="virement">🏦 Virement bancaire</option>
+                  <option value="carte">💳 Carte bancaire</option>
                 </select>
               </div>
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date de paiement
+                  Date de paiement *
                 </label>
                 <input
                   type="date"
                   name="date"
                   defaultValue={new Date().toISOString().split('T')[0]}
+                  max={new Date().toISOString().split('T')[0]}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -683,6 +772,16 @@ const handlePayment = async (factureId: string, paymentData: any) => {
                   placeholder="N° chèque, référence virement..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Ex: Chèque n°123456, Virement REF789
+                </p>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-6">
+                <p className="text-xs text-yellow-800">
+                  ℹ️ <strong>Information:</strong> Votre paiement sera enregistré et validé par le garage. 
+                  Vous recevrez une confirmation par email.
+                </p>
               </div>
 
               <div className="flex justify-end space-x-3">
@@ -695,8 +794,9 @@ const handlePayment = async (factureId: string, paymentData: any) => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 flex items-center"
                 >
+                  <CreditCard className="h-4 w-4 mr-2" />
                   Confirmer le paiement
                 </button>
               </div>
@@ -704,395 +804,58 @@ const handlePayment = async (factureId: string, paymentData: any) => {
           </div>
         </div>
       )}
-      {showDetailsModal && factureDetails && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-5 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
-            {/* Header avec boutons d'action */}
-            <div className="flex justify-between items-center mb-6 no-print">
-              <h3 className="text-xl font-bold text-gray-900">
-                Facture N° {factureDetails.numeroFacture.toString().padStart(4, '0')}
-              </h3>
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-
-            </div>
-
-            {/* Contenu de la facture */}
-            <div className="invoice-content bg-white" id="invoice-print">
-              {/* En-tête de l'entreprise */}
-              <div className="border-b-2 border-gray-200 pb-6 mb-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h1 className="text-3xl font-bold text-blue-600">
-                      {currentUser?.username || "Nom du garage"}
-                    </h1>
-                    <div className="mt-2 text-gray-600">
-                      <p>{currentUser?.governorateName}-{currentUser?.cityName}-{currentUser?.streetAddress || "Adresse non renseignée"}</p>
-                      <p>Tél: {currentUser?.phone || "Non renseigné"}</p>
-                      <p>Email: {currentUser?.email || "Non renseigné"}</p>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <h2 className="text-2xl font-bold text-gray-800">FACTURE</h2>
-                    <div className="mt-2 text-gray-600">
-                      <p><span className="font-medium">N°:</span> {factureDetails.numeroFacture.toString().padStart(4, '0')}</p>
-                      <p><span className="font-medium">Date:</span> {formatDate(factureDetails.invoiceDate)}</p>
-                      <p><span className="font-medium">Échéance:</span> {formatDate(factureDetails.dueDate)}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Informations client et véhicule */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">
-                    FACTURÉ À
-                  </h3>
-                  <div className="space-y-1 text-gray-700">
-                    <p className="font-medium text-lg">{factureDetails.clientId?.nom || factureDetails.clientInfo.nom}</p>
-                    {factureDetails.clientId?.adresse && (
-                      <p>{factureDetails.clientId.adresse}</p>
-                    )}
-                    <p>Tél: {factureDetails.clientId?.telephone || factureDetails.clientInfo.telephone}</p>
-                    <p>Email: {factureDetails.clientId?.email || factureDetails.clientInfo.email}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">
-                    VÉHICULE
-                  </h3>
-                  <div className="space-y-1 text-gray-700">
-                    <p className="font-medium">{factureDetails.vehicleInfo}</p>
-                    {factureDetails.devisId && (
-                      <p className="text-sm text-gray-500">Devis: {factureDetails.devisId.id}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Tableau des services */}
-              {factureDetails.services && factureDetails.services.length > 0 && (
-                <div className="mb-8">
-                  <table className="w-full border-collapse border border-gray-300">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-800">
-                          DESCRIPTION
-                        </th>
-                        <th className="border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-800">
-                          QTÉ
-                        </th>
-                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold text-gray-800">
-                          PRIX UNITAIRE
-                        </th>
-                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold text-gray-800">
-                          TOTAL
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {factureDetails.services.map((service, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border border-gray-300 px-4 py-3">
-                            <div>
-                              <p className="font-medium text-gray-900">{service.piece}</p>
-                              {service && (
-                                <p className="text-xs text-gray-500">{service.description}</p>
-                              )}
-                            </div>
-                          </td>
-                          <td className="border border-gray-300 px-4 py-3 text-center text-gray-900">
-                            {service.quantity}
-                          </td>
-                          <td className="border border-gray-300 px-4 py-3 text-right text-gray-900">
-                            {formatCurrency(service.unitPrice)}
-                          </td>
-                          <td className="border border-gray-300 px-4 py-3 text-right font-medium text-gray-900">
-                            {formatCurrency(service.total)}
-                          </td>
-                        </tr>
-                      ))}
-
-                      {/* Ligne main d'œuvre si présente */}
-                      {factureDetails.maindoeuvre && factureDetails.maindoeuvre > 0 && (
-                        <tr className="bg-blue-50">
-                          <td className="border border-gray-300 px-4 py-3 font-medium text-gray-900">
-                            Main d'œuvre
-                          </td>
-                          <td className="border border-gray-300 px-4 py-3 text-center">1</td>
-                          <td className="border border-gray-300 px-4 py-3 text-right">
-                            {formatCurrency(factureDetails.maindoeuvre)}
-                          </td>
-                          <td className="border border-gray-300 px-4 py-3 text-right font-medium">
-                            {formatCurrency(factureDetails.maindoeuvre)}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* Totaux */}
-              <div className="flex justify-end mb-8">
-                <div className="w-64">
-                  <table className="w-full">
-                    <tbody>
-                      {factureDetails.totalHT && (
-                        <tr>
-                          <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
-                            TOTAL HT:
-                          </td>
-                          <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
-                            {formatCurrency(factureDetails.totalHT)}
-                          </td>
-                        </tr>
-                      )}
-                      {factureDetails.totalTVA && (
-                        <tr>
-                          <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
-                            TVA ({factureDetails.tvaRate || 20}%):
-                          </td>
-                          <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
-                            {formatCurrency(factureDetails.totalTVA)}
-                          </td>
-                        </tr>
-                      )}
-                      <tr className="bg-gray-100">
-                        <td className="px-4 py-3 text-right text-lg font-bold text-gray-800">
-                          TOTAL TTC:
-                        </td>
-                        <td className="px-4 py-3 text-right text-lg font-bold text-green-600">
-                          {formatCurrency(factureDetails.totalTTC)}
-                        </td>
-                      </tr>
-
-
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Statut et notes */}
-              <div className="border-t border-gray-200 pt-6">
-                <div className="flex justify-between items-start">
-                  <div>
-
-                    {factureDetails.notes && (
-                      <div className="mt-4">
-                        <p className="text-sm font-medium text-gray-700">Notes:</p>
-                        <p className="text-sm text-gray-600 mt-1">{factureDetails.notes}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="text-right text-xs text-gray-500">
-                    <p>Merci pour votre confiance</p>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Boutons d'action en bas (non imprimables) */}
-            <div className="flex justify-end space-x-3 mt-6 pt-4 border-t no-print">
-              {factureDetails.paymentStatus !== 'paye' && (
-                <button
-                  onClick={() => {
-                    setSelectedFacture(factureDetails);
-                    setShowDetailsModal(false);
-                    setShowPaymentModal(true);
-                  }}
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-                >
-                  Enregistrer un paiement
-                </button>
-              )}
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-              >
-                Fermer
-              </button>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => window.print()}
-                  className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                  </svg>
-                  Imprimer
-                </button>
-
-
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
-{showCreditNoteModal && creditNoteDetails && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-5 mx-auto p-6 border w-full max-w-4xl shadow-lg rounded-md bg-white">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6 border-b pb-4">
-              <div>
-                <h3 className="text-2xl font-bold text-red-600">
-                  AVOIR N° {creditNoteDetails.creditNumber}
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Document d'annulation comptable
-                </p>
-              </div>
-              <button
-                onClick={() => setShowCreditNoteModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            {/* Informations principales */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <h4 className="font-semibold text-red-800 mb-3">Facture Annulée</h4>
-                <div className="space-y-2 text-sm">
-                  <p><strong>N° Facture:</strong> {creditNoteDetails.originalFactureNumber}</p>
-                  <p><strong>Date d'émission avoir:</strong> {formatDate(creditNoteDetails.creditDate)}</p>
-                  <p><strong>Raison:</strong> {creditNoteDetails.reason}</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-semibold text-gray-800 mb-3">Client</h4>
-                <div className="space-y-1 text-sm text-gray-700">
-                  <p className="font-medium">{creditNoteDetails.clientInfo.nom}</p>
-                  <p>Tél: {creditNoteDetails.clientId?.telephone || creditNoteDetails.clientInfo.telephone}</p>
-                  <p>Email: {creditNoteDetails.clientId?.email || creditNoteDetails.clientInfo.email}</p>
-                </div>
-                
-                <h4 className="font-semibold text-gray-800 mb-2 mt-4">Véhicule</h4>
-                <p className="text-sm text-gray-700">{creditNoteDetails.vehicleInfo}</p>
-              </div>
-            </div>
-
-            {/* Services annulés */}
-            {creditNoteDetails.services && creditNoteDetails.services.length > 0 && (
-              <div className="mb-8">
-                <h4 className="font-semibold text-gray-800 mb-4">Services Annulés</h4>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-gray-300">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold">
-                          Description
-                        </th>
-                        <th className="border border-gray-300 px-4 py-3 text-center text-sm font-semibold">
-                          Qté
-                        </th>
-                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold">
-                          Prix Unit.
-                        </th>
-                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold">
-                          Total Annulé
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {creditNoteDetails.services.map((service, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border border-gray-300 px-4 py-3">{service.piece}</td>
-                          <td className="border border-gray-300 px-4 py-3 text-center">{service.quantity}</td>
-                          <td className="border border-gray-300 px-4 py-3 text-right">
-                            {formatCurrency(service.unitPrice)}
-                          </td>
-                          <td className="border border-gray-300 px-4 py-3 text-right font-medium text-red-600">
-                            -{formatCurrency(service.total)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* Total de l'avoir */}
-            <div className="border-t-2 border-red-300 pt-6 mb-6">
-              <div className="flex justify-end">
-                <div className="w-64 bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex justify-between items-center text-xl font-bold text-red-600">
-                    <span>MONTANT DE L'AVOIR:</span>
-                    <span>-{formatCurrency(Math.abs(creditNoteDetails.totalTTC))}</span>
-                  </div>
-                  <p className="text-xs text-red-500 mt-2 text-center">
-                    Ce montant annule la facture originale
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Note légale */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> Cet avoir annule définitivement la facture N° {creditNoteDetails.originalFactureNumber}. 
-                Il doit être conservé pour la comptabilité et peut servir de justificatif pour tout remboursement.
-              </p>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => window.print()}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Imprimer l'avoir
-              </button>
-              <button
-                onClick={() => setShowCreditNoteModal(false)}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Fermer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-6">
-        <button
-          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          className="px-3 py-1 bg-blue-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Précédent
-        </button>
+      {filteredFactures.length > itemsPerPage && (
+        <div className="flex justify-between items-center mt-6 bg-white p-4 rounded-lg shadow">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
+          >
+            ← Précédent
+          </button>
 
-        <span className="text-sm text-gray-600">
-          Page {currentPage} / {Math.ceil(filteredFactures.length / itemsPerPage)}
-        </span>
+          <span className="text-sm text-gray-600">
+            Page {currentPage} / {Math.ceil(filteredFactures.length / itemsPerPage)}
+          </span>
 
-        <button
-          onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredFactures.length / itemsPerPage)))}
-          disabled={currentPage === Math.ceil(filteredFactures.length / itemsPerPage)}
-          className="px-3 py-1 bg-blue-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Suivant
-        </button>
-      </div>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredFactures.length / itemsPerPage)))}
+            disabled={currentPage === Math.ceil(filteredFactures.length / itemsPerPage)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
+          >
+            Suivant →
+          </button>
+        </div>
+      )}
+
+      {/* Style pour l'impression */}
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #invoice-print,
+          #invoice-print * {
+            visibility: visible;
+          }
+          #invoice-print {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+          .no-print {
+            display: none !important;
+          }
+          header {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default GestionClientFactures;
+export default ClientFactures;
