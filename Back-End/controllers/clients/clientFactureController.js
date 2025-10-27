@@ -21,7 +21,7 @@ export const getClientFactures = async (req, res) => {
     // ✅ Construire la requête directement avec realClientId
     let query = {
       realClientId: req.client._id,
-      status: 'active'
+      status: { $in: ['active', 'cancelled'] }
     };
 
     if (paymentStatus) {
@@ -321,7 +321,7 @@ export const GetClientFactureById = async (req, res) => {
     const facture = await Facture.findOne({ 
       _id: id, 
       realClientId: req.client._id,
-      status: 'active'
+      status: { $in: ['active', 'cancelled'] }
     })
       .populate('garagisteId', 'username email phone streetAddress cityName governorateName')
       .populate('devisId', '_id status createdAt')

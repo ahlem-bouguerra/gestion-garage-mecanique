@@ -111,7 +111,7 @@ clientInfo: {
   // Statut de paiement
   paymentStatus: {
     type: String,
-    enum: ['en_attente', 'partiellement_paye', 'paye', 'en_retard', 'annule'],
+    enum: ['en_attente', 'partiellement_paye', 'paye', 'en_retard', 'annule','cancelled'],
     default: 'en_attente'
   },
 
@@ -267,26 +267,39 @@ factureSchema.methods.isOverdue = function() {
   return new Date() > this.dueDate && this.paymentStatus !== 'paye';
 };
 
-// Middleware pour mettre à jour automatiquement le statut des factures en retard
-factureSchema.pre(['find', 'findOne', 'findOneAndUpdate', 'aggregate'], async function() {
+
+
+// Middleware pour find, findOne, findOneAndUpdate
+factureSchema.pre(['find', 'findOne', 'findOneAndUpdate'], async function() {
   try {
     const currentDate = new Date();
-    
-    // Mettre à jour les factures en retard (non payées ET partiellement payées)
     await this.model.updateMany(
       { 
         dueDate: { $lt: currentDate },
         paymentStatus: { $in: ['en_attente', 'partiellement_paye'] }
       },
-      { 
-        paymentStatus: 'en_retard' 
-      }
+      { paymentStatus: 'en_retard' }
     );
-    
-    console.log('✅ Mise à jour automatique des statuts de factures effectuée');
-    
   } catch (error) {
-    console.error('❌ Erreur mise à jour statut en retard:', error);
+    console.error('❌ Erreur mise à jour statut (find):', error);
+  }
+});
+
+// Middleware séparé pour aggregate
+factureSchema.pre('aggregate', async function() {
+  try {
+    const currentDate = new Date();
+    const Facture = this.model(); // ✅ Différente façon d'accéder au modèle
+    
+    await Facture.updateMany(
+      { 
+        dueDate: { $lt: currentDate },
+        paymentStatus: { $in: ['en_attente', 'partiellement_paye'] }
+      },
+      { paymentStatus: 'en_retard' }
+    );
+  } catch (error) {
+    console.error('❌ Erreur mise à jour statut (aggregate):', error);
   }
 });
 

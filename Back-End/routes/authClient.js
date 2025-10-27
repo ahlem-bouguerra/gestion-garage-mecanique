@@ -15,7 +15,7 @@ import {getClientProfile} from "../controllers/clients/profileController.js";
 import { ClientCreateReservation, ClientGetReservations, ClientUpdateReservation,ClientCancelReservation } from '../controllers/clients/revervationController.js';
 import {getClientDevis, getClientDevisById, getClientDevisStats } from '../controllers/clients/clientDevisController.js';
 import { getClientFactures, GetClientFactureById, GetClientFactureStats,getClientCreditNoteById,handleClientPayment ,CreateFactureWithCredit} from '../controllers/clients/clientFactureController.js';
-
+import { search } from '../controllers/clients/ChercherGarage.js';
 const router = express.Router();
 
 // ========== GOOGLE OAUTH (CLIENT) ==========
@@ -119,4 +119,7 @@ router.get('/client/factures/:id', clientauthMiddleware, GetClientFactureById);
 router.get('/client/credit-note/:creditNoteId', clientauthMiddleware, getClientCreditNoteById);
 router.post('/create-with-credit/:devisId', clientauthMiddleware, CreateFactureWithCredit);
 router.post('/client/factures/:id/payment', clientauthMiddleware, handleClientPayment);
+
+
+router.get('/search', search);
 export default router;

@@ -514,7 +514,7 @@ export const CreateFactureWithCredit = async (req, res) => {
     });
 
     let creditNote = null;
-
+ const ficheClient = await FicheClient.findById(devis.clientId);
     // 3. Si facture existe ET que l'utilisateur veut créer un avoir
     if (existingFacture && createCreditNote) {
       // Générer le numéro d'avoir
@@ -568,11 +568,12 @@ export const CreateFactureWithCredit = async (req, res) => {
 
     // 5. Créer la nouvelle facture
     const numeroFacture = await Facture.generateFactureId();
-    
+
     const newFactureData = {
       numeroFacture: numeroFacture,
       devisId: devis._id,
       clientId: devis.clientId,
+      realClientId: ficheClient?.clientId || null,
       clientInfo: {
         nom: devis.clientName
       },
