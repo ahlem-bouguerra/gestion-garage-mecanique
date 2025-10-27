@@ -296,7 +296,7 @@ const handleSubmit = async () => {
                         <div className="mt-6 p-3 bg-blue-50 rounded-lg">
                             <h4 className="font-medium text-blue-800 text-sm mb-1">Information</h4>
                             <p className="text-blue-600 text-xs">
-                                Votre demande sera envoyée directement au garage. Vous recevrez une réponse sous 24h.
+                                Votre demande sera envoyée directement au garage. Vous recevrez une réponse bientôt.
                             </p>
                         </div>
                     </div>

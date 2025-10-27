@@ -10,12 +10,12 @@ export const NAV_DATA = [
         icon: MapPin,
         items: [],
       },
-      {
+      /*{
         title: "Tableau de bord",
         url: "/client/dashboard",
         icon: User,
         items: [],
-      },
+      },*/
       {
         title: "Mes Réservations",
         url: "/client/reservations",
@@ -25,10 +25,10 @@ export const NAV_DATA = [
             title: "Historique",
             url: "/historique-reservation",
           },
-          {
+         /* {
             title: "Nouvelle réservation",
             url: "/reservation-cote-client",
-          },
+          },*/
         ],
       },
       {
@@ -43,33 +43,33 @@ export const NAV_DATA = [
         ],
       },
       {
-        title: "Factures & Devis",
+        title: "Mes Devis",
         icon: FileText,
         items: [
-          {
+          /*{
             title: "Mes factures",
             url: "/client-facture",
-          },
+          },*/
           {
-            title: "Mes devis",
+            title: "devis",
             url: "/client-devis",
           },
         ],
       },
-      {
+    /*  {
         title: "Historique Services",
         url: "/client/historique",
         icon: Clock,
         items: [],
-      },
+      },*/
     ],
   },
   {
     label: "SERVICES",
     items: [
       {
-        title: "Paiements",
-        url: "/client/paiements",
+        title: "Factures & Paiements",
+        url: "/client-facture",
         icon: CreditCard,
         items: [],
       },

@@ -174,6 +174,10 @@ const fetchCreditNoteDetails = async (creditNoteId) => {
   try {
     console.log('🚀 Appel API pour ID:', creditNoteId);
     console.log('🔑 Token:', getAuthToken());
+    console.log('🚀 1. ID reçu:', creditNoteId);
+    console.log('🚀 2. Type:', typeof creditNoteId);
+    console.log('🚀 3. URL complète:', `http://localhost:5000/api/credit-note/${creditNoteId}`);
+    console.log('🚀 4. Token:', getAuthToken() ? 'Présent' : 'Absent');
     
     const response = await axios.get(`http://localhost:5000/api/credit-note/${creditNoteId}`, {
       headers: { Authorization: `Bearer ${getAuthToken()}` }
@@ -188,7 +192,8 @@ const fetchCreditNoteDetails = async (creditNoteId) => {
     console.error('❌ Erreur détaillée:', {
       status: error.response?.status,
       message: error.response?.data?.message,
-      url: error.config?.url
+      url: error.config?.url,
+      data: error.response?.data
     });
     
     if (error.response?.status === 404) {
