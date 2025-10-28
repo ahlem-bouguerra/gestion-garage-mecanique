@@ -194,7 +194,7 @@ router.post("/signup", register);
 router.post("/login", login);
 router.post("/logout", logout);
 
-router.get("/garage/verify-email/:token", async (req, res) => {
+router.get("/verify-email/:token", async (req, res) => {
   const token = req.params.token;
 
   try {
@@ -357,7 +357,7 @@ router.get('/dashboard/charge-atelier', getDashboardData);
 router.get('/search', search);
 
 // ========== RESERVATIONS ==========
-router.get('/reservations', getReservations);
-router.put('/update/reservations/:id', updateReservation);
+router.get('/reservations',authMiddleware, getReservations);
+router.put('/update/reservations/:id',authMiddleware, updateReservation);
 
 export default router;

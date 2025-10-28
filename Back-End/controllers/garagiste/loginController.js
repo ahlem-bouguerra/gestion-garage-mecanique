@@ -16,6 +16,16 @@ export const login = async (req, res) => {
     
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) return res.status(401).json({ message: "Mot de passe incorrect" });
+    const isProfileComplete = !!(
+      user.username && 
+      user.garagenom && 
+      user.matriculefiscal && 
+      user.phone && 
+      user.governorateId && 
+      user.cityId &&
+      user.location?.coordinates
+    );
+
     
     const token = jwt.sign(
       { 
@@ -36,6 +46,7 @@ export const login = async (req, res) => {
     res.json({ 
       message: "Connexion réussie", 
       token,
+      isProfileComplete,
       user: {
         id: user._id,
         name: user.username,

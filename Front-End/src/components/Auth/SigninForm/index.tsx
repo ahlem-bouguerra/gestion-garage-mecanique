@@ -45,52 +45,42 @@ export default function SigninWithPassword() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // ✅ CORRECTION : Gérer le retour du callback Google
+  // ✅ Gérer le retour du callback Google
   useEffect(() => {
     const token = searchParams.get("token");
     const userEncoded = searchParams.get("user");
     const redirect = searchParams.get("redirect");
-
-    console.log("🔍 Paramètres URL détectés:", { 
-      hasToken: !!token, 
-      hasUser: !!userEncoded,
-      redirect 
-    });
+    const profileComplete = searchParams.get("profileComplete");
 
     if (token && userEncoded) {
-      console.log("🔐 Token Google reçu dans l'URL:", token.substring(0, 20) + "...");
+      console.log("🔐 Token Google reçu");
       
       try {
         const userDataString = atob(decodeURIComponent(userEncoded));
         const userData = JSON.parse(userDataString);
 
-        console.log("👤 Données utilisateur décodées:", userData);
-
-        // ✅ Stocker dans localStorage
+        // Stocker dans localStorage et cookies
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(userData));
-        
-        // ✅ Stocker dans les cookies
         Cookies.set("token", token, { expires: 7, path: "/" });
-
-        console.log("💾 Token stocké:", localStorage.getItem("token")?.substring(0, 20) + "...");
-        console.log("💾 User stocké:", localStorage.getItem("user"));
 
         toast.success("🎉 Connexion Google réussie !");
 
-        // ✅ Rediriger après un court délai
+        // ✅ VÉRIFIER SI LE PROFIL EST COMPLET
         setTimeout(() => {
-          if (redirect === "dashboard") {
-            console.log("➡️ Redirection vers /dashboard-reservation");
+          if (profileComplete === "false") {
+            console.log("➡️ Profil incomplet - Redirection vers complete-profile");
+            router.replace("/auth/complete-profile");
+          } else if (redirect === "dashboard") {
+            console.log("➡️ Profil complet - Redirection vers dashboard");
             router.replace("/dashboard-reservation");
           } else {
-            console.log("➡️ Redirection par défaut vers /dashboard-reservation");
             router.replace("/dashboard-reservation");
           }
         }, 1500);
 
       } catch (error) {
-        console.error("❌ Erreur lors du traitement des données Google:", error);
+        console.error("❌ Erreur traitement Google:", error);
         toast.error("Erreur lors de la connexion Google");
       }
     }
@@ -124,16 +114,27 @@ export default function SigninWithPassword() {
 
       if (response.data.token) {
         const token = response.data.token;
-        localStorage.setItem("token", token);
-        Cookies.set("token", token, { expires: 7, path: "/" });
-        toast.success("Connexion réussie !");
         const user = response.data.user;
+        const isProfileComplete = response.data.isProfileComplete;
+
+        // Stocker les données
+        localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
+        Cookies.set("token", token, { expires: 7, path: "/" });
         
-        console.log("💾 Token dans localStorage:", localStorage.getItem("token"));
-        console.log("💾 User dans localStorage:", localStorage.getItem("user"));
+        console.log("💾 Token stocké:", token.substring(0, 20) + "...");
+        console.log("💾 Profil complet:", isProfileComplete);
         
-        router.push("/dashboard-reservation");
+        toast.success("Connexion réussie !");
+
+        // ✅ REDIRECTION CONDITIONNELLE
+        if (!isProfileComplete) {
+          console.log("➡️ Profil incomplet - Redirection vers complete-profile");
+          router.push("/auth/complete-profile");
+        } else {
+          console.log("➡️ Profil complet - Redirection vers dashboard");
+          router.push("/dashboard-reservation");
+        }
       } else {
         throw new Error("Token non reçu");
       }
@@ -145,16 +146,10 @@ export default function SigninWithPassword() {
     }
   };
 
-  // Déclencher la connexion Google
   const handleGoogleSignIn = () => {
     console.log("🔄 Démarrage connexion Google...");
     setGoogleLoading(true);
-
-    const googleAuthUrl = "http://localhost:5000/api/garage/google";
-    console.log("🔗 Redirection vers:", googleAuthUrl);
-
-    // Ouvrir dans la même fenêtre pour une meilleure UX
-    window.location.href = googleAuthUrl;
+    window.location.href = "http://localhost:5000/api/garage/google";
   };
 
   return (
@@ -199,12 +194,11 @@ export default function SigninWithPassword() {
           >
             Sign In
             {loading && (
-              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-t-transparent dark:border-primary dark:border-t-transparent" />
+              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-t-transparent" />
             )}
           </button>
         </div>
 
-        {/* Séparateur */}
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-orange-300/20"></div>
@@ -216,7 +210,6 @@ export default function SigninWithPassword() {
           </div>
         </div>
 
-        {/* Bouton Google Sign-In */}
         <div className="mb-6">
           <button
             type="button"
@@ -233,7 +226,6 @@ export default function SigninWithPassword() {
           </button>
         </div>
 
-        {/* Sign-up Link */}
         <div className="text-center pt-4 border-t border-orange-500/20">
           <p className="text-sm text-orange-100/70">
             Don't have an account?{" "}

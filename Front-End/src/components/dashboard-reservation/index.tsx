@@ -9,6 +9,9 @@ export default function GarageDashboard() {
   const [upcomingReservations, setUpcomingReservations] = useState([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(true);
+      const getAuthToken = () => {
+      return localStorage.getItem('token') || sessionStorage.getItem('token');
+    };
 
   // Fonction pour filtrer les réservations
   const filterReservations = (allReservations) => {
@@ -49,7 +52,9 @@ export default function GarageDashboard() {
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/reservations");
+        const res = await axios.get("http://localhost:5000/api/reservations", {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
         
         // Filtrer les réservations avec dates non passées
         const filteredReservations = res.data.filter(reservation => 

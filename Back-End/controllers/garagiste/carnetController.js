@@ -9,12 +9,36 @@ import mongoose from 'mongoose';
 export const getCarnetByVehiculeId = async (req, res) => {
   try {
     const { vehiculeId } = req.params;
-    console.log("🔍 Recherche ordres pour vehiculeId:", vehiculeId);
+    console.log("🔍 Recherche pour vehiculeId:", vehiculeId);
 
-    // Récupérer les carnets existants
+    // ✅ VÉRIFIER D'ABORD SI LE VÉHICULE EXISTE ET SI LE GARAGE Y A ACCÈS
+    const vehicule = await Vehicule.findById(vehiculeId);
+    console.log("🚗 Véhicule trouvé:", vehicule ? "OUI" : "NON");
+    if (!vehicule) {
+      return res.status(404).json({ error: 'Véhicule non trouvé' });
+    }
+    console.log("   - garagisteId:", vehicule.garagisteId);
+    console.log("   - proprietaireId:", vehicule.proprietaireId);
+    console.log("   - proprietaireModel:", vehicule.proprietaireModel);
+
+    // ✅ VÉRIFIER L'ACCÈS DU GARAGE AU VÉHICULE
+    const liaison = await FicheClientVehicule.findOne({
+      vehiculeId: vehiculeId,
+      garageId: req.user._id
+    });
+    console.log("🔗 Liaison trouvée:", liaison ? "OUI" : "NON");
+
+    const estVehiculeGarage = vehicule.garagisteId?.toString() === req.user._id.toString();
+
+    if (!liaison && !estVehiculeGarage) {
+      return res.status(403).json({ 
+        error: 'Vous n\'avez pas accès à ce véhicule' 
+      });
+    }
+
+    // ✅ RÉCUPÉRER LES CARNETS EXISTANTS
     const carnetsExistants = await CarnetEntretien.find({ 
-      vehiculeId, 
-      garagisteId: req.user._id 
+      vehiculeId
     })
       .populate({
         path: 'devisId',
@@ -24,11 +48,106 @@ export const getCarnetByVehiculeId = async (req, res) => {
 
     console.log("✅ Carnets existants récupérés:", carnetsExistants.length);
 
-    let historique = [];
+    // 🔥 NOUVEAU : Récupérer les IDs des devis déjà associés à un carnet
+    const devisIdsAvecCarnet = carnetsExistants
+      .map(c => c.devisId?.id)
+      .filter(Boolean);
+    
+    console.log("📋 Devis déjà dans les carnets:", devisIdsAvecCarnet);
 
-    if (carnetsExistants.length > 0) {
-      // Traiter les carnets existants
-      historique = carnetsExistants.map(carnet => ({
+    // 🔥 TOUJOURS VÉRIFIER S'IL Y A DES ORDRES TERMINÉS SANS CARNET
+    let ordresTermines = await OrdreTravail.find({
+      'vehiculedetails.vehiculeId': vehiculeId,
+      status: 'termine',
+      devisId: { $nin: devisIdsAvecCarnet } // ✅ Exclure les ordres déjà transformés
+    }).sort({ dateFinReelle: -1 });
+
+    console.log("📋 Ordres terminés sans carnet trouvés:", ordresTermines.length);
+
+    if (ordresTermines.length === 0) {
+      // Essayer avec ObjectId
+      ordresTermines = await OrdreTravail.find({
+        'vehiculedetails.vehiculeId': new mongoose.Types.ObjectId(vehiculeId),
+        status: 'termine',
+        devisId: { $nin: devisIdsAvecCarnet }
+      }).sort({ dateFinReelle: -1 });
+      console.log("📋 Ordres trouvés (tentative 2):", ordresTermines.length);
+    }
+
+    // 🔥 CRÉER LES CARNETS MANQUANTS À PARTIR DES ORDRES
+    const nouveauxCarnets = await Promise.all(ordresTermines.map(async (ordre) => {
+      let devisInfo = null;
+      let totalTTC = 0;
+      let services = [];
+      let devisId = null;
+
+      try {
+        const devis = await Devis.findOne({ id: ordre.devisId })
+          .select('_id id inspectionDate services totalTTC status');
+
+        if (devis) {
+          devisInfo = {
+            id: devis.id,
+            inspectionDate: devis.inspectionDate,
+          };
+          totalTTC = devis.totalTTC;
+          services = devis.services;
+          devisId = devis._id;
+        }
+      } catch (error) {
+        console.error(`❌ Erreur récupération devis ${ordre.devisId}:`, error.message);
+      }
+
+      try {
+        const nouveauCarnet = new CarnetEntretien({
+          vehiculeId: new mongoose.Types.ObjectId(vehiculeId),
+          devisId: devisId,
+          dateCommencement: ordre.dateCommence,
+          dateFinCompletion: ordre.dateFinReelle,
+          typeEntretien: 'maintenance',
+          statut: 'termine',
+          totalTTC: totalTTC,
+          garagisteId: req.user._id,
+          kilometrageEntretien: null,
+          notes: `Créé automatiquement depuis l'ordre ${ordre.numeroOrdre}`,
+          services: ordre.taches ? ordre.taches.map(tache => ({
+            nom: tache.description,
+            description: tache.serviceNom ,
+            quantite: tache.quantite,
+          })) : []
+        });
+
+        await nouveauCarnet.save();
+        console.log(`💾 Carnet créé pour ordre ${ordre.numeroOrdre}`);
+
+        return {
+          _id: nouveauCarnet._id,
+          numeroOrdre: ordre.numeroOrdre,
+          dateCommencement: ordre.dateCommence,
+          totalTTC: totalTTC,
+          kilometrageEntretien: null,
+          devisInfo: devisInfo,
+          services: nouveauCarnet.services,
+          source: 'carnet'
+        };
+
+      } catch (saveError) {
+        console.error(`❌ Erreur sauvegarde:`, saveError);
+        
+        return {
+          _id: ordre._id,
+          numeroOrdre: ordre.numeroOrdre,
+          dateCommencement: ordre.dateCommence,
+          totalTTC: totalTTC,
+          taches: ordre.taches,
+          source: 'ordre'
+        };
+      }
+    }));
+
+    // 🔥 COMBINER LES CARNETS EXISTANTS ET LES NOUVEAUX
+    const historique = [
+      ...carnetsExistants.map(carnet => ({
         _id: carnet._id,
         dateCommencement: carnet.dateCommencement,
         totalTTC: carnet.totalTTC,
@@ -40,141 +159,22 @@ export const getCarnetByVehiculeId = async (req, res) => {
         } : null,
         services: carnet.services,
         source: 'carnet'
-      }));
-      console.log("📋 Historique à partir des carnets:", historique);
-    } else {
-      // Récupérer les ordres de travail terminés
-      let ordresTermines = await OrdreTravail.find({
-        'vehiculedetails.vehiculeId': vehiculeId,
-        status: 'termine',
-        garagisteId: req.user._id
-      }).sort({ dateFinReelle: -1 });
+      })),
+      ...nouveauxCarnets
+    ].sort((a, b) => new Date(b.dateCommencement) - new Date(a.dateCommencement));
 
-      console.log("📋 Ordres trouvés (string):", ordresTermines.length);
+    console.log("📊 Total historique:", historique.length);
 
-      // Si aucun ordre trouvé, essayer avec ObjectId
-      if (ordresTermines.length === 0) {
-        console.log("🔄 Tentative avec ObjectId...");
-        ordresTermines = await OrdreTravail.find({
-          'vehiculedetails.vehiculeId': new mongoose.Types.ObjectId(vehiculeId),
-          status: 'termine',
-          garagisteId: req.user._id
-        }).sort({ dateFinReelle: -1 });
-
-        console.log("📋 Ordres avec ObjectId:", ordresTermines.length);
-      }
-
-      // Transformer et SAUVEGARDER les ordres dans CarnetEntretien
-      historique = await Promise.all(ordresTermines.map(async (ordre) => {
-        let devisInfo = null;
-        let totalTTC = 0;
-        let services = [];
-        let devisId = null;
-
-        try {
-          // Récupérer le devis associé
-          const devis = await Devis.findOne({ id: ordre.devisId })
-            .select('_id id inspectionDate services totalTTC status');
-
-          console.log(`📝 Devis récupéré pour ordre ${ordre.numeroOrdre}:`, devis);
-
-          if (devis) {
-            devisInfo = {
-              id: devis.id,
-              inspectionDate: devis.inspectionDate,
-            };
-            totalTTC = devis.totalTTC;
-            services = devis.services;
-            devisId = devis._id;
-          }
-        } catch (error) {
-          console.error(`❌ Erreur récupération devis ${ordre.devisId}:`, error.message);
-        }
-
-        // Créer un carnet d'entretien dans la base
-        try {
-          const nouveauCarnet = new CarnetEntretien({
-            vehiculeId: new mongoose.Types.ObjectId(vehiculeId),
-            devisId: devisId,
-            dateCommencement: ordre.dateCommence,
-            dateFinCompletion: ordre.dateFinReelle,
-            typeEntretien: 'maintenance',
-            statut: 'termine',
-            totalTTC: totalTTC,
-            garagisteId: req.user._id,
-            kilometrageEntretien: null,
-            notes: `Créé automatiquement depuis l'ordre ${ordre.numeroOrdre}`,
-            services: ordre.taches ? ordre.taches.map(tache => ({
-              nom: tache.description,
-              description: tache.serviceNom,
-              quantite: tache.quantite
-            })) : []
-          });
-
-          await nouveauCarnet.save();
-          console.log(`💾 Carnet d'entretien créé pour ordre ${ordre.numeroOrdre}`);
-
-          return {
-            _id: nouveauCarnet._id,
-            numeroOrdre: ordre.numeroOrdre,
-            dateCommencement: ordre.dateCommence,
-            totalTTC: totalTTC,
-            kilometrageEntretien: null,
-            devisInfo: devisInfo,
-            taches: ordre.taches,
-            source: 'carnet'
-          };
-
-        } catch (saveError) {
-          console.error(`❌ Erreur sauvegarde carnet pour ordre ${ordre.numeroOrdre}:`, saveError);
-          
-          return {
-            _id: ordre._id,
-            numeroOrdre: ordre.numeroOrdre,
-            dateCommencement: ordre.dateCommence,
-            totalTTC: totalTTC,
-            statut: 'termine',
-            kilometrageEntretien: null,
-            devisInfo: devisInfo,
-            taches: ordre.taches,
-            source: 'ordre'
-          };
-        }
-      }));
-
-      console.log("📋 Historique à partir des ordres (maintenant sauvegardés):", historique);
-    }
-
-    // ✅ MODIFICATION ICI : Récupérer le véhicule SANS populate
-    const vehicule = await Vehicule.findById(vehiculeId);
-
-    if (!vehicule) {
-      return res.status(404).json({ error: 'Véhicule non trouvé' });
-    }
-
-    // ✅ RÉCUPÉRER LA FICHE CLIENT MANUELLEMENT
-    const liaison = await FicheClientVehicule.findOne({
-      vehiculeId: vehiculeId,
-      garageId: req.user._id
-    });
-
+    // ✅ RÉCUPÉRER LA FICHE CLIENT
     let ficheClient = null;
     if (liaison) {
       ficheClient = await FicheClient.findById(liaison.ficheClientId);
+    } else if (vehicule.proprietaireModel === 'FicheClient') {
+      ficheClient = await FicheClient.findOne({
+        _id: vehicule.proprietaireId
+      });
     }
 
-    // ✅ SI PAS DE LIAISON, VÉRIFIER SI C'EST UN VEHICULE DU GARAGE
-    if (!ficheClient && vehicule.garagisteId?.toString() === req.user._id.toString()) {
-      // Essayer de trouver via proprietaireId si c'est une FicheClient
-      if (vehicule.proprietaireModel === 'FicheClient') {
-        ficheClient = await FicheClient.findOne({
-          _id: vehicule.proprietaireId,
-          garagisteId: req.user._id
-        });
-      }
-    }
-
-    // ✅ CRÉER L'OBJET VÉHICULE AVEC LA FICHE CLIENT
     const vehiculeData = {
       _id: vehicule._id,
       marque: vehicule.marque,
@@ -196,16 +196,13 @@ export const getCarnetByVehiculeId = async (req, res) => {
       }
     };
 
-    console.log("🚗 Véhicule récupéré avec proprietaire:", vehiculeData.proprietaire.nom);
-    console.log("📋 Historique final:", historique.length, "entrées");
-
     res.json({
       vehicule: vehiculeData,
       historique,
     });
 
   } catch (error) {
-    console.error('❌ Erreur récupération carnet:', error);
+    console.error('❌ Erreur:', error);
     res.status(500).json({
       error: 'Erreur lors de la récupération du carnet d\'entretien',
       details: error.message
@@ -295,9 +292,9 @@ export const creerCarnetManuel = async (req, res) => {
       statut: 'termine',
       totalTTC: parseFloat(cout),
       services: taches.map(tache => ({
-        nom: tache.nom || 'Entretien',
-        description: tache.description,
-        quantite: tache.quantite || 1,
+        nom: tache.description,
+        description: tache.serviceNom || 'entretien',
+        quantite: tache.quantite,
         prix: tache.prix || 0
       })),
       notes: 'Ajouté manuellement'

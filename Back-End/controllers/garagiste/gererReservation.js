@@ -8,19 +8,28 @@ import FicheClientVehicule from "../../models/FicheClientVehicule.js";
 
 export const getReservations = async (req, res) => {
   try {
-    const reservations = await Reservation.find()
-      .populate('serviceId', 'name') // Populer seulement le champ 'name' du service
-      .populate('garageId', 'username phone') // Optionnel: populer aussi le garage
+    // ✅ Récupérer l'ID du garage depuis le token (sécurisé)
+    const garageId = req.user._id;
+    
+    console.log('🔍 Récupération réservations pour garage:', garageId);
+
+    // ✅ Filtrer UNIQUEMENT les réservations de ce garage
+    const filter = { garageId };
+
+    const reservations = await Reservation.find(filter)
+      .populate('serviceId', 'name')
+      .populate('garageId', 'username phone')
       .populate('vehiculeId', 'immatriculation marque modele annee couleur typeCarburant kilometrage')
-      .sort({ createdAt: -1 }); // Trier par date de création décroissante
+      .sort({ createdAt: -1 });
+
+    console.log(`✅ ${reservations.length} réservations trouvées pour ce garage`);
 
     res.status(200).json(reservations);
   } catch (error) {
-    console.error('Erreur lors de la récupération des réservations:', error);
+    console.error('❌ Erreur récupération réservations:', error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };
-
 export const updateReservation = async (req, res) => {
   try {
     const { id } = req.params;
