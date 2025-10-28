@@ -11,6 +11,9 @@ export default function GarageReservationManagement() {
     newHeureDebut: '',
     message: ''
   });
+        const getAuthToken = () => {
+      return localStorage.getItem('token') || sessionStorage.getItem('token');
+    };
 
   const playNotificationSound = () => {
   const audio = new Audio('/sounds/mixkit-correct-answer-tone-2870.wav');
@@ -27,7 +30,9 @@ export default function GarageReservationManagement() {
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/reservations");
+        const res = await axios.get("http://localhost:5000/api/reservations", {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
         
         // Filtrer les réservations avec dates non passées
         const filteredReservations = res.data.filter(reservation => 
@@ -92,10 +97,15 @@ export default function GarageReservationManagement() {
           newDate: responseData.newDate || undefined,
           newHeureDebut: responseData.newHeureDebut || undefined,
           message: responseData.message || undefined
+        },
+        {
+          headers: { Authorization: `Bearer ${getAuthToken()}` }
         }
       );
       playNotificationSound();
-      const res = await axios.get("http://localhost:5000/api/reservations");
+      const res = await axios.get("http://localhost:5000/api/reservations", {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       const filteredReservations = res.data.filter(reservation => 
         !isDatePassed(reservation.creneauDemande.date)
       );
