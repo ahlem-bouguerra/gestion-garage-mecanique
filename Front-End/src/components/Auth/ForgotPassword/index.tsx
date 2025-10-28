@@ -45,7 +45,7 @@ export default function ForgotPasswordForm() {
     value={email}
     onChange={(e) => setEmail(e.target.value)}
     placeholder="Entrez votre email"
-    className="w-full text-white py-[15px] px-4 rounded-lg"
+    className="w-full text-black-900 bg-white py-[15px] text-lg py-5 px-6 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
     required
   />
 </div>
