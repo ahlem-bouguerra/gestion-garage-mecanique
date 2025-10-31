@@ -7,6 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 
 const API_BASE_URL = "http://localhost:5000/api";
 
+
 interface Vehicule {
     _id: string;
     proprietaireId: string;
@@ -19,6 +20,16 @@ interface Vehicule {
     typeCarburant?: string;
     dateCreation: Date;
     statut: "actif" | "inactif";
+    carteGrise?: {
+        numeroCG: string;
+        numeroChassis: string;
+        dateMiseCirculation: Date;
+        puissanceFiscale: number;
+        genre: 'VP' | 'VU' | 'MOTO';
+        nombrePlaces: number;
+        dateVisite?: Date;
+        dateProchaineVisite?: Date;
+    };
 }
 
 interface Client {
@@ -53,6 +64,16 @@ interface VehiculeFormData {
     annee: string;
     couleur: string;
     typeCarburant: string;
+    carteGrise?: {
+        numeroCG: string;
+        numeroChassis: string;
+        dateMiseCirculation: string;
+        puissanceFiscale: string;
+        genre: string;
+        nombrePlaces: string;
+        dateVisite: string;
+        dateProchaineVisite: string;
+    };
 }
 
 interface ValidationError {
@@ -423,37 +444,37 @@ export default function VehiculeManagement() {
     const [rechercheGlobale, setRechercheGlobale] = useState("");
     const [vehiculesFiltres, setVehiculesFiltres] = useState<Vehicule[]>([]);
     const getAuthToken = () => {
-      return localStorage.getItem('token') || sessionStorage.getItem('token');
+        return localStorage.getItem('token') || sessionStorage.getItem('token');
     };
 
     useEffect(() => {
-    if (!rechercheGlobale.trim()) {
-        setVehiculesFiltres(vehicules);
-        return;
-    }
+        if (!rechercheGlobale.trim()) {
+            setVehiculesFiltres(vehicules);
+            return;
+        }
 
-    const termesRecherche = rechercheGlobale.toLowerCase().trim();
-    
-    const vehiculesFiltrés = vehicules.filter(v => {
-        // Recherche dans l'immatriculation
-        const matchImmat = v.immatriculation.toLowerCase().includes(termesRecherche);
-        
-        // Recherche dans la marque
-        const matchMarque = v.marque.toLowerCase().includes(termesRecherche);
-        
-        // Recherche dans le modèle
-        const matchModele = v.modele.toLowerCase().includes(termesRecherche);
-        
-        // Recherche dans le nom du propriétaire
-        const nomProprietaire = getClientName(v.proprietaireId).toLowerCase();
-        const matchProprietaire = nomProprietaire.includes(termesRecherche);
-        
-        // Recherche dans la couleur (si elle existe)
-        const matchCouleur = v.couleur ? v.couleur.toLowerCase().includes(termesRecherche) : false;
-        
-        // Retourner true si au moins un critère correspond
-        return matchImmat || matchMarque || matchModele || matchProprietaire || matchCouleur;
-    });
+        const termesRecherche = rechercheGlobale.toLowerCase().trim();
+
+        const vehiculesFiltrés = vehicules.filter(v => {
+            // Recherche dans l'immatriculation
+            const matchImmat = v.immatriculation.toLowerCase().includes(termesRecherche);
+
+            // Recherche dans la marque
+            const matchMarque = v.marque.toLowerCase().includes(termesRecherche);
+
+            // Recherche dans le modèle
+            const matchModele = v.modele.toLowerCase().includes(termesRecherche);
+
+            // Recherche dans le nom du propriétaire
+            const nomProprietaire = getClientName(v.proprietaireId).toLowerCase();
+            const matchProprietaire = nomProprietaire.includes(termesRecherche);
+
+            // Recherche dans la couleur (si elle existe)
+            const matchCouleur = v.couleur ? v.couleur.toLowerCase().includes(termesRecherche) : false;
+
+            // Retourner true si au moins un critère correspond
+            return matchImmat || matchMarque || matchModele || matchProprietaire || matchCouleur;
+        });
 
         setVehiculesFiltres(vehiculesFiltrés);
     }, [vehicules, rechercheGlobale, clients]);
@@ -550,8 +571,8 @@ export default function VehiculeManagement() {
         try {
             setError("");
             const response = await axios.get(`${API_BASE_URL}/clients/noms`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
+                headers: { Authorization: `Bearer ${getAuthToken()}` }
+            });
             console.log("🔍 Clients reçus:", response.data);
 
             if (Array.isArray(response.data)) {
@@ -571,8 +592,8 @@ export default function VehiculeManagement() {
         try {
             setError("");
             const response = await axios.get(`${API_BASE_URL}/vehicules`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
+                headers: { Authorization: `Bearer ${getAuthToken()}` }
+            });
             setVehicules(response.data);
         } catch (error: any) {
             console.error("❌ Erreur lors du chargement des véhicules:", error);
@@ -669,7 +690,23 @@ export default function VehiculeManagement() {
                 kilometrage: vehicule.kilometrage ? vehicule.kilometrage.toString() : "",
                 annee: vehicule.annee ? vehicule.annee.toString() : "",
                 couleur: vehicule.couleur || "",
-                typeCarburant: vehicule.typeCarburant || "essence"
+                typeCarburant: vehicule.typeCarburant || "essence",
+                carteGrise: vehicule.carteGrise ? {
+                    numeroCG: vehicule.carteGrise.numeroCG || "",
+                    numeroChassis: vehicule.carteGrise.numeroChassis || "",
+                    dateMiseCirculation: vehicule.carteGrise.dateMiseCirculation
+                        ? new Date(vehicule.carteGrise.dateMiseCirculation).toISOString().split('T')[0]
+                        : "",
+                    puissanceFiscale: vehicule.carteGrise.puissanceFiscale?.toString() || "",
+                    genre: vehicule.carteGrise.genre || "VP",
+                    nombrePlaces: vehicule.carteGrise.nombrePlaces?.toString() || "5",
+                    dateVisite: vehicule.carteGrise.dateVisite
+                        ? new Date(vehicule.carteGrise.dateVisite).toISOString().split('T')[0]
+                        : "",
+                    dateProchaineVisite: vehicule.carteGrise.dateProchaineVisite
+                        ? new Date(vehicule.carteGrise.dateProchaineVisite).toISOString().split('T')[0]
+                        : ""
+                } : undefined
             });
 
             // Détecter le pays d'immatriculation
@@ -691,7 +728,17 @@ export default function VehiculeManagement() {
                 immatriculation: "",
                 annee: "",
                 couleur: "",
-                typeCarburant: "essence"
+                typeCarburant: "essence",
+                carteGrise: {
+                    numeroCG: "",
+                    numeroChassis: "",
+                    dateMiseCirculation: "",
+                    puissanceFiscale: "",
+                    genre: "VP",
+                    nombrePlaces: "5",
+                    dateVisite: "",
+                    dateProchaineVisite: ""
+                }
             });
 
             // Message de présélection
@@ -724,27 +771,37 @@ export default function VehiculeManagement() {
 
         try {
             const submitData = {
-                proprietaireId: vehiculeForm.proprietaireId,
                 marque: vehiculeForm.marque.trim(),
                 modele: vehiculeForm.modele.trim(),
                 immatriculation: vehiculeForm.immatriculation.trim().toUpperCase(),
                 annee: vehiculeForm.annee ? parseInt(vehiculeForm.annee) : undefined,
                 couleur: vehiculeForm.couleur.trim() || undefined,
                 typeCarburant: vehiculeForm.typeCarburant,
-                kilometrage: vehiculeForm.kilometrage ? parseInt(vehiculeForm.kilometrage.replace(/\s/g, '')) : undefined
+                kilometrage: vehiculeForm.kilometrage ? parseInt(vehiculeForm.kilometrage.replace(/\s/g, '')) : undefined,
+                carteGrise: vehiculeForm.carteGrise?.numeroCG || vehiculeForm.carteGrise?.numeroChassis ? {
+                numeroCG: vehiculeForm.carteGrise.numeroCG?.trim() || undefined,
+                numeroChassis: vehiculeForm.carteGrise.numeroChassis?.trim() || undefined,
+                dateMiseCirculation: vehiculeForm.carteGrise.dateMiseCirculation || undefined,
+                puissanceFiscale: vehiculeForm.carteGrise.puissanceFiscale ? parseInt(vehiculeForm.carteGrise.puissanceFiscale) : undefined,
+                genre: vehiculeForm.carteGrise.genre || undefined,
+                nombrePlaces: vehiculeForm.carteGrise.nombrePlaces ? parseInt(vehiculeForm.carteGrise.nombrePlaces) : undefined,
+                dateVisite: vehiculeForm.carteGrise.dateVisite || undefined,
+                dateProchaineVisite: vehiculeForm.carteGrise.dateProchaineVisite || undefined
+            } : undefined
             };
 
             console.log("📤 Données à envoyer:", submitData);
 
             if (modalType === "add") {
+                submitData.proprietaireId = vehiculeForm.proprietaireId;
                 await axios.post(`${API_BASE_URL}/vehicules`, submitData, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
+                    headers: { Authorization: `Bearer ${getAuthToken()}` }
+                });
                 showSuccess("Véhicule ajouté avec succès!");
             } else if (modalType === "edit" && selectedVehicule) {
                 await axios.put(`${API_BASE_URL}/vehicules/${selectedVehicule._id}`, submitData, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
+                    headers: { Authorization: `Bearer ${getAuthToken()}` }
+                });
                 showSuccess("Véhicule modifié avec succès!");
             }
 
@@ -763,8 +820,8 @@ export default function VehiculeManagement() {
         if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ?`)) {
             try {
                 await axios.delete(`${API_BASE_URL}/vehicules/${vehicule._id}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });;
+                    headers: { Authorization: `Bearer ${getAuthToken()}` }
+                });;
                 fetchVehicules();
                 showSuccess("Véhicule supprimé avec succès!");
             } catch (error: any) {
@@ -804,42 +861,42 @@ export default function VehiculeManagement() {
                     </div>
 
                     <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-                    <div className="flex items-center space-x-4">
-                        {/* Input de recherche global */}
-                        <div className="flex-1 relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
+                        <div className="flex items-center space-x-4">
+                            {/* Input de recherche global */}
+                            <div className="flex-1 relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Rechercher par immatriculation, marque, modèle, propriétaire, couleur..."
+                                    value={rechercheGlobale}
+                                    onChange={(e) => setRechercheGlobale(e.target.value)}
+                                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
                             </div>
-                            <input
-                                type="text"
-                                placeholder="Rechercher par immatriculation, marque, modèle, propriétaire, couleur..."
-                                value={rechercheGlobale}
-                                onChange={(e) => setRechercheGlobale(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            />
-                        </div>
-                        
-                        {/* Bouton réinitialiser */}
-                        {rechercheGlobale && (
-                            <button
-                                onClick={() => setRechercheGlobale("")}
-                                className="px-3 py-2 text-sm text-gray-500 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
-                            >
-                                Effacer
-                            </button>
-                        )}
-                        
-                        {/* Compteur de résultats */}
-                        <div className="text-sm text-gray-600 whitespace-nowrap">
-                            {vehiculesFiltres.length} résultat{vehiculesFiltres.length > 1 ? 's' : ''}
-                            {rechercheGlobale && vehiculesFiltres.length !== vehicules.length && (
-                                <span className="text-gray-400"> sur {vehicules.length}</span>
+
+                            {/* Bouton réinitialiser */}
+                            {rechercheGlobale && (
+                                <button
+                                    onClick={() => setRechercheGlobale("")}
+                                    className="px-3 py-2 text-sm text-gray-500 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
+                                >
+                                    Effacer
+                                </button>
                             )}
+
+                            {/* Compteur de résultats */}
+                            <div className="text-sm text-gray-600 whitespace-nowrap">
+                                {vehiculesFiltres.length} résultat{vehiculesFiltres.length > 1 ? 's' : ''}
+                                {rechercheGlobale && vehiculesFiltres.length !== vehicules.length && (
+                                    <span className="text-gray-400"> sur {vehicules.length}</span>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
 
 
                     {/* ✅ AFFICHAGE DES ERREURS AMÉLIORÉ */}
@@ -965,6 +1022,24 @@ export default function VehiculeManagement() {
                                             </div>
                                         )}
                                     </div>
+                                    {/* Carte Grise */}
+                                    {vehicule.carteGrise && (
+                                        <div className="mt-4 pt-4 border-t border-gray-200">
+                                            <h4 className="text-sm font-medium text-gray-700 mb-2">📄 Carte Grise</h4>
+                                            <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                                                <div><span className="font-medium">N° CG:</span> {vehicule.carteGrise.numeroCG}</div>
+                                                <div><span className="font-medium">Châssis:</span> {vehicule.carteGrise.numeroChassis}</div>
+                                                <div><span className="font-medium">Mise en circ.:</span> {new Date(vehicule.carteGrise.dateMiseCirculation).toLocaleDateString('fr-FR')}</div>
+                                                <div><span className="font-medium">Puissance:</span> {vehicule.carteGrise.puissanceFiscale} CV</div>
+                                                {vehicule.carteGrise.dateProchaineVisite && (
+                                                    <div className="col-span-2">
+                                                        <span className="font-medium">Prochaine visite:</span>{' '}
+                                                        {new Date(vehicule.carteGrise.dateProchaineVisite).toLocaleDateString('fr-FR')}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
 
 
                                 </div>
@@ -1158,6 +1233,111 @@ export default function VehiculeManagement() {
                                             </div>
                                         )}
 
+                                        {/* ===== SECTION CARTE GRISE ===== */}
+                                        <div className="col-span-3 mt-6 pt-6 border-t border-gray-300">
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                                <span>Informations Carte Grise</span>
+                                            </h3>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                {/* Numéro CG */}
+                                                <ValidatedField
+                                                    label="Numéro Carte Grise"
+                                                    value={vehiculeForm.carteGrise?.numeroCG || ""}
+                                                    onChange={(value) => setVehiculeForm({
+                                                        ...vehiculeForm,
+                                                        carteGrise: { ...vehiculeForm.carteGrise, numeroCG: value.toUpperCase() }
+                                                    })}
+                                                    placeholder="Ex: 123456/2020"
+                                                    maxLength={20}
+                                                />
+
+                                                {/* Numéro Châssis */}
+                                                <ValidatedField
+                                                    label="Numéro Châssis (VIN)"
+                                                    value={vehiculeForm.carteGrise?.numeroChassis || ""}
+                                                    onChange={(value) => setVehiculeForm({
+                                                        ...vehiculeForm,
+                                                        carteGrise: { ...vehiculeForm.carteGrise, numeroChassis: value.toUpperCase() }
+                                                    })}
+                                                    placeholder="Ex: VF1XXXXX..."
+                                                    maxLength={17}
+                                                />
+
+                                                {/* Date mise en circulation */}
+                                                <ValidatedField
+                                                    label="Date mise en circulation"
+                                                    type="date"
+                                                    value={vehiculeForm.carteGrise?.dateMiseCirculation || ""}
+                                                    onChange={(value) => setVehiculeForm({
+                                                        ...vehiculeForm,
+                                                        carteGrise: { ...vehiculeForm.carteGrise, dateMiseCirculation: value }
+                                                    })}
+                                                />
+
+                                                {/* Puissance fiscale */}
+                                                <ValidatedField
+                                                    label="Puissance fiscale (CV)"
+                                                    type="number"
+                                                    value={vehiculeForm.carteGrise?.puissanceFiscale || ""}
+                                                    onChange={(value) => setVehiculeForm({
+                                                        ...vehiculeForm,
+                                                        carteGrise: { ...vehiculeForm.carteGrise, puissanceFiscale: value }
+                                                    })}
+                                                    placeholder="Ex: 7"
+                                                />
+
+                                                {/* Genre */}
+                                                <ValidatedField
+                                                    label="Type véhicule"
+                                                    value={vehiculeForm.carteGrise?.genre || "VP"}
+                                                    onChange={(value) => setVehiculeForm({
+                                                        ...vehiculeForm,
+                                                        carteGrise: { ...vehiculeForm.carteGrise, genre: value }
+                                                    })}
+                                                >
+                                                    <option value="VP">VP - Véhicule Particulier</option>
+                                                    <option value="VU">VU - Véhicule Utilitaire</option>
+                                                    <option value="MOTO">MOTO - Motocyclette</option>
+                                                </ValidatedField>
+
+                                                {/* Nombre places */}
+                                                <ValidatedField
+                                                    label="Nombre de places"
+                                                    type="number"
+                                                    value={vehiculeForm.carteGrise?.nombrePlaces || "5"}
+                                                    onChange={(value) => setVehiculeForm({
+                                                        ...vehiculeForm,
+                                                        carteGrise: { ...vehiculeForm.carteGrise, nombrePlaces: value }
+                                                    })}
+                                                />
+
+                                                {/* Date visite technique */}
+                                                <ValidatedField
+                                                    label="Dernière visite technique"
+                                                    type="date"
+                                                    value={vehiculeForm.carteGrise?.dateVisite || ""}
+                                                    onChange={(value) => setVehiculeForm({
+                                                        ...vehiculeForm,
+                                                        carteGrise: { ...vehiculeForm.carteGrise, dateVisite: value }
+                                                    })}
+                                                />
+
+                                                {/* Prochaine visite */}
+                                                <ValidatedField
+                                                    label="Prochaine visite technique"
+                                                    type="date"
+                                                    value={vehiculeForm.carteGrise?.dateProchaineVisite || ""}
+                                                    onChange={(value) => setVehiculeForm({
+                                                        ...vehiculeForm,
+                                                        carteGrise: { ...vehiculeForm.carteGrise, dateProchaineVisite: value }
+                                                    })}
+                                                />
+                                            </div>
+                                        </div>
                                         {/* Boutons */}
                                         <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                                             <button

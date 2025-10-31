@@ -15,8 +15,8 @@ interface FactureDetails extends Facture {
     status: string;
   };
   services?: Array<{
-      name: string;
-      description: string;
+    name: string;
+    description: string;
     piece: string;
     quantity: number;
     unitPrice: number;
@@ -120,7 +120,7 @@ const GestionFactures: React.FC = () => {
     } else {
       header.classList.remove("hidden");
     }
-  }, [factureDetails, selectedFacture ,creditNoteDetails]);
+  }, [factureDetails, selectedFacture, creditNoteDetails]);
 
   const fetchFactures = async () => {
     try {
@@ -170,37 +170,37 @@ const GestionFactures: React.FC = () => {
     }
   };
 
-const fetchCreditNoteDetails = async (creditNoteId) => {
-  try {
-    console.log('🚀 Appel API pour ID:', creditNoteId);
-    console.log('🔑 Token:', getAuthToken());
-    console.log('🚀 1. ID reçu:', creditNoteId);
-    console.log('🚀 2. Type:', typeof creditNoteId);
-    console.log('🚀 3. URL complète:', `http://localhost:5000/api/credit-note/${creditNoteId}`);
-    console.log('🚀 4. Token:', getAuthToken() ? 'Présent' : 'Absent');
-    
-    const response = await axios.get(`http://localhost:5000/api/credit-note/${creditNoteId}`, {
-      headers: { Authorization: `Bearer ${getAuthToken()}` }
-    });
-    
-    const data = response.data;
-    if (data.success) {
-      setCreditNoteDetails(data.data);
-      setShowCreditNoteModal(true);
+  const fetchCreditNoteDetails = async (creditNoteId) => {
+    try {
+      console.log('🚀 Appel API pour ID:', creditNoteId);
+      console.log('🔑 Token:', getAuthToken());
+      console.log('🚀 1. ID reçu:', creditNoteId);
+      console.log('🚀 2. Type:', typeof creditNoteId);
+      console.log('🚀 3. URL complète:', `http://localhost:5000/api/credit-note/${creditNoteId}`);
+      console.log('🚀 4. Token:', getAuthToken() ? 'Présent' : 'Absent');
+
+      const response = await axios.get(`http://localhost:5000/api/credit-note/${creditNoteId}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
+
+      const data = response.data;
+      if (data.success) {
+        setCreditNoteDetails(data.data);
+        setShowCreditNoteModal(true);
+      }
+    } catch (error) {
+      console.error('❌ Erreur détaillée:', {
+        status: error.response?.status,
+        message: error.response?.data?.message,
+        url: error.config?.url,
+        data: error.response?.data
+      });
+
+      if (error.response?.status === 404) {
+        alert('Avoir non trouvé ou vous n\'avez pas les droits d\'accès');
+      }
     }
-  } catch (error) {
-    console.error('❌ Erreur détaillée:', {
-      status: error.response?.status,
-      message: error.response?.data?.message,
-      url: error.config?.url,
-      data: error.response?.data
-    });
-    
-    if (error.response?.status === 404) {
-      alert('Avoir non trouvé ou vous n\'avez pas les droits d\'accès');
-    }
-  }
-};
+  };
 
   useEffect(() => {
     const fetchUserWithLocation = async () => {
@@ -241,69 +241,69 @@ const fetchCreditNoteDetails = async (creditNoteId) => {
     setFilteredFactures(filtered);
   }, [searchTerm, statusFilter, factures]);
 
-const handlePayment = async (factureId: string, paymentData: any) => {
-  try {
-    const token = localStorage.getItem("token");
-    
-    // Vérification que le token existe
-    if (!token) {
-      alert('❌ Erreur: Token d\'authentification manquant. Veuillez vous reconnecter.');
-      // Rediriger vers la page de connexion ou actualiser
-      window.location.href = '/login';
-      return;
-    }
-    
-    console.log('🔍 Tentative paiement pour facture:', factureId);
-    console.log('📊 Données paiement:', paymentData);
-    console.log('🔐 Token présent:', token ? 'Oui' : 'Non');
-    
-    const response = await axios.put(
-      `http://localhost:5000/api/${factureId}/payment`,
-      paymentData,
-      {
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Format standard Bearer
-        }
+  const handlePayment = async (factureId: string, paymentData: any) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      // Vérification que le token existe
+      if (!token) {
+        alert('❌ Erreur: Token d\'authentification manquant. Veuillez vous reconnecter.');
+        // Rediriger vers la page de connexion ou actualiser
+        window.location.href = '/login';
+        return;
       }
-    );
 
-    console.log('✅ Réponse paiement:', response.data);
+      console.log('🔍 Tentative paiement pour facture:', factureId);
+      console.log('📊 Données paiement:', paymentData);
+      console.log('🔐 Token présent:', token ? 'Oui' : 'Non');
 
-    if (response.data.success) {
-      fetchFactures();
-      fetchStats();
-      setShowPaymentModal(false);
-      
-      // Afficher un message de succès
-      alert('✅ Paiement enregistré avec succès !');
-    } else {
-      console.error('❌ Échec paiement:', response.data.message);
-      alert('❌ Erreur: ' + response.data.message);
+      const response = await axios.put(
+        `http://localhost:5000/api/${factureId}/payment`,
+        paymentData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // Format standard Bearer
+          }
+        }
+      );
+
+      console.log('✅ Réponse paiement:', response.data);
+
+      if (response.data.success) {
+        fetchFactures();
+        fetchStats();
+        setShowPaymentModal(false);
+
+        // Afficher un message de succès
+        alert('✅ Paiement enregistré avec succès !');
+      } else {
+        console.error('❌ Échec paiement:', response.data.message);
+        alert('❌ Erreur: ' + response.data.message);
+      }
+    } catch (error: any) {
+      console.error('❌ Erreur lors du paiement:', error);
+
+      // Gestion spécifique des erreurs d'authentification
+      if (error.response?.status === 401) {
+        alert('❌ Session expirée. Veuillez vous reconnecter.');
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
+
+      console.error('📝 Détails erreur:', error.response?.data);
+      console.error('🔢 Status HTTP:', error.response?.status);
+
+      // Affichage d'erreur plus détaillé
+      const errorMessage = error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        'Erreur de connexion au serveur';
+
+      alert('❌ Erreur lors du paiement: ' + errorMessage);
     }
-  } catch (error: any) {
-    console.error('❌ Erreur lors du paiement:', error);
-    
-    // Gestion spécifique des erreurs d'authentification
-    if (error.response?.status === 401) {
-      alert('❌ Session expirée. Veuillez vous reconnecter.');
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-      return;
-    }
-    
-    console.error('📝 Détails erreur:', error.response?.data);
-    console.error('🔢 Status HTTP:', error.response?.status);
-    
-    // Affichage d'erreur plus détaillé
-    const errorMessage = error.response?.data?.message || 
-                        error.response?.data?.error || 
-                        error.message ||
-                        'Erreur de connexion au serveur';
-    
-    alert('❌ Erreur lors du paiement: ' + errorMessage);
-  }
-};
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-TN', {
@@ -554,7 +554,7 @@ const handlePayment = async (factureId: string, paymentData: any) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {facture.creditNoteId ? (
-                      <button 
+                      <button
                         onClick={() => fetchCreditNoteDetails(facture.creditNoteId)}
                         className="text-red-600 hover:text-red-800 underline text-xs"
                       >
@@ -880,6 +880,28 @@ const handlePayment = async (factureId: string, paymentData: any) => {
                           {formatCurrency(factureDetails.totalTTC)}
                         </td>
                       </tr>
+                      {factureDetails.paymentAmount > 0 && (
+                        <>
+                          <tr>
+                            <td className="px-4 py-2 text-right font-medium text-blue-700">
+                              Payé:
+                            </td>
+                            <td className="px-4 py-2 text-right text-blue-700">
+                              {formatCurrency(factureDetails.paymentAmount)}
+                            </td>
+                          </tr>
+                          {factureDetails.paymentStatus !== 'paye' && (
+                            <tr className="bg-yellow-50">
+                              <td className="px-4 py-3 text-right font-bold text-red-700">
+                                RESTE À PAYER:
+                              </td>
+                              <td className="px-4 py-3 text-right font-bold text-red-700">
+                                {formatCurrency(factureDetails.totalTTC - factureDetails.paymentAmount)}
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      )}
 
 
                     </tbody>
@@ -946,7 +968,7 @@ const handlePayment = async (factureId: string, paymentData: any) => {
           </div>
         </div>
       )}
-{showCreditNoteModal && creditNoteDetails && (
+      {showCreditNoteModal && creditNoteDetails && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-5 mx-auto p-6 border w-full max-w-4xl shadow-lg rounded-md bg-white">
             {/* Header */}
@@ -985,7 +1007,7 @@ const handlePayment = async (factureId: string, paymentData: any) => {
                   <p>Tél: {creditNoteDetails.clientId?.telephone || creditNoteDetails.clientInfo.telephone}</p>
                   <p>Email: {creditNoteDetails.clientId?.email || creditNoteDetails.clientInfo.email}</p>
                 </div>
-                
+
                 <h4 className="font-semibold text-gray-800 mb-2 mt-4">Véhicule</h4>
                 <p className="text-sm text-gray-700">{creditNoteDetails.vehicleInfo}</p>
               </div>
@@ -1050,7 +1072,7 @@ const handlePayment = async (factureId: string, paymentData: any) => {
             {/* Note légale */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
               <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> Cet avoir annule définitivement la facture N° {creditNoteDetails.originalFactureNumber}. 
+                <strong>Note:</strong> Cet avoir annule définitivement la facture N° {creditNoteDetails.originalFactureNumber}.
                 Il doit être conservé pour la comptabilité et peut servir de justificatif pour tout remboursement.
               </p>
             </div>

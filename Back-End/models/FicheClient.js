@@ -19,12 +19,11 @@ const FicheClientSchema = new mongoose.Schema({
    telephone: {
     type: String,
     required: true,
-    unique: true,
+
   },
   email: {
     type: String,
     required: true,
-    unique: true,
   },
   garagisteId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -36,6 +35,18 @@ const FicheClientSchema = new mongoose.Schema({
     ref: "Client",
     required: false
   },
+  nomSociete: { 
+    type: String 
+  },
+  telephoneSociete: {
+     type: String
+  },
+  emailSociete: {
+     type: String 
+  },
+  adresseSociete: { 
+    type: String
+  }
   //derniereVisite: String, // ou Date si tu veux
 //  vehiculeAssocie:{
   //  type: String,
@@ -57,5 +68,9 @@ const FicheClientSchema = new mongoose.Schema({
   //  }
  // ]
 });
+
+FicheClientSchema.index({ nom: 1, garagisteId: 1 }, { unique: true });
+FicheClientSchema.index({ email: 1, garagisteId: 1 }, { unique: true });
+FicheClientSchema.index({ telephone: 1, garagisteId: 1 }, { unique: true });
 
 export default mongoose.model("FicheClient", FicheClientSchema);

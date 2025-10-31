@@ -290,6 +290,25 @@ export const createVehicule = async (req, res) => {
       if (kmInt >= 0) vehiculeData.kilometrage = kmInt;
     }
 
+    // ✅ NOUVEAU : Gestion carte grise
+if (req.body.carteGrise) {
+  const { numeroCG, numeroChassis, dateMiseCirculation, puissanceFiscale, genre, nombrePlaces, dateVisite, dateProchaineVisite } = req.body.carteGrise;
+  
+  if (numeroCG && numeroChassis && dateMiseCirculation && puissanceFiscale) {
+    vehiculeData.carteGrise = {
+      numeroCG: numeroCG.trim().toUpperCase(),
+      numeroChassis: numeroChassis.trim().toUpperCase(),
+      dateMiseCirculation: new Date(dateMiseCirculation),
+      puissanceFiscale: parseInt(puissanceFiscale),
+      genre: genre || 'VP',
+      nombrePlaces: nombrePlaces ? parseInt(nombrePlaces) : 5
+    };
+    
+    if (dateVisite) vehiculeData.carteGrise.dateVisite = new Date(dateVisite);
+    if (dateProchaineVisite) vehiculeData.carteGrise.dateProchaineVisite = new Date(dateProchaineVisite);
+  }
+}
+
     const nouveauVehicule = new Vehicule(vehiculeData);
     const vehiculeSauve = await nouveauVehicule.save();
 
@@ -409,6 +428,22 @@ export const updateVehicule = async (req, res) => {
         }
       }
     }
+
+    // ✅ NOUVEAU : Mise à jour carte grise
+if (req.body.carteGrise) {
+  const { numeroCG, numeroChassis, dateMiseCirculation, puissanceFiscale, genre, nombrePlaces, dateVisite, dateProchaineVisite } = req.body.carteGrise;
+  
+  updateData.carteGrise = {};
+  
+  if (numeroCG) updateData.carteGrise.numeroCG = numeroCG.trim().toUpperCase();
+  if (numeroChassis) updateData.carteGrise.numeroChassis = numeroChassis.trim().toUpperCase();
+  if (dateMiseCirculation) updateData.carteGrise.dateMiseCirculation = new Date(dateMiseCirculation);
+  if (puissanceFiscale) updateData.carteGrise.puissanceFiscale = parseInt(puissanceFiscale);
+  if (genre) updateData.carteGrise.genre = genre;
+  if (nombrePlaces) updateData.carteGrise.nombrePlaces = parseInt(nombrePlaces);
+  if (dateVisite) updateData.carteGrise.dateVisite = new Date(dateVisite);
+  if (dateProchaineVisite) updateData.carteGrise.dateProchaineVisite = new Date(dateProchaineVisite);
+}
 
     const vehiculeModifie = await Vehicule.findByIdAndUpdate(
       id,

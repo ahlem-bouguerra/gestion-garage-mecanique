@@ -46,6 +46,11 @@ interface FormData {
   adresse: string;
   telephone: string;
   email: string;
+  // AJOUTER CES LIGNES :
+  nomSociete?: string;
+  telephoneSociete?: string;
+  emailSociete?: string;
+  adresseSociete?: string;
 }
 interface Vehicule {
   _id: string;
@@ -67,6 +72,10 @@ export default function ClientForm() {
     adresse: "",
     telephone: "",
     email: "",
+    nomSociete: "",
+    telephoneSociete: "",
+    emailSociete: "",
+    adresseSociete: "",
   });
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -87,8 +96,8 @@ export default function ClientForm() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [dateFilter, setDateFilter] = useState("tous");
   const getAuthToken = () => {
-  return localStorage.getItem('token') || sessionStorage.getItem('token');
-};
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+  };
 
   useEffect(() => {
     fetchAllClients();
@@ -102,16 +111,16 @@ export default function ClientForm() {
   }, [clients]);
 
 
-    useEffect(() => {
-      const header = document.querySelector('header');
-      if (!header) return;
-  
-      if ( loadingHistory || selectedClient ) {
-        header.classList.add("hidden");
-      } else {
-        header.classList.remove("hidden");
-      }
-    }, [loadingHistory ,selectedClient ]);
+  useEffect(() => {
+    const header = document.querySelector('header');
+    if (!header) return;
+
+    if (loadingHistory || selectedClient) {
+      header.classList.add("hidden");
+    } else {
+      header.classList.remove("hidden");
+    }
+  }, [loadingHistory, selectedClient]);
 
   const fetchAllVehicules = async (): Promise<void> => {
     try {
@@ -188,63 +197,63 @@ export default function ClientForm() {
   };
 
   const filterByDate = (client) => {
-  const resume = clientsResume[client._id];
-  
-  if (dateFilter === "tous") return true;
-  
-  if (dateFilter === "jamais") {
-    return !resume || resume.nombreVisites === 0;
-  }
-  
-  if (!resume || !resume.derniereVisite) return false;
-  
-  const derniereVisiteDate = new Date(resume.derniereVisite.date);
-  const now = new Date();
-  
-  switch (dateFilter) {
-    case "7jours":
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      return derniereVisiteDate >= weekAgo;
-    case "30jours":
-      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      return derniereVisiteDate >= monthAgo;
-    case "90jours":
-      const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-      return derniereVisiteDate >= quarterAgo;
-    case "6mois":
-      const sixMonthsAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
-      return derniereVisiteDate >= sixMonthsAgo;
-    case "1an":
-      const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-      return derniereVisiteDate >= yearAgo;
-    case "plus1an":
-      const yearAgoPlus = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-      return derniereVisiteDate < yearAgoPlus;
-    default:
-      return true;
-  }
-};
+    const resume = clientsResume[client._id];
 
-// 3. Modifiez votre useMemo comme ceci :
-const filteredClients = useMemo(() => {
-  return clients.filter(client => {
-    const vehiculeInfo = getClientVehicules(client._id);
-    const matchesSearch = client.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vehiculeInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === "tous" || client.type === filterType;
-    const matchesDate = filterByDate(client);
-    return matchesSearch && matchesType && matchesDate;
-  });
-}, [clients, searchTerm, filterType, dateFilter, clientVehicules, clientsResume]);
+    if (dateFilter === "tous") return true;
+
+    if (dateFilter === "jamais") {
+      return !resume || resume.nombreVisites === 0;
+    }
+
+    if (!resume || !resume.derniereVisite) return false;
+
+    const derniereVisiteDate = new Date(resume.derniereVisite.date);
+    const now = new Date();
+
+    switch (dateFilter) {
+      case "7jours":
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return derniereVisiteDate >= weekAgo;
+      case "30jours":
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        return derniereVisiteDate >= monthAgo;
+      case "90jours":
+        const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        return derniereVisiteDate >= quarterAgo;
+      case "6mois":
+        const sixMonthsAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+        return derniereVisiteDate >= sixMonthsAgo;
+      case "1an":
+        const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        return derniereVisiteDate >= yearAgo;
+      case "plus1an":
+        const yearAgoPlus = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        return derniereVisiteDate < yearAgoPlus;
+      default:
+        return true;
+    }
+  };
+
+  // 3. Modifiez votre useMemo comme ceci :
+  const filteredClients = useMemo(() => {
+    return clients.filter(client => {
+      const vehiculeInfo = getClientVehicules(client._id);
+      const matchesSearch = client.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vehiculeInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.email.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesType = filterType === "tous" || client.type === filterType;
+      const matchesDate = filterByDate(client);
+      return matchesSearch && matchesType && matchesDate;
+    });
+  }, [clients, searchTerm, filterType, dateFilter, clientVehicules, clientsResume]);
 
 
   const fetchAllClients = async (): Promise<void> => {
     setLoading(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/GetAll`, {
-  headers: { Authorization: `Bearer ${getAuthToken()}` }
-});
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
       setClients(response.data);
       setError("");
     } catch (error) {
@@ -368,8 +377,8 @@ const filteredClients = useMemo(() => {
       return "";
     }
 
-   const date = new Date(resume.derniereVisite.date);
-return date.toLocaleDateString('fr-FR');
+    const date = new Date(resume.derniereVisite.date);
+    return date.toLocaleDateString('fr-FR');
 
   };
 
@@ -458,6 +467,10 @@ return date.toLocaleDateString('fr-FR');
               adresse: fullClient.adresse,
               telephone: fullClient.telephone,
               email: fullClient.email,
+              nomSociete: fullClient.nomSociete || "",
+              telephoneSociete: fullClient.telephoneSociete || "",
+              emailSociete: fullClient.emailSociete || "",
+              adresseSociete: fullClient.adresseSociete || "",
             });
           }
         }
@@ -802,7 +815,7 @@ return date.toLocaleDateString('fr-FR');
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4" />
                         <span>Dernière visite: {getDerniereVisite(client._id)}</span>
-                        
+
                       </div>
                     )}
                   </div>
@@ -885,6 +898,32 @@ return date.toLocaleDateString('fr-FR');
                       <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                       <p className="text-gray-900">{selectedClient?.email}</p>
                     </div>
+                    {selectedClient?.type === "professionnel" && (
+                      <>
+                        <div className="md:col-span-2 mt-4 pt-4 border-t border-gray-200">
+                          <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center space-x-2">
+                            <Building2 className="w-4 h-4" />
+                            <span>Informations de la société</span>
+                          </h4>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Nom société</label>
+                          <p className="text-gray-900">{selectedClient?.nomSociete || "Non renseigné"}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone société</label>
+                          <p className="text-gray-900">{selectedClient?.telephoneSociete || "Non renseigné"}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Email société</label>
+                          <p className="text-gray-900">{selectedClient?.emailSociete || "Non renseigné"}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Adresse société</label>
+                          <p className="text-gray-900">{selectedClient?.adresseSociete || "Non renseigné"}</p>
+                        </div>
+                      </>
+                    )}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Véhicule(s) associé(s)</label>
                       <p className={`text-gray-900 ${getClientVehicules(selectedClient?._id || "") === "Non assigné" ? "text-orange-600 italic" : ""
@@ -931,7 +970,7 @@ return date.toLocaleDateString('fr-FR');
                               <div className="flex items-center space-x-2">
                                 <Calendar className="w-4 h-4" />
                                 <span>Dernière visite: {getDerniereVisite(selectedClient._id)}</span>
-                                
+
                               </div>
                             )}
                           </div>
@@ -1002,6 +1041,89 @@ return date.toLocaleDateString('fr-FR');
                         <option value="professionnel">Professionnel</option>
                       </select>
                     </div>
+                    {/* Champs Société - apparaissent seulement si type professionnel */}
+                    {formData.type === "professionnel" && (
+                      <div className="md:col-span-2 space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <h3 className="font-medium text-blue-900 flex items-center space-x-2">
+                          <Building2 className="w-5 h-5" />
+                          <span>Informations de la société</span>
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Nom de la société *
+                            </label>
+                            <input
+                              type="text"
+                              name="nomSociete"
+                              value={formData.nomSociete || ""}
+                              onChange={handleChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              required={formData.type === "professionnel"}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Téléphone société *
+                            </label>
+                            <input
+                              type="tel"
+                              name="telephoneSociete"
+                              value={formData.telephoneSociete || ""}
+                              onChange={(e) => {
+                          let value = e.target.value.replace(/[^\d\s\-]/g, '');
+                          if (value.length > 8) return;
+
+                          handleChange({ target: { name: 'telephoneSociete', value } } as React.ChangeEvent<HTMLInputElement>);
+
+                          const cleaned = value.replace(/[\s\-]/g, '');
+                          const isValid = /^[24579]\d{7}$/.test(cleaned);
+
+                          if (cleaned && !isValid) {
+                            setTelephoneError("Numéro tunisien invalide");
+                          } else {
+                            setTelephoneError("");
+                          }
+                        }}
+                              placeholder="Ex: 71234567"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              required={formData.type === "professionnel"}
+                            />
+                            {telephoneError && <p className="text-red-500 text-sm mt-1">{telephoneError}</p>}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Email société *
+                            </label>
+                            <input
+                              type="email"
+                              name="emailSociete"
+                              value={formData.emailSociete || ""}
+                              onChange={handleChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              required={formData.type === "professionnel"}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Adresse société *
+                            </label>
+                            <input
+                              type="text"
+                              name="adresseSociete"
+                              value={formData.adresseSociete || ""}
+                              onChange={handleChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              required={formData.type === "professionnel"}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>

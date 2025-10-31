@@ -183,6 +183,7 @@ export const getCarnetByVehiculeId = async (req, res) => {
       annee: vehicule.annee,
       typeCarburant: vehicule.typeCarburant,
       kilometrage: vehicule.kilometrage,
+       carteGrise: vehicule.carteGrise || null,
       proprietaire: ficheClient ? {
         _id: ficheClient._id,
         nom: ficheClient.nom,

@@ -1,6 +1,6 @@
 import { User } from "../../models/User.js";
-import  Service  from "../../models/Service.js";
-import  Reservation  from "../../models/Reservation.js";
+import Service from "../../models/Service.js";
+import Reservation from "../../models/Reservation.js";
 import FicheClient from "../../models/FicheClient.js";
 import FicheClientVehicule from "../../models/FicheClientVehicule.js";
 
@@ -10,7 +10,7 @@ export const getReservations = async (req, res) => {
   try {
     // ✅ Récupérer l'ID du garage depuis le token (sécurisé)
     const garageId = req.user._id;
-    
+
     console.log('🔍 Récupération réservations pour garage:', garageId);
 
     // ✅ Filtrer UNIQUEMENT les réservations de ce garage
@@ -52,19 +52,61 @@ export const updateReservation = async (req, res) => {
 
     // === ACTIONS DU GARAGE ===
     if (action === "accepter") {
-      reservation.status = "accepte";
+
+      console.log('🔍 DEBUG CRÉATION FICHE CLIENT');
+      console.log('reservation.clientPhone:', reservation.clientPhone);
+      console.log('reservation.garageId:', reservation.garageId);
+      console.log('reservation.clientName:', reservation.clientName);
+      console.log('Type garageId:', typeof reservation.garageId);
+
+      try {
+        let ficheClient = await FicheClient.findOne({
+          telephone: reservation.clientPhone,
+          garagisteId: reservation.garageId
+        });
+
+        if (!ficheClient) {
+          ficheClient = await FicheClient.create({
+            nom: reservation.clientName,
+            type: "particulier",
+            telephone: reservation.clientPhone,
+            email: reservation.clientEmail || `${reservation.clientPhone}@default.com`,
+            garagisteId: reservation.garageId,
+            clientId: reservation.clientId
+          });
+        }
+
+        if (reservation.vehiculeId) {
+          const existingAssoc = await FicheClientVehicule.findOne({
+            ficheClientId: ficheClient._id,
+            vehiculeId: reservation.vehiculeId
+          });
+
+          if (!existingAssoc) {
+            await FicheClientVehicule.create({
+              ficheClientId: ficheClient._id,
+              vehiculeId: reservation.vehiculeId,
+              garageId: reservation.garageId,
+              notes: `Ajouté via réservation ${reservation._id}`
+            });
+          }
+        }
+      } catch (ficheErr) {
+        console.error("❌ Erreur création fiche:", ficheErr);
+      }
+            reservation.status = "accepte";
       reservation.messageGarage = message || null;
-      
+
     } else if (action === "refuser") {
       reservation.status = "refuse";
       reservation.messageGarage = message || "Demande refusée";
-      
+
     } else if (action === "contre_proposer") {
       // CORRECTION : Sauvegarder le créneau proposé par le garage
       if (!newDate || !newHeureDebut) {
         return res.status(400).json({ error: "Date et heure requises pour une contre-proposition" });
       }
-      
+
       reservation.status = "contre_propose";
       reservation.messageGarage = message || "Nouveau créneau proposé";
       // AJOUT : Sauvegarder le créneau proposé
@@ -73,13 +115,13 @@ export const updateReservation = async (req, res) => {
         heureDebut: newHeureDebut
       };
 
-    // === ACTIONS DU CLIENT ===
+      // === ACTIONS DU CLIENT ===
     } else if (action === "accepter_contre_proposition") {
       // CORRECTION : Vérifier que creneauPropose existe
       if (!reservation.creneauPropose || !reservation.creneauPropose.date) {
         return res.status(400).json({ error: "Aucune contre-proposition à accepter" });
       }
-      
+
       reservation.status = "accepte";
       // On remplace le créneau demandé par celui proposé
       reservation.creneauDemande = {
@@ -89,17 +131,17 @@ export const updateReservation = async (req, res) => {
       reservation.messageClient = message || "Contre-proposition acceptée";
       // AJOUT : Nettoyer la contre-proposition
       reservation.creneauPropose = undefined;
-      
+
     } else if (action === "annuler") {
       reservation.status = "annule";
       reservation.messageClient = message || "Demande annulée par le client";
-      
+
     } else if (action === "client_contre_proposer") {
       // CORRECTION : Validation des données requises
       if (!newDate || !newHeureDebut) {
         return res.status(400).json({ error: "Date et heure requises pour une contre-proposition" });
       }
-      
+
       reservation.status = "en_attente";
       reservation.creneauDemande = {
         date: new Date(newDate),
@@ -109,10 +151,10 @@ export const updateReservation = async (req, res) => {
       reservation.creneauPropose = undefined;
       reservation.messageClient = message || "Nouvelle proposition de créneau";
       reservation.messageGarage = null;
-      
+
     } else {
-      return res.status(400).json({ 
-        error: "Action non reconnue", 
+      return res.status(400).json({
+        error: "Action non reconnue",
         validActions: ["accepter", "refuser", "contre_proposer", "accepter_contre_proposition", "annuler", "client_contre_proposer"]
       });
     }
@@ -124,7 +166,7 @@ export const updateReservation = async (req, res) => {
     reservation.markModified('messageClient');
 
     const updatedReservation = await reservation.save();
-    
+
     console.log('Réservation après update:', {
       status: updatedReservation.status,
       creneauDemande: updatedReservation.creneauDemande,
@@ -133,75 +175,22 @@ export const updateReservation = async (req, res) => {
       messageClient: updatedReservation.messageClient
     });
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       reservation: updatedReservation,
       message: "Réservation mise à jour avec succès"
     });
-    if (action === "accepter") {
-  console.log("🔵 DÉBUT ACCEPTATION");
-  
-  reservation.status = "accepte";
-  reservation.messageGarage = message || null;
-  
-  // ✅ CRÉER/RÉCUPÉRER LA FICHE CLIENT (ICI, DANS LE IF)
-  try {
-    console.log("clientPhone:", reservation.clientPhone);
-    console.log("garageId:", reservation.garageId);
-    
-    let ficheClient = await FicheClient.findOne({
-      telephone: reservation.clientPhone,
-      garagisteId: reservation.garageId
-    });
-    
-    console.log("Fiche trouvée?", ficheClient);
-    
-    if (!ficheClient) {
-      console.log("🟢 Création fiche client");
-      ficheClient = await FicheClient.create({
-        nom: reservation.clientName,
-        type: "particulier",
-        telephone: reservation.clientPhone,
-        email: reservation.clientEmail || `${reservation.clientPhone}`,
-        garagisteId: reservation.garageId,
-        clientId: reservation.clientId
-      });
-      console.log("✅ Fiche créée:", ficheClient._id);
-    }
-    
-    // ✅ ASSOCIER LE VÉHICULE
-    if (reservation.vehiculeId) {
-      console.log("🔵 Vérif association véhicule");
-      const existingAssoc = await FicheClientVehicule.findOne({
-        ficheClientId: ficheClient._id,
-        vehiculeId: reservation.vehiculeId
-      });
-      
-      if (!existingAssoc) {
-        console.log("🟢 Création association");
-        await FicheClientVehicule.create({
-          ficheClientId: ficheClient._id,
-          vehiculeId: reservation.vehiculeId,
-          garageId: reservation.garageId,
-          notes: `Ajouté via réservation ${reservation._id}`
-        });
-        console.log("✅ Association créée");
-      }
-    }
-  } catch (ficheErr) {
-    console.error("❌ Erreur création fiche:", ficheErr.message);
-  }
-}
+
 
   } catch (error) {
     console.error("=== ERREUR UPDATE RESERVATION ===");
     console.error("Erreur complète:", error);
     console.error("Stack trace:", error.stack);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "Erreur serveur lors de la mise à jour",
       details: error.message
     });
   }
 
-  
+
 };

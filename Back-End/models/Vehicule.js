@@ -86,7 +86,22 @@ const vehiculeSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
-  }]
+  }],
+  carteGrise: {
+  // Identifiants
+  numeroCG: { type: String, required: true, trim: true, uppercase: true },
+  numeroChassis: { type: String, required: true, trim: true, uppercase: true },
+  
+  // Infos techniques
+  dateMiseCirculation: { type: Date, required: true },
+  puissanceFiscale: { type: Number, required: true },
+  genre: { type: String, enum: ['VP', 'VU', 'MOTO'], default: 'VP' },
+  nombrePlaces: { type: Number, default: 5 },
+  
+  // Contrôle technique (important pour légalité)
+  dateVisite: { type: Date },
+  dateProchaineVisite: { type: Date }
+}
   
 }, {
   timestamps: true

@@ -66,6 +66,16 @@ interface VehiculeInfo {
     type: 'particulier' | 'professionnel';
     telephone?: string;
   };
+  carteGrise?: {
+        numeroCG: string;
+        numeroChassis: string;
+        dateMiseCirculation: Date;
+        puissanceFiscale: number;
+        genre: 'VP' | 'VU' | 'MOTO';
+        nombrePlaces: number;
+        dateVisite?: Date;
+        dateProchaineVisite?: Date;
+    };
 }
 
 interface Stats {
@@ -309,9 +319,11 @@ const CarnetEntretien: React.FC = () => {
                 {data.vehicule.kilometrage && (
                   <p className="text-sm text-gray-500">Kilométrage: {data.vehicule.kilometrage.toLocaleString('fr-FR')} km</p>
                 )}
+                
               </div>
             </div>
           </div>
+
 
           {/* Propriétaire */}
           <div className="border-t pt-4">
@@ -338,7 +350,117 @@ const CarnetEntretien: React.FC = () => {
               </div>
             )}
           </div>
+          {data.vehicule.carteGrise && (
+  <div className="border-t pt-4 mt-4">
+    <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center space-x-2">
+      <FileText className="w-4 h-4 text-blue-600" />
+      <span>Informations Carte Grise</span>
+    </h3>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      {/* Numéro CG */}
+      {data.vehicule.carteGrise.numeroCG && (
+        <div className="bg-gray-50 rounded-lg p-3">
+          <p className="text-xs text-gray-500 mb-1">Numéro Carte Grise</p>
+          <p className="text-sm font-medium text-gray-900">
+            {data.vehicule.carteGrise.numeroCG}
+          </p>
         </div>
+      )}
+
+      {/* Numéro Châssis */}
+      {data.vehicule.carteGrise.numeroChassis && (
+        <div className="bg-gray-50 rounded-lg p-3">
+          <p className="text-xs text-gray-500 mb-1">Numéro Châssis (VIN)</p>
+          <p className="text-sm font-medium text-gray-900 break-all">
+            {data.vehicule.carteGrise.numeroChassis}
+          </p>
+        </div>
+      )}
+
+      {/* Date Mise en Circulation */}
+      {data.vehicule.carteGrise.dateMiseCirculation && (
+        <div className="bg-gray-50 rounded-lg p-3">
+          <p className="text-xs text-gray-500 mb-1">Mise en Circulation</p>
+          <p className="text-sm font-medium text-gray-900">
+            {formatDate(data.vehicule.carteGrise.dateMiseCirculation)}
+          </p>
+        </div>
+      )}
+
+      {/* Puissance Fiscale */}
+      <div className="bg-gray-50 rounded-lg p-3">
+        <p className="text-xs text-gray-500 mb-1">Puissance Fiscale</p>
+        <p className="text-sm font-medium text-gray-900">
+          {data.vehicule.carteGrise.puissanceFiscale} CV
+        </p>
+      </div>
+
+      {/* Genre de Véhicule */}
+      <div className="bg-gray-50 rounded-lg p-3">
+        <p className="text-xs text-gray-500 mb-1">Type de Véhicule</p>
+        <p className="text-sm font-medium text-gray-900">
+          {data.vehicule.carteGrise.genre === 'VP' && '🚗 Véhicule Particulier'}
+          {data.vehicule.carteGrise.genre === 'VU' && '🚚 Véhicule Utilitaire'}
+          {data.vehicule.carteGrise.genre === 'MOTO' && '🏍️ Motocyclette'}
+        </p>
+      </div>
+
+      {/* Nombre de Places */}
+      <div className="bg-gray-50 rounded-lg p-3">
+        <p className="text-xs text-gray-500 mb-1">Nombre de Places</p>
+        <p className="text-sm font-medium text-gray-900">
+          {data.vehicule.carteGrise.nombrePlaces} places
+        </p>
+      </div>
+
+      {/* Dernière Visite Technique */}
+      {data.vehicule.carteGrise.dateVisite && (
+        <div className="bg-gray-50 rounded-lg p-3">
+          <p className="text-xs text-gray-500 mb-1">Dernière Visite Technique</p>
+          <p className="text-sm font-medium text-gray-900">
+            {formatDate(data.vehicule.carteGrise.dateVisite)}
+          </p>
+        </div>
+      )}
+
+      {/* Prochaine Visite Technique */}
+      {data.vehicule.carteGrise.dateProchaineVisite && (
+        <div className={`rounded-lg p-3 ${
+          new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date()
+            ? 'bg-red-50 border border-red-200'
+            : new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+            ? 'bg-yellow-50 border border-yellow-200'
+            : 'bg-gray-50'
+        }`}>
+          <p className="text-xs text-gray-500 mb-1 flex items-center space-x-1">
+            <Calendar className="w-3 h-3" />
+            <span>Prochaine Visite Technique</span>
+          </p>
+          <p className={`text-sm font-medium ${
+            new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date()
+              ? 'text-red-700'
+              : new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+              ? 'text-yellow-700'
+              : 'text-gray-900'
+          }`}>
+            {formatDate(data.vehicule.carteGrise.dateProchaineVisite)}
+          </p>
+          {new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date() && (
+            <p className="text-xs text-red-600 mt-1 font-medium">⚠️ Visite expirée</p>
+          )}
+          {new Date(data.vehicule.carteGrise.dateProchaineVisite) >= new Date() &&
+           new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) && (
+            <p className="text-xs text-yellow-600 mt-1 font-medium">⚠️ Expire bientôt</p>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+)}
+          
+        </div>
+
 
         {/* Historique des entretiens */}
         <div className="bg-white rounded-lg shadow-sm">

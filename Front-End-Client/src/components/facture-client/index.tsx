@@ -94,7 +94,6 @@ const ClientFactures: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('tous');
   const [selectedFacture, setSelectedFacture] = useState<FactureDetails | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [creditNoteDetails, setCreditNoteDetails] = useState(null);
   const [showCreditNoteModal, setShowCreditNoteModal] = useState(false);
@@ -113,12 +112,12 @@ const ClientFactures: React.FC = () => {
     const header = document.querySelector('header');
     if (!header) return;
 
-    if (selectedFacture || showDetailsModal || showPaymentModal || creditNoteDetails) {
+    if (selectedFacture || showDetailsModal  || creditNoteDetails) {
       header.classList.add("hidden");
     } else {
       header.classList.remove("hidden");
     }
-  }, [selectedFacture, showDetailsModal, showPaymentModal,creditNoteDetails]);
+  }, [selectedFacture, showDetailsModal,creditNoteDetails]);
 
   const fetchFactures = async () => {
     try {
@@ -210,7 +209,6 @@ const ClientFactures: React.FC = () => {
         alert('✅ Paiement enregistré avec succès !');
         fetchFactures();
         fetchStats();
-        setShowPaymentModal(false);
         setSelectedFacture(null);
       }
     } catch (error: any) {
@@ -491,18 +489,7 @@ const ClientFactures: React.FC = () => {
                       >
                         Voir
                       </button>
-                      {facture.paymentStatus !== 'paye' && facture.paymentStatus !== 'annule' && (
-                        <button
-                          onClick={() => {
-                            setSelectedFacture(facture);
-                            setShowPaymentModal(true);
-                          }}
-                          className="text-green-600 hover:text-green-900"
-                        >
-                          <CreditCard className="h-4 w-4 inline mr-1" />
-                          Payer
-                        </button>
-                      )}
+                      
                     </div>
                   </td>
                 </tr>
@@ -720,18 +707,6 @@ const ClientFactures: React.FC = () => {
             </div>
 
             <div className="flex justify-end space-x-3 mt-6 pt-4 border-t no-print">
-              {selectedFacture.paymentStatus !== 'paye' && selectedFacture.paymentStatus !== 'annule' && (
-                <button
-                  onClick={() => {
-                    setShowDetailsModal(false);
-                    setShowPaymentModal(true);
-                  }}
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-                >
-                  <CreditCard className="h-4 w-4 inline mr-2" />
-                  Payer cette facture
-                </button>
-              )}
               <button
                 onClick={() => window.print()}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
@@ -750,143 +725,7 @@ const ClientFactures: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de paiement */}
-      {showPaymentModal && selectedFacture && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-gray-900">
-                Effectuer un paiement
-              </h3>
-              <button
-                onClick={() => setShowPaymentModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
 
-            <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-700">
-                <span className="font-medium">Facture N°:</span> {selectedFacture.numeroFacture.toString().padStart(4, '0')}
-              </p>
-              <p className="text-sm text-gray-700">
-                <span className="font-medium">Montant total:</span> {formatCurrency(selectedFacture.totalTTC)}
-              </p>
-              {selectedFacture.paymentAmount > 0 && (
-                <>
-                  <p className="text-sm text-blue-600">
-                    <span className="font-medium">Déjà payé:</span> {formatCurrency(selectedFacture.paymentAmount)}
-                  </p>
-                  <p className="text-sm text-red-600 font-medium">
-                    <span className="font-medium">Reste:</span> {formatCurrency(selectedFacture.totalTTC - selectedFacture.paymentAmount)}
-                  </p>
-                </>
-              )}
-            </div>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target as HTMLFormElement);
-              handlePayment(selectedFacture._id, {
-                paymentAmount: Number(formData.get('amount')),
-                paymentMethod: formData.get('method'),
-                paymentDate: formData.get('date'),
-                reference: formData.get('reference')
-              });
-            }}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Montant à payer *
-                </label>
-                <input
-                  type="number"
-                  name="amount"
-                  step="0.001"
-                  min="0.001"
-                  max={selectedFacture.totalTTC - (selectedFacture.paymentAmount || 0)}
-                  defaultValue={selectedFacture.totalTTC - (selectedFacture.paymentAmount || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Maximum: {formatCurrency(selectedFacture.totalTTC - (selectedFacture.paymentAmount || 0))}
-                </p>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Méthode de paiement *
-                </label>
-                <select
-                  name="method"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">Sélectionner...</option>
-                  <option value="especes">💵 Espèces</option>
-                  <option value="cheque">📝 Chèque</option>
-                  <option value="virement">🏦 Virement bancaire</option>
-                  <option value="carte">💳 Carte bancaire</option>
-                </select>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date de paiement *
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  defaultValue={new Date().toISOString().split('T')[0]}
-                  max={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Référence (optionnel)
-                </label>
-                <input
-                  type="text"
-                  name="reference"
-                  placeholder="N° chèque, référence virement..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Ex: Chèque n°123456, Virement REF789
-                </p>
-              </div>
-
-              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-6">
-                <p className="text-xs text-yellow-800">
-                  ℹ️ <strong>Information:</strong> Votre paiement sera enregistré et validé par le garage. 
-                  Vous recevrez une confirmation par email.
-                </p>
-              </div>
-
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowPaymentModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 flex items-center"
-                >
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Confirmer le paiement
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
       {showCreditNoteModal && creditNoteDetails && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-5 mx-auto p-6 border w-full max-w-4xl shadow-lg rounded-md bg-white">
