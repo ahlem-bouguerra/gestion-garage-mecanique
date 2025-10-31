@@ -81,7 +81,7 @@ const mecanicienSchema = new mongoose.Schema({
   },
   salaire: { 
     type: Number,
-    required: [true, 'Le salaire est obligatoire'],
+    required: false,
     min: [200, 'Le salaire minimum est de 200 DT'],
     max: [10000, 'Le salaire maximum est de 10000 DT']
   },

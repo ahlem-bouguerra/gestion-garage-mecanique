@@ -384,7 +384,7 @@ const MecaniciensManager = () => {
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <Plus className="h-5 w-5" />
-                <span>Nouveau Mécanicien</span>
+                <span>Nouveau Employés</span>
               </button>
             </div>
           </div>
@@ -665,7 +665,7 @@ const MecaniciensManager = () => {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
               <h2 className="text-2xl font-bold text-white">
-                {isEditMode ? 'Modifier le Mécanicien' : 'Nouveau Mécanicien'}
+                {isEditMode ? 'Modifier  Employés' : 'Nouveau Employés'}
               </h2>
               <p className="text-blue-100 mt-1">
                 {isEditMode ? 'Mettre à jour les informations' : 'Ajouter un nouveau membre à l\'équipe'}

@@ -7,7 +7,7 @@ import AtelierManager from "@/components/gestion-atelier";
 import ServicesManager from "@/components/gestion-service";
 
 // Type definitions
-type TabType = 'mecaniciens' | 'ateliers';
+type TabType = 'employé' | 'ateliers';
 
 interface TabConfig {
   id: TabType;
@@ -26,12 +26,12 @@ const UnifiedManagementDashboard: React.FC<UnifiedManagementDashboardProps> = ({
   selectedTimeFrame, 
   extractTimeFrame 
 }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('mecaniciens');
+  const [activeTab, setActiveTab] = useState<TabType>('employé');
 
   const tabs: TabConfig[] = [
     {
-      id: 'mecaniciens',
-      label: 'Mécaniciens',
+      id: 'employé',
+      label: 'Employés',
       icon: Users,
       description: 'Gestion du personnel technique',
       component: MecaniciensManager
