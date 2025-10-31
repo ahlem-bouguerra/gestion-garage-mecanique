@@ -98,7 +98,7 @@ const carnetEntretienSchema = new mongoose.Schema({
   garagisteId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true
+      required: false,
   }
   
 }, {

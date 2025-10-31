@@ -16,6 +16,7 @@ import { ClientCreateReservation, ClientGetReservations, ClientUpdateReservation
 import {getClientDevis, getClientDevisById, getClientDevisStats } from '../controllers/clients/clientDevisController.js';
 import { getClientFactures, GetClientFactureById, GetClientFactureStats,getClientCreditNoteById,handleClientPayment ,CreateFactureWithCredit} from '../controllers/clients/clientFactureController.js';
 import { search } from '../controllers/clients/ChercherGarage.js';
+import { getCarnetByVehiculeIdClient, creerCarnetManuelClient } from '../controllers/clients/carnetController.js';
 const router = express.Router();
 
 // ========== GOOGLE OAUTH (CLIENT) ==========
@@ -119,6 +120,9 @@ router.get('/client/factures/:id', clientauthMiddleware, GetClientFactureById);
 router.get('/client/credit-note/:creditNoteId', clientauthMiddleware, getClientCreditNoteById);
 router.post('/create-with-credit/:devisId', clientauthMiddleware, CreateFactureWithCredit);
 router.post('/client/factures/:id/payment', clientauthMiddleware, handleClientPayment);
+
+router.get('/carnet-entretien/:vehiculeId', clientauthMiddleware, getCarnetByVehiculeIdClient);
+router.post('/creer-dans-carnet', clientauthMiddleware, creerCarnetManuelClient);
 
 
 router.get('/search', search);

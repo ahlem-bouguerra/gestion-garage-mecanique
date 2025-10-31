@@ -455,7 +455,7 @@ export default function VehiculeManagement() {
 
         const termesRecherche = rechercheGlobale.toLowerCase().trim();
 
-        const vehiculesFiltrés = vehicules.filter(v => {
+        const vehiculesFiltrés = vehicules.filter(v => {isVehiculeFormValid
             // Recherche dans l'immatriculation
             const matchImmat = v.immatriculation.toLowerCase().includes(termesRecherche);
 
