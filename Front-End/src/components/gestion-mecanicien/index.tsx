@@ -229,10 +229,10 @@ const MecaniciensManager = () => {
 
       if (isEditMode && selectedMecanicien) {
         await mecaniciensApi.update(selectedMecanicien._id, apiData);
-        showSuccess('Mécanicien modifié avec succès !');
+        showSuccess('Employé modifié avec succès !');
       } else {
         await mecaniciensApi.create(apiData);
-        showSuccess('Mécanicien créé avec succès !');
+        showSuccess('Employé créé avec succès !');
       }
 
       resetForm();
@@ -254,7 +254,7 @@ const MecaniciensManager = () => {
     try {
       setLoading(true);
       await mecaniciensApi.delete(id);
-      showSuccess('Mécanicien supprimé avec succès');
+      showSuccess('Employé supprimé avec succès');
       await loadMecaniciens();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
@@ -547,7 +547,7 @@ const MecaniciensManager = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Mécanicien
+                      Employé
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Contact

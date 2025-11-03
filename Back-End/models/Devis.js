@@ -77,6 +77,12 @@ const devisSchema = new mongoose.Schema({
     min: 0,
     comment: "Total TTC final (services + main d'œuvre + TVA)"
   },
+  finalTotalTTC: {
+    type: Number,
+    required: true,
+    min: 0,
+    comment: "Total TTC final avec remise (services + main d'œuvre + TVA + remise)"
+  },
   tvaRate: {
     type: Number,
     required: true,
@@ -84,6 +90,27 @@ const devisSchema = new mongoose.Schema({
     min: 0,
     max: 100
   },
+  remiseRate: {
+    type: Number,
+    required: true,
+    default: 0,
+    min: 0,
+    max: 100
+  },
+  montantTVA: {
+  type: Number,
+  required: true,
+  min: 0,
+  comment: "Montant exact de TVA calculé"
+},
+montantRemise: {
+  type: Number,
+  required: true,
+  default: 0,
+  min: 0,
+  comment: "Montant exact de remise appliquée"
+},
+  
   maindoeuvre: {
     type: Number,
     required: true,
@@ -150,7 +177,7 @@ devisSchema.virtual('totalCompletHT').get(function() {
 });
 
 // ✅ Méthode virtuelle pour calculer la TVA
-devisSchema.virtual('montantTVA').get(function() {
+devisSchema.virtual('montantTva').get(function() {
   const totalHT = this.totalHT + (this.maindoeuvre || 0);
   return totalHT * ((this.tvaRate || 20) / 100);
 });

@@ -39,6 +39,10 @@ export const CreateFacture = async (req, res) => {
     const numeroFacture = await Facture.generateFactureId();
     console.log('✅ ID généré:', numeroFacture);
 
+
+    const timbreFiscal = 1.000;
+    const finalTotalTTCAvecTimbre = (devis.finalTotalTTC || 0) + timbreFiscal;
+
     // 4️⃣ Préparer les données de la facture
     const factureData = {
       numeroFacture: numeroFacture,
@@ -62,9 +66,13 @@ export const CreateFacture = async (req, res) => {
         total: service.total || (service.quantity * service.unitPrice)
       })),
       maindoeuvre: devis.maindoeuvre || 0,
-      tvaRate: devis.tvaRate || 20,
+      tvaRate: devis.tvaRate || 20, 
+      remiseRate: devis.remiseRate,
+      totalTVA: devis.montantTVA,
+      totalRemise: devis.montantRemise,
+      timbreFiscal: timbreFiscal,
+      finalTotalTTC: finalTotalTTCAvecTimbre,
       totalHT: devis.totalHT || 0,
-      totalTVA: (devis.totalTTC - devis.totalHT) || 0,
       totalTTC: devis.totalTTC || 0,
       estimatedTime: devis.estimatedTime,
       createdBy: req.user?.id
@@ -134,7 +142,7 @@ export const GetAllFactures = async (req, res) => {
 
     // Exécution de la requête
     const factures = await Facture.find(query)
-        .select('numeroFacture clientInfo vehicleInfo totalTTC paymentAmount paymentStatus invoiceDate creditNoteId dueDate') // Ajoutez paymentAmount
+        .select('numeroFacture clientInfo vehicleInfo totalTTC finalTotalTTC paymentAmount paymentStatus invoiceDate creditNoteId dueDate') // Ajoutez paymentAmount
         .populate('clientInfo', 'nom email telephone')
       .populate('devisId', 'id status')
       .sort(sortOptions)
@@ -384,12 +392,12 @@ export const StaticFacture = async (req, res) => {
     $group: {
       _id: null,
       totalFactures: { $sum: 1 },
-      totalTTC: { $sum: '$totalTTC' },
+      finalTotalTTC: { $sum: '$finalTotalTTC' },
       totalPaye: {
         $sum: {
           $cond: [
             { $eq: ['$paymentStatus', 'paye'] },
-            '$totalTTC',
+            '$finalTotalTTC',
             0
           ]
         }
@@ -446,7 +454,7 @@ export const StaticFacture = async (req, res) => {
 
     const result = stats[0] || {
       totalFactures: 0,
-      totalTTC: 0,
+      finalTotalTTC: 0,
       totalPaye: 0,
       totalPayePartiel: 0,
       facturesPayees: 0,
@@ -459,11 +467,11 @@ export const StaticFacture = async (req, res) => {
     result.totalEncaisse = result.totalPaye + result.totalPayePartiel;
     
     // Calculer le montant impayé
-    result.totalImpaye = result.totalTTC - result.totalEncaisse;
+    result.totalImpaye = result.finalTotalTTC - result.totalEncaisse;
 
     // Calculer les pourcentages
-    result.tauxPaiement = result.totalTTC > 0 
-      ? ((result.totalEncaisse / result.totalTTC) * 100).toFixed(2) 
+    result.tauxPaiement = result.finalTotalTTC > 0 
+      ? ((result.totalEncaisse / result.finalTotalTTC) * 100).toFixed(2) 
       : 0;
 
     res.json({
@@ -519,6 +527,9 @@ export const CreateFactureWithCredit = async (req, res) => {
     if (existingFacture && createCreditNote) {
       // Générer le numéro d'avoir
       const creditNumber = await CreditNote.generateCreditNumber();
+
+      const timbreFiscal = 1.000;
+      const finalTotalTTCAvecTimbre = (devis.finalTotalTTC || 0) + timbreFiscal;
       
       // Créer l'avoir
       creditNote = new CreditNote({
@@ -535,6 +546,10 @@ export const CreateFactureWithCredit = async (req, res) => {
         })),
         maindoeuvre: existingFacture.maindoeuvre,
         tvaRate: existingFacture.tvaRate,
+        remiseRate: existingFacture.remiseRate,
+        totalRemise: existingFacture.totalRemise,
+        timbreFiscal: timbreFiscal,
+        finalTotalTTC: finalTotalTTCAvecTimbre,
         totalHT: existingFacture.totalHT,
         totalTVA: existingFacture.totalTVA,
         totalTTC: existingFacture.totalTTC,
@@ -543,7 +558,7 @@ export const CreateFactureWithCredit = async (req, res) => {
         createdBy: req.user?.id,
         garagisteId: req.user._id
       });
-      
+
       await creditNote.save();
 
       // Marquer l'ancienne facture comme annulée
@@ -565,6 +580,8 @@ export const CreateFactureWithCredit = async (req, res) => {
     const totalHT = totalServicesHT + (devis.maindoeuvre || 0);
     const totalTVA = totalHT * ((devis.tvaRate || 20) / 100);
     const totalTTC = totalHT + totalTVA;
+     const totalRemise = totalTTC * ((devis.remiseRate || 0) / 100);
+    const finalTotalTTC = totalTTC - totalRemise;
 
     // 5. Créer la nouvelle facture
     const numeroFacture = await Facture.generateFactureId();
@@ -589,7 +606,10 @@ export const CreateFactureWithCredit = async (req, res) => {
       tvaRate: devis.tvaRate || 20,
       totalHT: totalHT,
       totalTVA: totalTVA,
+      totalRemise: totalRemise,
+      finalTotalTTC: finalTotalTTC,
       totalTTC: totalTTC,
+      remiseRate: devis.remiseRate,
       estimatedTime: devis.estimatedTime,
       invoiceDate: new Date(),
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),

@@ -47,7 +47,7 @@ interface Facture {
     telephone: string;
   };
   vehicleInfo: string;
-  totalTTC: number;
+  finalTotalTTC: number;
   paymentStatus: 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye' | 'annule';
   invoiceDate: string;
   dueDate: string;
@@ -56,7 +56,7 @@ interface Facture {
 }
 interface Stats {
   totalFactures: number;
-  totalTTC: number;
+  finalTotalTTC: number;
   totalPaye: number;
   totalPayePartiel: number; // ✅ Nouveau
   totalEncaisse: number; // ✅ Nouveau
@@ -73,7 +73,7 @@ const GestionFactures: React.FC = () => {
   const [filteredFactures, setFilteredFactures] = useState<Facture[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalFactures: 0,
-    totalTTC: 0,
+    finalTotalTTC: 0,
     totalPaye: 0,
     totalPayePartiel: 0, // ✅ Nouveau
     totalEncaisse: 0, // ✅ Nouveau
@@ -369,7 +369,7 @@ const GestionFactures: React.FC = () => {
             <DollarSign className="h-8 w-8 text-green-500" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Chiffre d'Affaires</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalTTC)}</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.finalTotalTTC)}</p>
             </div>
           </div>
         </div>
@@ -501,7 +501,7 @@ const GestionFactures: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {formatCurrency(facture.totalTTC)}
+                    {formatCurrency(facture.finalTotalTTC)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     <div className="space-y-1">
@@ -513,7 +513,7 @@ const GestionFactures: React.FC = () => {
                       {facture.paymentStatus === 'partiellement_paye' && (
                         <div>
                           <p className="text-xs text-red-600 font-medium">
-                            Reste: {formatCurrency(facture.totalTTC - (facture.paymentAmount || 0))}
+                            Reste: {formatCurrency(facture.finalTotalTTC - (facture.paymentAmount || 0))}
                           </p>
                         </div>
                       )}
@@ -524,7 +524,7 @@ const GestionFactures: React.FC = () => {
                           </p>
                           {facture.paymentAmount > 0 ? (
                             <p className="text-xs text-red-600">
-                              Reste: {formatCurrency(facture.totalTTC - (facture.paymentAmount || 0))}
+                              Reste: {formatCurrency(facture.finalTotalTTC - (facture.paymentAmount || 0))}
                             </p>
                           ) : (
                             <p className="text-xs text-red-600">
@@ -641,8 +641,8 @@ const GestionFactures: React.FC = () => {
                   type="number"
                   name="amount"
                   step="0.001"
-                  max={selectedFacture.totalTTC - (selectedFacture.paymentAmount || 0)}
-                  defaultValue={selectedFacture.totalTTC - (selectedFacture.paymentAmount || 0)}
+                  max={(selectedFacture.finalTotalTTC - (selectedFacture.paymentAmount || 0)).toFixed(3)}
+                  defaultValue={(selectedFacture.finalTotalTTC - (selectedFacture.paymentAmount || 0)).toFixed(3)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -849,7 +849,7 @@ const GestionFactures: React.FC = () => {
 
               {/* Totaux */}
               <div className="flex justify-end mb-8">
-                <div className="w-64">
+                <div className="w-100">
                   <table className="w-full">
                     <tbody>
                       {factureDetails.totalHT && (
@@ -872,12 +872,40 @@ const GestionFactures: React.FC = () => {
                           </td>
                         </tr>
                       )}
+                      {factureDetails.totalRemise !== undefined && factureDetails.totalRemise !== null && (
+                        <tr>
+                          <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                            REMISE ({factureDetails.remiseRate || 0}%):
+                          </td>
+                          <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                            {formatCurrency(factureDetails.totalRemise)}
+                          </td>
+                        </tr>
+                      )}
                       <tr className="bg-gray-100">
                         <td className="px-4 py-3 text-right text-lg font-bold text-gray-800">
                           TOTAL TTC:
                         </td>
                         <td className="px-4 py-3 text-right text-lg font-bold text-green-600">
                           {formatCurrency(factureDetails.totalTTC)}
+                        </td>
+                      </tr>
+                      {factureDetails.timbreFiscal && factureDetails.timbreFiscal > 0 && (
+                        <tr>
+                          <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                            Timbre fiscal:
+                          </td>
+                          <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                            {formatCurrency(factureDetails.timbreFiscal)}
+                          </td>
+                        </tr>
+                      )}
+                      <tr className="bg-gray-100">
+                        <td className="px-4 py-3 text-right text-lg font-bold text-gray-800">
+                          TOTAL TTC avec remise :
+                        </td>
+                        <td className="px-4 py-3 text-right text-lg font-bold text-green-600">
+                          {formatCurrency(factureDetails.finalTotalTTC)}
                         </td>
                       </tr>
                       {factureDetails.paymentAmount > 0 && (
@@ -896,14 +924,12 @@ const GestionFactures: React.FC = () => {
                                 RESTE À PAYER:
                               </td>
                               <td className="px-4 py-3 text-right font-bold text-red-700">
-                                {formatCurrency(factureDetails.totalTTC - factureDetails.paymentAmount)}
+                                {formatCurrency(factureDetails.finalTotalTTC - factureDetails.paymentAmount)}
                               </td>
                             </tr>
                           )}
                         </>
                       )}
-
-
                     </tbody>
                   </table>
                 </div>
@@ -1060,7 +1086,7 @@ const GestionFactures: React.FC = () => {
                 <div className="w-64 bg-red-50 border border-red-200 rounded-lg p-4">
                   <div className="flex justify-between items-center text-xl font-bold text-red-600">
                     <span>MONTANT DE L'AVOIR:</span>
-                    <span>-{formatCurrency(Math.abs(creditNoteDetails.totalTTC))}</span>
+                    <span>-{formatCurrency(Math.abs(creditNoteDetails.finalTotalTTC))}</span>
                   </div>
                   <p className="text-xs text-red-500 mt-2 text-center">
                     Ce montant annule la facture originale

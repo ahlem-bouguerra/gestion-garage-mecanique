@@ -17,6 +17,7 @@ const GarageQuoteSystem = () => {
   const [selectedVehiculeId, setSelectedVehiculeId] = useState('');
   const [loadingVehicules, setLoadingVehicules] = useState(false);
   const [tvaRate, setTvaRate] = useState(20); // TVA par défaut à 20%
+  const [remiseRate, setRemiseRate] = useState(0);
   const [maindoeuvre, setMaindoeuvre] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState({ days: 0, hours: 0, minutes: 0 });
   const [loading, setLoading] = useState(false);
@@ -281,9 +282,11 @@ const GarageQuoteSystem = () => {
       yPosition += 15;
 
       // ✅ Section totaux améliorée
-      const totalHT = (selectedQuote.totalHT || 0) + (selectedQuote.maindoeuvre || 0);
-      const tva = totalHT * ((selectedQuote.tvaRate || 20) / 100);
-      const totalTTC = totalHT + tva;
+      const totalHT = (selectedQuote.totalServicesHT || 0) + (selectedQuote.maindoeuvre || 0);
+      const montantTVA = totalHT * ((selectedQuote.tvaRate || 20) / 100);
+      const totalTTC = totalHT + montantTVA;
+      const montantRemise = (totalTTC * (selectedQuote.remiseRate / 100));
+      const finalTotalTTC = totalTTC - montantRemise;
 
       // Cadre pour les totaux
       const totalsStartY = yPosition;
@@ -295,7 +298,7 @@ const GarageQuoteSystem = () => {
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(10);
       pdf.text(`Total pièces HT:`, 122, yPosition + 2);
-      pdf.text(`${(selectedQuote.totalHT || 0).toFixed(3)} DT`, 170, yPosition + 2, { align: 'right' });
+      pdf.text(`${(selectedQuote.totalServicesHT || 0).toFixed(3)} DT`, 170, yPosition + 2, { align: 'right' });
 
       pdf.text(`Main d'œuvre:`, 122, yPosition + 8);
       pdf.text(`${(selectedQuote.maindoeuvre || 0).toFixed(3)} DT`, 170, yPosition + 8, { align: 'right' });
@@ -304,13 +307,21 @@ const GarageQuoteSystem = () => {
       pdf.text(`${totalHT.toFixed(3)} DT`, 170, yPosition + 14, { align: 'right' });
 
       pdf.text(`TVA (${selectedQuote.tvaRate || 20}%):`, 122, yPosition + 20);
-      pdf.text(`${tva.toFixed(3)} DT`, 170, yPosition + 20, { align: 'right' });
+      pdf.text(`${montantTVA.toFixed(3)} DT`, 170, yPosition + 20, { align: 'right' });
+
+      pdf.text(`Remise (${selectedQuote.remiseRate || 20}%):`, 122, yPosition + 20);
+      pdf.text(`${montantTVA.toFixed(3)} DT`, 170, yPosition + 20, { align: 'right' });
 
       // Total TTC en gras
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(11);
       pdf.text(`Total TTC:`, 122, yPosition + 28);
       pdf.text(`${totalTTC.toFixed(3)} DT`, 170, yPosition + 28, { align: 'right' });
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(11);
+      pdf.text(`Total TTC aprés remise :`, 122, yPosition + 28);
+      pdf.text(`${finalTotalTTC.toFixed(3)} DT`, 170, yPosition + 28, { align: 'left' });
 
       yPosition += 50;
 
@@ -391,10 +402,18 @@ const GarageQuoteSystem = () => {
     }, 0);
 
     const totalHT = totalServicesHT + maindoeuvre;
+    const montantTVA = totalHT * ((tvaRate || 20) / 100);
+    const montantRemise = ((totalHT + montantTVA) * (remiseRate / 100));
+    const totalTTC = totalHT + montantTVA;
+    const finalTotalTTC = totalTTC - montantRemise;
 
     return {
-      totalHT,
-      totalTTC: totalHT * (1 + tvaRate / 100)
+    totalHT,
+    totalTTC,
+    finalTotalTTC,
+    montantTVA,
+    montantRemise,
+    totalServicesHT
     };
   };
 
@@ -414,13 +433,15 @@ const GarageQuoteSystem = () => {
         }, 0);
 
         const totalHT = totalServicesHT + (devis.maindoeuvre || 0);
-        const totalTTC = totalHT * (1 + (devis.tvaRate || 20) / 100);
 
         return {
           ...devis,
           services: servicesWithTotal,
-          totalHT: totalServicesHT,
-          totalTTC: totalTTC
+          totalHT: devis.totalHT,
+          totalTTC: devis.totalTTC,
+          finalTotalTTC: devis.finalTotalTTC,
+          montantTVA: devis.montantTVA,
+          montantRemise: devis.montantRemise
         };
       });
 
@@ -472,7 +493,10 @@ const GarageQuoteSystem = () => {
         vehiculeId: selectedVehiculeId,
         inspectionDate: newQuote.inspectionDate,
         services: newQuote.services,
+        montantRemise: calculateTotal(newQuote.services, maindoeuvre).montantRemise,
+        montantTVA: calculateTotal(newQuote.services, maindoeuvre).montantTVA,
         tvaRate: tvaRate,
+        remiseRate: remiseRate,
         maindoeuvre: maindoeuvre,
         estimatedTime: estimatedTime,
         // Si c'est une modification, remettre le statut à "brouillon"
@@ -499,6 +523,7 @@ const GarageQuoteSystem = () => {
       setSelectedClientId('');
       setSelectedVehiculeId('');
       setTvaRate(20);
+      setRemiseRate(0);
       setVehicules([]);
       setMaindoeuvre(0);
       setEditingQuote(null);
@@ -801,6 +826,7 @@ const GarageQuoteSystem = () => {
     setSelectedClientId(quote.clientId || '');
     setSelectedVehiculeId(quote.vehiculeId || '');
     setTvaRate(quote.tvaRate || 20);
+    setRemiseRate(quote.remiseRate || 0);
     setMaindoeuvre(quote.maindoeuvre || 0);
     setEstimatedTime(quote.estimatedTime || { days: 0, hours: 0, minutes: 0 });
 
@@ -936,7 +962,6 @@ const GarageQuoteSystem = () => {
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p class="text-sm text-blue-800 mb-2">
               <strong>Facture N°:</strong> ${existingFacture.numeroFacture}<br>
-              <strong>Montant:</strong> ${existingFacture.totalTTC?.toFixed(3) || '0.000'} DT<br>
               <strong>Date:</strong> ${new Date(existingFacture.createdAt).toLocaleDateString('fr-FR')}
             </p>
             <div class="bg-orange-100 border border-orange-300 rounded p-3 mt-3">
@@ -1325,6 +1350,9 @@ const GarageQuoteSystem = () => {
                         Total TTC
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Total TTC apres remise
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Statut
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1367,6 +1395,11 @@ const GarageQuoteSystem = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm font-medium text-gray-900">
                               {quote.totalTTC?.toFixed(3) || '0.000'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-medium text-gray-900">
+                              {quote.finalTotalTTC?.toFixed(3) || '0.000'}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -1728,6 +1761,23 @@ const GarageQuoteSystem = () => {
                 />
 
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Remise (%) *
+                </label>
+                <input
+                  type="number"
+                  step="1"
+                  min="0"
+                  max="100"
+                  value={remiseRate}
+                  onChange={(e) => setRemiseRate(parseFloat(e.target.value) || 0)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="20"
+                />
+              </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1808,7 +1858,7 @@ const GarageQuoteSystem = () => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Total pièces HT:</span>
-                  <span className="font-medium">{newQuote.services.reduce((sum, service) => sum + (service.quantity * service.unitPrice), 0).toFixed(3)} Dinnar</span>
+                  <span className="font-medium"> {calculateTotal(newQuote.services, maindoeuvre).totalServicesHT.toFixed(3)}Dinnar</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Main d'œuvre:</span>
@@ -1821,12 +1871,25 @@ const GarageQuoteSystem = () => {
 
                 <div className="flex justify-between">
                   <span>TVA ({tvaRate}%):</span> {/* ✅ Affiche le taux dynamique */}
-                  <span className="font-medium">{(calculateTotal(newQuote.services, maindoeuvre).totalTTC - calculateTotal(newQuote.services, maindoeuvre).totalHT).toFixed(2)} Dinnar</span>
+                  <span className="font-medium">{(calculateTotal(newQuote.services, maindoeuvre).totalTTC - calculateTotal(newQuote.services, maindoeuvre).totalHT).toFixed(3)} Dinnar</span>
                 </div>
+
+                <div className="flex justify-between">
+                  <span>Remise ({remiseRate}%):</span> {/* ✅ Affiche le taux dynamique */}
+                  <span className="font-medium">{(calculateTotal(newQuote.services, maindoeuvre).finalTotalTTC - calculateTotal(newQuote.services, maindoeuvre).totalTTC).toFixed(3)} Dinnar</span>
+                </div>
+
                 <div className="flex justify-between text-lg font-bold border-t pt-2">
                   <span>Total TTC:</span>
-                  <span>{calculateTotal(newQuote.services, maindoeuvre).totalTTC.toFixed(2)} Dinnar</span>
+                  <span>{calculateTotal(newQuote.services, maindoeuvre).totalTTC.toFixed(3)} Dinnar</span>
                 </div>
+
+
+                <div className="flex justify-between text-lg font-bold border-t pt-2">
+                  <span>Total TTC avec remise :</span>
+                  <span>{calculateTotal(newQuote.services, maindoeuvre).finalTotalTTC.toFixed(3)} Dinnar</span>
+                </div>
+
               </div>
             </div>
 
@@ -1923,7 +1986,7 @@ const GarageQuoteSystem = () => {
                     {/* Détail des composants */}
                     <div className="flex justify-between text-gray-600">
                       <span>Total pièces HT:</span>
-                      <span>{((selectedQuote.totalHT || 0)).toFixed(3)} Dinnar</span>
+                      <span>{((selectedQuote.totalServicesHT || 0)).toFixed(3)} Dinnar</span>
                     </div>
 
                     <div className="flex justify-between text-gray-600">
@@ -1934,7 +1997,7 @@ const GarageQuoteSystem = () => {
                     {/* Sous-total */}
                     <div className="flex justify-between font-medium border-t pt-2">
                       <span>Total HT:</span>
-                      <span>{((selectedQuote.totalHT || 0) + (selectedQuote.maindoeuvre || 0)).toFixed(3)} Dinnar</span>
+                      <span>{((selectedQuote.totalServicesHT || 0) + (selectedQuote.maindoeuvre || 0)).toFixed(3)} Dinnar</span>
                     </div>
 
                     {/* TVA */}
@@ -1942,8 +2005,16 @@ const GarageQuoteSystem = () => {
                       <span>TVA ({selectedQuote.tvaRate || 20}%):</span>
                       <span>
                         {(
-                          ((selectedQuote.totalHT || 0) + (selectedQuote.maindoeuvre || 0)) *
-                          ((selectedQuote.tvaRate || 20) / 100)
+                          ((selectedQuote.montantTVA || 0) ) 
+                        ).toFixed(3)} Dinnar
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-red-600">
+                      <span>REMISE ({selectedQuote.remiseRate || 0}%):</span>
+                      <span>
+                        {(
+                          ((selectedQuote.montantRemise || 0) )
                         ).toFixed(3)} Dinnar
                       </span>
                     </div>
@@ -1953,13 +2024,22 @@ const GarageQuoteSystem = () => {
                       <span>Total TTC:</span>
                       <span>
                         {(
-                          (selectedQuote.totalHT || 0) +
+                          (selectedQuote.totalServicesHT || 0) +
                           (selectedQuote.maindoeuvre || 0) +
-                          ((selectedQuote.totalHT || 0) + (selectedQuote.maindoeuvre || 0)) *
-                          ((selectedQuote.tvaRate || 20) / 100)
+                          ((selectedQuote.montantTVA || 0)) 
                         ).toFixed(3)} Dinnar
                       </span>
                     </div>
+
+                    <div className="flex justify-between text-lg font-bold border-t pt-2 text-yellow-700">
+                      <span>Total TTC aprés remise :</span>
+                      <span>
+                        {(
+                          ((selectedQuote.totalTTC || 0) - ((selectedQuote.montantRemise || 0)) )
+                        ).toFixed(3)} Dinnar
+                      </span>
+                    </div>
+
                   </div>
                 </div>
               </div>

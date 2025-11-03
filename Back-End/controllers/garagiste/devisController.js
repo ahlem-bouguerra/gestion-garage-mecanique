@@ -5,7 +5,7 @@ export const createDevis = async (req, res) => {
   try {
     console.log('📥 Données reçues:', req.body);
 
-    const { clientId, clientName, vehicleInfo,vehiculeId, inspectionDate, services, tvaRate, maindoeuvre,estimatedTime } = req.body;
+    const { clientId, clientName, vehicleInfo,vehiculeId, inspectionDate, services,montantTVA,montantRemise, tvaRate,remiseRate, maindoeuvre,estimatedTime } = req.body;
 
     // ✅ CALCUL CORRECT DES TOTAUX
     // 1. Total des services (pièces seulement)
@@ -20,7 +20,9 @@ export const createDevis = async (req, res) => {
     const totalHT = totalServicesHT + (maindoeuvre || 0);
 
     // 3. Total TTC = Total HT + TVA
-    const totalTTC = totalHT * (1 + (tvaRate || 20) / 100);
+    const totalTTC = totalHT + montantTVA;
+
+    const finalTotalTTC = totalTTC - montantRemise;
 
     console.log('🔢 Calculs:');
     console.log('- Total services HT:', totalServicesHT);
@@ -28,6 +30,8 @@ export const createDevis = async (req, res) => {
     console.log('- Total HT:', totalHT);
     console.log('- Taux TVA:', tvaRate || 20, '%');
     console.log('- Total TTC:', totalTTC);
+    console.log('- Taux Remise:', remiseRate || 0, '%');
+    console.log('- Total TTC après remise:', finalTotalTTC);
 
     const devisId = await Devis.generateDevisId();
     console.log('✅ ID généré:', devisId);
@@ -44,6 +48,10 @@ export const createDevis = async (req, res) => {
       totalServicesHT: totalServicesHT,
       totalHT: totalHT, 
       totalTTC,
+      finalTotalTTC,
+      remiseRate: remiseRate || 0,
+      montantTVA : montantTVA || 0,
+      montantRemise : montantRemise  || 0,
       tvaRate: tvaRate || 20,
       maindoeuvre: maindoeuvre || 0,
       status: 'brouillon',
@@ -201,7 +209,7 @@ export const updateDevisStatus = async (req, res) => {
 export const updateDevis = async (req, res) => {
   try {
     const { id } = req.params;
-    const { clientId, clientName, vehicleInfo, inspectionDate, services, tvaRate, maindoeuvre ,estimatedTime} = req.body;
+    const { clientId, clientName, vehicleInfo, inspectionDate, services, tvaRate,remiseRate,montantTVA,montantRemise, maindoeuvre ,estimatedTime} = req.body;
 
     console.log('🔄 Mise à jour devis:', id);
     console.log('📥 Nouvelles données:', req.body);
@@ -224,13 +232,15 @@ export const updateDevis = async (req, res) => {
     });
 
     const totalHT = totalServicesHT + (maindoeuvre || 0);
-    const totalTTC = totalHT * (1 + (tvaRate || 20) / 100);
+    const totalTTC = totalHT + montantTVA;
+    const finalTotalTTC = totalTTC - montantRemise;
 
     console.log('🔢 Nouveaux calculs:');
     console.log('- Total services HT:', totalServicesHT);
     console.log('- Main d\'œuvre:', maindoeuvre || 0);
     console.log('- Total HT:', totalHT);
     console.log('- Total TTC:', totalTTC);
+    console.log('- Total TTC après remise:', finalTotalTTC);
 
     // Mettre à jour le devis
     const updatedDevis = await Devis.findOneAndUpdate(
@@ -244,7 +254,11 @@ export const updateDevis = async (req, res) => {
         totalServicesHT: totalServicesHT,
         totalHT: totalHT,
         totalTTC,
+        finalTotalTTC,
+        remiseRate: remiseRate || 0,
         tvaRate: tvaRate || 20,
+        montantRemise : montantRemise || 0,
+        montantTVA : montantTVA || 0,
         maindoeuvre: maindoeuvre || 0,
         status: 'brouillon', // ✅ Remettre en brouillon après modification
         estimatedTime,
@@ -300,11 +314,13 @@ export const updateFactureId = async (req, res) => {
       });
 
       const totalHT = totalServicesHT + (updateData.maindoeuvre || 0);
-      const totalTTC = totalHT * (1 + (updateData.tvaRate || 20) / 100);
+      const totalTTC = totalHT + montantTVA;
+      const finalTotalTTC = totalTTC - montantRemise;
 
       updateData.totalServicesHT = totalServicesHT;
       updateData.totalHT = totalHT;
       updateData.totalTTC = totalTTC;
+      updateData.finalTotalTTC = finalTotalTTC;
       updateData.status = 'brouillon';
     }
 

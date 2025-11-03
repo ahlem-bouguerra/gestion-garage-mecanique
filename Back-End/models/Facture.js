@@ -17,21 +17,21 @@ const factureSchema = new mongoose.Schema({
   },
 
   clientId: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'FicheClient',
-  required: true
-},
-realClientId: {  // ← NOUVEAU : vrai compte Client
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'Client',
-  required: false  // false car anciennes factures n'ont pas ça
-},
-clientInfo: {
-  nom: String,
-  telephone: String,
-  email: String,
-  adresse: String
-},
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'FicheClient',
+    required: true
+  },
+  realClientId: {  // ← NOUVEAU : vrai compte Client
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Client',
+    required: false  // false car anciennes factures n'ont pas ça
+  },
+  clientInfo: {
+    nom: String,
+    telephone: String,
+    email: String,
+    adresse: String
+  },
 
 
   // Informations véhicule
@@ -47,7 +47,7 @@ clientInfo: {
   },
   dueDate: {
     type: Date,
-    default: function() {
+    default: function () {
       return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // +30 jours
     }
   },
@@ -74,7 +74,7 @@ clientInfo: {
     },
     total: {
       type: Number,
-      default: function() {
+      default: function () {
         return this.quantity * this.unitPrice;
       }
     }
@@ -92,6 +92,21 @@ clientInfo: {
     min: 0,
     max: 100
   },
+  tvaRate: {
+    type: Number,
+    required: true,
+    default: 20,
+    min: 0,
+    max: 100
+  },
+  remiseRate: {
+    type: Number,
+    required: true,
+    default: 0,
+    min: 0,
+    max: 100
+  },
+
   totalHT: {
     type: Number,
     required: true,
@@ -102,16 +117,33 @@ clientInfo: {
     required: true,
     min: 0
   },
+  totalRemise: {
+    type: Number,
+    required: true,
+    default: 0,
+    min: 0,
+    comment: "Montant exact de remise appliquée"
+  },
   totalTTC: {
     type: Number,
     required: true,
     min: 0
   },
+  finalTotalTTC: {
+    type: Number,
+    required: true,
+    min: 0,
+    comment: "Total TTC final avec remise (services + main d'œuvre + TVA + remise)"
+  },
+  timbreFiscal: {
+    type: Number,
+    default: 1.000 // 1 dinar
+  },
 
   // Statut de paiement
   paymentStatus: {
     type: String,
-    enum: ['en_attente', 'partiellement_paye', 'paye', 'en_retard', 'annule','cancelled'],
+    enum: ['en_attente', 'partiellement_paye', 'paye', 'en_retard', 'annule', 'cancelled'],
     default: 'en_attente'
   },
 
@@ -161,7 +193,7 @@ clientInfo: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
-  
+
   createdAt: {
     type: Date,
     default: Date.now
@@ -170,12 +202,12 @@ clientInfo: {
     type: Date,
     default: Date.now
   },
-    status: {
+  status: {
     type: String,
     enum: ['active', 'cancelled'],
     default: 'active'
   },
-    // Référence à l'avoir qui annule cette facture (si applicable)
+  // Référence à l'avoir qui annule cette facture (si applicable)
   creditNoteId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'CreditNote'
@@ -226,55 +258,55 @@ factureSchema.statics.generateFactureId = async function () {
 
 
 // Méthodes statiques utiles
-factureSchema.statics.findByDevis = function(devisId) {
+factureSchema.statics.findByDevis = function (devisId) {
   return this.findOne({ devisId: devisId });
 };
 
-factureSchema.statics.findByClient = function(clientId, options = {}) {
+factureSchema.statics.findByClient = function (clientId, options = {}) {
   const query = this.find({ clientId: clientId });
-  
+
   if (options.paymentStatus) {
     query.where({ paymentStatus: options.paymentStatus });
   }
-  
+
   if (options.dateFrom) {
     query.where({ invoiceDate: { $gte: new Date(options.dateFrom) } });
   }
-  
+
   if (options.dateTo) {
     query.where({ invoiceDate: { $lte: new Date(options.dateTo) } });
   }
-  
+
   return query.sort({ invoiceDate: -1 });
 };
 
 // Méthodes d'instance
-factureSchema.methods.markAsPaid = function(newPaymentAmount, paymentMethod, paymentDate = new Date()) {
+factureSchema.methods.markAsPaid = function (newPaymentAmount, paymentMethod, paymentDate = new Date()) {
   // ACCUMULER les paiements, ne pas remplacer
   this.paymentAmount = (this.paymentAmount || 0) + parseFloat(newPaymentAmount);
   this.paymentMethod = paymentMethod;
   this.paymentDate = paymentDate;
-  
-  if (this.paymentAmount >= this.totalTTC) {
+
+  if (this.paymentAmount >= this.finalTotalTTC) {
     this.paymentStatus = 'paye';
   } else if (this.paymentAmount > 0) {
     this.paymentStatus = 'partiellement_paye';
   }
-  
+
   return this.save();
 };
-factureSchema.methods.isOverdue = function() {
+factureSchema.methods.isOverdue = function () {
   return new Date() > this.dueDate && this.paymentStatus !== 'paye';
 };
 
 
 
 // Middleware pour find, findOne, findOneAndUpdate
-factureSchema.pre(['find', 'findOne', 'findOneAndUpdate'], async function() {
+factureSchema.pre(['find', 'findOne', 'findOneAndUpdate'], async function () {
   try {
     const currentDate = new Date();
     await this.model.updateMany(
-      { 
+      {
         dueDate: { $lt: currentDate },
         paymentStatus: { $in: ['en_attente', 'partiellement_paye'] }
       },
@@ -286,13 +318,13 @@ factureSchema.pre(['find', 'findOne', 'findOneAndUpdate'], async function() {
 });
 
 // Middleware séparé pour aggregate
-factureSchema.pre('aggregate', async function() {
+factureSchema.pre('aggregate', async function () {
   try {
     const currentDate = new Date();
     const Facture = this.model(); // ✅ Différente façon d'accéder au modèle
-    
+
     await Facture.updateMany(
-      { 
+      {
         dueDate: { $lt: currentDate },
         paymentStatus: { $in: ['en_attente', 'partiellement_paye'] }
       },

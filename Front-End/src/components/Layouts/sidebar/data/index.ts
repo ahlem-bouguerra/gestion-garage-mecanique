@@ -55,7 +55,7 @@ export const NAV_DATA = [
         icon: Building,
         items: [
           {
-            title: "Mécaniciens | Ateliers | Services",
+            title: "Employés | Ateliers | Services",
             url: "/gestion-mecanicien",
             icon: Users,
           },
