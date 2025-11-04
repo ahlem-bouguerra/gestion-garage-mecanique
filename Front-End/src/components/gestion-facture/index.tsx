@@ -878,7 +878,7 @@ const GestionFactures: React.FC = () => {
                             REMISE ({factureDetails.remiseRate || 0}%):
                           </td>
                           <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
-                            {formatCurrency(factureDetails.totalRemise)}
+                            -{formatCurrency(factureDetails.totalRemise)}
                           </td>
                         </tr>
                       )}
@@ -937,17 +937,7 @@ const GestionFactures: React.FC = () => {
 
               {/* Statut et notes */}
               <div className="border-t border-gray-200 pt-6">
-                <div className="flex justify-between items-start">
-                  <div>
-
-                    {factureDetails.notes && (
-                      <div className="mt-4">
-                        <p className="text-sm font-medium text-gray-700">Notes:</p>
-                        <p className="text-sm text-gray-600 mt-1">{factureDetails.notes}</p>
-                      </div>
-                    )}
-                  </div>
-
+                <div className="flex justify-center items-start">
                   <div className="text-right text-xs text-gray-500">
                     <p>Merci pour votre confiance</p>
                   </div>
@@ -1083,13 +1073,76 @@ const GestionFactures: React.FC = () => {
             {/* Total de l'avoir */}
             <div className="border-t-2 border-red-300 pt-6 mb-6">
               <div className="flex justify-end">
-                <div className="w-64 bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex justify-between items-center text-xl font-bold text-red-600">
-                    <span>MONTANT DE L'AVOIR:</span>
-                    <span>-{formatCurrency(Math.abs(creditNoteDetails.finalTotalTTC))}</span>
+                <div className="w-100 bg-red-50 border border-red-200 rounded-lg p-4">
+
+                  <div className="flex justify-end mb-8">
+                    <div className="w-100">
+                      <table className="w-full">
+                        <tbody>
+                          {creditNoteDetails.totalHT && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b">
+                                TOTAL HT:
+                              </td>
+                              <td className="px-4 py-2 text-right border-b">
+                                {formatCurrency(creditNoteDetails.totalHT)}
+                              </td>
+                            </tr>
+                          )}
+                          {creditNoteDetails.totalTVA && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b">
+                                TVA ({creditNoteDetails.tvaRate || 20}%):
+                              </td>
+                              <td className="px-4 py-2 text-right border-b">
+                                {formatCurrency(creditNoteDetails.totalTVA)}
+                              </td>
+                            </tr>
+                          )}
+                          {creditNoteDetails.totalRemise !== undefined && creditNoteDetails.totalRemise !== null && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                                REMISE:
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                                -{formatCurrency(creditNoteDetails.totalRemise)}
+                              </td>
+                            </tr>
+                          )}
+                          <tr className="bg-gray-100">
+                            <td className="px-4 py-3 text-right text-lg font-bold">
+                              TOTAL TTC:
+                            </td>
+                            <td className="px-4 py-3 text-right text-lg font-bold text-red-600">
+                              {formatCurrency(creditNoteDetails.totalTTC)}
+                            </td>
+                          </tr>
+
+
+                          {creditNoteDetails.timbreFiscal && creditNoteDetails.timbreFiscal > 0 && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                                Timbre fiscal:
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                                {formatCurrency(creditNoteDetails.timbreFiscal)}
+                              </td>
+                            </tr>
+                          )}
+                          <tr className="bg-gray-100">
+                            <td className="px-4 py-3 text-right text-lg font-bold text-gray-800">
+                              TOTAL TTC avec remise :
+                            </td>
+                            <td className="px-4 py-3 text-right text-lg font-bold text-red-600">
+                              {formatCurrency(creditNoteDetails.finalTotalTTC)}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <p className="text-xs text-red-500 mt-2 text-center">
-                    Ce montant annule la facture originale
+                  <p className="text-s text-red-500 mt-2 text-center">
+                    Ce montant annulé est de la facture originale
                   </p>
                 </div>
               </div>

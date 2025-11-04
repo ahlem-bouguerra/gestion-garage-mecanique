@@ -214,11 +214,17 @@ export const GetFactureById = async (req, res) => {
 
 export const getFactureByDevis = async (req, res) => {
   try {
-    // ✅ Chercher seulement les factures actives (pas annulées)
+    // ✅ Vérification de sécurité
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ 
+        message: "Utilisateur non authentifié" 
+      });
+    }
+
     const facture = await Facture.findOne({ 
       garagisteId: req.user._id,
       devisId: req.params.devisId,
-      status: 'active' // ✅ Exclut les factures annulées
+      status: 'active'
     }).populate("devisId");
     
     if (!facture) {
@@ -233,7 +239,6 @@ export const getFactureByDevis = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
 export const MarquerFacturePayed = async (req, res) => {
   try {
     const { id } = req.params;
@@ -493,6 +498,7 @@ export const CreateFactureWithCredit = async (req, res) => {
   try {
     const { devisId } = req.params;
     const { createCreditNote = false } = req.body;
+    const timbreFiscal = 1.000;
 
     // Validation de l'ObjectId
     if (!mongoose.Types.ObjectId.isValid(devisId)) {
@@ -527,9 +533,6 @@ export const CreateFactureWithCredit = async (req, res) => {
     if (existingFacture && createCreditNote) {
       // Générer le numéro d'avoir
       const creditNumber = await CreditNote.generateCreditNumber();
-
-      const timbreFiscal = 1.000;
-      const finalTotalTTCAvecTimbre = (devis.finalTotalTTC || 0) + timbreFiscal;
       
       // Créer l'avoir
       creditNote = new CreditNote({
@@ -548,8 +551,8 @@ export const CreateFactureWithCredit = async (req, res) => {
         tvaRate: existingFacture.tvaRate,
         remiseRate: existingFacture.remiseRate,
         totalRemise: existingFacture.totalRemise,
-        timbreFiscal: timbreFiscal,
-        finalTotalTTC: finalTotalTTCAvecTimbre,
+        timbreFiscal: existingFacture.timbreFiscal || timbreFiscal, // ✅ Prendre celui de la facture
+        finalTotalTTC: existingFacture.finalTotalTTC,
         totalHT: existingFacture.totalHT,
         totalTVA: existingFacture.totalTVA,
         totalTTC: existingFacture.totalTTC,
@@ -581,7 +584,8 @@ export const CreateFactureWithCredit = async (req, res) => {
     const totalTVA = totalHT * ((devis.tvaRate || 20) / 100);
     const totalTTC = totalHT + totalTVA;
      const totalRemise = totalTTC * ((devis.remiseRate || 0) / 100);
-    const finalTotalTTC = totalTTC - totalRemise;
+
+    const finalTotalTTC = (totalTTC - totalRemise) + timbreFiscal;
 
     // 5. Créer la nouvelle facture
     const numeroFacture = await Facture.generateFactureId();
@@ -607,7 +611,8 @@ export const CreateFactureWithCredit = async (req, res) => {
       totalHT: totalHT,
       totalTVA: totalTVA,
       totalRemise: totalRemise,
-      finalTotalTTC: finalTotalTTC,
+      timbreFiscal: timbreFiscal, // ✅ Ajoutez explicitement
+      finalTotalTTC: finalTotalTTC, 
       totalTTC: totalTTC,
       remiseRate: devis.remiseRate,
       estimatedTime: devis.estimatedTime,

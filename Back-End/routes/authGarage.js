@@ -339,7 +339,7 @@ router.post('/create/:devisId', authMiddleware, CreateFacture);
 router.post('/create-with-credit/:devisId', authMiddleware, CreateFactureWithCredit);
 router.get('/getFactures', authMiddleware, GetAllFactures);
 router.get('/getFacture/:id', authMiddleware, GetFactureById);
-router.get('/factureByDevis/:devisId', authMiddleware, getFactureByDevis);
+router.get('/factureByDevis/:devisId',authMiddleware, getFactureByDevis);
 router.put('/:id/payment', authMiddleware, MarquerFacturePayed);
 router.put('/:id', authMiddleware, UpdateFacture);
 router.delete('/:id', authMiddleware, DeleteFacture);

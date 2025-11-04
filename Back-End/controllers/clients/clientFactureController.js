@@ -43,7 +43,7 @@ export const getClientFactures = async (req, res) => {
 
     // ✅ Récupérer les factures directement
     const factures = await Facture.find(query)
-      .select('numeroFacture clientInfo vehicleInfo totalTTC paymentAmount paymentStatus invoiceDate creditNoteId dueDate garagisteId devisId')
+      .select('numeroFacture clientInfo vehicleInfo totalTTC finalTotalTTC paymentAmount paymentStatus invoiceDate creditNoteId dueDate garagisteId devisId')
       .populate('garagisteId', 'username email phone streetAddress cityName governorateName')
       .populate('devisId', '_id status createdAt')
       .populate('realClientId', 'email phone')
@@ -369,12 +369,12 @@ export const GetClientFactureStats = async (req, res) => {
         $group: {
           _id: null,
           totalFactures: { $sum: 1 },
-          totalTTC: { $sum: '$totalTTC' },
+          finalTotalTTC: { $sum: '$finalTotalTTC' },
           totalPaye: {
             $sum: {
               $cond: [
                 { $eq: ['$paymentStatus', 'paye'] },
-                '$totalTTC',
+                '$finalTotalTTC',
                 0
               ]
             }
@@ -430,7 +430,7 @@ export const GetClientFactureStats = async (req, res) => {
 
     const result = stats[0] || {
       totalFactures: 0,
-      totalTTC: 0,
+      finalTotalTTC: 0,
       totalPaye: 0,
       totalPayePartiel: 0,
       facturesPayees: 0,
@@ -440,9 +440,9 @@ export const GetClientFactureStats = async (req, res) => {
     };
 
     result.totalEncaisse = result.totalPaye + result.totalPayePartiel;
-    result.totalImpaye = result.totalTTC - result.totalEncaisse;
-    result.tauxPaiement = result.totalTTC > 0 
-      ? ((result.totalEncaisse / result.totalTTC) * 100).toFixed(2) 
+    result.totalImpaye = result.finalTotalTTC - result.totalEncaisse;
+    result.tauxPaiement = result.finalTotalTTC > 0 
+      ? ((result.totalEncaisse / result.finalTotalTTC) * 100).toFixed(2) 
       : 0;
 
     console.log('✅ Stats calculées:', result);
@@ -467,7 +467,7 @@ export const getClientCreditNoteById = async (req, res) => {
   try {
     const { creditNoteId } = req.params;
     console.log('🔍 Recherche avoir ID:', creditNoteId);
-    console.log('👤 User ID:', req.client._id);
+    console.log('👤 Client ID:', req.client._id);
     
     if (!mongoose.Types.ObjectId.isValid(creditNoteId)) {
       return res.status(400).json({
@@ -477,7 +477,8 @@ export const getClientCreditNoteById = async (req, res) => {
     }
     
     const creditNote = await CreditNote.findById(creditNoteId)
-      .populate('originalFactureId', 'numeroFacture realClientId');
+      .populate('originalFactureId', 'numeroFacture realClientId')
+      .populate('clientId', 'nom email telephone adresse'); 
 
     if (!creditNote) {
       console.log('❌ Avoir non trouvé');

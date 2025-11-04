@@ -19,10 +19,9 @@ interface CreditNoteDetails {
   reason: string;
   clientInfo: {
     nom: string;
-    telephone?: string;
-    email?: string;
   };
-  clientId?: {
+  clientId: {
+    nom: string;
     telephone: string;
     email: string;
   };
@@ -33,8 +32,15 @@ interface CreditNoteDetails {
     unitPrice: number;
     total: number;
   }>;
+  finalTotalTTC: number;
   totalTTC: number;
-  maindoeuvre?: number;
+  totalHT: number;  
+  totalTVA: number;
+  tvaRate: number;
+  totalRemise: number;
+  remiseRate: number;
+  maindoeuvre: number;
+  timbreFiscal: number;
 }
 
 interface FactureDetails {
@@ -44,20 +50,25 @@ interface FactureDetails {
   clientInfo: {
     nom: string;
   };
-  realClientId:{
+  realClientId: {
+    username: string;
     email: string;
     phone: string;
   };
   vehicleInfo: string;
+  finalTotalTTC: number;
   totalTTC: number;
-  totalHT?: number;
-  totalTVA?: number;
-  tvaRate?: number;
+  totalHT: number;
+  totalTVA: number;
+  totalRemise: number;
+  tvaRate: number;
+  remiseRate: number;
+  timbreFiscal: number;
   paymentStatus: 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye' | 'annule';
   invoiceDate: string;
   dueDate: string;
-  paymentAmount?: number;
-  services?: Array<{
+  paymentAmount: number;
+  services: Array<{
     name: string;
     description: string;
     piece: string;
@@ -65,15 +76,15 @@ interface FactureDetails {
     unitPrice: number;
     total: number;
   }>;
-  maindoeuvre?: number;
-  notes?: string;
-  creditNoteId?: string;
-  status?: 'active' | 'cancelled';
+  maindoeuvre: number;
+  notes: string;
+  creditNoteId: string;
+  status: 'active' | 'cancelled';
 }
 
 interface Stats {
   totalFactures: number;
-  totalTTC: number;
+  finalTotalTTC: number;
   totalPaye: number;
   totalImpaye: number;
   facturesEnRetard: number;
@@ -82,9 +93,10 @@ interface Stats {
 const ClientFactures: React.FC = () => {
   const [factures, setFactures] = useState<FactureDetails[]>([]);
   const [filteredFactures, setFilteredFactures] = useState<FactureDetails[]>([]);
+  const [loadingFactureId, setLoadingFactureId] = useState<string | null>(null);
   const [stats, setStats] = useState<Stats>({
     totalFactures: 0,
-    totalTTC: 0,
+    finalTotalTTC: 0,
     totalPaye: 0,
     totalImpaye: 0,
     facturesEnRetard: 0
@@ -112,12 +124,12 @@ const ClientFactures: React.FC = () => {
     const header = document.querySelector('header');
     if (!header) return;
 
-    if (selectedFacture || showDetailsModal  || creditNoteDetails) {
+    if (selectedFacture || showDetailsModal || creditNoteDetails) {
       header.classList.add("hidden");
     } else {
       header.classList.remove("hidden");
     }
-  }, [selectedFacture, showDetailsModal,creditNoteDetails]);
+  }, [selectedFacture, showDetailsModal, creditNoteDetails]);
 
   const fetchFactures = async () => {
     try {
@@ -135,39 +147,58 @@ const ClientFactures: React.FC = () => {
     }
   };
 
+  const fetchFactureDetails = async (factureId: string) => {
+    setLoadingFactureId(factureId);
+    try {
+      const response = await axios.get(`http://localhost:5000/api/client/factures/${factureId}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
+      const data = response.data;
+      if (data.success) {
+        setSelectedFacture(data.data);
+        setShowDetailsModal(true);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des détails:', error);
+    } finally {
+      setLoadingFactureId(null);
+
+    }
+  };
+
   const fetchCreditNoteDetails = async (creditNoteId: string) => {
-  try {
-    console.log('🚀 Appel API pour ID:', creditNoteId);
-    console.log('🔑 Token:', getAuthToken());
-    
-    const response = await axios.get(`http://localhost:5000/api/client/credit-note/${creditNoteId}`, {
-      headers: { Authorization: `Bearer ${getAuthToken()}` }
-    });
-    
-    const data = response.data;
-    if (data.success) {
-      setCreditNoteDetails(data.data);
-      setShowCreditNoteModal(true);
+    try {
+      console.log('🚀 Appel API pour ID:', creditNoteId);
+      console.log('🔑 Token:', getAuthToken());
+
+      const response = await axios.get(`http://localhost:5000/api/client/credit-note/${creditNoteId}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      });
+
+      const data = response.data;
+      if (data.success) {
+        setCreditNoteDetails(data.data);
+        setShowCreditNoteModal(true);
+      }
+    } catch (error: any) {
+      console.error('❌ Erreur détaillée:', {
+        status: error.response?.status,
+        message: error.response?.data?.message,
+        url: error.config?.url,
+        data: error.response?.data
+      });
+
+      if (error.response?.status === 404) {
+        alert('Avoir non trouvé ou vous n\'avez pas les droits d\'accès');
+      } else if (error.response?.status === 401) {
+        alert('❌ Session expirée. Veuillez vous reconnecter.');
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      } else {
+        alert('Erreur lors de la récupération de l\'avoir');
+      }
     }
-  } catch (error: any) {
-    console.error('❌ Erreur détaillée:', {
-      status: error.response?.status,
-      message: error.response?.data?.message,
-      url: error.config?.url,
-      data: error.response?.data
-    });
-    
-    if (error.response?.status === 404) {
-      alert('Avoir non trouvé ou vous n\'avez pas les droits d\'accès');
-    } else if (error.response?.status === 401) {
-      alert('❌ Session expirée. Veuillez vous reconnecter.');
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    } else {
-      alert('Erreur lors de la récupération de l\'avoir');
-    }
-  }
-};
+  };
 
   const fetchStats = async () => {
     try {
@@ -185,20 +216,20 @@ const ClientFactures: React.FC = () => {
   const handlePayment = async (factureId: string, paymentData: any) => {
     try {
       const token = getAuthToken();
-      
+
       if (!token) {
         alert('❌ Erreur: Session expirée. Veuillez vous reconnecter.');
         window.location.href = '/login';
         return;
       }
-      
+
       console.log('🔍 Tentative paiement client pour facture:', factureId);
-      
+
       const response = await axios.post(
         `http://localhost:5000/api/client/factures/${factureId}/payment`,
         paymentData,
         {
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           }
@@ -213,18 +244,18 @@ const ClientFactures: React.FC = () => {
       }
     } catch (error: any) {
       console.error('❌ Erreur lors du paiement:', error);
-      
+
       if (error.response?.status === 401) {
         alert('❌ Session expirée. Veuillez vous reconnecter.');
         localStorage.removeItem('token');
         window.location.href = '/login';
         return;
       }
-      
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error || 
-                          'Erreur de connexion au serveur';
-      
+
+      const errorMessage = error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Erreur de connexion au serveur';
+
       alert('❌ Erreur lors du paiement: ' + errorMessage);
     }
   };
@@ -412,23 +443,22 @@ const ClientFactures: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {currentFactures.map((facture) => (
                 <tr
-  key={facture._id}
-  className={`hover:bg-gray-50 ${
-    facture.status === 'cancelled'
-      ? 'bg-gray-100 opacity-70 cursor-not-allowed'
-      : facture.paymentStatus === 'en_retard'
-      ? 'bg-red-50 border-l-4 border-red-500'
-      : ''
-  }`}
->
-                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-  {facture.numeroFacture.toString().padStart(4, '0')}
-  {facture.status === 'cancelled' && (
-    <span className="ml-2 px-2 py-1 text-xs bg-red-100 text-red-700 rounded border border-red-300">
-      ❌ ANNULÉE
-    </span>
-  )}
-</td>
+                  key={facture._id}
+                  className={`hover:bg-gray-50 ${facture.status === 'cancelled'
+                      ? 'bg-gray-100 opacity-70 cursor-not-allowed'
+                      : facture.paymentStatus === 'en_retard'
+                        ? 'bg-red-50 border-l-4 border-red-500'
+                        : ''
+                    }`}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {facture.numeroFacture.toString().padStart(4, '0')}
+                    {facture.status === 'cancelled' && (
+                      <span className="ml-2 px-2 py-1 text-xs bg-red-100 text-red-700 rounded border border-red-300">
+                        ❌ ANNULÉE
+                      </span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">
@@ -445,7 +475,7 @@ const ClientFactures: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-gray-900">
-                        {formatCurrency(facture.totalTTC)}
+                        {formatCurrency(facture.finalTotalTTC)}
                       </p>
                       {facture.paymentAmount > 0 && (
                         <p className="text-xs text-blue-600">
@@ -454,7 +484,7 @@ const ClientFactures: React.FC = () => {
                       )}
                       {facture.paymentStatus === 'partiellement_paye' && (
                         <p className="text-xs text-red-600 font-medium">
-                          Reste: {formatCurrency(facture.totalTTC - (facture.paymentAmount || 0))}
+                          Reste: {formatCurrency(facture.finalTotalTTC - (facture.paymentAmount || 0))}
                         </p>
                       )}
                     </div>
@@ -466,30 +496,27 @@ const ClientFactures: React.FC = () => {
                     {getStatusBadge(facture.paymentStatus)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-  {facture.creditNoteId ? (
-    <button 
-      onClick={() => fetchCreditNoteDetails(facture.creditNoteId)}
-      className="text-red-600 hover:text-red-800 underline text-xs"
-    >
-      📄 Voir avoir
-    </button>
-  ) : (
-    <span className="text-gray-400 text-xs">-</span>
-  )}
-</td>
+                    {facture.creditNoteId ? (
+                      <button
+                        onClick={() => fetchCreditNoteDetails(facture.creditNoteId)}
+                        className="text-red-600 hover:text-red-800 underline text-xs"
+                      >
+                        📄 Voir avoir
+                      </button>
+                    ) : (
+                      <span className="text-gray-400 text-xs">-</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => {
-                          setSelectedFacture(facture);
-                          setShowDetailsModal(true);
-                        }}
-                      
-                        className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
+                        onClick={() => fetchFactureDetails(facture._id)}
+                        disabled={loadingFactureId === facture._id || facture.paymentStatus === "annulee"}
+                        className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Voir
+                        {loadingFactureId === facture._id ? "Chargement..." : "Voir"}
                       </button>
-                      
+
                     </div>
                   </td>
                 </tr>
@@ -537,8 +564,7 @@ const ClientFactures: React.FC = () => {
                       {selectedFacture.garagisteId?.username || 'Garage'}
                     </h1>
                     <div className="mt-2 text-gray-600">
-                      <p>{selectedFacture.garagisteId?.governorateName} - {selectedFacture.garagisteId?.cityName}</p>
-                      <p>{selectedFacture.garagisteId?.streetAddress}</p>
+                      <p>{selectedFacture.garagisteId?.governorateName} - {selectedFacture.garagisteId?.cityName}-{selectedFacture.garagisteId?.streetAddress}</p>
                       <p>Tél: {selectedFacture.garagisteId?.phone}</p>
                       <p>Email: {selectedFacture.garagisteId?.email}</p>
                     </div>
@@ -559,7 +585,7 @@ const ClientFactures: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">
-                    CLIENT
+                    FACTURÉ À
                   </h3>
                   <div className="space-y-1 text-gray-700">
                     <p className="font-medium text-lg">{selectedFacture.clientInfo.nom}</p>
@@ -584,16 +610,16 @@ const ClientFactures: React.FC = () => {
                   <table className="w-full border-collapse border border-gray-300">
                     <thead>
                       <tr className="bg-gray-100">
-                        <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold">
+                        <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-800">
                           DESCRIPTION
                         </th>
-                        <th className="border border-gray-300 px-4 py-3 text-center text-sm font-semibold">
+                        <th className="border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-800">
                           QTÉ
                         </th>
-                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold">
+                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold text-gray-800">
                           PRIX UNITAIRE
                         </th>
-                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold">
+                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold text-gray-800">
                           TOTAL
                         </th>
                       </tr>
@@ -602,26 +628,29 @@ const ClientFactures: React.FC = () => {
                       {selectedFacture.services.map((service, index) => (
                         <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                           <td className="border border-gray-300 px-4 py-3">
-                            <p className="font-medium">{service.piece}</p>
-                            {service.description && (
-                              <p className="text-xs text-gray-500">{service.description}</p>
-                            )}
+                            <div>
+                              <p className="font-medium text-gray-900">{service.piece}</p>
+                              {service && (
+                                <p className="text-xs text-gray-500">{service.description}</p>
+                              )}
+                            </div>
                           </td>
-                          <td className="border border-gray-300 px-4 py-3 text-center">
+                          <td className="border border-gray-300 px-4 py-3 text-center text-gray-900">
                             {service.quantity}
                           </td>
-                          <td className="border border-gray-300 px-4 py-3 text-right">
+                          <td className="border border-gray-300 px-4 py-3 text-right text-gray-900">
                             {formatCurrency(service.unitPrice)}
                           </td>
-                          <td className="border border-gray-300 px-4 py-3 text-right font-medium">
+                          <td className="border border-gray-300 px-4 py-3 text-right font-medium text-gray-900">
                             {formatCurrency(service.total)}
                           </td>
                         </tr>
                       ))}
 
+                      {/* Ligne main d'œuvre si présente */}
                       {selectedFacture.maindoeuvre && selectedFacture.maindoeuvre > 0 && (
                         <tr className="bg-blue-50">
-                          <td className="border border-gray-300 px-4 py-3 font-medium">
+                          <td className="border border-gray-300 px-4 py-3 font-medium text-gray-900">
                             Main d'œuvre
                           </td>
                           <td className="border border-gray-300 px-4 py-3 text-center">1</td>
@@ -640,7 +669,7 @@ const ClientFactures: React.FC = () => {
 
               {/* Totaux */}
               <div className="flex justify-end mb-8">
-                <div className="w-64">
+                <div className="w-100">
                   <table className="w-full">
                     <tbody>
                       {selectedFacture.totalHT && (
@@ -663,6 +692,16 @@ const ClientFactures: React.FC = () => {
                           </td>
                         </tr>
                       )}
+                      {selectedFacture.totalRemise !== undefined && selectedFacture.totalRemise !== null && (
+                        <tr>
+                          <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                            REMISE ({selectedFacture.remiseRate || 0}%):
+                          </td>
+                          <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                            -{formatCurrency(selectedFacture.totalRemise)}
+                          </td>
+                        </tr>
+                      )}
                       <tr className="bg-gray-100">
                         <td className="px-4 py-3 text-right text-lg font-bold">
                           TOTAL TTC:
@@ -671,6 +710,28 @@ const ClientFactures: React.FC = () => {
                           {formatCurrency(selectedFacture.totalTTC)}
                         </td>
                       </tr>
+
+
+                      {selectedFacture.timbreFiscal && selectedFacture.timbreFiscal > 0 && (
+                        <tr>
+                          <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                            Timbre fiscal:
+                          </td>
+                          <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                            {formatCurrency(selectedFacture.timbreFiscal)}
+                          </td>
+                        </tr>
+                      )}
+                      <tr className="bg-gray-100">
+                        <td className="px-4 py-3 text-right text-lg font-bold text-gray-800">
+                          TOTAL TTC avec remise :
+                        </td>
+                        <td className="px-4 py-3 text-right text-lg font-bold text-green-600">
+                          {formatCurrency(selectedFacture.finalTotalTTC)}
+                        </td>
+                      </tr>
+
+
                       {selectedFacture.paymentAmount > 0 && (
                         <>
                           <tr>
@@ -687,7 +748,7 @@ const ClientFactures: React.FC = () => {
                                 RESTE À PAYER:
                               </td>
                               <td className="px-4 py-3 text-right font-bold text-red-700">
-                                {formatCurrency(selectedFacture.totalTTC - selectedFacture.paymentAmount)}
+                                {formatCurrency(selectedFacture.finalTotalTTC - selectedFacture.paymentAmount)}
                               </td>
                             </tr>
                           )}
@@ -696,6 +757,14 @@ const ClientFactures: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+              </div>
+              <div className="border-t border-gray-200 pt-6">
+                <div className="flex  justify-center items-start">
+                  <div className="text-center text-xs text-gray-500">
+                    <p>Merci pour votre confiance</p>
+                  </div>
+                </div>
+
               </div>
 
               {selectedFacture.notes && (
@@ -761,11 +830,11 @@ const ClientFactures: React.FC = () => {
               <div>
                 <h4 className="font-semibold text-gray-800 mb-3">Client</h4>
                 <div className="space-y-1 text-sm text-gray-700">
-                  <p className="font-medium">{creditNoteDetails.clientInfo.nom}</p>
-                  <p>Tél: {creditNoteDetails.realClientId?.phone}</p>
-                  <p>Email: {creditNoteDetails.realClientId?.email}</p>
+                  <p className="font-medium">{creditNoteDetails.clientId.nom}</p>
+                  <p>Tél: {creditNoteDetails.clientId?.telephone}</p>
+                  <p>Email: {creditNoteDetails.clientId?.email}</p>
                 </div>
-                
+
                 <h4 className="font-semibold text-gray-800 mb-2 mt-4">Véhicule</h4>
                 <p className="text-sm text-gray-700">{creditNoteDetails.vehicleInfo}</p>
               </div>
@@ -815,13 +884,76 @@ const ClientFactures: React.FC = () => {
             {/* Total de l'avoir */}
             <div className="border-t-2 border-red-300 pt-6 mb-6">
               <div className="flex justify-end">
-                <div className="w-64 bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex justify-between items-center text-xl font-bold text-red-600">
-                    <span>MONTANT DE L'AVOIR:</span>
-                    <span>-{formatCurrency(Math.abs(creditNoteDetails.totalTTC))}</span>
+                <div className="w-100 bg-red-50 border border-red-200 rounded-lg p-4">
+
+                  <div className="flex justify-end mb-8">
+                    <div className="w-100">
+                      <table className="w-full">
+                        <tbody>
+                          {creditNoteDetails.totalHT && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b">
+                                TOTAL HT:
+                              </td>
+                              <td className="px-4 py-2 text-right border-b">
+                                {formatCurrency(creditNoteDetails.totalHT)}
+                              </td>
+                            </tr>
+                          )}
+                          {creditNoteDetails.totalTVA && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b">
+                                TVA ({creditNoteDetails.tvaRate || 20}%):
+                              </td>
+                              <td className="px-4 py-2 text-right border-b">
+                                {formatCurrency(creditNoteDetails.totalTVA)}
+                              </td>
+                            </tr>
+                          )}
+                          {creditNoteDetails.totalRemise !== undefined && creditNoteDetails.totalRemise !== null && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                                REMISE:
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                                -{formatCurrency(creditNoteDetails.totalRemise)}
+                              </td>
+                            </tr>
+                          )}
+                          <tr className="bg-gray-100">
+                            <td className="px-4 py-3 text-right text-lg font-bold">
+                              TOTAL TTC:
+                            </td>
+                            <td className="px-4 py-3 text-right text-lg font-bold text-red-600">
+                              {formatCurrency(creditNoteDetails.totalTTC)}
+                            </td>
+                          </tr>
+
+
+                          {creditNoteDetails.timbreFiscal && creditNoteDetails.timbreFiscal > 0 && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                                Timbre fiscal:
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                                {formatCurrency(creditNoteDetails.timbreFiscal)}
+                              </td>
+                            </tr>
+                          )}
+                          <tr className="bg-gray-100">
+                            <td className="px-4 py-3 text-right text-lg font-bold text-gray-800">
+                              TOTAL TTC avec remise :
+                            </td>
+                            <td className="px-4 py-3 text-right text-lg font-bold text-red-600">
+                              {formatCurrency(creditNoteDetails.finalTotalTTC)}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <p className="text-xs text-red-500 mt-2 text-center">
-                    Ce montant annule la facture originale
+                  <p className="text-s text-red-500 mt-2 text-center">
+                    Ce montant annulé est de la facture originale
                   </p>
                 </div>
               </div>
@@ -830,7 +962,7 @@ const ClientFactures: React.FC = () => {
             {/* Note légale */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
               <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> Cet avoir annule définitivement la facture N° {creditNoteDetails.originalFactureNumber}. 
+                <strong>Note:</strong> Cet avoir annule définitivement la facture N° {creditNoteDetails.originalFactureNumber}.
                 Il doit être conservé pour la comptabilité et peut servir de justificatif pour tout remboursement.
               </p>
             </div>

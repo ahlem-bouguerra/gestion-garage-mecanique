@@ -39,7 +39,7 @@ const ClientDevisPage = () => {
   };
 
 
-    useEffect(() => {
+  useEffect(() => {
     const header = document.querySelector('header');
     if (!header) return;
 
@@ -111,8 +111,8 @@ const ClientDevisPage = () => {
   }, []);
 
   // Filtrer les devis
-  const filteredDevis = filter === 'tous' 
-    ? devis 
+  const filteredDevis = filter === 'tous'
+    ? devis
     : devis.filter(d => d.status === filter);
 
   return (
@@ -193,11 +193,10 @@ const ClientDevisPage = () => {
               <button
                 key={status}
                 onClick={() => setFilter(status)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filter === status
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === status
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {status === 'tous' ? 'Tous' : statusLabels[status]}
               </button>
@@ -233,6 +232,7 @@ const ClientDevisPage = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Véhicule</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant TTC</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant TTC aprés remise</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                   </tr>
@@ -262,6 +262,9 @@ const ClientDevisPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {d.totalTTC?.toFixed(3) || '0.000'} DT
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {d.finalTotalTTC?.toFixed(3) || '0.000'} DT
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[d.status]}`}>
@@ -349,12 +352,44 @@ const ClientDevisPage = () => {
                 </div>
 
                 {/* Totaux */}
-                <div className="bg-gray-50 rounded-lg p-4">
+                {/* Summary */}
+                <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Récapitulatif</h3>
                   <div className="space-y-2">
-                    <div className="flex justify-between"><span>Total HT:</span><span>{selectedDevis.totalHT?.toFixed(3)} DT</span></div>
-                    <div className="flex justify-between"><span>Main d'œuvre:</span><span>{selectedDevis.maindoeuvre?.toFixed(3)} DT</span></div>
-                    <div className="flex justify-between"><span>TVA ({selectedDevis.tvaRate}%):</span><span>{((selectedDevis.totalHT + selectedDevis.maindoeuvre) * (selectedDevis.tvaRate / 100)).toFixed(3)} DT</span></div>
-                    <div className="flex justify-between text-lg font-bold border-t pt-2"><span>Total TTC:</span><span>{selectedDevis.totalTTC?.toFixed(3)} DT</span></div>
+                    <div className="flex justify-between">
+                      <span>Total pièces HT:</span>
+                      <span className="font-medium"> { selectedDevis.totalServicesHT?.toFixed(3) }Dinnar</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Main d'œuvre:</span>
+                      <span className="font-medium">{ selectedDevis.maindoeuvre?.toFixed(3) } Dinnar</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total HT:</span>
+                      <span className="font-medium">{ selectedDevis.totalHT?.toFixed(3) } Dinnar</span>
+                    </div>
+
+                    <div className="flex justify-between  text-blue-700">
+                      <span>TVA ({ selectedDevis.tvaRate}%)::</span> {/* ✅ Affiche le taux dynamique */}
+                      <span className="font-medium">{ selectedDevis.montantTVA?.toFixed(3) } Dinnar</span>
+                    </div>
+
+                    <div className="flex justify-between  text-red-700">
+                      <span>Remise ({ selectedDevis.remiseRate}%):</span> {/* ✅ Affiche le taux dynamique */}
+                      <span className="font-medium">-{ selectedDevis.montantRemise?.toFixed(3) } Dinnar</span>
+                    </div>
+
+                    <div className="flex justify-between text-lg font-bold border-t pt-2  text-green-700">
+                      <span>Total TTC:</span>
+                      <span>{selectedDevis.totalTTC?.toFixed(3) } Dinnar</span>
+                    </div>
+
+
+                    <div className="flex justify-between text-lg font-bold border-t pt-2  text-yellow-700">
+                      <span>Total TTC avec remise :</span>
+                      <span>{ selectedDevis.finalTotalTTC?.toFixed(3) } Dinnar</span>
+                    </div>
+
                   </div>
                 </div>
               </div>
