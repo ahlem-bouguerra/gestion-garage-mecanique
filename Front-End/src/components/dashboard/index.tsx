@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import KPIGrid from './components/KPIGrid';
 import DashboardFilters from './components/DashboardFilters';
 import StatusPieChart from './components/StatusPieChart';
-
+import { ChargeMensuelle } from "./charts/charge-mensuelle"
 interface DashboardData {
   periode: 'jour' | 'semaine' | 'mois';
   date?: string;
@@ -108,6 +108,7 @@ const Dashboard: React.FC = () => {
               date={data.date}
             />
             <StatusPieChart statistiques={data.statistiques} />
+            <ChargeMensuelle atelierId={atelierId} className="mb-6" />
             
             {/* Affichage conditionnel pour les données du jour */}
             {periode === 'jour' && (

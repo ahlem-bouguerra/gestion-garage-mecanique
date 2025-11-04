@@ -19,7 +19,7 @@ import { getAllServices, getServiceById, createService, updateService, deleteSer
 import { createOrdreTravail, getOrdresTravail, getOrdreTravailById, updateStatusOrdreTravail, demarrerOrdre, terminerOrdre, getStatistiques, supprimerOrdreTravail, getOrdresParDevisId, getOrdresByStatus, getOrdresSupprimes, getOrdresByAtelier, updateOrdreTravail } from '../controllers/garagiste/ordreController.js';
 import { CreateFacture, CreateFactureWithCredit, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture, getCreditNoteById } from '../controllers/garagiste/facturesController.js';
 import { getCarnetByVehiculeId, creerCarnetManuel } from '../controllers/garagiste/carnetController.js';
-import { getDashboardData } from '../controllers/garagiste/ChargeAtelier.js';
+import { getDashboardData ,getChargeMensuelle} from '../controllers/garagiste/ChargeAtelier.js';
 import { search } from '../controllers/clients/ChercherGarage.js';
 import { getReservations, updateReservation } from '../controllers/garagiste/gererReservation.js';
 
@@ -352,6 +352,7 @@ router.post('/creer-manuel', authMiddleware, creerCarnetManuel);
 
 // ========== DASHBOARD ==========
 router.get('/dashboard/charge-atelier', getDashboardData);
+router.get('/dashboard/charge-mensuelle', authMiddleware, getChargeMensuelle);
 
 // ========== SEARCH ==========
 router.get('/search', search);

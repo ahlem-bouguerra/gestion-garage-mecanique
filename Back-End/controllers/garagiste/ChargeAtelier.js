@@ -74,3 +74,102 @@ console.log('statistiques finales:', statistiques);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 };
+
+export const getChargeMensuelle = async (req, res) => {
+  try {
+    const { mois, annee, atelierId } = req.query;
+    
+    const startDate = new Date(annee, mois - 1, 1);
+    const endDate = new Date(annee, mois, 0, 23, 59, 59);
+    
+    const matchFilter = {
+      garagisteId: req.user._id,
+      $or: [
+        { dateCommence: { $lte: endDate }, dateFinPrevue: { $gte: startDate } },
+        { dateCommence: { $gte: startDate, $lte: endDate } }
+      ]
+    };
+    
+    if (atelierId && atelierId !== 'tous') {
+      matchFilter.atelierId = new mongoose.Types.ObjectId(atelierId);
+    }
+    
+    const ordres = await OrdreTravail.find(matchFilter).lean();
+    
+    const joursTotal = endDate.getDate();
+    const resultats = Array.from({ length: joursTotal }, (_, i) => ({
+      jour: i + 1,
+      nombreOrdres: 0,
+      ordresActifs: new Set(),
+      chargeEstimee: 0,
+      chargeReelle: 0,
+      // 🆕 Détails par statut
+      parStatut: {
+        en_attente: { count: 0, ordres: [] },
+        en_cours: { count: 0, ordres: [] },
+        termine: { count: 0, ordres: [] },
+        suspendu: { count: 0, ordres: [] }
+      }
+    }));
+    
+    // Répartir chaque ordre sur ses jours
+    ordres.forEach(ordre => {
+      const debut = new Date(Math.max(ordre.dateCommence, startDate));
+      const fin = new Date(Math.min(ordre.dateFinPrevue || ordre.dateCommence, endDate));
+      
+      const nbJoursOrdre = Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)) + 1;
+      const chargeEstimeeParJour = (ordre.totalHeuresEstimees || 0) / nbJoursOrdre;
+      const chargeReelleParJour = (ordre.totalHeuresReelles || 0) / nbJoursOrdre;
+      
+      for (let d = new Date(debut); d <= fin; d.setDate(d.getDate() + 1)) {
+        const jourIndex = d.getDate() - 1;
+        if (jourIndex >= 0 && jourIndex < joursTotal) {
+          const ordreId = ordre._id.toString();
+          
+          // Éviter les doublons
+          if (!resultats[jourIndex].ordresActifs.has(ordreId)) {
+            resultats[jourIndex].ordresActifs.add(ordreId);
+            
+            // 🆕 Ajouter les détails de l'ordre par statut
+            const status = ordre.status || 'en_attente';
+            if (resultats[jourIndex].parStatut[status]) {
+              resultats[jourIndex].parStatut[status].count++;
+              resultats[jourIndex].parStatut[status].ordres.push({
+                id: ordreId,
+                numeroOrdre: ordre.numeroOrdre,
+                clientNom: ordre.clientInfo?.nom,
+                vehicule: ordre.vehiculedetails?.nom,
+                dateDebut: ordre.dateCommence,
+                dateFin: ordre.dateFinPrevue || ordre.dateFinReelle,
+                heuresEstimees: ordre.totalHeuresEstimees,
+                progression: Math.round((ordre.nombreTachesTerminees / ordre.nombreTaches) * 100) || 0
+              });
+            }
+          }
+          
+          resultats[jourIndex].chargeEstimee += chargeEstimeeParJour;
+          resultats[jourIndex].chargeReelle += chargeReelleParJour;
+        }
+      }
+    });
+    
+    // Convertir le Set en nombre
+    const donneesFinales = resultats.map(r => ({
+      jour: r.jour,
+      nombreOrdres: r.ordresActifs.size,
+      chargeEstimee: r.chargeEstimee,
+      chargeReelle: r.chargeReelle,
+      parStatut: r.parStatut // 🆕 Inclure les détails
+    }));
+    
+    res.json({
+      mois,
+      annee,
+      donnees: donneesFinales
+    });
+    
+  } catch (error) {
+    console.error("❌ Erreur getChargeMensuelle:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
