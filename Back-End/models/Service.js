@@ -7,7 +7,10 @@ const Servicechema = new mongoose.Schema({
   name: {
     type: String,
     required :true,
-    unique: true,
+    enum: {
+      values: ["Entretien et révision", "Réparation mécanique", "Pneumatiques et suspension", "Électricité et électronique","Freinage et sécurité","Carrosserie et peinture","Services complémentaires"],
+      message: 'Service non disponible'
+    }
   },
   description: {
     type: String,
@@ -29,6 +32,8 @@ const Servicechema = new mongoose.Schema({
         required: true
       }
 });
+// À la fin de ton schema, AVANT export default
+Servicechema.index({ name: 1, garagisteId: 1 }, { unique: true });
 
 // 🔹 Générer matricule auto : EMP001, EMP002, ...
 Servicechema.pre("save", async function (next) {

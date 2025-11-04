@@ -31,6 +31,7 @@ interface ServiceFormData {
 }
 
 const ServicesManager = () => {
+  const SERVICES_DISPONIBLES = ["Entretien et révision", "Réparation mécanique", "Pneumatiques et suspension", "Électricité et électronique","Freinage et sécurité","Carrosserie et peinture","Services complémentaires"];
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,6 +43,7 @@ const ServicesManager = () => {
     description: '',
     statut: 'Actif'
   });
+  const [error, setError] = useState('');
   const API_BASE_URL = 'http://localhost:5000/api';
   const getAuthToken = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -65,6 +67,7 @@ const ServicesManager = () => {
   // Create service
   const createService = async () => {
     try {
+      setError('');
       await axios.post(`${API_BASE_URL}/createService`, formData, {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
@@ -72,6 +75,7 @@ const ServicesManager = () => {
       closeModal();
     } catch (error) {
       console.error('Erreur lors de la création du service:', error);
+      setError(error.response?.data?.error || 'Une erreur est survenue');
     }
   };
 
@@ -342,14 +346,17 @@ const updateService = async () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nom du service *
                     </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Ex: Vidange moteur"
-                    />
+                    <select
+  required
+  value={formData.name}
+  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+>
+  <option value="">-- Choisir un service --</option>
+  {SERVICES_DISPONIBLES.map(service => (
+    <option key={service} value={service}>{service}</option>
+  ))}
+</select>
                   </div>
 
                   <div>

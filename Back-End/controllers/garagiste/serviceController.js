@@ -32,25 +32,47 @@ export const getServiceById = async (req, res) => {
 
 export const createService = async (req, res) => {
   try {
-    const {name,description,statut} = req.body;
-
-    console.log("📝 Création Service - Données reçues:", req.body);
-
-    if (!name || !description ) {
+    const {name, description, statut} = req.body;
+    
+    if (!name || !description) {
       return res.status(400).json({ 
         error: 'Les champs nom et description sont obligatoires'
- 
       });
     }
 
-    const service = new Service({ name,description,statut,garagisteId: req.user._id});
+    // Vérifier si le service existe déjà pour ce garagiste
+    const serviceExistant = await Service.findOne({ 
+      name, 
+      garagisteId: req.user._id 
+    });
+    
+    if (serviceExistant) {
+      return res.status(409).json({ 
+        error: 'Vous avez déjà ce service dans votre liste' 
+      });
+    }
+
+    const service = new Service({ 
+      name, 
+      description, 
+      statut, 
+      garagisteId: req.user._id 
+    });
+    
     await service.save();
-
-    console.log("✅ service créée:", service);
+    console.log("✅ service créé:", service);
     res.status(201).json(service);
-
+    
   } catch (error) {
-    console.error("❌ Erreur createservice:", error);
+    console.error("❌ Erreur createService:", error);
+    
+    // Gestion des erreurs d'enum
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        error: 'Service non valide. Veuillez choisir un service dans la liste.' 
+      });
+    }
+    
     res.status(500).json({ error: error.message });
   }
 };
