@@ -1,35 +1,68 @@
 "use client";
 
-import { compactFormat } from "@/lib/format-number";
-import type { ApexOptions } from "apexcharts";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import type { ApexOptions } from "apexcharts";
+import { compactFormat } from "@/lib/format-number";
 
-type PropsType = {
-  data: { name: string; amount: number }[];
-};
-
-const Chart = dynamic(() => import("react-apexcharts"), {
+const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-export function DonutChart({ data }: PropsType) {
+type PropsType = {
+  data: { device: string; value: number; percentage: number }[];
+};
+
+export function UsedDevicesChart({ data }: PropsType) {
+  const [chartReady, setChartReady] = useState(false);
+
+  useEffect(() => {
+    // Attendre que le composant soit monté
+    const timer = setTimeout(() => setChartReady(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex h-[300px] items-center justify-center text-gray-500">
+        Aucune donnée disponible
+      </div>
+    );
+  }
+
+  const validData = data.filter(
+    (item) =>
+      item.value &&
+      typeof item.value === "number" &&
+      !isNaN(item.value) &&
+      item.value > 0
+  );
+
+  if (validData.length === 0) {
+    return (
+      <div className="flex h-[300px] items-center justify-center text-gray-500">
+        Données invalides
+      </div>
+    );
+  }
+
+  if (!chartReady) {
+    return null; // Ne rien rendre tant que pas prêt
+  }
+
   const chartOptions: ApexOptions = {
     chart: {
       type: "donut",
       fontFamily: "inherit",
     },
     colors: ["#5750F1", "#5475E5", "#8099EC", "#ADBCF2"],
-    labels: data.map((item) => item.name),
+    labels: validData.map((item) => item.device),
     legend: {
       show: true,
       position: "bottom",
       itemMargin: {
         horizontal: 10,
         vertical: 5,
-      },
-      formatter: (legendName, opts) => {
-        const { seriesPercent } = opts.w.globals;
-        return `${legendName}: ${seriesPercent[opts.seriesIndex]}%`;
       },
     },
     plotOptions: {
@@ -42,7 +75,7 @@ export function DonutChart({ data }: PropsType) {
             total: {
               show: true,
               showAlways: true,
-              label: "Visitors",
+              label: "Total",
               fontSize: "16px",
               fontWeight: "400",
             },
@@ -88,10 +121,11 @@ export function DonutChart({ data }: PropsType) {
   };
 
   return (
-    <Chart
+    <ReactApexChart
       options={chartOptions}
-      series={data.map((item) => item.amount)}
+      series={validData.map((item) => item.value)}
       type="donut"
+      height={350}
     />
   );
 }

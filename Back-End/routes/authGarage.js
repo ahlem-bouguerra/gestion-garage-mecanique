@@ -17,7 +17,7 @@ import { createMecanicien, updateMecanicien, deleteMecanicien, getAllMecaniciens
 import { getAllAteliers, getAtelierById, createAtelier, updateAtelier, deleteAtelier } from '../controllers/garagiste/atelierController.js';
 import { getAllServices, getServiceById, createService, updateService, deleteService } from '../controllers/garagiste/serviceController.js';
 import { createOrdreTravail, getOrdresTravail, getOrdreTravailById, updateStatusOrdreTravail, demarrerOrdre, terminerOrdre, getStatistiques, supprimerOrdreTravail, getOrdresParDevisId, getOrdresByStatus, getOrdresSupprimes, getOrdresByAtelier, updateOrdreTravail } from '../controllers/garagiste/ordreController.js';
-import { CreateFacture, CreateFactureWithCredit, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture, getCreditNoteById } from '../controllers/garagiste/facturesController.js';
+import { CreateFacture, CreateFactureWithCredit, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture, getCreditNoteById ,GetPaymentsOverviewData,GetWeeksProfitData,GetDevicesUsedData} from '../controllers/garagiste/facturesController.js';
 import { getCarnetByVehiculeId, creerCarnetManuel } from '../controllers/garagiste/carnetController.js';
 import { getDashboardData ,getChargeMensuelle} from '../controllers/garagiste/ChargeAtelier.js';
 import { search } from '../controllers/clients/ChercherGarage.js';
@@ -345,6 +345,10 @@ router.put('/:id', authMiddleware, UpdateFacture);
 router.delete('/:id', authMiddleware, DeleteFacture);
 router.get('/stats/summary', authMiddleware, StaticFacture);
 router.get('/credit-note/:creditNoteId', authMiddleware, getCreditNoteById);
+router.get('/factures/charts/payments-overview', authMiddleware, GetPaymentsOverviewData);
+router.get('/factures/charts/weeks-profit', authMiddleware, GetWeeksProfitData);
+router.get('/factures/charts/devices-used', authMiddleware, GetDevicesUsedData);
+
 
 // ========== CARNET ENTRETIEN ==========
 router.get('/carnet-entretien/vehicule/:vehiculeId', authMiddleware, getCarnetByVehiculeId);

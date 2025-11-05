@@ -733,3 +733,239 @@ export const getCreditNoteById = async (req, res) => {
     });
   }
 };
+
+export const GetPaymentsOverviewData = async (req, res) => {
+  try {
+    console.log('📊 GetPaymentsOverviewData appelé');
+    console.log('👤 User ID:', req.user._id);
+    console.log('⏰ TimeFrame:', req.query.timeFrame);
+
+    const { timeFrame = 'monthly' } = req.query;
+    
+    // ✅ IMPORTANT : Convertir en ObjectId si c'est une string
+    const garagisteId = mongoose.Types.ObjectId.isValid(req.user._id) 
+      ? new mongoose.Types.ObjectId(req.user._id)
+      : req.user._id;
+
+    // Déterminer la plage de dates selon le timeFrame
+    let startDate, groupFormat;
+    const now = new Date();
+
+    switch (timeFrame) {
+      case 'daily':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
+        groupFormat = { $dateToString: { format: "%Y-%m-%d", date: "$invoiceDate" } };
+        break;
+      case 'weekly':
+        startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+        groupFormat = { 
+          $dateToString: { 
+            format: "%Y-W%U", // %U au lieu de %V
+            date: "$invoiceDate" 
+          } 
+        };
+        break;
+      case 'yearly':
+        startDate = new Date(now.getFullYear() - 5, 0, 1);
+        groupFormat = { $dateToString: { format: "%Y", date: "$invoiceDate" } };
+        break;
+      case 'monthly':
+      default:
+        startDate = new Date(now.getFullYear(), 0, 1);
+        groupFormat = { $dateToString: { format: "%Y-%m", date: "$invoiceDate" } };
+        break;
+    }
+
+    console.log('📅 Date de début:', startDate);
+    console.log('🔧 Format de groupe:', groupFormat);
+
+    // Agrégation pour les totaux
+    const facturesData = await Facture.aggregate([
+      {
+        $match: {
+          garagisteId: garagisteId, // ✅ ObjectId converti
+          status: 'active',
+          invoiceDate: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: groupFormat,
+          totalAmount: { $sum: '$finalTotalTTC' },
+          paidAmount: {
+            $sum: {
+              $cond: [
+                { $eq: ['$paymentStatus', 'paye'] },
+                '$finalTotalTTC',
+                { $ifNull: ['$paymentAmount', 0] }
+              ]
+            }
+          }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    console.log('📊 Données trouvées:', facturesData.length, 'périodes');
+
+    // Formater les données pour le graphique
+    const formattedData = {
+      total: facturesData.map(item => ({
+        x: item._id,
+        y: parseFloat(item.totalAmount.toFixed(2))
+      })),
+      paid: facturesData.map(item => ({
+        x: item._id,
+        y: parseFloat(item.paidAmount.toFixed(2))
+      }))
+    };
+
+    console.log('✅ Données formatées:', formattedData);
+
+    res.json({
+      success: true,
+      data: formattedData,
+      timeFrame: timeFrame
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur GetPaymentsOverviewData:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur',
+      error: error.message,
+      stack: error.stack // Pour debug
+    });
+  }
+};
+export const GetWeeksProfitData = async (req, res) => {
+  try {
+    const { weeksCount = 12 } = req.query;
+    const garagisteId = mongoose.Types.ObjectId.isValid(req.user._id) 
+      ? new mongoose.Types.ObjectId(req.user._id)
+      : req.user._id;
+
+    const weeksAgo = new Date();
+    weeksAgo.setDate(weeksAgo.getDate() - (weeksCount * 7));
+
+    const facturesData = await Facture.aggregate([
+      {
+        $match: {
+          garagisteId: garagisteId,
+          status: 'active',
+          invoiceDate: { $gte: weeksAgo }
+        }
+      },
+      {
+        $group: {
+          _id: { 
+            $dateToString: { 
+              format: "%Y-W%U", 
+              date: "$invoiceDate" 
+            } 
+          },
+          revenue: { $sum: '$finalTotalTTC' },
+          // Ajoutez les dépenses si vous les avez
+          expenses: { $sum: 0 }
+        }
+      },
+      {
+        $project: {
+          week: '$_id',
+          revenue: 1,
+          expenses: 1,
+          profit: { $subtract: ['$revenue', '$expenses'] }
+        }
+      },
+      {
+        $sort: { week: 1 }
+      }
+    ]);
+
+    res.json({
+      success: true,
+      data: facturesData
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur GetWeeksProfitData:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur',
+      error: error.message
+    });
+  }
+};
+
+export const GetDevicesUsedData = async (req, res) => {
+  try {
+    console.log('📊 GetDevicesUsedData appelé');
+    
+    const garagisteId = mongoose.Types.ObjectId.isValid(req.user._id) 
+      ? new mongoose.Types.ObjectId(req.user._id)
+      : req.user._id;
+
+    // ✅ Agrégation par statut de paiement
+    const devicesData = await Facture.aggregate([
+      {
+        $match: {
+          garagisteId: garagisteId,
+          status: 'active'
+        }
+      },
+      {
+        $group: {
+          _id: '$paymentStatus', // ✅ Utiliser un champ qui existe
+          count: { $sum: 1 },
+          totalAmount: { $sum: '$finalTotalTTC' }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    console.log('📊 Données trouvées:', devicesData);
+
+    // ✅ Mapper les statuts en français
+    const statusLabels = {
+      'paye': 'Payé',
+      'partiellement_paye': 'Partiellement payé',
+      'non_paye': 'Non payé',
+      'en_attente': 'En attente'
+    };
+
+    const total = devicesData.reduce((sum, item) => sum + item.count, 0);
+    
+    // ✅ Formater les données
+    let formattedData = devicesData.map(item => ({
+      device: statusLabels[item._id] || item._id || 'Inconnu',
+      value: item.count,
+      percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
+    }));
+
+    // ✅ Données de fallback si aucune facture
+    if (formattedData.length === 0) {
+      formattedData = [
+        { device: 'Aucune facture', value: 1, percentage: 100 }
+      ];
+    }
+
+    console.log('✅ Données formatées:', formattedData);
+
+    res.json({
+      success: true,
+      data: formattedData
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur GetDevicesUsedData:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur',
+      error: error.message
+    });
+  }
+};

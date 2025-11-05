@@ -6,8 +6,8 @@ import dynamic from "next/dynamic";
 
 type PropsType = {
   data: {
-    received: { x: unknown; y: number }[];
-    due: { x: unknown; y: number }[];
+    total: { x: string; y: number }[];
+    paid: { x: string; y: number }[];
   };
 };
 
@@ -20,9 +20,14 @@ export function PaymentsOverviewChart({ data }: PropsType) {
 
   const options: ApexOptions = {
     legend: {
-      show: false,
+      show: true,
+      position: "top",
+      horizontalAlign: "left",
+      labels: {
+        colors: ["#64748B"],
+      },
     },
-    colors: ["#5750F1", "#0ABEF9"],
+    colors: ["#5750F1", "#10B981"],
     chart: {
       height: 310,
       type: "area",
@@ -74,6 +79,9 @@ export function PaymentsOverviewChart({ data }: PropsType) {
       marker: {
         show: true,
       },
+      y: {
+        formatter: (value) => `${value.toFixed(2)} DT`,
+      },
     },
     xaxis: {
       axisBorder: {
@@ -81,6 +89,19 @@ export function PaymentsOverviewChart({ data }: PropsType) {
       },
       axisTicks: {
         show: false,
+      },
+      labels: {
+        style: {
+          colors: "#64748B",
+        },
+      },
+    },
+    yaxis: {
+      labels: {
+        style: {
+          colors: "#64748B",
+        },
+        formatter: (value) => `${value.toFixed(0)} DT`,
       },
     },
   };
@@ -91,12 +112,12 @@ export function PaymentsOverviewChart({ data }: PropsType) {
         options={options}
         series={[
           {
-            name: "Received",
-            data: data.received,
+            name: "Total Facturé",
+            data: data.total,
           },
           {
-            name: "Due",
-            data: data.due,
+            name: "Montant Payé",
+            data: data.paid,
           },
         ]}
         type="area"

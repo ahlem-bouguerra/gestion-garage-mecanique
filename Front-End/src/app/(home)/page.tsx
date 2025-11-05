@@ -1,4 +1,5 @@
 import { ChargeMensuelle } from "@/components/dashboard/charts/charge-mensuelle";
+import { PaymentsOverview } from "@/components/Charts/payments-overview";
 import { UsedDevices } from "@/components/Charts/used-devices";
 import { WeeksProfit } from "@/components/Charts/weeks-profit";
 import { TopChannels } from "@/components/Tables/top-channels";
@@ -30,23 +31,27 @@ export default async function Home({ searchParams }: PropsType) {
       <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
         <ChargeMensuelle
           className="col-span-12 xl:col-span-7"
-          key={extractTimeFrame("payments_overview")}
+          key="charge-mensuelle-chart" // ✅ Clé unique et statique
           timeFrame={extractTimeFrame("payments_overview")?.split(":")[1]}
         />
 
         <WeeksProfit
-          key={extractTimeFrame("weeks_profit")}
+          key="weeks-profit-chart" // ✅ Clé unique et statique
           timeFrame={extractTimeFrame("weeks_profit")?.split(":")[1]}
           className="col-span-12 xl:col-span-5"
         />
 
-        <UsedDevices
-          className="col-span-12 xl:col-span-5"
-          key={extractTimeFrame("used_devices")}
-          timeFrame={extractTimeFrame("used_devices")?.split(":")[1]}
+        <PaymentsOverview
+          className="col-span-12 xl:col-span-7"
+          key="payments-overview-chart" // ✅ Clé unique et statique
+          timeFrame={extractTimeFrame("payments_overview")?.split(":")[1]}
         />
 
-        <RegionLabels />
+        <UsedDevices
+          className="col-span-12 xl:col-span-5"
+          key="used-devices-chart" // ✅ Clé unique et statique
+          timeFrame={extractTimeFrame("used_devices")?.split(":")[1]}
+        />
 
         <div className="col-span-12 grid xl:col-span-8">
           <Suspense fallback={<TopChannelsSkeleton />}>
