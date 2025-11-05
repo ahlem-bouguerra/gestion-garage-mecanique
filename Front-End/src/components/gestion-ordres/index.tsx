@@ -327,7 +327,9 @@ const OrdreTravailSystem = () => {
           onOrdreDeleted={handleOrdreDeleted}
           onEditOrdre={handleEditOrdre}
           onOrdresSupprimes={handleOrdresSupprimes} // ✅ Nouvelle prop
+          
         />
+        
       )}
 
         {/* Modal de détail d'ordre */}

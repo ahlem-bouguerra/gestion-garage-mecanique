@@ -17,7 +17,11 @@ export const NAV_DATA = [
           {
             title: "Charge Atelier",
             url: "/dashboard",
-          }
+          },
+          {
+            title: "eCommerce",
+            url: "/",
+          },
         ],
       },
       {

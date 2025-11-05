@@ -71,3 +71,130 @@ export function Users(props: SVGPropsType) {
     </svg>
   );
 }
+export function ActivityIcon(props: SVGPropsType) {
+  return (
+    <svg width={58} height={58} viewBox="0 0 58 58" fill="none" {...props}>
+      <circle cx={29} cy={29} r={29} fill="#3b82f6" />
+      <path
+        d="M20 29h6l3-6 4 12 3-6h6"
+        stroke="#fff"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function ClockIcon(props: SVGPropsType) {
+  return (
+    <svg width={58} height={58} viewBox="0 0 58 58" fill="none" {...props}>
+      <circle cx={29} cy={29} r={29} fill="#10b981" />
+      <circle
+        cx={29}
+        cy={29}
+        r={9}
+        stroke="#fff"
+        strokeWidth={2}
+        fill="none"
+      />
+      <path
+        d="M29 23v6l4 2"
+        stroke="#fff"
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function CalendarIcon(props: SVGPropsType) {
+  return (
+    <svg width={58} height={58} viewBox="0 0 58 58" fill="none" {...props}>
+      <circle cx={29} cy={29} r={29} fill="#f59e0b" />
+      <rect
+        x={22}
+        y={23}
+        width={14}
+        height={12}
+        rx={2}
+        stroke="#fff"
+        strokeWidth={2}
+        fill="none"
+      />
+      <path
+        d="M26 21v4M32 21v4M22 27h14"
+        stroke="#fff"
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function PerformanceIcon(props: SVGPropsType) {
+  return (
+    <svg width={58} height={58} viewBox="0 0 58 58" fill="none" {...props}>
+      <circle cx={29} cy={29} r={29} fill="#8b5cf6" />
+      <path
+        d="M24 32l3-3 3 3 6-6"
+        stroke="#fff"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M36 26v6h-6"
+        stroke="#fff"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function CheckCircleIcon(props: SVGPropsType) {
+  return (
+    <svg width={58} height={58} viewBox="0 0 58 58" fill="none" {...props}>
+      <circle cx={29} cy={29} r={29} fill="#22c55e" />
+      <circle
+        cx={29}
+        cy={29}
+        r={9}
+        stroke="#fff"
+        strokeWidth={2}
+        fill="none"
+      />
+      <path
+        d="M25 29l2 2 5-5"
+        stroke="#fff"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function TrendingUpIcon(props: SVGPropsType) {
+  return (
+    <svg width={58} height={58} viewBox="0 0 58 58" fill="none" {...props}>
+      <circle cx={29} cy={29} r={29} fill="#06b6d4" />
+      <path
+        d="M22 33l5-5 3 3 8-8"
+        stroke="#fff"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M38 23v7h-7"
+        stroke="#fff"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

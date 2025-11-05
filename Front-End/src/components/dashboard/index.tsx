@@ -70,8 +70,8 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+
+      <div >
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
@@ -174,7 +174,7 @@ const Dashboard: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+ 
   );
 };
 

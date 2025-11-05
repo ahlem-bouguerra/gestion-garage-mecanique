@@ -27,26 +27,12 @@ export function OverviewCard({ label, data, Icon }: PropsType) {
           <dd className="text-sm font-medium text-dark-6">{label}</dd>
         </dl>
 
-        <dl
-          className={cn(
-            "text-sm font-medium",
-            isDecreasing ? "text-red" : "text-green",
-          )}
-        >
-          <dt className="flex items-center gap-1.5">
-            {data.growthRate}%
-            {isDecreasing ? (
-              <ArrowDownIcon aria-hidden />
-            ) : (
-              <ArrowUpIcon aria-hidden />
-            )}
-          </dt>
 
           <dd className="sr-only">
             {label} {isDecreasing ? "Decreased" : "Increased"} by{" "}
-            {data.growthRate}%
+            
           </dd>
-        </dl>
+   
       </div>
     </div>
   );
