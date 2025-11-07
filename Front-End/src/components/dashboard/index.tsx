@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Dashboard Atelier
+            Tableau de bord Atelier
           </h1>
           
           {/* Utilisation du composant DashboardFilters */}

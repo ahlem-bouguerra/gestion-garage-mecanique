@@ -27,7 +27,7 @@ export type DevicesUsedData = {
   percentage: number;
 }[];
 
-// ✅ Payments Overview
+// ✅ Aperçu des paiements
 export async function getPaymentsOverviewData(
   timeFrame: string = "monthly"
 ): Promise<PaymentsOverviewData> {
@@ -85,8 +85,7 @@ export async function getWeeksProfitData(
   }
 }
 
-// ✅ Devices Used - NOUVELLE FONCTION
-// charts.services.ts - fonction getDevicesUsedData
+
 export async function getDevicesUsedData(): Promise<DevicesUsedData> {
   try {
     const token = getAuthToken();

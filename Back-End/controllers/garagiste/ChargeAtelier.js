@@ -77,7 +77,7 @@ console.log('statistiques finales:', statistiques);
 
 export const getChargeMensuelle = async (req, res) => {
   try {
-    const { mois, annee, atelierId } = req.query;
+    const { mois, annee } = req.query;
     
     const startDate = new Date(annee, mois - 1, 1);
     const endDate = new Date(annee, mois, 0, 23, 59, 59);
@@ -89,10 +89,7 @@ export const getChargeMensuelle = async (req, res) => {
         { dateCommence: { $gte: startDate, $lte: endDate } }
       ]
     };
-    
-    if (atelierId && atelierId !== 'tous') {
-      matchFilter.atelierId = new mongoose.Types.ObjectId(atelierId);
-    }
+
     
     const ordres = await OrdreTravail.find(matchFilter).lean();
     

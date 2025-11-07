@@ -1,16 +1,14 @@
 import { ChargeMensuelle } from "@/components/dashboard/charts/charge-mensuelle";
 import { PaymentsOverview } from "@/components/Charts/payments-overview";
-import { UsedDevices } from "@/components/Charts/used-devices";
-import { WeeksProfit } from "@/components/Charts/weeks-profit";
+import StatusPieChart from "@/components/dashboard/components/StatusPieChart";
 import { TopChannels } from "@/components/Tables/top-channels";
 import { TopChannelsSkeleton } from "@/components/Tables/top-channels/skeleton";
 import { createTimeFrameExtractor } from "@/utils/timeframe-extractor";
 import { Suspense } from "react";
 import { ChatsCard } from "./_components/chats-card";
-import { OverviewCardsGroup } from "./_components/overview-cards";
 import { OverviewCardsSkeleton } from "./_components/overview-cards/skeleton";
-import { RegionLabels } from "./_components/region-labels";
 import { DashboardKPICardsWithFilters } from "./_components/overview-cards/dashboard-kpi-cards-with-filters";
+import { HomeDashboardSection } from "@/components/dashboard/components/HomeDashboardSection";
 
 type PropsType = {
   searchParams: Promise<{
@@ -24,44 +22,21 @@ export default async function Home({ searchParams }: PropsType) {
 
   return (
     <>
-      <Suspense fallback={<OverviewCardsSkeleton />}>
-        <DashboardKPICardsWithFilters />
-      </Suspense>
+      {/* Section Dashboard Atelier avec StatusPieChart inclus */}
+      <div className="mt-6">
+        <HomeDashboardSection />
+      </div>
 
-      <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
-        <ChargeMensuelle
-          className="col-span-12 xl:col-span-7"
-          key="charge-mensuelle-chart" // ✅ Clé unique et statique
-          timeFrame={extractTimeFrame("payments_overview")?.split(":")[1]}
-        />
-
-        <WeeksProfit
-          key="weeks-profit-chart" // ✅ Clé unique et statique
-          timeFrame={extractTimeFrame("weeks_profit")?.split(":")[1]}
-          className="col-span-12 xl:col-span-5"
-        />
-
-        <PaymentsOverview
-          className="col-span-12 xl:col-span-7"
-          key="payments-overview-chart" // ✅ Clé unique et statique
-          timeFrame={extractTimeFrame("payments_overview")?.split(":")[1]}
-        />
-
-        <UsedDevices
-          className="col-span-12 xl:col-span-5"
-          key="used-devices-chart" // ✅ Clé unique et statique
-          timeFrame={extractTimeFrame("used_devices")?.split(":")[1]}
-        />
-
-        <div className="col-span-12 grid xl:col-span-8">
-          <Suspense fallback={<TopChannelsSkeleton />}>
-            <TopChannels />
-          </Suspense>
+      {/* PaymentsOverview centralisé */}
+      <div className="mt-4 md:mt-6 2xl:mt-9">
+        <div className="flex justify-center">
+          <div className="w-full max-w-5xl">
+            <PaymentsOverview
+              key="payments-overview-chart"
+              timeFrame={extractTimeFrame("payments_overview")?.split(":")[1]}
+            />
+          </div>
         </div>
-
-        <Suspense fallback={null}>
-          <ChatsCard />
-        </Suspense>
       </div>
     </>
   );
