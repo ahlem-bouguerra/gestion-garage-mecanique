@@ -308,9 +308,7 @@ const filteredReservations = reservations.filter(reservation => {
 
                     {/* Right Section - Actions */}
                     <div className="flex flex-col gap-2 md:w-40">
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
-                        Détails
-                      </button>
+                     
                       {reservation.status === 'en_attente' && (
                         <button 
                             onClick={() => handleCancelReservation(reservation._id)}
