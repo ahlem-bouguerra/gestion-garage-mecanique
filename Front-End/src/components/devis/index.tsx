@@ -21,8 +21,7 @@ const GarageQuoteSystem = () => {
   const [maindoeuvre, setMaindoeuvre] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState({ days: 0, hours: 0, minutes: 0 });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [notifications, setNotifications] = useState([]);
   const [editingQuote, setEditingQuote] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -52,6 +51,57 @@ const GarageQuoteSystem = () => {
   const filteredClients = clients.filter(client =>
     client.nom.toLowerCase().includes(searchClient.toLowerCase())
   );
+
+  // Composant Alert personnalisé
+const Alert = ({ variant = 'info', title, description, onClose }) => {
+  const variants = {
+    warning: {
+      bg: 'bg-yellow-50 border-yellow-200',
+      icon: 'text-yellow-600',
+      title: 'text-yellow-800',
+      desc: 'text-yellow-700'
+    },
+    success: {
+      bg: 'bg-green-50 border-green-200',
+      icon: 'text-green-600',
+      title: 'text-green-800',
+      desc: 'text-green-700'
+    },
+    error: {
+      bg: 'bg-red-50 border-red-200',
+      icon: 'text-red-600',
+      title: 'text-red-800',
+      desc: 'text-red-700'
+    },
+    info: {
+      bg: 'bg-blue-50 border-blue-200',
+      icon: 'text-blue-600',
+      title: 'text-blue-800',
+      desc: 'text-blue-700'
+    }
+  };
+
+  const style = variants[variant] || variants.info;
+
+  return (
+    <div className={`${style.bg} border rounded-lg p-4 mb-6 flex items-start`}>
+      <AlertCircle className={`h-5 w-5 ${style.icon} mr-3 flex-shrink-0 mt-0.5`} />
+      <div className="flex-1">
+        {title && <h3 className={`font-semibold ${style.title} mb-1`}>{title}</h3>}
+        {description && <p className={`text-sm ${style.desc}`}>{description}</p>}
+      </div>
+      {onClose && (
+        <button
+          onClick={onClose}
+          className={`${style.icon} hover:opacity-70 ml-3`}
+          aria-label="Fermer"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  );
+};
 
   useEffect(() => {
     const fetchUserWithLocation = async () => {
@@ -623,9 +673,6 @@ const GarageQuoteSystem = () => {
     }
   };
 
-
-
-
   const fetchClients = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/clients/noms', {
@@ -838,15 +885,23 @@ const GarageQuoteSystem = () => {
     setActiveTab('create');
   };
 
-  const showError = (message) => {
-    setError(message);
-    setTimeout(() => setError(''), 5000);
-  };
 
-  const showSuccess = (message) => {
-    setSuccess(message);
-    setTimeout(() => setSuccess(''), 3000);
-  };
+
+const showError = (message) => {
+  const id = Date.now();
+  setNotifications(prev => [...prev, { id, variant: 'error', title: 'Erreur', description: message }]);
+  setTimeout(() => removeNotification(id), 5000);
+};
+
+const showSuccess = (message) => {
+  const id = Date.now();
+  setNotifications(prev => [...prev, { id, variant: 'success', title: 'Succès', description: message }]);
+  setTimeout(() => removeNotification(id), 3000);
+};
+
+const removeNotification = (id) => {
+  setNotifications(prev => prev.filter(notif => notif.id !== id));
+};
 
   const createWorkOrder = async (quote) => {
     try {
@@ -890,8 +945,6 @@ const GarageQuoteSystem = () => {
       return null;
     }
   };
-
-
 
   const createFactureFromDevis = async (devis) => {
     try {
@@ -1130,12 +1183,18 @@ const GarageQuoteSystem = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Devis</h1>
           <p className="text-gray-600">Système de devis pour atelier mécanique</p>
         </div>
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 flex items-center">
-            <AlertCircle className="h-4 w-4 mr-2" />
-            {error}
-          </div>
-        )}
+        {/* Notifications */}
+<div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+  {notifications.map(notif => (
+    <Alert
+      key={notif.id}
+      variant={notif.variant}
+      title={notif.title}
+      description={notif.description}
+      onClose={() => removeNotification(notif.id)}
+    />
+  ))}
+</div>
 
         {/* Navigation Tabs */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">

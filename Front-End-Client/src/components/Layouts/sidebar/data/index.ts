@@ -84,12 +84,7 @@ export const NAV_DATA = [
         icon: User,
         items: [],
       },
-      {
-        title: "Paramètres",
-        url: "/client/parametres",
-        icon: Settings,
-        items: [],
-      },
+
     ],
   },
 ];
