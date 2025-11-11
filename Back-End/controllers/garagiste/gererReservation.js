@@ -1,4 +1,3 @@
-import { User } from "../../models/User.js";
 import Service from "../../models/Service.js";
 import Reservation from "../../models/Reservation.js";
 import FicheClient from "../../models/FicheClient.js";

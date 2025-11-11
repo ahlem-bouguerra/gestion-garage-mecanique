@@ -1,12 +1,12 @@
 
 import bcrypt from "bcryptjs";
-import { User } from "../../models/User.js";
+import { Garagiste } from "../../models/Garagiste.js";
 
 
 export const resetPassword = async (req , res )=>{
     try{
         const {email,token,newPassword} = req.body;
-        const user = await User.findOne({email});
+        const user = await Garagiste.findOne({email});
 
         if (!user || !user.resetPasswordToken || !user.resetPasswordExpires){
              return res.status(400).json({message: "Lien invalide ou expiré."});

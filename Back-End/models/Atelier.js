@@ -11,7 +11,7 @@ const Atelierchema = new mongoose.Schema({
   },
   garagisteId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Garagiste",
     required: true
   }
 });

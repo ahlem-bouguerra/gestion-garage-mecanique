@@ -191,7 +191,7 @@ const factureSchema = new mongoose.Schema({
   // Métadonnées
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Garagiste'
   },
 
   createdAt: {
@@ -224,7 +224,7 @@ const factureSchema = new mongoose.Schema({
   },
   garagisteId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Garagiste",
     required: true
   }
 }, {

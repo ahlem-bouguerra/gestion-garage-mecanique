@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { User } from "../../models/User.js";
+import { Garagiste } from "../../models/Garagiste.js";
 import { sendVerificationEmail } from "../../utils/mailer.js";
 
 
@@ -15,7 +15,7 @@ export const register = async (req, res) => {
   }
 
   try {
-    const existing = await User.findOne({ email });
+    const existing = await Garagiste.findOne({ email });
     if (existing) {
       console.warn("⚠️ Email déjà utilisé :", email);
       return res.status(400).json({ message: "Email déjà utilisé." });
@@ -37,7 +37,7 @@ export const register = async (req, res) => {
 
     console.log("📦 Données utilisateur à créer:", userData);
 
-    const user = await User.create(userData);
+    const user = await Garagiste.create(userData);
 
     console.log("✅ Utilisateur créé:", {
       id: user._id,

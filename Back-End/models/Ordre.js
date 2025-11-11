@@ -129,11 +129,11 @@ const OrdreTravailSchema = new Schema({
   // Métadonnées
   createdBy: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Garagiste'
   },
   updatedBy: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Garagiste'
   },
   // Statistiques calculées
   totalHeuresEstimees: {
@@ -154,7 +154,7 @@ const OrdreTravailSchema = new Schema({
   },
   garagisteId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Garagiste",
         required: true
   },
   // Notes et commentaires additionnels

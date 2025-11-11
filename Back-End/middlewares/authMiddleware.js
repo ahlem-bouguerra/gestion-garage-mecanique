@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { User } from "../models/User.js";
+import { Garagiste } from "../models/Garagiste.js";
 export const authMiddleware = async (req, res, next) => {
   try {
     console.log('🔐 AuthMiddleware - Headers:', req.headers.authorization);
@@ -17,7 +17,7 @@ export const authMiddleware = async (req, res, next) => {
 
      req.user = decoded;
      
-    const user = await User.findById(decoded.userId);
+    const user = await Garagiste.findById(decoded.userId);
     
 
     if (!user) {

@@ -67,7 +67,7 @@ const vehiculeSchema = new mongoose.Schema({
   // ✅ MODIFIÉ : garagisteId devient OPTIONNEL (seulement si créé par garage)
   garagisteId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Garagiste",
     required: false // ✅ Nullable si créé par client
   },
   paysImmatriculation: {
@@ -80,7 +80,7 @@ const vehiculeSchema = new mongoose.Schema({
   historique_garages: [{
     garageId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
+      ref: "Garagiste"
     },
     datePremiereVisite: {
       type: Date,

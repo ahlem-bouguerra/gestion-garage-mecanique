@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import Devis from '../models/Devis.js';
 import FicheClient from '../models/FicheClient.js';
-import { User } from '../models/User.js';
+import { Garagiste } from '../models/Garagiste.js';
 
 
 // Configuration du transporteur email
@@ -18,7 +18,7 @@ export const sendDevisByEmail = async (req, res) => {
     const { devisId } = req.params;
 
     // Récupérer l'utilisateur depuis le token
-    const user = req.user; // <-- ici req.user contient les infos décodées du token + l'objet complet User depuis la DB
+    const user = req.user; // <-- ici req.user contient les infos décodées du token + l'objet complet Garagiste depuis la DB
     console.log('👤 Utilisateur connecté:', user.username);
     console.log('📱 Téléphone depuis token:', user.phone);
     console.log('🆔 ID utilisateur depuis token:', user._id);

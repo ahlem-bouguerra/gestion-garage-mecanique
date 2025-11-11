@@ -1,4 +1,4 @@
-import { User } from '../../models/User.js';
+import { Garagiste } from '../../models/Garagiste.js';
 import mongoose from 'mongoose';
 import axios from 'axios';
 
@@ -104,7 +104,7 @@ export const search = async (req, res) => {
     console.log('Query MongoDB:', JSON.stringify(query, null, 2));
 
     // Récupération des garages
-    let garages = await User.find(query)
+    let garages = await Garagiste.find(query)
       .populate('governorateId', 'name')
       .populate('cityId', 'name')
       .select('-password -resetPasswordToken -resetPasswordExpires -googleId')

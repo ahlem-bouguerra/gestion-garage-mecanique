@@ -1,12 +1,12 @@
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import { User } from "../../models/User.js";
+import { Garagiste } from "../../models/Garagiste.js";
 import { sendForgotPasswordMailer } from "../../utils/sendForgotPasswordMailer.js";
 
 export const forgotPassword = async(req,res) =>{
     try{
         const {email}= req.body;
-        const user = await User.findOne({email});
+        const user = await Garagiste.findOne({email});
 
         if (!user){
             return res.json({message: "Aucun utilisateur avec cet mail , vérifier votre mail"});

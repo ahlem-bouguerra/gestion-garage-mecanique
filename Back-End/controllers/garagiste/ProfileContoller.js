@@ -1,5 +1,5 @@
 // controllers/ProfileController.js - Version corrigée
-import { User } from "../../models/User.js";
+import { Garagiste } from "../../models/Garagiste.js";
 import Governorate from "../../models/Governorate.js";
 import City from "../../models/City.js";
 
@@ -8,7 +8,7 @@ export const getProfile = async (req, res) => {
     console.log('👤 GetProfile appelé pour:', req.user.email);
 
     // Récupérer l'utilisateur avec populate pour governorate et city
-    const user = await User.findById(req.user._id)
+    const user = await Garagiste.findById(req.user._id)
       .populate("governorateId", "name")
       .populate("cityId", "name");
 
@@ -110,7 +110,7 @@ export const completeProfile = async (req, res) => {
       });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
+    const updatedUser = await Garagiste.findByIdAndUpdate(
       userId,
       updateData,
       { new: true, runValidators: true }

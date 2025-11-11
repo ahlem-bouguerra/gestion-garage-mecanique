@@ -1,4 +1,4 @@
-import { User } from "../../models/User.js";
+import { Garagiste } from "../../models/Garagiste.js";
 import  Service  from "../../models/Service.js";
 import  Reservation  from "../../models/Reservation.js";
 import { Client } from "../../models/Client.js";
@@ -33,7 +33,7 @@ export const ClientCreateReservation = async (req, res) => {
 
 
     // Vérifier que le garage existe
-    const garage = await User.findById(garageId);
+    const garage = await Garagiste.findById(garageId);
     if (!garage) {
       return res.status(404).json({
         success: false,

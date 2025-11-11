@@ -111,7 +111,7 @@ services: [
   },
   garagisteId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Garagiste",
     required: true
   }
 

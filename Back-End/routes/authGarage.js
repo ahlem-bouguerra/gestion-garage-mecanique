@@ -3,7 +3,7 @@ import passportGarage from "../config/passportGarage.js";
 import { register } from "../controllers/garagiste/authController.js";
 import { login, logout } from "../controllers/garagiste/loginController.js";
 import jwt from "jsonwebtoken";
-import { User } from "../models/User.js";
+import { Garagiste } from "../models/Garagiste.js";
 import { forgotPassword } from "../controllers/garagiste/ForgotPassword.js";
 import { resetPassword } from "../controllers/garagiste/ResetPassword.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -96,7 +96,7 @@ router.get(
       
       console.log('📦 Données à transmettre:');
       console.log('   - Token (extrait):', token.substring(0, 30) + '...');
-      console.log('   - User encodé (extrait):', userDataEncoded.substring(0, 30) + '...');
+      console.log('   - Garagiste encodé (extrait):', userDataEncoded.substring(0, 30) + '...');
       console.log('   - Profil complet:', isProfileComplete);
 
       const html = `
@@ -199,7 +199,7 @@ router.get("/verify-email/:token", async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
+    const user = await Garagiste.findById(decoded.userId);
 
     if (!user) {
       console.log("❌ Utilisateur non trouvé pour la vérification");
@@ -233,7 +233,7 @@ router.get("/garage/verify-token", async (req, res) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
+    const user = await Garagiste.findById(decoded.userId);
 
     if (!user) {
       return res.status(404).json({ error: 'Utilisateur non trouvé' });
