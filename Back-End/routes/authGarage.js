@@ -7,7 +7,7 @@ import { Garagiste } from "../models/Garagiste.js";
 import { forgotPassword } from "../controllers/garagiste/ForgotPassword.js";
 import { resetPassword } from "../controllers/garagiste/ResetPassword.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
-import { completeProfile, getProfile } from "../controllers/garagiste/ProfileContoller.js";
+import { completeProfile, getProfile ,updateProfile,updateGarageInfo} from "../controllers/garagiste/ProfileContoller.js";
 import { enhancedLocationRoutes } from "../apiDataFetcher.js";
 import { createFicheClient, getFicheClients, getFicheClientById, updateFicheClient, deleteFicheClient, getFicheClientNoms, getHistoriqueVisiteByIdClient, getHistoryVisite } from "../controllers/garagiste/FicheClient.js";
 import { getAllVehicules, getVehiculeById, createVehicule, updateVehicule, dissocierVehicule, getVehiculesByProprietaire } from '../controllers/garagiste/vehiculeController.js';
@@ -22,6 +22,8 @@ import { getCarnetByVehiculeId, creerCarnetManuel } from '../controllers/garagis
 import { getDashboardData ,getChargeMensuelle} from '../controllers/garagiste/ChargeAtelier.js';
 import { search } from '../controllers/clients/ChercherGarage.js';
 import { getReservations, updateReservation } from '../controllers/garagiste/gererReservation.js';
+import { isGarageAdmin } from "../middlewares/authMiddleware.js";
+import { createEmploye } from "../controllers/garagiste/EmployeController.js";
 
 const router = express.Router();
 
@@ -71,15 +73,7 @@ router.get(
 
       console.log('🔐 Token JWT généré pour Garage OAuth');
 
-      const isProfileComplete = !!(
-        user.username &&
-        user.phone &&
-        user.governorateId &&
-        user.matriculefiscal &&
-        user.garagenom
-      );
 
-      console.log('🔍 Profil complet:', isProfileComplete);
 
       // ✅ Préparer les données utilisateur
       const userData = {
@@ -88,7 +82,7 @@ router.get(
         email: user.email,
         phone: user.phone || '',
         isVerified: user.isVerified || true,
-        isProfileComplete: isProfileComplete
+
       };
 
       // ✅ Encoder les données utilisateur en base64
@@ -97,7 +91,7 @@ router.get(
       console.log('📦 Données à transmettre:');
       console.log('   - Token (extrait):', token.substring(0, 30) + '...');
       console.log('   - Garagiste encodé (extrait):', userDataEncoded.substring(0, 30) + '...');
-      console.log('   - Profil complet:', isProfileComplete);
+ 
 
       const html = `
         <!DOCTYPE html>
@@ -152,22 +146,19 @@ router.get(
           <script>
             const token = "${token}";
             const userDataEncoded = "${userDataEncoded}";
-            const isComplete = ${isProfileComplete};
+      
             
             console.log('🔐 Token Garage reçu');
-            console.log('📋 Profil complet:', isComplete);
+           
             
             try {
               // ✅ CORRECTION : Toujours rediriger vers /auth/sign-in d'abord
               // pour que le composant puisse traiter le token
               setTimeout(() => {
-                if (isComplete) {
+             
                   console.log('➡️ Redirection vers sign-in avec token (profil complet)');
                   window.location.href = \`http://localhost:3000/auth/sign-in?token=\${token}&user=\${encodeURIComponent(userDataEncoded)}&redirect=dashboard\`;
-                } else {
-                  console.log('➡️ Redirection vers completion profil Garage');
-                  window.location.href = \`http://localhost:3000/auth/complete-profile?token=\${token}&user=\${encodeURIComponent(userDataEncoded)}\`;
-                }
+              
               }, 1000);
               
             } catch (error) {
@@ -257,8 +248,16 @@ router.get("/garage/verify-token", async (req, res) => {
 
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
+
+
 router.post("/complete-profile", authMiddleware, completeProfile);
 router.get("/get-profile", authMiddleware, getProfile);
+// Mettre à jour les infos personnelles du garagiste (nom, téléphone, photo)
+router.put("/profile/personal", authMiddleware, updateProfile);
+// Mettre à jour les infos du garage (localisation, description, etc.)
+router.put("/profile/garage", authMiddleware,isGarageAdmin, updateGarageInfo);
+
+
 
 // ========== LOCATIONS ==========
 router.get('/governorates', enhancedLocationRoutes.getAllGovernoratesWithCount);
@@ -364,5 +363,9 @@ router.get('/search', search);
 // ========== RESERVATIONS ==========
 router.get('/reservations',authMiddleware, getReservations);
 router.put('/update/reservations/:id',authMiddleware, updateReservation);
+
+
+
+router.post("/create-employe", authMiddleware,isGarageAdmin, createEmploye);
 
 export default router;

@@ -14,7 +14,7 @@ import { getServicesByGarageId } from "../controllers/clients/serviceController.
 import {getClientProfile} from "../controllers/clients/profileController.js";
 import { ClientCreateReservation, ClientGetReservations, ClientUpdateReservation,ClientCancelReservation } from '../controllers/clients/revervationController.js';
 import {getClientDevis, getClientDevisById, getClientDevisStats } from '../controllers/clients/clientDevisController.js';
-import { getClientFactures, GetClientFactureById, GetClientFactureStats,getClientCreditNoteById,handleClientPayment ,CreateFactureWithCredit} from '../controllers/clients/clientFactureController.js';
+import { getClientFactures, GetClientFactureById, GetClientFactureStats,getClientCreditNoteById} from '../controllers/clients/clientFactureController.js';
 import { search } from '../controllers/clients/ChercherGarage.js';
 import { getCarnetByVehiculeIdClient, creerCarnetManuelClient } from '../controllers/clients/carnetController.js';
 const router = express.Router();
@@ -118,8 +118,7 @@ router.get('/client/factures', clientauthMiddleware, getClientFactures);
 router.get('/client/factures/stats', clientauthMiddleware, GetClientFactureStats);
 router.get('/client/factures/:id', clientauthMiddleware, GetClientFactureById);
 router.get('/client/credit-note/:creditNoteId', clientauthMiddleware, getClientCreditNoteById);
-router.post('/create-with-credit/:devisId', clientauthMiddleware, CreateFactureWithCredit);
-router.post('/client/factures/:id/payment', clientauthMiddleware, handleClientPayment);
+
 
 router.get('/carnet-entretien/:vehiculeId', clientauthMiddleware, getCarnetByVehiculeIdClient);
 router.post('/creer-dans-carnet', clientauthMiddleware, creerCarnetManuelClient);

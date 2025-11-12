@@ -35,14 +35,9 @@ const garagisteSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  // 🔗 Rôle de l'utilisateur (admin, employé, etc.)
-  role: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Role",
-    required: true,
-  },
 
-  // 🔗 Lien avec le garage
+
+
   garage: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Garage",

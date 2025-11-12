@@ -35,10 +35,17 @@ const usersSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+     // Super admin a tous les droits
+  isSuperAdmin: {
+    type: Boolean,
+    default: true
+  },
 
 
 }, {
     timestamps: true
 });
+
+usersSchema.index({ email: 1 }, { unique: true });
 
 export const Users = mongoose.model("Users", usersSchema);

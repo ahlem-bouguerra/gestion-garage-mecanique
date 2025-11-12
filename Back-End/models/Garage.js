@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const garagisteSchema = new mongoose.Schema({
+const garageSchema = new mongoose.Schema({
 
     nom: { type: String, required: true },
 
@@ -46,12 +46,34 @@ const garagisteSchema = new mongoose.Schema({
         ref: "Garagiste",
         default: null,
     },
+      // Informations supplémentaires
+  description: {
+    type: String,
+    default: ""
+  },
+  logo: {
+    type: String,
+    default: ""
+  },
+  horaires: {
+    type: String,
+    default: ""
+  },
+  services: [{
+    type: String
+  }],
+  // Statut du garage
+  isActive: {
+    type: Boolean,
+    default: true
+  }
 
 }, {
     timestamps: true
 });
 
 // ✅ Index géospatial sparse
-garagisteSchema.index({ location: '2dsphere' }, { sparse: true });
+garageSchema.index({ location: '2dsphere' }, { sparse: true });
+garageSchema.index({ matriculeFiscal: 1 }, { unique: true });
 
-export const Garagiste = mongoose.model("Garagiste", garagisteSchema);
+export const Garage = mongoose.model("Garage", garageSchema);

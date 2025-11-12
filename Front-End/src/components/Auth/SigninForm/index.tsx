@@ -115,7 +115,7 @@ export default function SigninWithPassword() {
       if (response.data.token) {
         const token = response.data.token;
         const user = response.data.user;
-        const isProfileComplete = response.data.isProfileComplete;
+        
 
         // Stocker les données
         localStorage.setItem("token", token);
@@ -123,18 +123,15 @@ export default function SigninWithPassword() {
         Cookies.set("token", token, { expires: 7, path: "/" });
         
         console.log("💾 Token stocké:", token.substring(0, 20) + "...");
-        console.log("💾 Profil complet:", isProfileComplete);
+       
         
         toast.success("Connexion réussie !");
 
         // ✅ REDIRECTION CONDITIONNELLE
-        if (!isProfileComplete) {
-          console.log("➡️ Profil incomplet - Redirection vers complete-profile");
-          router.push("/auth/complete-profile");
-        } else {
+       
           console.log("➡️ Profil complet - Redirection vers dashboard");
           router.push("/dashboard-reservation");
-        }
+        
       } else {
         throw new Error("Token non reçu");
       }
