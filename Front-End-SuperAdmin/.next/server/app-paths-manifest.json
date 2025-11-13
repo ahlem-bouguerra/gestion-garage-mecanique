@@ -1,6 +1,0 @@
-{
-  "/(client)/auth/sign-in/page": "app/(client)/auth/sign-in/page.js",
-  "/(client)/chercher-garage/page": "app/(client)/chercher-garage/page.js",
-  "/(client)/Voiture/page": "app/(client)/Voiture/page.js",
-  "/(client)/auth/sign-up/page": "app/(client)/auth/sign-up/page.js"
-}
