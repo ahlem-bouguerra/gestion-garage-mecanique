@@ -1,0 +1,36 @@
+@media print {
+  /* 1. Cacher tous les boutons (dont celui d'impression) */
+  .no-print, button {
+    display: none !important;
+  }
+
+  /* 2. Forcer tout le contenu dans une seule page */
+  body, html, #invoice-print {
+    margin: 0;
+    padding: 0;
+    height: auto !important;
+    overflow: visible !important;
+
+    page-break-before: avoid;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* 3. Définir la taille de page */
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  /* 4. Réduction automatique pour tout faire tenir sur une seule page */
+  #invoice-print {
+    transform: scale(0.9); /* ajuste : 0.9, 0.8, etc. selon ton contenu */
+    transform-origin: top left;
+    width: 100%;
+  }
+  
+
+  table {
+    page-break-inside: avoid;
+  }
+}

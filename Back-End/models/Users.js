@@ -12,15 +12,11 @@ const usersSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: function () {
-            return !this.googleId;
-        }
+        required: true
     },
     phone: {
         type: String,
-        required: function () {
-            return !this.googleId;
-        }
+        required: true
     },
     isVerified: {
         type: Boolean,
@@ -38,7 +34,7 @@ const usersSchema = new mongoose.Schema({
      // Super admin a tous les droits
   isSuperAdmin: {
     type: Boolean,
-    default: true
+    default: false
   },
 
 

@@ -3,11 +3,19 @@ import jwt from "jsonwebtoken";
 import { Users } from "../../models/Users.js";
 import { sendVerificationEmailForCient } from "../../utils/mailerSuperAdmin.js";
 
-// ========== INSCRIPTION SUPER ADMIN ==========
-export const registerSuperAdmin = async (req, res) => {
+// ========== INSCRIPTION UTILISATEUR PUBLIC (NON SUPER ADMIN) ==========
+export const registerUser = async (req, res) => {
   const { username, email, password, phone } = req.body;
   
-  console.log("📥 Inscription Super Admin:", { username, email });
+  console.log("📥 Inscription utilisateur:", { username, email });
+  
+  // ✅ SÉCURITÉ : Bloquer toute tentative de se créer en tant que SuperAdmin
+  if (req.body.isSuperAdmin || req.body.isSuperAdmin === true) {
+    console.warn("⚠️ Tentative de création SuperAdmin bloquée:", email);
+    return res.status(403).json({ 
+      message: "Impossible de se créer en tant que SuperAdmin" 
+    });
+  }
   
   if (!username || !email || !password || !phone) {
     return res.status(400).json({ 
@@ -28,25 +36,26 @@ export const registerSuperAdmin = async (req, res) => {
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // Créer le super admin
-    const newAdmin = await Users.create({
+    // ✅ Créer l'utilisateur NORMAL (isSuperAdmin: false forcé)
+    const newUser = await Users.create({
       username,
       email,
       password: hashedPassword,
       phone,
       isVerified: false,
-      isSuperAdmin: true
+      isSuperAdmin: false // ✅ FORCÉ À FALSE
     });
     
-    console.log("✅ Super admin créé:", {
-      id: newAdmin._id,
-      email: newAdmin.email
+    console.log("✅ Utilisateur créé:", {
+      id: newUser._id,
+      email: newUser.email,
+      isSuperAdmin: newUser.isSuperAdmin // devrait être false
     });
     
     // Envoyer l'email de vérification
     const verificationToken = jwt.sign(
       { 
-        userId: newAdmin._id, 
+        userId: newUser._id, 
         purpose: 'email_verification' 
       },
       process.env.JWT_SECRET,
@@ -57,12 +66,12 @@ export const registerSuperAdmin = async (req, res) => {
     console.log("📧 Email de vérification envoyé à:", email);
     
     res.status(201).json({
-      message: "Super admin créé avec succès. Vérifiez votre email.",
-      userId: newAdmin._id
+      message: "Compte créé avec succès. Vérifiez votre email.",
+      userId: newUser._id
     });
     
   } catch (error) {
-    console.error("❌ Erreur inscription super admin:", error);
+    console.error("❌ Erreur inscription utilisateur:", error);
     res.status(500).json({ 
       message: "Erreur serveur", 
       error: error.message 
@@ -70,36 +79,30 @@ export const registerSuperAdmin = async (req, res) => {
   }
 };
 
-// ========== LOGIN SUPER ADMIN ==========
-export const loginSuperAdmin = async (req, res) => {
+// ========== LOGIN (UTILISATEURS ET SUPER ADMINS) ==========
+export const loginUser = async (req, res) => {
   const { email, password } = req.body;
   
-  console.log("🔐 Tentative de connexion Super Admin:", email);
+  console.log("🔐 Tentative de connexion:", email);
   
   try {
-    // Trouver le super admin
-    const admin = await Users.findOne({ email });
+    // Trouver l'utilisateur
+    const user = await Users.findOne({ email });
     
-    if (!admin) {
+    if (!user) {
       return res.status(401).json({ 
         message: "Email ou mot de passe incorrect" 
       });
     }
     
-    if (!admin.isSuperAdmin) {
-      return res.status(403).json({ 
-        message: "Vous n'êtes pas autorisé à accéder à cette interface." 
-      });
-    }
-    
-    if (!admin.isVerified) {
+    if (!user.isVerified) {
       return res.status(403).json({ 
         message: "Compte non vérifié. Vérifiez votre email." 
       });
     }
     
     // Vérifier le mot de passe
-    const passwordMatch = await bcrypt.compare(password, admin.password);
+    const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ 
         message: "Email ou mot de passe incorrect" 
@@ -109,47 +112,153 @@ export const loginSuperAdmin = async (req, res) => {
     // Générer le token
     const token = jwt.sign(
       {
-        userId: admin._id,
-        email: admin.email,
-        isSuperAdmin: admin.isSuperAdmin
+        userId: user._id,
+        email: user.email,
+        isSuperAdmin: user.isSuperAdmin // peut être true ou false
       },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
     
-    console.log("✅ Super admin connecté:", admin.email);
+    console.log("✅ Utilisateur connecté:", {
+      email: user.email,
+      isSuperAdmin: user.isSuperAdmin
+    });
     
     res.json({
       message: "Connexion réussie",
       token,
       user: {
-        id: admin._id,
-        username: admin.username,
-        email: admin.email,
-        phone: admin.phone,
-        isSuperAdmin: admin.isSuperAdmin
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        isSuperAdmin: user.isSuperAdmin
       }
     });
     
   } catch (error) {
-    console.error("❌ Erreur login super admin:", error);
+    console.error("❌ Erreur login:", error);
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
 
-// ========== LOGOUT SUPER ADMIN ==========
-export const logoutSuperAdmin = async (req, res) => {
+// ========== LOGOUT ==========
+export const logoutUser = async (req, res) => {
   try {
-    // Le logout se fait côté client en supprimant le token
-    console.log("✅ Super admin déconnecté:", req.user?.email);
+    console.log("✅ Utilisateur déconnecté:", req.user?.email);
     
     res.json({
       message: "Déconnexion réussie"
     });
     
   } catch (error) {
-    console.error("❌ Erreur logout super admin:", error);
+    console.error("❌ Erreur logout:", error);
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
 
+// ========== PROMOUVOIR UN UTILISATEUR EN SUPER ADMIN (PROTÉGÉ) ==========
+export const promoteToSuperAdmin = async (req, res) => {
+  try {
+    // ✅ Vérifier que l'utilisateur qui fait la demande est bien SuperAdmin
+    if (!req.user?.isSuperAdmin) {
+      console.warn("⚠️ Tentative de promotion par non-SuperAdmin:", req.user?.email);
+      return res.status(403).json({ 
+        message: "Accès refusé. Vous devez être SuperAdmin." 
+      });
+    }
+
+    const { id } = req.params; // ID de l'utilisateur à promouvoir
+    
+    const user = await Users.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
+
+    // ✅ Vérifier que l'email est vérifié avant promotion
+    if (!user.isVerified) {
+      return res.status(400).json({ 
+        message: "L'utilisateur doit vérifier son email avant d'être promu" 
+      });
+    }
+
+    // ✅ Vérifier si déjà SuperAdmin
+    if (user.isSuperAdmin) {
+      return res.status(400).json({ 
+        message: "Cet utilisateur est déjà SuperAdmin" 
+      });
+    }
+
+    // ✅ Promouvoir
+    user.isSuperAdmin = true;
+    await user.save();
+
+    console.log("✅ Utilisateur promu SuperAdmin:", {
+      promotedBy: req.user.email,
+      promotedUser: user.email
+    });
+
+    res.json({ 
+      message: "Utilisateur promu SuperAdmin avec succès",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        isSuperAdmin: user.isSuperAdmin
+      }
+    });
+    
+  } catch (err) {
+    console.error("❌ Erreur promotion:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+// ========== RÉTROGRADER UN SUPER ADMIN (PROTÉGÉ) ==========
+export const demoteSuperAdmin = async (req, res) => {
+  try {
+    // ✅ Vérifier que l'utilisateur qui fait la demande est bien SuperAdmin
+    if (!req.user?.isSuperAdmin) {
+      return res.status(403).json({ message: "Accès refusé" });
+    }
+
+    const { id } = req.params;
+    
+    const user = await Users.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
+
+    // ✅ Empêcher la rétrogradation du dernier SuperAdmin
+    const totalSuperAdmins = await Users.countDocuments({ isSuperAdmin: true });
+    if (user.isSuperAdmin && totalSuperAdmins <= 1) {
+      return res.status(400).json({ 
+        message: "Impossible de rétrograder le dernier SuperAdmin" 
+      });
+    }
+
+    // ✅ Rétrograder
+    user.isSuperAdmin = false;
+    await user.save();
+
+    console.log("✅ SuperAdmin rétrogradé:", {
+      demotedBy: req.user.email,
+      demotedUser: user.email
+    });
+
+    res.json({ 
+      message: "SuperAdmin rétrogradé avec succès",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        isSuperAdmin: user.isSuperAdmin
+      }
+    });
+    
+  } catch (err) {
+    console.error("❌ Erreur rétrogradation:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};

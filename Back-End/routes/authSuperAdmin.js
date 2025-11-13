@@ -6,8 +6,14 @@ import { createPermission , getAllPermissions, getPermissionById , updatePermiss
 import {createRolePermission,getAllRolePermissions,getRolePermissionById,deleteRolePermission } from "../controllers/superAdmin/rolePermissionController.js";
 import { createGaragisteRole,getAllGaragisteRoles,getGaragisteRoleById,deleteGaragisteRole} from "../controllers/superAdmin/garagisteRoleController.js";
 import {createGarageWithGaragiste,getAllGarages,getGarageById,updateGarage,toggleGarageStatus,deleteGarage} from "../controllers/superAdmin/garageController.js";
-import {registerSuperAdmin,loginSuperAdmin,logoutSuperAdmin} from "../controllers/superAdmin/AuthControllerSuperAdmin.js";
 import { superAdminMiddleware } from "../middlewares/authMiddleware.js";
+import {
+  registerUser,           // ✅ Inscription PUBLIC (non SuperAdmin)
+  loginUser,              // ✅ Login pour TOUS
+  logoutUser,             // ✅ Logout pour TOUS
+  promoteToSuperAdmin,    // ✅ PROTÉGÉ : promouvoir
+  demoteSuperAdmin,       // ✅ PROTÉGÉ : rétrograder
+} from "../controllers/superAdmin/AuthControllerSuperAdmin.js";
 const router = express.Router();
 
 router.get("/me", adminAuthMiddleware, async (req, res) => {
@@ -23,9 +29,17 @@ router.get("/me", adminAuthMiddleware, async (req, res) => {
   }
 });
 router.get("/admin/verify-token/:token", verifEmailSuperAdmin);
-router.post("/auth/register", registerSuperAdmin);
-router.post("/auth/login", loginSuperAdmin);
-router.post("/auth/logout", logoutSuperAdmin);
+
+// ========== ROUTES PUBLIQUES ==========
+router.post("/auth/register", registerUser);        // ✅ Inscription (isSuperAdmin bloqué)
+router.post("/auth/login", loginUser);              // ✅ Login (tous les users)
+
+// ========== ROUTES PROTÉGÉES ==========
+router.post("/auth/logout", adminAuthMiddleware, logoutUser);
+
+// ========== GESTION DES SUPER ADMINS (PROTÉGÉ) ==========
+router.patch("/users/:id/promote", adminAuthMiddleware, promoteToSuperAdmin);   // ✅ Promouvoir
+router.patch("/users/:id/demote", adminAuthMiddleware, demoteSuperAdmin);       // ✅ Rétrograder
 
 
 // CRUD des rôles
