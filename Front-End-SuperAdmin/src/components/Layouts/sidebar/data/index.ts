@@ -17,19 +17,10 @@ export const NAV_DATA = [
         items: [],
       },*/
       {
-        title: "Mes Réservations",
-        url: "/client/reservations",
-        icon: Calendar,
-        items: [
-          {
-            title: "Historique",
-            url: "/historique-reservation",
-          },
-         /* {
-            title: "Nouvelle réservation",
-            url: "/reservation-cote-client",
-          },*/
-        ],
+        title: "Les SuperAdmins",
+        url: "/TableSuperAdmin",
+        icon: User,
+        items: [ ],
       },
       {
         title: "Mes Véhicules",
