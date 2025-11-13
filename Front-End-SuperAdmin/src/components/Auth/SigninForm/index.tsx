@@ -75,10 +75,10 @@ export default function SigninWithPassword() {
     <div className="w-full">
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Sign In
+          Se connecter
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Enter your credentials to access your account
+          Saisissez vos identifiants pour accéder à votre compte.
         </p>
       </div>
 
@@ -87,7 +87,8 @@ export default function SigninWithPassword() {
           type="email"
           label="Email"
           className="mb-4"
-          placeholder="Enter your email"
+          placeholder="
+Entrez votre email"
           name="email"
           handleChange={handleChange}
           value={data.email}
@@ -98,7 +99,7 @@ export default function SigninWithPassword() {
           type="password"
           label="Password"
           className="mb-5"
-          placeholder="Enter your password"
+          placeholder="Entrez votre mot de passe"
           name="password"
           handleChange={handleChange}
           value={data.password}
@@ -109,8 +110,8 @@ export default function SigninWithPassword() {
           <Link
             href="/auth/forgot-password"
             className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-          >
-            Forgot Password?
+          >       
+Mot de passe oublié ?
           </Link>
         </div>
 
@@ -122,11 +123,11 @@ export default function SigninWithPassword() {
           >
             {loading ? (
               <>
-                Signing in...
+                Se connecter...
                 <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-white dark:border-gray-900 border-t-transparent" />
               </>
             ) : (
-              "Sign In"
+              "Se connecter"
             )}
           </button>
         </div>
@@ -134,12 +135,12 @@ export default function SigninWithPassword() {
         {/* Sign-up Link */}
         <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Don't have an account?{" "}
+            Vous n'avez pas de compte ?{" "}
             <Link
               href="/auth/sign-up"
               className="font-semibold text-gray-900 dark:text-white hover:underline transition-all"
             >
-              Sign up
+              S'inscrire
             </Link>
           </p>
         </div>

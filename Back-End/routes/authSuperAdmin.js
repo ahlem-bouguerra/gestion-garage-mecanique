@@ -13,6 +13,7 @@ import {
   logoutUser,             // ✅ Logout pour TOUS
   promoteToSuperAdmin,    // ✅ PROTÉGÉ : promouvoir
   demoteSuperAdmin,       // ✅ PROTÉGÉ : rétrograder
+  getAllUsers
 } from "../controllers/superAdmin/AuthControllerSuperAdmin.js";
 const router = express.Router();
 
@@ -36,6 +37,7 @@ router.post("/auth/login", loginUser);              // ✅ Login (tous les users
 
 // ========== ROUTES PROTÉGÉES ==========
 router.post("/auth/logout", adminAuthMiddleware, logoutUser);
+router.get("/getAllUsers", adminAuthMiddleware, getAllUsers);
 
 // ========== GESTION DES SUPER ADMINS (PROTÉGÉ) ==========
 router.patch("/users/:id/promote", adminAuthMiddleware, promoteToSuperAdmin);   // ✅ Promouvoir

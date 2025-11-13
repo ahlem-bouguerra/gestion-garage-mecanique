@@ -63,7 +63,7 @@ export default function SignupForm() {
           
 
           {/* Titre */}
-          <h2 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r bg-white bg-clip-text text-transparent">
             🎉 Inscription réussie !
           </h2>
 
@@ -79,7 +79,7 @@ export default function SignupForm() {
           <div className="flex justify-center">
             <button
               onClick={onClose}
-              className="relative px-8 py-3 font-semibold text-white uppercase transition-all duration-300 bg-gradient-to-r from-orange-500 to-red-500 rounded-full hover:from-orange-600 hover:to-red-600 hover:scale-105 hover:shadow-lg transform"
+              className="relative px-8 py-3 font-semibold text-black uppercase transition-all duration-300 bg-gradient-to-r bg-white rounded-full hover:from-orange-600 hover:to-red-600 hover:scale-105 hover:shadow-lg transform"
             >
               Confirmer
             </button>
@@ -215,7 +215,7 @@ export default function SignupForm() {
     setPending(true);
     try {
       const cleanPhone = phone.replace(/\s/g, '');
-      const response = await axios.post("http://localhost:5000/api/client/signup", {
+      const response = await axios.post("http://localhost:5000/api/auth/register", {
         username,
         email,
         password,
@@ -250,19 +250,19 @@ export default function SignupForm() {
     if (!password) return null;
     return (
       <div className="mt-2 space-y-1">
-        <div className={`text-xs flex items-center ${criteria.minLength ? 'text-green-400' : 'text-red-400'}`}>
+        <div className={`text-xs flex items-center ${criteria.minLength ? 'text-green-400' : 'text-red-800'}`}>
           {criteria.minLength ? '✓' : '✗'} Au moins 8 caractères
         </div>
-        <div className={`text-xs flex items-center ${criteria.hasUpperCase ? 'text-green-400' : 'text-red-400'}`}>
+        <div className={`text-xs flex items-center ${criteria.hasUpperCase ? 'text-green-400' : 'text-red-800'}`}>
           {criteria.hasUpperCase ? '✓' : '✗'} Une lettre majuscule
         </div>
-        <div className={`text-xs flex items-center ${criteria.hasLowerCase ? 'text-green-400' : 'text-red-400'}`}>
+        <div className={`text-xs flex items-center ${criteria.hasLowerCase ? 'text-green-400' : 'text-red-800'}`}>
           {criteria.hasLowerCase ? '✓' : '✗'} Une lettre minuscule
         </div>
-        <div className={`text-xs flex items-center ${criteria.hasNumbers ? 'text-green-400' : 'text-red-400'}`}>
+        <div className={`text-xs flex items-center ${criteria.hasNumbers ? 'text-green-400' : 'text-red-800'}`}>
           {criteria.hasNumbers ? '✓' : '✗'} Un chiffre
         </div>
-        <div className={`text-xs flex items-center ${criteria.hasSpecialChar ? 'text-green-400' : 'text-red-400'}`}>
+        <div className={`text-xs flex items-center ${criteria.hasSpecialChar ? 'text-green-400' : 'text-red-800'}`}>
           {criteria.hasSpecialChar ? '✓' : '✗'} Un caractère spécial (!@#$%^&*...)
         </div>
       </div>
@@ -276,13 +276,13 @@ export default function SignupForm() {
 
     return (
       <div className="mt-2 space-y-1">
-        <div className={`text-xs flex items-center ${criteria.hasCorrectLength ? 'text-green-400' : 'text-red-400'}`}>
+        <div className={`text-xs flex items-center ${criteria.hasCorrectLength ? 'text-green-400' : 'text-red-800'}`}>
           {criteria.hasCorrectLength ? '✓' : '✗'} Exactement 8 chiffres
         </div>
-        <div className={`text-xs flex items-center ${criteria.isNumeric ? 'text-green-400' : 'text-red-400'}`}>
+        <div className={`text-xs flex items-center ${criteria.isNumeric ? 'text-green-400' : 'text-red-800'}`}>
           {criteria.isNumeric ? '✓' : '✗'} Uniquement des chiffres
         </div>
-        <div className={`text-xs flex items-center ${criteria.isValidTunisianFormat ? 'text-green-400' : 'text-red-400'}`}>
+        <div className={`text-xs flex items-center ${criteria.isValidTunisianFormat ? 'text-green-400' : 'text-red-800'}`}>
           {criteria.isValidTunisianFormat ? '✓' : '✗'} Format tunisien valide (commence par 2,4,5,9)
         </div>
       </div>
@@ -300,7 +300,7 @@ export default function SignupForm() {
             <input
               type="text"
               placeholder={isUsernameFocused ? '' : 'Nom et Prénom'}
-              className="w-full px-4 py-2 text-white bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-orange-500"
+              className="w-full px-4 py-2 text-black bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-gray-800"
               onFocus={() => setUsernameFocused(true)}
               onBlur={() => setUsernameFocused(false)}
               value={username}
@@ -312,7 +312,7 @@ export default function SignupForm() {
             <input
               type="email"
               placeholder={isEmailFocused ? '' : 'Adresse e-mail'}
-              className="w-full px-4 py-2 text-white bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-orange-500"
+              className="w-full px-4 py-2 text-black bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-gray-800"
               onFocus={() => setEmailFocused(true)}
               onBlur={() => setEmailFocused(false)}
               value={email}
@@ -325,7 +325,7 @@ export default function SignupForm() {
               <input
                 type="tel"
                 placeholder={isPhoneFocused ? '' : 'Numéro de téléphone (ex: 12 34 56 78)'}
-                className="w-full px-4 py-2 text-white bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-orange-500"
+                className="w-full px-4 py-2 text-black bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-gray-800"
                 onFocus={() => setPhoneFocused(true)}
                 onBlur={() => setPhoneFocused(false)}
                 value={phone}
@@ -334,7 +334,7 @@ export default function SignupForm() {
               />
               
               {/* Icône de téléphone */}
-              <div className="absolute top-0 right-0 h-full flex items-center px-3 text-white">
+              <div className="absolute top-0 right-0 h-full flex items-center px-3 text-black">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -351,7 +351,7 @@ export default function SignupForm() {
               <input
                 type={isPasswordVisible ? 'text' : 'password'}
                 placeholder={isPasswordFocused ? '' : 'Mot de passe'}
-                className="w-full px-4 py-2 text-white bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-orange-500"
+                className="w-full px-4 py-2 text-black bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-gray-800"
                 onFocus={() => setPasswordFocused(true)}
                 onBlur={() => setPasswordFocused(false)}
                 value={password}
@@ -359,7 +359,7 @@ export default function SignupForm() {
               />
               <button
                 type="button"
-                className="absolute top-0 right-0 h-full flex items-center px-3 text-white"
+                className="absolute top-0 right-0 h-full flex items-center px-3 text-black"
                 onClick={togglePasswordVisibility}
               >
                 {isPasswordVisible ? (
@@ -388,7 +388,7 @@ export default function SignupForm() {
               <input
                 type={isPasswordVisible ? 'text' : 'password'}
                 placeholder={isConfirmPasswordFocused ? '' : 'Confirmer le mot de passe'}
-                className="w-full px-4 py-2 text-white bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-orange-500"
+                className="w-full px-4 py-2 text-black bg-transparent border-b-2 border-white rounded-none focus:outline-none focus:border-gray-800"
                 onFocus={() => setConfirmPasswordFocused(true)}
                 onBlur={() => setConfirmPasswordFocused(false)}
                 value={ConfirmPassword}
@@ -396,7 +396,7 @@ export default function SignupForm() {
               />
               <button
                 type="button"
-                className="absolute top-0 right-0 h-full flex items-center px-3 text-white"
+                className="absolute top-0 right-0 h-full flex items-center px-3 text-black"
                 onClick={togglePasswordVisibility}
               >
                 {isPasswordVisible ? (
@@ -419,11 +419,11 @@ export default function SignupForm() {
             {ConfirmPassword && (
               <div className="mt-2">
                 {password === ConfirmPassword ? (
-                  <div className="text-xs text-green-400 flex items-center">
+                  <div className="text-xs text-green-800 flex items-center">
                     ✓ Les mots de passe correspondent
                   </div>
                 ) : (
-                  <div className="text-xs text-red-400 flex items-center">
+                  <div className="text-xs text-red-800 flex items-center">
                     ✗ Les mots de passe ne correspondent pas
                   </div>
                 )}
@@ -435,7 +435,7 @@ export default function SignupForm() {
           {/* Affichage des erreurs */}
           {error && (
             <div className="flex items-center justify-center mb-6">
-              <span className="px-6 py-2 text-white bg-orange-500 rounded">{error}</span>
+              <span className="px-6 py-2 text-black bg-gray-800 rounded">{error}</span>
             </div>
           )}
 
@@ -443,25 +443,25 @@ export default function SignupForm() {
           <div className="flex flex-col items-center mb-6">
             <button 
               id="registerButton" 
-              className="relative w-1/2 px-4 py-2 mt-2 font-medium text-white uppercase transition-colors bg-transparent border-2 border-white before:absolute before:left-0 before:top-0 before:-z-10 before:h-full before:w-full before:origin-top-left before:scale-x-0 before:bg-orange-500 before:transition-transform before:duration-300 before:content-[''] hover:text-white before:hover:scale-x-100" 
+              className="relative w-1/2 px-4 py-2 mt-2 font-medium text-black uppercase transition-colors bg-transparent border-2 border-white before:absolute before:left-0 before:top-0 before:-z-10 before:h-full before:w-full before:origin-top-left before:scale-x-0 bg-white text-black hover:bg-gray-800 before:transition-transform before:duration-300 before:content-[''] hover:text-white before:hover:scale-x-100" 
               type='submit'
               disabled={pending}
             >
               {pending ? "Inscription en cours..." : "S'inscrire"}
             </button>
           </div>
-             <div className="text-center pt-4 border-t border-orange-500/20">
+             <div className="text-center pt-4 border-t border-gray-700">
      
       
           <Link 
             href="/auth/sign-in"
-            className="group font-semibold text-orange-400 hover:text-orange-300 transition-colors duration-200"
+            className="group font-semibold text-black-800 hover:text-black-800 transition-colors duration-200"
           >
             <span className="relative">
-              Sign in
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-400 transition-all duration-300 group-hover:w-full"></span>
+              Se connecter
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-black-800 transition-all duration-300 group-hover:w-full"></span>
             </span>
-            <span className="inline-block ml-1 transition-transform duration-200 group-hover:translate-x-1 text-orange-300">
+            <span className="inline-block ml-1 transition-transform duration-200 group-hover:translate-x-1 text-black-800">
               →
             </span>
           </Link>

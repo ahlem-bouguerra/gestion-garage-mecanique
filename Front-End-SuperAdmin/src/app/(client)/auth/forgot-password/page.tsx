@@ -1,40 +1,21 @@
+import ForgotPasswordForm from "@/components/Auth/ForgotPassword";import Signin from "../../../../components/Auth/SigninForm";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import type { Metadata } from "next";
-import ForgotPasswordForm from "@/components/Auth/ForgotPassword";
-
 
 export const metadata: Metadata = {
-  title: "Connexion - Garage Pro",
+  title: "Sign in",
 };
 
-export default function ForgotPassword() {
+export default function SignIn() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-zinc-900">
-      {/* Industrial Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              linear-gradient(45deg, transparent 35%, rgba(255,165,0,0.1) 35%, rgba(255,165,0,0.1) 70%, transparent 70%),
-              linear-gradient(-45deg, transparent 35%, rgba(255,165,0,0.05) 35%, rgba(255,165,0,0.05) 70%, transparent 70%)
-            `,
-            backgroundSize: '30px 30px'
-          }}
-        ></div>
-      </div>
+    <>
+      <Breadcrumb pageName="Sign In" />
 
-      {/* Animated Background Elements */}
-
-
-      {/* Main Container - Plus grand cadre */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-[95vw] xl:max-w-[1000px]">
-          {/* Cadre principal englobant */}
-          <div className="bg-slate-800/30 backdrop-blur-sm border-2 border-orange-500/40 rounded-3xl p-6 shadow-2xl shadow-orange-500/20">
-             <ForgotPasswordForm/>
-          </div>
+      <div className="flex items-center justify-center min-h-[calc(100vh-200px)] px-4">
+        <div className="w-full max-w-md rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card p-6 sm:p-8 md:p-10">
+          <ForgotPasswordForm />
         </div>
       </div>
-    </div>
+    </>
   );
 }

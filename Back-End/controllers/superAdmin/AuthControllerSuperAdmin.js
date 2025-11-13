@@ -100,6 +100,12 @@ export const loginUser = async (req, res) => {
         message: "Compte non vérifié. Vérifiez votre email." 
       });
     }
+
+    if (!user.isSuperAdmin) {
+      return res.status(403).json({ 
+        message: "Role non autorisé. Accès réservé aux Super Admins." 
+      });
+    }
     
     // Vérifier le mot de passe
     const passwordMatch = await bcrypt.compare(password, user.password);
@@ -260,5 +266,14 @@ export const demoteSuperAdmin = async (req, res) => {
   } catch (err) {
     console.error("❌ Erreur rétrogradation:", err);
     res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await Users.find().sort({ createdAt: -1 });
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors de la récupération des users.", error: error.message });
   }
 };
