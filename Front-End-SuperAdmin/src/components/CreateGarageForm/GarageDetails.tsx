@@ -13,9 +13,11 @@ import {
   Phone,
   Shield,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Eye // Ajouter cette icône
 } from 'lucide-react';
 import { getGarageById } from './api';
+import GaragisteDetailsModal from './GaragisteDetailsModal'; // Importer la modal
 
 interface GarageDetailsProps {
   garageId: string;
@@ -27,6 +29,10 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
   const [garage, setGarage] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // États pour la modal
+  const [selectedGaragisteId, setSelectedGaragisteId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchGarageDetails();
@@ -43,6 +49,16 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewGaragiste = (garagisteId: string) => {
+    setSelectedGaragisteId(garagisteId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedGaragisteId(null);
   };
 
   if (loading) {
@@ -93,8 +109,6 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
 
       {/* Informations du garage */}
       <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
-       
-
         <div className="p-8">
           <div className="flex items-start justify-between mb-6">
             <div>
@@ -223,17 +237,16 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
                       </span>
                     </div>
                   )}
-                  {
-                    <div className="pt-2 mt-2 border-t border-gray-200">
-                      <button
-                      onClick={() => onAddGaragiste(garage)}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
+                  
+                  <div className="pt-2 mt-2 border-t border-gray-200">
+                    <button
+                      onClick={() => handleViewGaragiste(garagiste._id)}
+                      className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
                     >
-                    
+                      <Eye className="w-4 h-4" />
                       Voir plus de détails
                     </button>
-                    </div>
-                  }
+                  </div>
                 </div>
               </div>
             ))}
@@ -253,6 +266,15 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
           </div>
         )}
       </div>
+
+      {/* Modal des détails du garagiste */}
+      {selectedGaragisteId && (
+        <GaragisteDetailsModal
+          garagisteId={selectedGaragisteId}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 }

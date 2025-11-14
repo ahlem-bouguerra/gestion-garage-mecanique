@@ -107,12 +107,21 @@ export const getGarageById = async (_id: string) => {
 
 export const getGaragisteById = async (id: string) => {
   try {
+    if (!id) {
+      throw new Error('ID du garagiste requis');
+    }
+
+    console.log('📡 Appel API:', `${API_BASE}/garagistes/${id}`);
+
     const { data } = await axios.get(`${API_BASE}/garagistes/${id}`, {
       headers: getAuthHeaders()
     });
-    return  data;
-  } catch (error) {
-    console.error('Erreur chargement garagiste:', error);
+    
+    console.log('✅ Réponse API reçue:', data);
+    return data;
+  } catch (error: any) {
+    console.error('❌ Erreur chargement garagiste:', error.response?.data || error.message);
     throw error;
   }
-}   
+};
+

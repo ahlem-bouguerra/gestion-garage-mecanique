@@ -5,7 +5,7 @@ import {createRole,getAllRoles,getRoleById,updateRole,deleteRole,} from "../cont
 import { createPermission , getAllPermissions, getPermissionById , updatePermission , deletePermission } from "../controllers/superAdmin/permissionController.js";
 import {createRolePermission,getAllRolePermissions,getRolePermissionById,deleteRolePermission } from "../controllers/superAdmin/rolePermissionController.js";
 import { createGaragisteRole,getAllGaragisteRoles,getGaragisteRoleById,deleteGaragisteRole} from "../controllers/superAdmin/garagisteRoleController.js";
-import {createGarage,  createGaragisteForGarage,getAllGarages,getGarageById,updateGarage,toggleGarageStatus,deleteGarage} from "../controllers/superAdmin/garageController.js";
+import {createGarage,  createGaragisteForGarage,getAllGarages,getGarageById,updateGarage,toggleGarageStatus,deleteGarage,getGaragisteById} from "../controllers/superAdmin/garageController.js";
 import { superAdminMiddleware } from "../middlewares/authMiddleware.js";
 import {
   registerUser,           // ✅ Inscription PUBLIC (non SuperAdmin)
@@ -79,6 +79,8 @@ router.get("/garages/:id", getGarageById);
 router.put("/garages/:id", updateGarage);
 router.patch("/garages/:id/toggle-status", toggleGarageStatus);
 router.delete("/garages/:id", deleteGarage);
+router.get('/garagistes/:garagisteId', superAdminMiddleware, getGaragisteById);
+
 
 
 export default router;

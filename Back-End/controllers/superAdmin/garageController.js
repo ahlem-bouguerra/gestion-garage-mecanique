@@ -5,6 +5,8 @@ import { Garage } from "../../models/Garage.js";
 import { sendVerificationEmail } from "../../utils/mailer.js";
 import { GaragisteRole } from "../../models/GaragisteRole.js";
 import { Role } from "../../models/Role.js";
+import { RolePermission } from "../../models/RolePermission.js";
+import { Permission } from "../../models/Permission.js";
 
 // ========== CRÉER UNIQUEMENT LE GARAGE (Étape 1) ==========
 export const createGarage = async (req, res) => {
@@ -374,5 +376,128 @@ export const deleteGarage = async (req, res) => {
   } catch (error) {
     console.error("❌ Erreur deleteGarage:", error);
     res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+
+// ========== GET GARAGISTE BY ID AVEC RÔLE ET PERMISSIONS ==========
+export const getGaragisteById = async (req, res) => {
+  const { garagisteId } = req.params;
+
+  console.log("📥 Récupération du garagiste:", garagisteId);
+
+  try {
+    // ✅ D'abord vérifier si garagisteId existe
+    if (!garagisteId) {
+      return res.status(400).json({ 
+        message: "ID de garagiste manquant" 
+      });
+    }
+
+    // ✅ Ensuite valider le format
+    if (!garagisteId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ 
+        message: "ID de garagiste invalide" 
+      });
+    }
+
+    // Le reste de votre code...
+    const garagiste = await Garagiste.findById(garagisteId)
+      .select('-password -resetPasswordToken -resetPasswordExpires')
+      .populate('createdBy', 'username email')
+      .lean();
+
+    if (!garagiste) {
+      return res.status(404).json({ 
+        message: "Garagiste non trouvé" 
+      });
+    }
+
+    console.log("✅ Garagiste trouvé:", garagiste.username);
+
+    const garagisteRole = await GaragisteRole.findOne({ 
+      garagisteId: garagiste._id 
+    }).lean();
+
+    if (!garagisteRole) {
+      return res.status(404).json({ 
+        message: "Aucun rôle assigné à ce garagiste" 
+      });
+    }
+
+    const role = await Role.findById(garagisteRole.roleId).lean();
+
+    if (!role) {
+      return res.status(404).json({ 
+        message: "Rôle non trouvé dans la base de données" 
+      });
+    }
+
+    const rolePermissions = await RolePermission.find({ 
+      roleId: role._id 
+    }).lean();
+
+    const permissionIds = rolePermissions.map(rp => rp.permissionId);
+    const permissions = await Permission.find({ 
+      _id: { $in: permissionIds } 
+    }).lean();
+
+    const formattedPermissions = permissions.map(permission => ({
+      id: permission._id,
+      name: permission.name,
+      description: permission.description || '',
+      category: permission.category || '',
+      createdAt: permission.createdAt
+    }));
+
+    const isAdmin = role.name === "Admin Garage" || 
+                    role.name === "Admin" || 
+                    role.name.toLowerCase().includes("admin");
+
+    const response = {
+      garagiste: {
+        id: garagiste._id,
+        username: garagiste.username,
+        email: garagiste.email,
+        phone: garagiste.phone,
+        isVerified: garagiste.isVerified,
+        isAdmin: isAdmin,
+        garageId: garagiste.garage || null,
+        createdAt: garagiste.createdAt,
+        updatedAt: garagiste.updatedAt,
+        createdBy: garagiste.createdBy ? {
+          id: garagiste.createdBy._id,
+          username: garagiste.createdBy.username,
+          email: garagiste.createdBy.email
+        } : null
+      },
+      role: {
+        id: role._id,
+        name: role.name,
+        description: role.description || '',
+        createdAt: role.createdAt
+      },
+      permissions: formattedPermissions,
+      stats: {
+        totalPermissions: formattedPermissions.length,
+        isAdmin: isAdmin,
+        hasGarage: !!garagiste.garage,
+        accountStatus: garagiste.isVerified ? 'Vérifié' : 'En attente de vérification'
+      }
+    };
+
+    console.log("✅ Réponse complète construite");
+
+    res.status(200).json({
+      message: "Garagiste récupéré avec succès",
+      data: response
+    });
+
+  } catch (err) {
+    console.error("❌ Erreur récupération garagiste:", err.message);
+    res.status(500).json({
+      message: "Erreur serveur lors de la récupération",
+      error: err.message
+    });
   }
 };
