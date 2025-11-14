@@ -25,12 +25,14 @@ export const createRole = async (req, res) => {
 /**
  * ✅ Lire tous les rôles
  */
+// ========== OBTENIR TOUS LES RÔLES DISPONIBLES ==========
 export const getAllRoles = async (req, res) => {
   try {
-    const roles = await Role.find().sort({ createdAt: -1 });
-    res.status(200).json(roles);
+    const roles = await Role.find().select('_id name description');
+    res.json(roles );
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la récupération des rôles.", error: error.message });
+    console.error("❌ Erreur getAllRoles:", error);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 };
 

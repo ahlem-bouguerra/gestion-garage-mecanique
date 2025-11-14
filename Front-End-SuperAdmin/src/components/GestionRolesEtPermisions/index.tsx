@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Check, X, Shield, Key, Link } from 'lucide-react';
+import axios from 'axios';
 
 const API_BASE = 'http://localhost:5000/api'; // Adaptez selon votre configuration
 
@@ -32,8 +33,7 @@ export default function RolePermissionManager() {
 
   const loadRoles = async () => {
     try {
-      const res = await fetch(`${API_BASE}/getAllRoles`);
-      const data = await res.json();
+      const { data } = await axios.get(`${API_BASE}/getAllRoles`);
       setRoles(data);
     } catch (error) {
       alert('Erreur lors du chargement des rôles');
@@ -42,8 +42,7 @@ export default function RolePermissionManager() {
 
   const loadPermissions = async () => {
     try {
-      const res = await fetch(`${API_BASE}/getAllPermissions`);
-      const data = await res.json();
+      const { data } = await axios.get(`${API_BASE}/getAllPermissions`);
       setPermissions(data);
     } catch (error) {
       alert('Erreur lors du chargement des permissions');
@@ -52,151 +51,138 @@ export default function RolePermissionManager() {
 
   const loadRolePermissions = async () => {
     try {
-      const res = await fetch(`${API_BASE}/getAllRolePermissions`);
-      const data = await res.json();
+      const { data } = await axios.get(`${API_BASE}/getAllRolePermissions`);
       setRolePermissions(data);
     } catch (error) {
       alert('Erreur lors du chargement des associations');
     }
   };
 
-  // CRUD Rôles
-  const handleSaveRole = async () => {
-    if (!roleForm.name.trim()) {
-      alert('Le nom du rôle est requis');
-      return;
+
+// CRUD Rôles
+const handleSaveRole = async () => {
+  if (!roleForm.name.trim()) {
+    alert('Le nom du rôle est requis');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const url = editingId 
+      ? `${API_BASE}/updateRole/${editingId}` 
+      : `${API_BASE}/creeRole`;
+    
+    // ✅ VERSION AXIOS
+    const { data } = editingId
+      ? await axios.put(url, roleForm)
+      : await axios.post(url, roleForm);
+
+    alert(data.message);
+    loadRoles();
+    setShowRoleModal(false);
+    setRoleForm({ name: '', description: '' });
+    setEditingId(null);
+  } catch (error) {
+    alert(error.response?.data?.message || 'Erreur lors de la sauvegarde');
+  }
+  setLoading(false);
+};
+
+const handleDeleteRole = async (id) => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer ce rôle ?')) return;
+
+  try {
+    // ✅ VERSION AXIOS
+    const { data } = await axios.delete(`${API_BASE}/deleteRole/${id}`);
+    alert(data.message);
+    loadRoles();
+    loadRolePermissions();
+  } catch (error) {
+    alert(error.response?.data?.message || 'Erreur lors de la suppression');
+  }
+};
+
+// CRUD Permissions
+const handleSavePermission = async () => {
+  if (!permissionForm.name.trim()) {
+    alert('Le nom de la permission est requis');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const url = editingId 
+      ? `${API_BASE}/updatePermission/${editingId}` 
+      : `${API_BASE}/creePermission`;
+    
+    // ✅ VERSION AXIOS
+    const { data } = editingId
+      ? await axios.put(url, permissionForm)
+      : await axios.post(url, permissionForm);
+
+    alert(data.message);
+    loadPermissions();
+    setShowPermissionModal(false);
+    setPermissionForm({ name: '', description: '' });
+    setEditingId(null);
+  } catch (error) {
+    alert(error.response?.data?.message || 'Erreur lors de la sauvegarde');
+  }
+  setLoading(false);
+};
+
+const handleDeletePermission = async (id) => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cette permission ?')) return;
+
+  try {
+    // ✅ VERSION AXIOS
+    const { data } = await axios.delete(`${API_BASE}/deletePermission/${id}`);
+    alert(data.message);
+    loadPermissions();
+    loadRolePermissions();
+  } catch (error) {
+    alert(error.response?.data?.message || 'Erreur lors de la suppression');
+  }
+};
+
+// Gestion des associations
+const handleAssignPermissions = async () => {
+  if (!selectedRole) {
+    alert('Veuillez sélectionner un rôle');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    // Supprimer les anciennes associations pour ce rôle
+    const existingAssociations = rolePermissions.filter(
+      rp => rp.roleId && rp.roleId._id === selectedRole
+    );
+    
+    for (const assoc of existingAssociations) {
+      // ✅ VERSION AXIOS
+      await axios.delete(`${API_BASE}/deleteRolePermission/${assoc._id}`);
     }
 
-    setLoading(true);
-    try {
-      const url = editingId 
-        ? `${API_BASE}/updateRole/${editingId}` 
-        : `${API_BASE}/creeRole`;
-      
-      const res = await fetch(url, {
-        method: editingId ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(roleForm)
+    // Créer les nouvelles associations
+    for (const permId of selectedPermissions) {
+      // ✅ VERSION AXIOS
+      await axios.post(`${API_BASE}/creeRolePermission`, {
+        roleId: selectedRole,
+        permissionId: permId
       });
-
-      const data = await res.json();
-      
-      if (res.ok) {
-        alert(data.message);
-        loadRoles();
-        setShowRoleModal(false);
-        setRoleForm({ name: '', description: '' });
-        setEditingId(null);
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      alert('Erreur lors de la sauvegarde');
-    }
-    setLoading(false);
-  };
-
-  const handleDeleteRole = async (id) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce rôle ?')) return;
-
-    try {
-      const res = await fetch(`${API_BASE}/deleteRole/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      alert(data.message);
-      loadRoles();
-      loadRolePermissions();
-    } catch (error) {
-      alert('Erreur lors de la suppression');
-    }
-  };
-
-  // CRUD Permissions
-  const handleSavePermission = async () => {
-    if (!permissionForm.name.trim()) {
-      alert('Le nom de la permission est requis');
-      return;
     }
 
-    setLoading(true);
-    try {
-      const url = editingId 
-        ? `${API_BASE}/updatePermission/${editingId}` 
-        : `${API_BASE}/creePermission`;
-      
-      const res = await fetch(url, {
-        method: editingId ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(permissionForm)
-      });
-
-      const data = await res.json();
-      
-      if (res.ok) {
-        alert(data.message);
-        loadPermissions();
-        setShowPermissionModal(false);
-        setPermissionForm({ name: '', description: '' });
-        setEditingId(null);
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      alert('Erreur lors de la sauvegarde');
-    }
-    setLoading(false);
-  };
-
-  const handleDeletePermission = async (id) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette permission ?')) return;
-
-    try {
-      const res = await fetch(`${API_BASE}/deletePermission/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      alert(data.message);
-      loadPermissions();
-      loadRolePermissions();
-    } catch (error) {
-      alert('Erreur lors de la suppression');
-    }
-  };
-
-  // Gestion des associations
-  const handleAssignPermissions = async () => {
-    if (!selectedRole) {
-      alert('Veuillez sélectionner un rôle');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Supprimer les anciennes associations pour ce rôle
-      const existingAssociations = rolePermissions.filter(
-        rp => rp.roleId && rp.roleId._id === selectedRole
-      );
-      for (const assoc of existingAssociations) {
-        await fetch(`${API_BASE}/deleteRolePermission/${assoc._id}`, { method: 'DELETE' });
-      }
-
-      // Créer les nouvelles associations
-      for (const permId of selectedPermissions) {
-        await fetch(`${API_BASE}/creeRolePermission`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ roleId: selectedRole, permissionId: permId })
-        });
-      }
-
-      alert('Permissions affectées avec succès');
-      loadRolePermissions();
-      setShowAssignModal(false);
-      setSelectedRole('');
-      setSelectedPermissions([]);
-    } catch (error) {
-      alert('Erreur lors de l\'affectation');
-    }
-    setLoading(false);
-  };
-
+    alert('Permissions affectées avec succès');
+    loadRolePermissions();
+    setShowAssignModal(false);
+    setSelectedRole('');
+    setSelectedPermissions([]);
+  } catch (error) {
+    alert(error.response?.data?.message || 'Erreur lors de l\'affectation');
+  }
+  setLoading(false);
+};
   const openAssignModal = (roleId) => {
     setSelectedRole(roleId);
     const currentPermissions = rolePermissions

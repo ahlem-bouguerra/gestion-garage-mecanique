@@ -5,7 +5,7 @@ import {createRole,getAllRoles,getRoleById,updateRole,deleteRole,} from "../cont
 import { createPermission , getAllPermissions, getPermissionById , updatePermission , deletePermission } from "../controllers/superAdmin/permissionController.js";
 import {createRolePermission,getAllRolePermissions,getRolePermissionById,deleteRolePermission } from "../controllers/superAdmin/rolePermissionController.js";
 import { createGaragisteRole,getAllGaragisteRoles,getGaragisteRoleById,deleteGaragisteRole} from "../controllers/superAdmin/garagisteRoleController.js";
-import {createGarageWithGaragiste,getAllGarages,getGarageById,updateGarage,toggleGarageStatus,deleteGarage} from "../controllers/superAdmin/garageController.js";
+import {createGarage,  createGaragisteForGarage,getAllGarages,getGarageById,updateGarage,toggleGarageStatus,deleteGarage} from "../controllers/superAdmin/garageController.js";
 import { superAdminMiddleware } from "../middlewares/authMiddleware.js";
 import {
   registerUser,           // ✅ Inscription PUBLIC (non SuperAdmin)
@@ -46,7 +46,7 @@ router.patch("/users/:id/demote", adminAuthMiddleware, demoteSuperAdmin);       
 
 // CRUD des rôles
 router.post("/creeRole", createRole);     
-router.get("/getAllRoles", getAllRoles);      
+router.get("/getAllRoles",superAdminMiddleware, getAllRoles);      
 router.get("/getOneRole/:id", getRoleById);  
 router.put("/updateRole/:id", updateRole);  
 router.delete("/deleteRole/:id", deleteRole); 
@@ -69,7 +69,11 @@ router.get("/getGaragisteRoleById/:id", getGaragisteRoleById);
 router.delete("/deleteGaragisteRole/:id", deleteGaragisteRole);
 
 
-router.post("/garages/create", superAdminMiddleware,createGarageWithGaragiste);
+router.post("/garages", superAdminMiddleware, createGarage);
+
+// 🆕 Étape 2: Créer un garagiste pour un garage existant
+router.post("/garages/:garageId/garagiste", superAdminMiddleware, createGaragisteForGarage);
+
 router.get("/garages", getAllGarages);
 router.get("/garages/:id", getGarageById);
 router.put("/garages/:id", updateGarage);

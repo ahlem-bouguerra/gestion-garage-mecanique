@@ -6,10 +6,9 @@ import { sendVerificationEmail } from "../../utils/mailer.js";
 import { GaragisteRole } from "../../models/GaragisteRole.js";
 import { Role } from "../../models/Role.js";
 
-// ========== CRÉER GARAGE + GARAGISTE (Super Admin) ==========
-export const createGarageWithGaragiste = async (req, res) => {
+// ========== CRÉER UNIQUEMENT LE GARAGE (Étape 1) ==========
+export const createGarage = async (req, res) => {
   const {
-    // Infos Garage
     garagenom,
     matriculefiscal,
     governorateId,
@@ -19,68 +18,30 @@ export const createGarageWithGaragiste = async (req, res) => {
     streetAddress,
     location,
     description,
-    logo,
     horaires,
     services,
-    
-    // Infos Garagiste
-    username,
-    email,
-    password,
-    phone
   } = req.body;
 
-  console.log("📥 Données reçues pour création Garage + Garagiste:", req.body);
+  console.log("📥 Création du garage:", req.body);
 
-  // ✅ Validation des champs obligatoires
-  if (!garagenom || !matriculefiscal || !username || !email || !password || !phone) {
-    console.warn("⚠️ Champs manquants !");
+  // Validation des champs obligatoires
+  if (!garagenom || !matriculefiscal) {
     return res.status(400).json({ 
-      message: "Tous les champs obligatoires doivent être remplis.",
-      required: ["garagenom", "matriculefiscal", "username", "email", "password", "phone"]
+      message: "Le nom et le matricule fiscal sont obligatoires.",
+      required: ["garagenom", "matriculefiscal"]
     });
   }
 
   try {
-    // ✅ 1. Vérifier si l'email existe déjà
-    const existingGaragiste = await Garagiste.findOne({ email });
-    if (existingGaragiste) {
-      console.warn("⚠️ Email déjà utilisé :", email);
-      return res.status(400).json({ 
-        message: "Cet email est déjà utilisé par un autre garagiste." 
-      });
-    }
-
-    // ✅ 2. Vérifier si le matricule fiscal existe déjà
+    // Vérifier si le matricule fiscal existe déjà
     const existingGarage = await Garage.findOne({ matriculeFiscal: matriculefiscal });
     if (existingGarage) {
-      console.warn("⚠️ Matricule fiscal déjà utilisé :", matriculefiscal);
       return res.status(400).json({ 
         message: "Ce matricule fiscal est déjà utilisé." 
       });
     }
 
-    // ✅ 3. Hasher le mot de passe
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // ✅ 4. Créer le GARAGISTE d'abord (temporairement sans garage)
-    const newGaragiste = await Garagiste.create({
-      username,
-      email,
-      password: hashedPassword,
-      phone,
-      isVerified: false,
-      garage: null, // Sera mis à jour après création du garage
-      createdBy: req.user?.userId || null // ID du super admin
-    });
-
-    console.log("✅ Garagiste créé:", {
-      id: newGaragiste._id,
-      email: newGaragiste.email,
-      username: newGaragiste.username
-    });
-
-    // ✅ 5. Créer le GARAGE avec le garagiste comme admin
+    // Créer le garage SANS garagiste admin pour le moment
     const newGarage = await Garage.create({
       nom: garagenom,
       matriculeFiscal: matriculefiscal,
@@ -91,37 +52,121 @@ export const createGarageWithGaragiste = async (req, res) => {
       streetAddress: streetAddress || "",
       location: location || undefined,
       description: description || "",
-      logo: logo || "",
       horaires: horaires || "",
       services: services || [],
-      garagisteAdmin: newGaragiste._id // Lien avec le garagiste
+      garagisteAdmin: null // Sera assigné plus tard
     });
 
-    console.log("✅ Garage créé:", {
-      id: newGarage._id,
-      nom: newGarage.nom,
-      matriculeFiscal: newGarage.matriculeFiscal,
-      admin: newGaragiste._id
+    console.log("✅ Garage créé:", newGarage._id);
+
+    res.status(201).json({
+      message: "Garage créé avec succès. Vous pouvez maintenant ajouter un garagiste.",
+      garage: {
+        id: newGarage._id,
+        nom: newGarage.nom,
+        matriculeFiscal: newGarage.matriculeFiscal,
+        governorateName: newGarage.governorateName,
+        cityName: newGarage.cityName
+      }
     });
 
-    // ✅ 6. Associer le garage au garagiste
-    newGaragiste.garage = newGarage._id;
-    await newGaragiste.save();
+  } catch (err) {
+    console.error("❌ Erreur création garage:", err.message);
+    res.status(500).json({
+      message: "Erreur serveur lors de la création.",
+      error: err.message
+    });
+  }
+};
 
-    console.log("✅ Garage associé au garagiste");
+// ========== CRÉER GARAGISTE ET L'ASSOCIER AU GARAGE (Étape 2) ==========
+export const createGaragisteForGarage = async (req, res) => {
+  const { garageId } = req.params;
+  const {
+    username,
+    email,
+    password,
+    phone,
+    roleId
+  } = req.body;
 
-    const adminRole = await Role.findOne({ name: "Admin Garage" });
-    if (!adminRole) {
-      throw new Error("Le rôle 'Admin Garage' n'existe pas en base");
+  console.log("📥 Création garagiste pour garage:", garageId);
+
+  // Validation
+  if (!username || !email || !password || !phone) {
+    return res.status(400).json({ 
+      message: "Tous les champs du garagiste sont obligatoires.",
+      required: ["username", "email", "password", "phone"]
+    });
+  }
+
+  try {
+    // Vérifier que le garage existe
+    const garage = await Garage.findById(garageId);
+    if (!garage) {
+      return res.status(404).json({ message: "Garage non trouvé" });
     }
+
+   
+
+    // Vérifier si l'email existe déjà
+    const existingGaragiste = await Garagiste.findOne({ email });
+    if (existingGaragiste) {
+      return res.status(400).json({ 
+        message: "Cet email est déjà utilisé." 
+      });
+    }
+
+    // Vérifier le rôle
+    let selectedRole;
+    if (roleId) {
+      selectedRole = await Role.findById(roleId);
+      if (!selectedRole) {
+        return res.status(400).json({ 
+          message: "Le rôle sélectionné n'existe pas." 
+        });
+      }
+    } else {
+      // Par défaut : Admin Garage
+      selectedRole = await Role.findOne({ name: "Admin Garage" });
+      if (!selectedRole) {
+        return res.status(500).json({ 
+          message: "Le rôle 'Admin Garage' n'existe pas en base" 
+        });
+      }
+    }
+
+    // Hasher le mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Créer le garagiste
+    const newGaragiste = await Garagiste.create({
+      username,
+      email,
+      password: hashedPassword,
+      phone,
+      isVerified: false,
+      garage: garage._id,
+      createdBy: req.user?.userId || null
+    });
+
+    console.log("✅ Garagiste créé:", newGaragiste._id);
+
+    // Mettre à jour le garage avec l'admin
+    garage.garagisteAdmin = newGaragiste._id;
+    await garage.save();
+
+    console.log("✅ Garage mis à jour avec admin:", garage._id);
+
+    // Créer l'association GaragisteRole
     await GaragisteRole.create({
       garagisteId: newGaragiste._id,
-      roleId: adminRole._id
+      roleId: selectedRole._id
     });
 
-    console.log("✅ Rôle 'Admin Garage' assigné au garagiste");
+    console.log(`✅ Rôle '${selectedRole.name}' assigné`);
 
-    // ✅ 7. Envoyer l'email de vérification
+    // Envoyer l'email de vérification
     const verificationToken = jwt.sign(
       { 
         userId: newGaragiste._id, 
@@ -132,31 +177,25 @@ export const createGarageWithGaragiste = async (req, res) => {
     );
 
     await sendVerificationEmail(email, verificationToken);
-    console.log("📧 Email de vérification envoyé à:", email);
+    console.log("📧 Email de vérification envoyé");
 
-    // ✅ 8. Réponse de succès
     res.status(201).json({
-      message: "Garage et garagiste créés avec succès. Email de vérification envoyé.",
-      garage: {
-        id: newGarage._id,
-        nom: newGarage.nom,
-        matriculeFiscal: newGarage.matriculeFiscal,
-        governorateName: newGarage.governorateName,
-        cityName: newGarage.cityName
-      },
+      message: "Garagiste créé et associé au garage avec succès. Email de vérification envoyé.",
       garagiste: {
         id: newGaragiste._id,
         username: newGaragiste.username,
         email: newGaragiste.email,
         phone: newGaragiste.phone,
-    
+        role: selectedRole.name
+      },
+      garage: {
+        id: garage._id,
+        nom: garage.nom
       }
     });
 
   } catch (err) {
-    console.error("❌ Erreur lors de la création Garage + Garagiste:", err.message);
-    console.error("❌ Stack trace:", err.stack);
-    
+    console.error("❌ Erreur création garagiste:", err.message);
     res.status(500).json({
       message: "Erreur serveur lors de la création.",
       error: err.message
@@ -164,7 +203,8 @@ export const createGarageWithGaragiste = async (req, res) => {
   }
 };
 
-// ========== OBTENIR TOUS LES GARAGES (Super Admin) ==========
+
+// ========== OBTENIR TOUS LES GARAGES ==========
 export const getAllGarages = async (req, res) => {
   try {
     const garages = await Garage.find()
@@ -182,42 +222,59 @@ export const getAllGarages = async (req, res) => {
   }
 };
 
-// ========== OBTENIR UN GARAGE PAR ID (Super Admin) ==========
+// ========== OBTENIR UN GARAGE PAR ID ==========
 export const getGarageById = async (req, res) => {
   try {
     const { id } = req.params;
-
-    const garage = await Garage.findById(id)
-      .populate('garagisteAdmin', 'username email phone isVerified createdAt');
-
+    const garage = await Garage.findById(id);
+    
     if (!garage) {
       return res.status(404).json({ message: "Garage non trouvé" });
     }
 
-    // Compter les employés du garage
-    const employeesCount = await Garagiste.countDocuments({ 
-      garage: id,
-      _id: { $ne: garage.garagisteAdmin._id } // Exclure l'admin
-    });
+    // Tous les garagistes du garage
+    const garagistes = await Garagiste.find({ garage: id });
+    
+    // Peupler chaque garagiste avec ses rôles
+    const garagistesWithRoles = await Promise.all(
+      garagistes.map(async (g) => {
+        const roleRelations = await GaragisteRole.find({ garagisteId: g._id })
+          .populate('roleId', 'name');
+        
+        return {
+          _id: g._id,
+          username: g.username,
+          email: g.email,
+          phone: g.phone,
+          isVerified: g.isVerified,
+          createdAt: g.createdAt,
+          roles: roleRelations.map(r => r.roleId)
+        };
+      })
+    );
 
+    // Retourner le garage avec les garagistes intégrés
     res.json({
-      garage,
-      employeesCount
+      ...garage.toObject(),
+      garagistes: garagistesWithRoles,
+      employeesCount: garagistesWithRoles.length
     });
-
+    
   } catch (error) {
-    console.error("❌ Erreur getGarageById:", error);
-    res.status(500).json({ message: "Erreur serveur" });
+    console.error("❌ getGarageById error:", error.message, error.stack);
+    res.status(500).json({ 
+      message: "Erreur serveur",
+      error: error.message 
+    });
   }
 };
 
-// ========== METTRE À JOUR UN GARAGE (Super Admin) ==========
+// ========== METTRE À JOUR UN GARAGE ==========
 export const updateGarage = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
 
-    // Ne pas permettre de modifier le garagisteAdmin ou le matriculeFiscal
     delete updateData.garagisteAdmin;
     delete updateData.matriculeFiscal;
 
@@ -244,7 +301,7 @@ export const updateGarage = async (req, res) => {
   }
 };
 
-// ========== DÉSACTIVER/ACTIVER UN GARAGE (Super Admin) ==========
+// ========== DÉSACTIVER/ACTIVER UN GARAGE ==========
 export const toggleGarageStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -257,7 +314,6 @@ export const toggleGarageStatus = async (req, res) => {
     garage.isActive = !garage.isActive;
     await garage.save();
 
-    // Désactiver/activer aussi tous les garagistes du garage
     await Garagiste.updateMany(
       { garage: id },
       { isActive: garage.isActive }
@@ -276,7 +332,7 @@ export const toggleGarageStatus = async (req, res) => {
   }
 };
 
-// ========== SUPPRIMER UN GARAGE (Super Admin) ==========
+// ========== SUPPRIMER UN GARAGE ==========
 export const deleteGarage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -286,19 +342,19 @@ export const deleteGarage = async (req, res) => {
       return res.status(404).json({ message: "Garage non trouvé" });
     }
 
-    // Vérifier s'il y a des données liées (clients, véhicules, etc.)
     const garagistesCount = await Garagiste.countDocuments({ garage: id });
     
-    if (garagistesCount > 1) { // Plus que l'admin
+    if (garagistesCount > 1) {
       return res.status(400).json({ 
         message: "Impossible de supprimer ce garage. Il contient encore des employés." 
       });
     }
 
-    // Supprimer le garagiste admin
-    await Garagiste.deleteOne({ _id: garage.garagisteAdmin });
+    if (garage.garagisteAdmin) {
+      await GaragisteRole.deleteMany({ garagisteId: garage.garagisteAdmin });
+      await Garagiste.deleteOne({ _id: garage.garagisteAdmin });
+    }
     
-    // Supprimer le garage
     await Garage.deleteOne({ _id: id });
 
     console.log("✅ Garage supprimé:", id);

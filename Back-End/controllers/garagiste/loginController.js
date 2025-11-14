@@ -9,7 +9,7 @@ export const login = async (req, res) => {
   try {
     // ✅ 1. Trouver le garagiste et peupler les infos du garage
     const garagiste = await Garagiste.findOne({ email })
-      .populate('garage', 'nom matriculeFiscal governorateName cityName streetAddress location logo horaires services isActive');
+      .populate('garage', 'nom matriculeFiscal governorateName cityName streetAddress location  horaires services isActive');
     
     if (!garagiste) {
       return res.status(401).json({ message: "Utilisateur non trouvé" });
@@ -73,7 +73,6 @@ export const login = async (req, res) => {
           cityName: garagiste.garage.cityName,
           streetAddress: garagiste.garage.streetAddress,
           location: garagiste.garage.location,
-          logo: garagiste.garage.logo,
           horaires: garagiste.garage.horaires,
           services: garagiste.garage.services,
           isActive: garagiste.garage.isActive

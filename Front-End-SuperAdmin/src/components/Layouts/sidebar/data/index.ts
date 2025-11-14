@@ -1,4 +1,4 @@
-import { Car, Calendar, FileText, User, Settings, CreditCard, Clock, MapPin } from 'lucide-react';
+import { Car, Calendar, FileText, User, Settings, CreditCard, Clock, MapPin,LinkIcon } from 'lucide-react';
 
 export const NAV_DATA = [
   {
@@ -18,34 +18,23 @@ export const NAV_DATA = [
       },*/
       {
         title: "Les SuperAdmins",
-        url: "/TableSuperAdmin",
+        url: "/tableSuperAdmin",
         icon: User,
         items: [ ],
       },
       {
-        title: "Mes Véhicules",
-        url: "/vehicules",
-        icon: Car,
+        title: "Gestion des Rôles & Permissions",
+        url: "/gestionRolesEtPermisions",
+        icon: LinkIcon,
         items: [
-          {
-            title: "véhicules",
-            url: "/Voiture",
-          },
+        
         ],
       },
       {
-        title: "Mes Devis",
+        title: "Gestion Des Garages et Des Clients",
+        url: "/createGarageForm",
         icon: FileText,
-        items: [
-          /*{
-            title: "Mes factures",
-            url: "/client-facture",
-          },*/
-          {
-            title: "devis",
-            url: "/client-devis",
-          },
-        ],
+        items: [],
       },
     /*  {
         title: "Historique Services",

@@ -132,7 +132,6 @@ export const updateGarageInfo = async (req, res) => {
       streetAddress,
       location,
       description,
-      logo,
       horaires,
       services
     } = req.body;
@@ -174,7 +173,6 @@ export const updateGarageInfo = async (req, res) => {
     if (cityName) updateData.cityName = cityName.trim();
     if (streetAddress !== undefined) updateData.streetAddress = streetAddress.trim();
     if (description !== undefined) updateData.description = description.trim();
-    if (logo !== undefined) updateData.logo = logo.trim();
     if (horaires !== undefined) updateData.horaires = horaires.trim();
     if (services) updateData.services = services;
     
@@ -208,7 +206,6 @@ export const updateGarageInfo = async (req, res) => {
         streetAddress: updatedGarage.streetAddress,
         location: updatedGarage.location,
         description: updatedGarage.description,
-        logo: updatedGarage.logo,
         horaires: updatedGarage.horaires,
         services: updatedGarage.services
       }
