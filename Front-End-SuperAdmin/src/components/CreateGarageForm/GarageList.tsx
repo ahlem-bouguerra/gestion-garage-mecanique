@@ -5,11 +5,10 @@ import GarageCard from './GarageCard';
 interface GarageListProps {
   garages: any[];
   onCreateGarage: () => void;
-  onAddGaragiste: (garage: any) => void;
   onViewDetails: (garage: any) => void;
 }
 
-export default function GarageList({ garages, onCreateGarage, onAddGaragiste,onViewDetails }: GarageListProps) {
+export default function GarageList({ garages, onCreateGarage,onViewDetails }: GarageListProps) {
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
@@ -42,7 +41,6 @@ export default function GarageList({ garages, onCreateGarage, onAddGaragiste,onV
             <GarageCard
               key={garage._id || garage.id}
               garage={garage}
-              onAddGaragiste={onAddGaragiste}
               onViewDetails={onViewDetails}
             />
           ))}

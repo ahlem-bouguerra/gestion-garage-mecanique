@@ -102,7 +102,7 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
                 <Building2 className="w-8 h-8 text-blue-600" />
                 <h1 className="text-4xl font-bold text-gray-900">{garage.nom}</h1>
               </div>
-              <p className="text-gray-500 text-lg">Matricule: {garage.matriculeFiscal}</p>
+              <p className="text-gray-500 text-lg">Matricule Fiscale: {garage.matriculeFiscal}</p>
             </div>
           </div>
 
@@ -223,6 +223,17 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
                       </span>
                     </div>
                   )}
+                  {
+                    <div className="pt-2 mt-2 border-t border-gray-200">
+                      <button
+                      onClick={() => onAddGaragiste(garage)}
+                      className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
+                    >
+                    
+                      Voir plus de détails
+                    </button>
+                    </div>
+                  }
                 </div>
               </div>
             ))}

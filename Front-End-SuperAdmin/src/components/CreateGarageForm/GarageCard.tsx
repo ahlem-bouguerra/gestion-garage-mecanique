@@ -3,11 +3,10 @@ import { Building2, MapPin, Users } from 'lucide-react';
 
 interface GarageCardProps {
   garage: any;
-  onAddGaragiste: (garage: any) => void;
   onViewDetails: (garage: any) => void;
 }
 
-export default function GarageCard({ garage, onAddGaragiste, onViewDetails }: GarageCardProps) {
+export default function GarageCard({ garage, onViewDetails }: GarageCardProps) {
   return (
     <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
 
@@ -57,13 +56,7 @@ export default function GarageCard({ garage, onAddGaragiste, onViewDetails }: Ga
           </div>
         )}
 <div className="flex flex-col gap-2">
-  <button
-    onClick={() => onAddGaragiste(garage)}
-    className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
-  >
-    <Users className="w-4 h-4" />
-    Ajouter un Garagiste
-  </button>
+ 
 
   <button
     onClick={() => onViewDetails(garage)}

@@ -54,7 +54,7 @@ export const createGarage = async (req, res) => {
       description: description || "",
       horaires: horaires || "",
       services: services || [],
-      garagisteAdmin: null // Sera assigné plus tard
+      garagisteAdmins: []  // Seulement les admins seront ici
     });
 
     console.log("✅ Garage créé:", newGarage._id);
@@ -107,8 +107,6 @@ export const createGaragisteForGarage = async (req, res) => {
       return res.status(404).json({ message: "Garage non trouvé" });
     }
 
-   
-
     // Vérifier si l'email existe déjà
     const existingGaragiste = await Garagiste.findOne({ email });
     if (existingGaragiste) {
@@ -152,11 +150,21 @@ export const createGaragisteForGarage = async (req, res) => {
 
     console.log("✅ Garagiste créé:", newGaragiste._id);
 
-    // Mettre à jour le garage avec l'admin
-    garage.garagisteAdmin = newGaragiste._id;
-    await garage.save();
+    // **CORRECTION: Ajouter à garagisteAdmins SEULEMENT si c'est un admin**
+    const isAdminRole = selectedRole.name === "Admin Garage" || 
+                        selectedRole.name === "Admin" || 
+                        selectedRole.name.toLowerCase().includes("admin");
 
-    console.log("✅ Garage mis à jour avec admin:", garage._id);
+    if (isAdminRole) {
+      if (!garage.garagisteAdmins) {
+        garage.garagisteAdmins = [];
+      }
+      garage.garagisteAdmins.push(newGaragiste._id);
+      await garage.save();
+      console.log("✅ Admin ajouté au garage:", garage._id);
+    } else {
+      console.log("ℹ️ Employé créé (non ajouté à garagisteAdmins)");
+    }
 
     // Créer l'association GaragisteRole
     await GaragisteRole.create({
@@ -180,13 +188,14 @@ export const createGaragisteForGarage = async (req, res) => {
     console.log("📧 Email de vérification envoyé");
 
     res.status(201).json({
-      message: "Garagiste créé et associé au garage avec succès. Email de vérification envoyé.",
+      message: `${isAdminRole ? 'Admin' : 'Employé'} créé et associé au garage avec succès. Email de vérification envoyé.`,
       garagiste: {
         id: newGaragiste._id,
         username: newGaragiste.username,
         email: newGaragiste.email,
         phone: newGaragiste.phone,
-        role: selectedRole.name
+        role: selectedRole.name,
+        isAdmin: isAdminRole
       },
       garage: {
         id: garage._id,
@@ -208,14 +217,13 @@ export const createGaragisteForGarage = async (req, res) => {
 export const getAllGarages = async (req, res) => {
   try {
     const garages = await Garage.find()
-      .populate('garagisteAdmin', 'username email phone')
+      .populate('garagisteAdmins', 'username email phone isVerified') // ✅ Pluriel + ajouter isVerified
       .sort({ createdAt: -1 });
-
+    
     res.json({
       count: garages.length,
       garages
     });
-
   } catch (error) {
     console.error("❌ Erreur getAllGarages:", error);
     res.status(500).json({ message: "Erreur serveur" });

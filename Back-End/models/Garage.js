@@ -40,7 +40,10 @@ const garageSchema = new mongoose.Schema({
             type: [Number] // [longitude, latitude]
         }
     },
-garagisteAdmin: { type: mongoose.Schema.Types.ObjectId, ref: "Garagiste", default: null },
+  garagisteAdmins: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Garagiste" 
+  }],
       // Informations supplémentaires
   description: {
     type: String,

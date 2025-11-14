@@ -5,11 +5,10 @@ interface GarageFormProps {
   garageData: any;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
   loading: boolean;
 }
 
-export default function GarageForm({ garageData, onChange, onSubmit, onCancel, loading }: GarageFormProps) {
+export default function GarageForm({ garageData, onChange, onSubmit, loading }: GarageFormProps) {
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
@@ -126,13 +125,7 @@ export default function GarageForm({ garageData, onChange, onSubmit, onCancel, l
       </div>
 
       <div className="flex gap-4 pt-6 border-t">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-        >
-          Annuler
-        </button>
+     
         <button
           type="submit"
           disabled={loading}
