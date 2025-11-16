@@ -31,14 +31,27 @@ export default function RolePermissionManager() {
     loadRolePermissions();
   }, []);
 
+  const getAuthToken = () => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
+
+const getAuthHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${getAuthToken()}`
+});
+
   const loadRoles = async () => {
     try {
-      const { data } = await axios.get(`${API_BASE}/getAllRoles`);
+      const { data } = await axios.get(`${API_BASE}/getAllRoles`, {
+      headers: getAuthHeaders()
+    });
       setRoles(data);
     } catch (error) {
       alert('Erreur lors du chargement des rôles');
     }
   };
+
+
 
   const loadPermissions = async () => {
     try {
@@ -268,22 +281,9 @@ const handleAssignPermissions = async () => {
                       <div className="flex-1">
                         <h3 className="text-xl font-semibold text-gray-800 mb-1">{role.name}</h3>
                         <p className="text-gray-600 text-sm mb-2">{role.description || 'Aucune description'}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {getRolePermissions(role._id).map((perm, idx) => (
-                            <span key={idx} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs">
-                              {perm}
-                            </span>
-                          ))}
-                        </div>
+                      
                       </div>
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => openAssignModal(role._id)}
-                          className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                          title="Affecter permissions"
-                        >
-                          <Link className="w-4 h-4" />
-                        </button>
                         <button
                           onClick={() => {
                             setRoleForm({ name: role.name, description: role.description });
@@ -516,7 +516,7 @@ const handleAssignPermissions = async () => {
       {/* Modal Affectation */}
       {showAssignModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl max-h-[80vh] overflow-y-auto">
+         <div className="bg-white rounded-xl p-6 max-w-4xl w-full shadow-2xl max-h-[80vh] overflow-y-auto">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">
               Affecter des Permissions
             </h3>
@@ -528,26 +528,25 @@ const handleAssignPermissions = async () => {
               </div>
             </div>
 
-            <div className="space-y-2 mb-6">
-              <label className="block text-gray-700 mb-3">Sélectionnez les permissions</label>
-              {permissions.map(perm => (
-                <label
-                  key={perm._id}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedPermissions.includes(perm._id)}
-                    onChange={() => togglePermission(perm._id)}
-                    className="w-5 h-5 text-blue-600"
-                  />
-                  <div>
-                    <div className="text-gray-800 font-medium">{perm.name}</div>
-                    <div className="text-gray-600 text-sm">{perm.description}</div>
-                  </div>
-                </label>
-              ))}
-            </div>
+            <div className="mb-6">
+  <label className="block text-gray-700 mb-3">Sélectionnez les permissions</label>
+  <div className="grid grid-cols-5 gap-x-4 gap-y-2">
+    {permissions.map(perm => (
+      <label
+        key={perm._id}
+        className="flex items-start gap-2 cursor-pointer hover:text-blue-600 transition-colors"
+      >
+        <input
+          type="checkbox"
+          checked={selectedPermissions.includes(perm._id)}
+          onChange={() => togglePermission(perm._id)}
+          className="mt-1 w-4 h-4 text-blue-600"
+        />
+        <span className="text-sm text-gray-800">• {perm.name}</span>
+      </label>
+    ))}
+  </div>
+</div>
 
             <div className="flex gap-3">
               <button

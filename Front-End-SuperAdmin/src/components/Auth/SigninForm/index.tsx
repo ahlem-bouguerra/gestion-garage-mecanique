@@ -56,7 +56,7 @@ export default function SigninWithPassword() {
         toast.success("Connexion réussie !");
         const user = response.data.user;
         localStorage.setItem("user", JSON.stringify(user));
-        router.push("/chercher-garage");
+        router.push("/createGarageForm");
         console.log("💾 Token dans localStorage:", localStorage.getItem("token"));
         console.log("💾 User dans localStorage:", localStorage.getItem("user"));
 

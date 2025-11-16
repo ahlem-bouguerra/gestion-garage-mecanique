@@ -2,12 +2,12 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { 
-  ArrowLeft, 
-  Building2, 
-  MapPin, 
-  Clock, 
-  Users, 
+import {
+  ArrowLeft,
+  Building2,
+  MapPin,
+  Clock,
+  Users,
   Plus,
   Mail,
   Phone,
@@ -29,10 +29,22 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
   const [garage, setGarage] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // États pour la modal
   const [selectedGaragisteId, setSelectedGaragisteId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Masquer/Afficher le header quand la modal s'ouvre ou se ferme
+  useEffect(() => {
+    const header = document.querySelector("header");
+    if (!header) return;
+
+    if (isModalOpen) {
+      header.classList.add("hidden");
+    } else {
+      header.classList.remove("hidden");
+    }
+  }, [isModalOpen]);
 
   useEffect(() => {
     fetchGarageDetails();
@@ -216,7 +228,7 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
                       {garagiste.email}
                     </a>
                   </div>
-                  
+
                   {garagiste.phone && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Phone className="w-4 h-4" />
@@ -228,16 +240,15 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
 
                   {garagiste.isVerified !== undefined && (
                     <div className="pt-2 mt-2 border-t border-gray-200">
-                      <span className={`text-xs font-medium ${
-                        garagiste.isVerified 
-                          ? 'text-green-600' 
+                      <span className={`text-xs font-medium ${garagiste.isVerified
+                          ? 'text-green-600'
                           : 'text-orange-600'
-                      }`}>
+                        }`}>
                         {garagiste.isVerified ? '✓ Compte vérifié' : '⚠ En attente de vérification'}
                       </span>
                     </div>
                   )}
-                  
+
                   <div className="pt-2 mt-2 border-t border-gray-200">
                     <button
                       onClick={() => handleViewGaragiste(garagiste._id)}

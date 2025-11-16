@@ -125,3 +125,65 @@ export const getGaragisteById = async (id: string) => {
   }
 };
 
+export const getAllPermissions = async () => {
+  try {
+    const { data } = await axios.get(`${API_BASE}/getAllPermissions`, {
+      headers: getAuthHeaders()
+    });
+    return data;
+  } catch (error) {
+    console.error('Erreur chargement permissions:', error);
+    throw error;
+  }
+};
+
+export const getAllRolePermissions = async () => {
+  try {
+    const { data } = await axios.get(`${API_BASE}/getAllRolePermissions`, {
+      headers: getAuthHeaders()
+    });
+    return data;
+  } catch (error) {
+    console.error('Erreur chargement permissions des rôles:', error);
+    throw error;
+  }
+};
+
+export const getGaragistePermissions = async (garagisteId: string) => {
+  try {
+    const { data } = await axios.get(`${API_BASE}/garagiste/${garagisteId}/permissions`, {
+      headers: getAuthHeaders()
+    });
+    return data;
+  } catch (error) {
+    console.error('Erreur chargement permissions individuelles:', error);
+    throw error;
+  }
+};
+
+export const addGaragistePermission = async (garagisteId: string, permissionId: string) => {
+  try {
+    const { data } = await axios.post(
+      `${API_BASE}/garagiste/permission`,
+      { GaragisteId: garagisteId, permissionId },
+      { headers: getAuthHeaders() }
+    );
+    return data;
+  } catch (error: any) {
+    console.error('Erreur ajout permission:', error);
+    throw new Error(error.response?.data?.message || 'Erreur lors de l\'ajout de la permission');
+  }
+};
+
+export const removeGaragistePermission = async (permissionAssociationId: string) => {
+  try {
+    const { data } = await axios.delete(
+      `${API_BASE}/garagiste/permission/${permissionAssociationId}`,
+      { headers: getAuthHeaders() }
+    );
+    return data;
+  } catch (error: any) {
+    console.error('Erreur suppression permission:', error);
+    throw new Error(error.response?.data?.message || 'Erreur lors de la suppression de la permission');
+  }
+};

@@ -44,6 +44,12 @@ const garagisteSchema = new mongoose.Schema({
     default: null,
   },
 
+
+   isActive: {
+    type: Boolean,
+    default: false
+  },
+
   // 🔗 Créé par qui ? (utile pour savoir quel admin a créé l’employé)
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,

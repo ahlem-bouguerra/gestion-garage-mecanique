@@ -4,6 +4,7 @@ import { adminAuthMiddleware } from "../middlewares/superAdminAuthMiddleware.js"
 import {createRole,getAllRoles,getRoleById,updateRole,deleteRole,} from "../controllers/superAdmin/roleController.js";
 import { createPermission , getAllPermissions, getPermissionById , updatePermission , deletePermission } from "../controllers/superAdmin/permissionController.js";
 import {createRolePermission,getAllRolePermissions,getRolePermissionById,deleteRolePermission } from "../controllers/superAdmin/rolePermissionController.js";
+import { addPermissionToGaragiste, deleteGaragistePermission ,getGaragistePermissions} from "../controllers/superAdmin/garagistePermission.js";
 import { createGaragisteRole,getAllGaragisteRoles,getGaragisteRoleById,deleteGaragisteRole} from "../controllers/superAdmin/garagisteRoleController.js";
 import {createGarage,  createGaragisteForGarage,getAllGarages,getGarageById,updateGarage,toggleGarageStatus,deleteGarage,getGaragisteById} from "../controllers/superAdmin/garageController.js";
 import { superAdminMiddleware } from "../middlewares/authMiddleware.js";
@@ -41,12 +42,12 @@ router.post("/SuperAdmin/reset-password", resetPasswordSuperAdmin);
 router.post("/SuperAdmin/forgot-password", forgotPasswordSuperAdmin);
 
 // ========== ROUTES PROTÉGÉES ==========
-router.post("/auth/logout", adminAuthMiddleware, logoutUser);
-router.get("/getAllUsers", adminAuthMiddleware, getAllUsers);
+router.post("/auth/logout", superAdminMiddleware, logoutUser);
+router.get("/getAllUsers", superAdminMiddleware, getAllUsers);
 
 // ========== GESTION DES SUPER ADMINS (PROTÉGÉ) ==========
-router.patch("/users/:id/promote", adminAuthMiddleware, promoteToSuperAdmin);   // ✅ Promouvoir
-router.patch("/users/:id/demote", adminAuthMiddleware, demoteSuperAdmin);       // ✅ Rétrograder
+router.patch("/users/:id/promote", superAdminMiddleware, promoteToSuperAdmin);   // ✅ Promouvoir
+router.patch("/users/:id/demote", superAdminMiddleware, demoteSuperAdmin);       // ✅ Rétrograder
 
 
 // CRUD des rôles
@@ -67,6 +68,14 @@ router.post("/creeRolePermission", createRolePermission);
 router.get("/getAllRolePermissions", getAllRolePermissions);      
 router.get("/getOneRolePermission/:id", getRolePermissionById);  
 router.delete("/deleteRolePermission/:id", deleteRolePermission);
+
+
+router.get('/garagiste/:garagisteId/permissions',superAdminMiddleware, getGaragistePermissions);
+// Ajouter permission individuelle
+router.post('/garagiste/permission',superAdminMiddleware, addPermissionToGaragiste);
+// Supprimer permission individuelle
+router.delete('/garagiste/permission/:id',superAdminMiddleware, deleteGaragistePermission);
+
 
 router.post("/createGaragisteRole",createGaragisteRole);     
 router.get("/getAllGaragisteRoles", getAllGaragisteRoles);      

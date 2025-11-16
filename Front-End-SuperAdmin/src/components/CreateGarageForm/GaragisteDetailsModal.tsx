@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import { getGaragisteById } from './api';
+import GaragistePermissionsSection from './GaragistePermissionsSection';
 
 interface GaragisteDetailsModalProps {
   garagisteId: string;
@@ -32,18 +33,28 @@ export default function GaragisteDetailsModal({ garagisteId, isOpen, onClose }: 
     }
   }, [isOpen, garagisteId]);
 
-  const fetchGaragisteDetails = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await getGaragisteById(garagisteId);
-      setData(response.data);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors du chargement');
-    } finally {
-      setLoading(false);
-    }
-  };
+useEffect(() => {
+  if (isOpen && garagisteId) {
+    console.log('🔎 Chargement détails pour ID:', garagisteId);
+    fetchGaragisteDetails();
+  }
+}, [isOpen, garagisteId]);
+
+const fetchGaragisteDetails = async () => {
+  setLoading(true);
+  setError('');
+  try {
+    const response = await getGaragisteById(garagisteId);
+    console.log('📦 Données reçues:', response);
+    console.log('👤 Garagiste dans data:', response.data.garagiste);
+    console.log('🆔 ID du garagiste:', response.data.garagiste._id);
+    setData(response.data);
+  } catch (err: any) {
+    setError(err.message || 'Erreur lors du chargement');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -252,6 +263,9 @@ export default function GaragisteDetailsModal({ garagisteId, isOpen, onClose }: 
                     </div>
                   </div>
                 </div>
+                {data && data.garagiste && (
+  <GaragistePermissionsSection garagiste={data.garagiste} />
+)}
               </div>
             ) : null}
           </div>
