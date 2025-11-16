@@ -501,3 +501,250 @@ export const getGaragisteById = async (req, res) => {
     });
   }
 };
+
+
+// ========== ACTIVER UN GARAGE (PROTÉGÉ) ==========
+export const ActiveGarageAccount = async (req, res) => {
+  try {
+    // ✅ Vérifier que l'utilisateur est SuperAdmin
+    if (!req.user?.isSuperAdmin) {
+      console.warn("⚠️ Tentative d'activation par non-SuperAdmin:", req.user?.email);
+      return res.status(403).json({ 
+        message: "Accès refusé. Vous devez être SuperAdmin." 
+      });
+    }
+
+    const { id } = req.params;
+    
+    const garage = await Garage.findById(id);
+    if (!garage) {
+      return res.status(404).json({ message: "Garage introuvable" });
+    }
+
+    // ✅ Vérifier si déjà activé
+    if (garage.isActive) {
+      return res.status(400).json({ 
+        message: "Ce garage est déjà activé" 
+      });
+    }
+
+    // ✅ Activer le garage
+    garage.isActive = true;
+    await garage.save();
+
+    console.log("✅ Garage activé:", {
+      activatedBy: req.user.email,
+      activatedGarage: garage.email // ✅ CORRECTION ICI
+    });
+
+    res.json({ 
+      message: "Garage activé avec succès",
+      garage: {
+        id: garage._id,
+        nom: garage.nom,
+        email: garage.email,
+        isActive: garage.isActive
+      }
+    });
+    
+  } catch (err) {
+    console.error("❌ Erreur activation:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+// ========== DÉSACTIVER UN GARAGE (PROTÉGÉ) ==========
+export const DésactiveGarageAccount = async (req, res) => {
+  try {
+    // ✅ Vérifier que l'utilisateur est SuperAdmin
+    if (!req.user?.isSuperAdmin) {
+      return res.status(403).json({ message: "Accès refusé" });
+    }
+
+    const { id } = req.params;
+    
+    const garage = await Garage.findById(id);
+    if (!garage) {
+      return res.status(404).json({ message: "Garage introuvable" });
+    }
+
+    // ✅ Vérifier si déjà désactivé (AJOUTÉ)
+    if (!garage.isActive) {
+      return res.status(400).json({ 
+        message: "Ce garage est déjà désactivé" 
+      });
+    }
+
+    // ✅ Désactiver le garage
+    garage.isActive = false;
+    await garage.save();
+
+    console.log("✅ Garage désactivé:", {
+      deactivatedBy: req.user.email,
+      deactivatedGarage: garage.email // ✅ CORRECTION ICI
+    });
+
+    res.json({ 
+      message: "Garage désactivé avec succès",
+      garage: {
+        id: garage._id,
+        nom: garage.nom,
+        email: garage.email,
+        isActive: garage.isActive
+      }
+    });
+    
+  } catch (err) {
+    console.error("❌ Erreur désactivation:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+
+// ========== RÉCUPÉRER LES GARAGISTES D'UN GARAGE ==========
+export const getGaragistesByGarage = async (req, res) => {
+  try {
+    // Vérifier que l'utilisateur est SuperAdmin
+    if (!req.user?.isSuperAdmin) {
+      return res.status(403).json({ 
+        message: "Accès refusé. Vous devez être SuperAdmin." 
+      });
+    }
+
+    const { id } = req.params; // ID du garage
+    
+    // Vérifier que le garage existe
+    const garage = await Garage.findById(id);
+    if (!garage) {
+      return res.status(404).json({ message: "Garage introuvable" });
+    }
+
+    // Récupérer tous les garagistes liés à ce garage
+    const garagistes = await Garagiste.find({ garage: id })
+      .select('-password') // Ne pas retourner le mot de passe
+      .populate('createdBy', 'username email') // Populer qui a créé le garagiste
+      .sort({ createdAt: -1 }); // Trier par date de création décroissante
+
+    console.log(`✅ ${garagistes.length} garagiste(s) récupéré(s) pour le garage:`, garage.nom);
+
+    res.json({
+      garagistes,
+      total: garagistes.length,
+      garage: {
+        id: garage._id,
+        nom: garage.nom,
+        email: garage.email
+      }
+    });
+    
+  } catch (err) {
+    console.error("❌ Erreur récupération garagistes:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+// ========== ACTIVER UN GARAGISTE ==========
+export const activateGaragiste = async (req, res) => {
+  try {
+    // Vérifier que l'utilisateur est SuperAdmin
+    if (!req.user?.isSuperAdmin) {
+      console.warn("⚠️ Tentative d'activation par non-SuperAdmin:", req.user?.email);
+      return res.status(403).json({ 
+        message: "Accès refusé. Vous devez être SuperAdmin." 
+      });
+    }
+
+    const { id } = req.params; // ID du garagiste
+    
+    const garagiste = await Garagiste.findById(id).populate('garage', 'nom email');
+    if (!garagiste) {
+      return res.status(404).json({ message: "Garagiste introuvable" });
+    }
+
+    // Vérifier si déjà actif
+    if (garagiste.isActive) {
+      return res.status(400).json({ 
+        message: "Ce garagiste est déjà activé" 
+      });
+    }
+
+    // Activer le garagiste
+    garagiste.isActive = true;
+    await garagiste.save();
+
+    console.log("✅ Garagiste activé:", {
+      activatedBy: req.user.email,
+      garagiste: garagiste.username,
+      email: garagiste.email,
+      garage: garagiste.garage?.nom
+    });
+
+    res.json({ 
+      message: "Garagiste activé avec succès",
+      garagiste: {
+        id: garagiste._id,
+        username: garagiste.username,
+        email: garagiste.email,
+        isActive: garagiste.isActive,
+        garage: garagiste.garage
+      }
+    });
+    
+  } catch (err) {
+    console.error("❌ Erreur activation garagiste:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+// ========== DÉSACTIVER UN GARAGISTE ==========
+export const deactivateGaragiste = async (req, res) => {
+  try {
+    // Vérifier que l'utilisateur est SuperAdmin
+    if (!req.user?.isSuperAdmin) {
+      return res.status(403).json({ 
+        message: "Accès refusé. Vous devez être SuperAdmin." 
+      });
+    }
+
+    const { id } = req.params; // ID du garagiste
+    
+    const garagiste = await Garagiste.findById(id).populate('garage', 'nom email');
+    if (!garagiste) {
+      return res.status(404).json({ message: "Garagiste introuvable" });
+    }
+
+    // Vérifier si déjà inactif
+    if (!garagiste.isActive) {
+      return res.status(400).json({ 
+        message: "Ce garagiste est déjà désactivé" 
+      });
+    }
+
+    // Désactiver le garagiste
+    garagiste.isActive = false;
+    await garagiste.save();
+
+    console.log("✅ Garagiste désactivé:", {
+      deactivatedBy: req.user.email,
+      garagiste: garagiste.username,
+      email: garagiste.email,
+      garage: garagiste.garage?.nom
+    });
+
+    res.json({ 
+      message: "Garagiste désactivé avec succès",
+      garagiste: {
+        id: garagiste._id,
+        username: garagiste.username,
+        email: garagiste.email,
+        isActive: garagiste.isActive,
+        garage: garagiste.garage
+      }
+    });
+    
+  } catch (err) {
+    console.error("❌ Erreur désactivation garagiste:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+

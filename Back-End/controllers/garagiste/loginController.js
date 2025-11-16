@@ -21,6 +21,12 @@ export const login = async (req, res) => {
         message: "Compte non vérifié. Vérifiez votre email." 
       });
     }
+
+     if (!garagiste.isActive) {
+      return res.status(403).json({ 
+        message: "Compte non Active. Contacter votre admin." 
+      });
+    }
     
     // ✅ 3. Vérifier le mot de passe
     const passwordMatch = await bcrypt.compare(password, garagiste.password);

@@ -24,6 +24,12 @@ export const NAV_DATA = [
         items: [ ],
       },
       {
+        title: "Gestion des Garages et des Garagistes Statut",
+        url: "/table-garage-garagite-statut",
+        icon: User,
+        items: [ ],
+      },
+      {
         title: "Gestion des Rôles & Permissions",
         url: "/gestionRolesEtPermisions",
         icon: LinkIcon,

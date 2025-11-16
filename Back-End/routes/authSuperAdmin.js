@@ -18,6 +18,8 @@ import {
 } from "../controllers/superAdmin/AuthControllerSuperAdmin.js";
 import { resetPasswordSuperAdmin } from "../controllers/superAdmin/ResetPasswordSuperAdmin.js";
 import { forgotPasswordSuperAdmin } from "../controllers/superAdmin/ForgotPasswordClient.js";
+import { ActiveGarageAccount,DésactiveGarageAccount,getGaragistesByGarage,activateGaragiste,deactivateGaragiste } from "../controllers/superAdmin/garageController.js";
+
 const router = express.Router();
 
 router.get("/me", adminAuthMiddleware, async (req, res) => {
@@ -48,6 +50,20 @@ router.get("/getAllUsers", superAdminMiddleware, getAllUsers);
 // ========== GESTION DES SUPER ADMINS (PROTÉGÉ) ==========
 router.patch("/users/:id/promote", superAdminMiddleware, promoteToSuperAdmin);   // ✅ Promouvoir
 router.patch("/users/:id/demote", superAdminMiddleware, demoteSuperAdmin);       // ✅ Rétrograder
+
+// ========== GESTION DES GARAGE (PROTÉGÉ) ==========
+router.patch("/garage/:id/activate", superAdminMiddleware, ActiveGarageAccount);       // ✅ Activer garage
+router.patch("/garage/:id/deactivate", superAdminMiddleware, DésactiveGarageAccount); // ✅ Désactiver garage
+
+// Récupérer tous les garagistes d'un garage
+router.get("/garage/:id/garagistes", superAdminMiddleware, getGaragistesByGarage);
+
+// Activer un garagiste
+router.patch("/garagiste/:id/activate", superAdminMiddleware, activateGaragiste);
+
+// Désactiver un garagiste
+router.patch("/garagiste/:id/deactivate", superAdminMiddleware, deactivateGaragiste);
+
 
 
 // CRUD des rôles
