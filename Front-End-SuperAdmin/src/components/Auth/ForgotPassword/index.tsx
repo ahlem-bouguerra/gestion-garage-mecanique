@@ -15,7 +15,7 @@ export default function ForgotPasswordForm() {
     setMessage(""); // Reset le message précédent
 
     try {
-      const res = await fetch("http://localhost:5000/api/client/forgot-password", {
+      const res = await fetch("http://localhost:5000/api/SuperAdmin/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

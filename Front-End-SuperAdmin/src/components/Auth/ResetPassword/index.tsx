@@ -25,7 +25,7 @@ export default function ResetPasswordForm() {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/client/reset-password", {
+      const response = await axios.post("http://localhost:5000/api/SuperAdmin/reset-password", {
         email,
         token,
         newPassword,

@@ -15,6 +15,8 @@ import {
   demoteSuperAdmin,       // ✅ PROTÉGÉ : rétrograder
   getAllUsers
 } from "../controllers/superAdmin/AuthControllerSuperAdmin.js";
+import { resetPasswordSuperAdmin } from "../controllers/superAdmin/ResetPasswordSuperAdmin.js";
+import { forgotPasswordSuperAdmin } from "../controllers/superAdmin/ForgotPasswordClient.js";
 const router = express.Router();
 
 router.get("/me", adminAuthMiddleware, async (req, res) => {
@@ -34,6 +36,9 @@ router.get("/admin/verify-token/:token", verifEmailSuperAdmin);
 // ========== ROUTES PUBLIQUES ==========
 router.post("/auth/register", registerUser);        // ✅ Inscription (isSuperAdmin bloqué)
 router.post("/auth/login", loginUser);              // ✅ Login (tous les users)
+
+router.post("/SuperAdmin/reset-password", resetPasswordSuperAdmin);
+router.post("/SuperAdmin/forgot-password", forgotPasswordSuperAdmin);
 
 // ========== ROUTES PROTÉGÉES ==========
 router.post("/auth/logout", adminAuthMiddleware, logoutUser);
