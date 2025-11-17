@@ -3,20 +3,20 @@ import mongoose from "mongoose";
 
 const FicheClientSchema = new mongoose.Schema({
 
-    nom: {
+  nom: {
     type: String,
     required: true,
   },
-    type: {
+  type: {
     type: String,
     enum: ["particulier", "professionnel"],
     required: true,
   },
-   adresse: {
+  adresse: {
     type: String,
     required: false,
   },
-   telephone: {
+  telephone: {
     type: String,
     required: true,
 
@@ -25,52 +25,52 @@ const FicheClientSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  garagisteId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Garagiste",
-    required: true
+
+  garageId: {
+     type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true 
   },
-    clientId: {
+
+  clientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Client",
     required: false
   },
-  nomSociete: { 
-    type: String 
+  nomSociete: {
+    type: String
   },
   telephoneSociete: {
-     type: String
+    type: String
   },
   emailSociete: {
-     type: String 
+    type: String
   },
-  adresseSociete: { 
+  adresseSociete: {
     type: String
   }
   //derniereVisite: String, // ou Date si tu veux
-//  vehiculeAssocie:{
+  //  vehiculeAssocie:{
   //  type: String,
- //   required: true,
-//  },
+  //   required: true,
+  //  },
   //contactsSecondaires: [
-   // {
-   //   nom: String,
-   //   relation: String,
-    //  telephone: String,
-   //   email: String
-   // }
- // ],
- // historiqueVisites: [
+  // {
+  //   nom: String,
+  //   relation: String,
+  //  telephone: String,
+  //   email: String
+  // }
+  // ],
+  // historiqueVisites: [
   //  {
   //    date: String, // ou Date
   //    service: String,
-//montant: String
+  //montant: String
   //  }
- // ]
+  // ]
 });
 
-FicheClientSchema.index({ nom: 1, garagisteId: 1 }, { unique: true });
-FicheClientSchema.index({ email: 1, garagisteId: 1 }, { unique: true });
-FicheClientSchema.index({ telephone: 1, garagisteId: 1 }, { unique: true });
+FicheClientSchema.index({ nom: 1, garageId: 1 }, { unique: true });
+FicheClientSchema.index({ email: 1, garageId: 1 }, { unique: true });
+FicheClientSchema.index({ telephone: 1, garageId: 1 }, { unique: true });
 
 export default mongoose.model("FicheClient", FicheClientSchema);

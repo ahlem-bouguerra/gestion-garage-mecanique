@@ -26,14 +26,10 @@ const Servicechema = new mongoose.Schema({
     default: "Actif" 
   },
 
-      garagisteId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Garagiste",
-        required: true
-      }
+     garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true }
 });
 // À la fin de ton schema, AVANT export default
-Servicechema.index({ name: 1, garagisteId: 1 }, { unique: true });
+Servicechema.index({ name: 1, garageId: 1 }, { unique: true });
 
 // 🔹 Générer matricule auto : EMP001, EMP002, ...
 Servicechema.pre("save", async function (next) {

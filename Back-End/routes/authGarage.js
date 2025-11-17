@@ -343,6 +343,7 @@ router.put('/:id/payment', authMiddleware, MarquerFacturePayed);
 router.put('/:id', authMiddleware, UpdateFacture);
 router.delete('/:id', authMiddleware, DeleteFacture);
 router.get('/stats/summary', authMiddleware, StaticFacture);
+
 router.get('/credit-note/:creditNoteId', authMiddleware, getCreditNoteById);
 router.get('/factures/charts/payments-overview', authMiddleware, GetPaymentsOverviewData);
 router.get('/factures/charts/weeks-profit', authMiddleware, GetWeeksProfitData);

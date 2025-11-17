@@ -141,11 +141,7 @@ montantRemise: {
     enum: ['brouillon', 'envoye', 'accepte', 'refuse'],
     default: 'brouillon'
   },
-  garagisteId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Garagiste",
-      required: true
-  }
+garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true }
 }, {
   timestamps: true
 });

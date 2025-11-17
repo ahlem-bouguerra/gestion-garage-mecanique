@@ -9,11 +9,7 @@ const Atelierchema = new mongoose.Schema({
     type: String,
     required :true
   },
-  garagisteId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Garagiste",
-    required: true
-  }
+garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true }
 });
 
 export default mongoose.model("Atelier", Atelierchema);

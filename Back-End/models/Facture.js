@@ -222,11 +222,7 @@ const factureSchema = new mongoose.Schema({
   cancelledAt: {
     type: Date
   },
-  garagisteId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Garagiste",
-    required: true
-  }
+garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true }
 }, {
   timestamps: true
 });

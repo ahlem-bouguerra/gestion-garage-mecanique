@@ -9,14 +9,14 @@ import {Client} from '../../models/Client.js';
 export const getAllVehicules = async (req, res) => {
   try {
     const mesClients = await FicheClient.find({ 
-      garagisteId: req.user._id 
+       garageId : req.user.garageId
     }).select('_id');
     
     const clientIds = mesClients.map(c => c._id);
     
     const liaisons = await FicheClientVehicule.find({
       ficheClientId: { $in: clientIds },
-      garageId: req.user._id
+      garageId : req.user.garageId
     }).select('vehiculeId ficheClientId'); // ✅ Inclure ficheClientId
     
     const vehiculeIds = liaisons.map(l => l.vehiculeId);
@@ -76,7 +76,7 @@ export const getVehiculeById = async (req, res) => {
 
     const liaison = await FicheClientVehicule.findOne({
       vehiculeId: id,
-      garageId: req.user._id
+      garageId : req.user.garageId
     });
     
     if (!liaison) {
@@ -116,7 +116,7 @@ export const getVehiculesByProprietaire = async (req, res) => {
 
     const ficheClient = await FicheClient.findOne({
       _id: clientId,
-      garagisteId: req.user._id
+      garageId : req.user.garageId
     });
     
     if (!ficheClient) {
@@ -125,7 +125,7 @@ export const getVehiculesByProprietaire = async (req, res) => {
 
     const liaisons = await FicheClientVehicule.find({
       ficheClientId: clientId,
-      garageId: req.user._id
+      garageId : req.user.garageId
     }).select('vehiculeId');
     
     const vehiculeIds = liaisons.map(l => l.vehiculeId);
@@ -185,7 +185,7 @@ export const createVehicule = async (req, res) => {
       
       const ficheClient = await FicheClient.findOne({
         _id: proprietaireId,
-        garagisteId: req.user._id
+        garageId : req.user.garageId
       });
       
       if (!ficheClient) {
@@ -195,7 +195,7 @@ export const createVehicule = async (req, res) => {
       const liaisonExistante = await FicheClientVehicule.findOne({
         ficheClientId: proprietaireId,
         vehiculeId: vehiculeExistant._id,
-        garageId: req.user._id
+        garageId : req.user.garageId
       });
       
       if (liaisonExistante) {
@@ -205,16 +205,16 @@ export const createVehicule = async (req, res) => {
       await FicheClientVehicule.create({
         ficheClientId: proprietaireId,
         vehiculeId: vehiculeExistant._id,
-        garageId: req.user._id
+        garageId : req.user.garageId
       });
       
       const dejaVisiteParGarage = vehiculeExistant.historique_garages.some(
-        h => h.garageId.toString() === req.user._id.toString()
+        h => h.garageId.toString() === req.user.garageId.toString()
       );
       
       if (!dejaVisiteParGarage) {
         vehiculeExistant.historique_garages.push({
-          garageId: req.user._id,
+          garageId : req.user.garageId,
           datePremiereVisite: new Date()
         });
         await vehiculeExistant.save();
@@ -233,7 +233,7 @@ export const createVehicule = async (req, res) => {
     // ✅ NOUVEAU VÉHICULE
     const ficheClient = await FicheClient.findOne({
       _id: proprietaireId,
-      garagisteId: req.user._id
+      garageId : req.user.garageId
     });
     
     if (!ficheClient) {
@@ -265,9 +265,9 @@ export const createVehicule = async (req, res) => {
       immatriculation: immatriculationFormatee,
       statut: 'actif',
       creePar: 'garagiste',
-      garagisteId: req.user._id,
+      garageId : req.user.garageId,
       historique_garages: [{
-        garageId: req.user._id,
+        garageId : req.user.garageId,
         datePremiereVisite: new Date()
       }]
     };
@@ -315,7 +315,7 @@ if (req.body.carteGrise) {
     await FicheClientVehicule.create({
       ficheClientId: proprietaireId,
       vehiculeId: vehiculeSauve._id,
-      garageId: req.user._id
+      garageId : req.user.garageId
     });
 
     // ✅ Retourner avec FicheClient
@@ -357,7 +357,7 @@ export const updateVehicule = async (req, res) => {
 
     const liaison = await FicheClientVehicule.findOne({
       vehiculeId: id,
-      garageId: req.user._id
+      garageId : req.user.garageId
     });
 
     if (!liaison) {
@@ -481,7 +481,7 @@ if (req.body.carteGrise) {
 export const dissocierVehicule = async (req, res) => {
   try {
     const { ficheClientId, vehiculeId } = req.params;
-    const garageId = req.user._id;
+    const garageId = req.user.garageId;
 
     const liaison = await FicheClientVehicule.findOneAndDelete({
       ficheClientId,

@@ -56,13 +56,18 @@ export const authMiddleware = async (req, res, next) => {
     }
 
     // ✅ Attacher l'utilisateur complet à req.user
-    req.user = user;
+    // ⭐ APRÈS (ajoute garageId explicitement)
+req.user = {
+  ...user,
+  garageId: user.garage?._id || null,  // ← Ajoute cette ligne
+
+};
     
     console.log('✅ Garagiste authentifié:', {
       id: user._id,
       email: user.email,
       garage: user.garage?.nom || 'Aucun garage',
-      garageId: user.garage?._id || 'N/A'
+      garageId: req.user.garageId,  // ← Utilise req.user.garageId maintenant
     });
     
     next();

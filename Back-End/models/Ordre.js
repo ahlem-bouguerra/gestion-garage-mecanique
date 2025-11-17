@@ -152,11 +152,7 @@ const OrdreTravailSchema = new Schema({
     type: Number,
     default: 0
   },
-  garagisteId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Garagiste",
-        required: true
-  },
+garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true },
   // Notes et commentaires additionnels
   notes: [{
     contenu: String,
@@ -252,11 +248,11 @@ OrdreTravailSchema.statics.findByAtelier = function(atelierId, options = {}) {
     .skip(options.skip || 0);
 };
 
-OrdreTravailSchema.statics.getStatistiques = async function(atelierId = null, garagisteId = null) {
+OrdreTravailSchema.statics.getStatistiques = async function(atelierId = null, garageId = null) {
     const match = {};
     
-    if (garagisteId) {
-      match.garagisteId = new mongoose.Types.ObjectId(garagisteId);
+    if (garageId) {
+      match.garageId = new mongoose.Types.ObjectId(garageId);
     }
     
     if (atelierId) {
@@ -290,11 +286,11 @@ OrdreTravailSchema.statics.getStatistiques = async function(atelierId = null, ga
   };
 };
 
-OrdreTravailSchema.statics.getTempsMoyenInterventions = async function(atelierId, periode = 'jour', garagisteId = null) {
+OrdreTravailSchema.statics.getTempsMoyenInterventions = async function(atelierId, periode = 'jour', garageId = null) {
   const match = {};
   
-  if (garagisteId) {
-    match.garagisteId = new mongoose.Types.ObjectId(garagisteId);
+  if (garageId) {
+    match.garageId = new mongoose.Types.ObjectId(garageId);
   }
   
   if (atelierId) {
@@ -331,11 +327,11 @@ OrdreTravailSchema.statics.getTempsMoyenInterventions = async function(atelierId
   ]);
 };
 
-OrdreTravailSchema.statics.getChargeParMecanicien = async function(atelierId, periode = 'jour', garagisteId = null) {
+OrdreTravailSchema.statics.getChargeParMecanicien = async function(atelierId, periode = 'jour', garageId = null) {
     const match = {};
   
-  if (garagisteId) {
-    match.garagisteId = new mongoose.Types.ObjectId(garagisteId);
+  if (garageId) {
+    match.garageId = new mongoose.Types.ObjectId(garageId);
   }
   
   if (atelierId) {
@@ -377,11 +373,11 @@ OrdreTravailSchema.statics.getChargeParMecanicien = async function(atelierId, pe
 };
 
 
-OrdreTravailSchema.statics.getStatutStats = async function(atelierId, periode = 'jour' , garagisteId = null) {
+OrdreTravailSchema.statics.getStatutStats = async function(atelierId, periode = 'jour' , garageId = null) {
   const match = {};
   
-  if (garagisteId) {
-    match.garagisteId = new mongoose.Types.ObjectId(garagisteId);
+  if (garageId) {
+    match.garageId = new mongoose.Types.ObjectId(garageId);
   }
   
   if (atelierId) {
@@ -418,11 +414,11 @@ OrdreTravailSchema.statics.getStatutStats = async function(atelierId, periode = 
 };
 
 
-OrdreTravailSchema.statics.getChargeAtelier = async function(atelierId, periode = 'jour', garagisteId = null) {
+OrdreTravailSchema.statics.getChargeAtelier = async function(atelierId, periode = 'jour', garageId = null) {
     const match = {};
   
-  if (garagisteId) {
-    match.garagisteId = new mongoose.Types.ObjectId(garagisteId);
+  if (garageId) {
+    match.garageId = new mongoose.Types.ObjectId(garageId);
   }
   
   if (atelierId) {

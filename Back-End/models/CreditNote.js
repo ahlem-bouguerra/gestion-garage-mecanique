@@ -134,11 +134,7 @@ const creditNoteSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Garagiste'
   },
-  garagisteId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Garagiste",
-      required: true
-  }
+garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true }
 }, {
   timestamps: true
 });

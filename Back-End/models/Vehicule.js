@@ -64,12 +64,7 @@ const vehiculeSchema = new mongoose.Schema({
     required: true
   },
   
-  // ✅ MODIFIÉ : garagisteId devient OPTIONNEL (seulement si créé par garage)
-  garagisteId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Garagiste",
-    required: false // ✅ Nullable si créé par client
-  },
+garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true },
   paysImmatriculation: {
   type: String,
   enum: ['tunisie', 'autre'],

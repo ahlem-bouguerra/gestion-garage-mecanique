@@ -3,11 +3,19 @@ import Devis from '../../models/Devis.js';
 import mongoose from 'mongoose'; // ✅ Import ajouté
 import CreditNote from '../../models/CreditNote.js';
 import FicheClient from '../../models/FicheClient.js'; 
+import { hasPermission, hasAnyPermission } from '../../utils/permissionChecker.js'; 
 
 
 
 export const CreateFacture = async (req, res) => {
   try {
+    // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'create_facture')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
     const { devisId } = req.params;
 
     // Validation de l'ObjectId
