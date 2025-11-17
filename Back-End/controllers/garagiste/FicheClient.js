@@ -2,12 +2,19 @@ import FicheClient from "../../models/FicheClient.js";
 import OrdreTravail from "../../models/Ordre.js";
 import { validateTunisianPhone } from '../../utils/phoneValidator.js';
 import mongoose from "mongoose";
+import { hasAnyPermission,hasPermission } from "../../utils/permissionChecker.js";
 
-// -----------------------------------------------------
-// CREATE
-// -----------------------------------------------------
+
 export const createFicheClient = async (req, res) => {
   try {
+       // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'create_client')) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+
     if (!req.user || !req.user.garageId) {
       return res.status(401).json({ error: "Utilisateur non authentifié ou garage manquant" });
     }
@@ -37,11 +44,16 @@ export const createFicheClient = async (req, res) => {
   }
 };
 
-// -----------------------------------------------------
-// GET ALL CLIENTS (pour le garage)
-// -----------------------------------------------------
 export const getFicheClients = async (req, res) => {
   try {
+    // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['view_all_clients','create_client','view_client'])) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+
     const clients = await FicheClient.find({
       garageId: req.user.garageId
     });
@@ -52,11 +64,18 @@ export const getFicheClients = async (req, res) => {
   }
 };
 
-// -----------------------------------------------------
-// GET CLIENT BY ID
-// -----------------------------------------------------
+
 export const getFicheClientById = async (req, res) => {
   try {
+
+       // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['view_all_clients','create_client','view_client'])) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+
     const fiche = await FicheClient.findOne({
       _id: req.params._id,
       garageId: req.user.garageId
@@ -72,11 +91,19 @@ export const getFicheClientById = async (req, res) => {
   }
 };
 
-// -----------------------------------------------------
-// GET ONLY NAMES (autosuggestion)
-// -----------------------------------------------------
+
 export const getFicheClientNoms = async (req, res) => {
   try {
+
+       // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['view_all_clients','create_client','view_client','view_client_noms'])) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+
+  
     const clients = await FicheClient.find(
       { garageId: req.user.garageId },
       { nom: 1, type: 1, _id: 1 }
@@ -88,11 +115,19 @@ export const getFicheClientNoms = async (req, res) => {
   }
 };
 
-// -----------------------------------------------------
-// UPDATE
-// -----------------------------------------------------
+
 export const updateFicheClient = async (req, res) => {
   try {
+    
+       // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['create_client','update_client'])) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+
+
     const fiche = await FicheClient.findOneAndUpdate(
       {
         _id: req.params._id,
@@ -112,11 +147,17 @@ export const updateFicheClient = async (req, res) => {
   }
 };
 
-// -----------------------------------------------------
-// DELETE
-// -----------------------------------------------------
 export const deleteFicheClient = async (req, res) => {
   try {
+
+       // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['create_devis','delete_client','update_client'])) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+  
     const fiche = await FicheClient.findOneAndDelete({
       _id: req.params._id,
       garageId: req.user.garageId
@@ -132,11 +173,19 @@ export const deleteFicheClient = async (req, res) => {
   }
 };
 
-// -----------------------------------------------------
-// HISTORIQUE DETAILLÉ DES VISITES
-// -----------------------------------------------------
+
 export const getHistoriqueVisiteByIdClient = async (req, res) => {
   try {
+       // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'view_client_historique_detail')) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+
+
+
     const { clientId } = req.params;
 
     const client = await FicheClient.findOne({
@@ -195,11 +244,17 @@ export const getHistoriqueVisiteByIdClient = async (req, res) => {
   }
 };
 
-// -----------------------------------------------------
-// HISTORIQUE SIMPLE (nombre visites + dernière)
-// -----------------------------------------------------
+
 export const getHistoryVisite = async (req, res) => {
   try {
+
+    if (!hasPermission(req.user, 'view_client_historique_simple')) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+
     const { clientId } = req.params;
 
     const client = await FicheClient.findOne({

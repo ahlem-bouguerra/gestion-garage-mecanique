@@ -81,23 +81,7 @@ const permissions = [
   { name: 'super_admin', description: 'Accès complet à tout' }
 ];
 
-const roles = [
-  { 
-    name: 'Admin Garage', 
-    description: 'Administrateur avec tous les droits',
 
-  },
-  { 
-    name: 'Employé Garage', 
-    description: 'Peut voir et créer des factures',
-
-  },
-  { 
-    name: 'Mécanicien', 
-    description: 'Peut seulement voir les factures',
-
-  }
-];
 
 async function seed() {
   try {
@@ -118,32 +102,10 @@ async function seed() {
       console.log(`  ✅ ${perm.name}`);
     }
 
-    // 2️⃣ Créer les rôles
-    console.log('\n👥 Création des rôles...');
-    
-    for (const roleData of roles) {
-      const role = await Role.findOneAndUpdate(
-        { name: roleData.name },
-        { name: roleData.name, description: roleData.description },
-        { upsert: true, new: true }
-      );
-      
-      console.log(`  ✅ ${roleData.name}`);
 
-      // 3️⃣ Lier les permissions au rôle
-      for (const permName of roleData.permissions) {
-        const permId = permissionsMap[permName];
-        
-        if (permId) {
-          await RolePermission.findOneAndUpdate(
-            { roleId: role._id, permissionId: permId },
-            { roleId: role._id, permissionId: permId },
-            { upsert: true }
-          );
-          console.log(`    🔗 ${permName}`);
-        }
-      }
-    }
+    
+
+
 
     console.log('\n✅ Seed terminé avec succès !');
     process.exit(0);

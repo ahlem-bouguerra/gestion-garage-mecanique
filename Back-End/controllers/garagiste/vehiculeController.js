@@ -2,12 +2,21 @@ import Vehicule from '../../models/Vehicule.js';
 import FicheClient from '../../models/FicheClient.js';
 import FicheClientVehicule from '../../models/FicheClientVehicule.js';
 import {Client} from '../../models/Client.js';
+import { hasAllPermissions,hasAnyPermission ,hasPermission } from '../../utils/permissionChecker.js';
 
 // ==========================================
 // 📋 RÉCUPÉRER TOUS LES VÉHICULES DU GARAGE
 // ==========================================
 export const getAllVehicules = async (req, res) => {
   try {
+       // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['view_vehicule','view_all_vehicules','create_vehicule'])) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+
     const mesClients = await FicheClient.find({ 
        garageId : req.user.garageId
     }).select('_id');
@@ -72,6 +81,13 @@ export const getAllVehicules = async (req, res) => {
 // ==========================================
 export const getVehiculeById = async (req, res) => {
   try {
+       // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['view_vehicule','view_all_vehicules','create_vehicule'])) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
     const { id } = req.params;
 
     const liaison = await FicheClientVehicule.findOne({
@@ -110,6 +126,14 @@ export const getVehiculeById = async (req, res) => {
 // ==========================================
 export const getVehiculesByProprietaire = async (req, res) => {
   try {
+       // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['view_vehicule','view_all_vehicules','create_vehicule','view_vehicules_client'])) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+
     const { clientId } = req.params;
 
     console.log("🔍 Recherche véhicules pour ficheClient:", clientId);
@@ -155,6 +179,15 @@ export const getVehiculesByProprietaire = async (req, res) => {
 // ==========================================
 export const createVehicule = async (req, res) => {
   try {
+
+       // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'create_vehicule')) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+
     const {
       proprietaireId,
       marque,
@@ -343,6 +376,15 @@ if (req.body.carteGrise) {
 // ==========================================
 export const updateVehicule = async (req, res) => {
   try {
+
+       // 🔐 Vérifier la permission
+   if (!hasAnyPermission(req.user, ['create_vehicule','update_vehicule'])) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
+    
     const { id } = req.params;
     const {
       proprietaireId,
@@ -480,6 +522,14 @@ if (req.body.carteGrise) {
 // ==========================================
 export const dissocierVehicule = async (req, res) => {
   try {
+
+       // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['dissocier_vehicule','update_vehicule','create_vehicule'])) {
+      return res.status(403).json({ 
+      success: false, 
+      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
     const { ficheClientId, vehiculeId } = req.params;
     const garageId = req.user.garageId;
 
