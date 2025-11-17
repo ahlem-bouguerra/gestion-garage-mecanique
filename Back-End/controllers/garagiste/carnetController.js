@@ -17,18 +17,18 @@ export const getCarnetByVehiculeId = async (req, res) => {
     if (!vehicule) {
       return res.status(404).json({ error: 'Véhicule non trouvé' });
     }
-    console.log("   - garagisteId:", vehicule.garagisteId);
+    console.log("   - garageId:", vehicule.garageId);
     console.log("   - proprietaireId:", vehicule.proprietaireId);
     console.log("   - proprietaireModel:", vehicule.proprietaireModel);
 
     // ✅ VÉRIFIER L'ACCÈS DU GARAGE AU VÉHICULE
     const liaison = await FicheClientVehicule.findOne({
       vehiculeId: vehiculeId,
-      garageId: req.user._id
+      garageId: req.user.garageId
     });
     console.log("🔗 Liaison trouvée:", liaison ? "OUI" : "NON");
 
-    const estVehiculeGarage = vehicule.garagisteId?.toString() === req.user._id.toString();
+    const estVehiculeGarage = vehicule.garageId?.toString() === req.user.garageId.toString();
 
     if (!liaison && !estVehiculeGarage) {
       return res.status(403).json({ 
@@ -107,7 +107,7 @@ export const getCarnetByVehiculeId = async (req, res) => {
           typeEntretien: 'maintenance',
           statut: 'termine',
           totalTTC: totalTTC,
-          garagisteId: req.user._id,
+          garageId: req.user.garageId,
           kilometrageEntretien: null,
           notes: `Créé automatiquement depuis l'ordre ${ordre.numeroOrdre}`,
           services: ordre.taches ? ordre.taches.map(tache => ({
@@ -217,7 +217,7 @@ export const Statistiques = async (req, res) => {
 
     const carnets = await CarnetEntretien.find({ 
       vehiculeId, 
-      garagisteId: req.user._id 
+      garageId: req.user.garageId
     }).sort({ dateCommencement: -1 });
 
     if (carnets.length === 0) {
@@ -274,7 +274,7 @@ export const creerCarnetManuel = async (req, res) => {
     // ✅ MODIFICATION : Vérifier via la liaison, pas directement le véhicule
     const liaison = await FicheClientVehicule.findOne({
       vehiculeId: vehiculeId,
-      garageId: req.user._id
+      garageId: req.user.garageId
     });
 
     if (!liaison) {
@@ -289,7 +289,7 @@ export const creerCarnetManuel = async (req, res) => {
       dateCommencement: new Date(date),
       dateFinCompletion: new Date(date),
       typeEntretien: 'maintenance',
-      garagisteId: req.user._id,
+      garageId: req.user.garageId,
       statut: 'termine',
       totalTTC: parseFloat(cout),
       services: taches.map(tache => ({

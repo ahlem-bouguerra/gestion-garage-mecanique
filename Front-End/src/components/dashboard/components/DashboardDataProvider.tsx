@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface DashboardData {
   periode: 'jour' | 'semaine' | 'mois';
@@ -23,7 +23,6 @@ interface DashboardData {
       mecanicienNom: string;
     };
     chargeEstimee: number;
-    chargeReelle: number;
     nombreTaches: number;
   }>;
 }
@@ -31,24 +30,18 @@ interface DashboardData {
 interface DashboardContextType {
   data: DashboardData | null;
   loading: boolean;
+  error: string | null;
   periode: 'jour' | 'semaine' | 'mois';
   atelierId: string;
   setPeriode: (periode: 'jour' | 'semaine' | 'mois') => void;
-  setAtelierId: (id: string) => void;
+  setAtelierId: (atelierId: string) => void;
+  refetch: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
-export const useDashboardData = () => {
-  const context = useContext(DashboardContext);
-  if (!context) {
-    throw new Error('useDashboardData must be used within DashboardDataProvider');
-  }
-  return context;
-};
-
 interface DashboardDataProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   initialPeriode?: 'jour' | 'semaine' | 'mois';
   initialAtelierId?: string;
 }
@@ -61,44 +54,113 @@ export const DashboardDataProvider: React.FC<DashboardDataProviderProps> = ({
   const [periode, setPeriode] = useState<'jour' | 'semaine' | 'mois'>(initialPeriode);
   const [atelierId, setAtelierId] = useState<string>(initialAtelierId);
   const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setLoading(true);
-      try {
-        const params = new URLSearchParams({
-          periode,
-          ...(atelierId !== 'tous' && { atelier: atelierId })
-        });
+  // ✅ Fonction pour récupérer le token
+  const getAuthToken = () => {
+    // Vérifier d'abord localStorage, puis sessionStorage
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    
+    if (!token) {
+      console.error('❌ Aucun token trouvé dans localStorage ou sessionStorage');
+    } else {
+      console.log('✅ Token trouvé:', token.substring(0, 20) + '...');
+    }
+    
+    return token;
+  };
 
-        const response = await fetch(
-          `http://localhost:5000/api/dashboard/charge-atelier?${params}`
-        );
-        const result = await response.json();
-        setData(result);
-      } catch (error) {
-        console.error('Erreur lors de la récupération des données:', error);
-      } finally {
-        setLoading(false);
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = getAuthToken();
+
+      if (!token) {
+        throw new Error('Token d\'authentification manquant. Veuillez vous reconnecter.');
       }
-    };
 
+      const params = new URLSearchParams({
+        periode,
+        ...(atelierId !== 'tous' && { atelier: atelierId })
+      });
+
+      const url = `http://localhost:5000/api/dashboard/charge-atelier?${params}`;
+      console.log('📡 Requête dashboard:', url);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('📥 Réponse status:', response.status);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Token invalide ou expiré
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          throw new Error('Session expirée. Veuillez vous reconnecter.');
+        }
+
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || `Erreur ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('📊 Données reçues:', result);
+
+      // ✅ Vérification de la structure des données
+      if (!result || !result.statistiques) {
+        console.error('⚠️ Structure de données invalide:', result);
+        throw new Error('Structure de données invalide reçue du serveur');
+      }
+
+      setData(result);
+      setError(null);
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      console.error('❌ Erreur lors de la récupération des données:', errorMessage);
+      setError(errorMessage);
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Récupérer les données quand la période ou l'atelier change
+  useEffect(() => {
     fetchDashboardData();
   }, [periode, atelierId]);
 
+  const contextValue: DashboardContextType = {
+    data,
+    loading,
+    error,
+    periode,
+    atelierId,
+    setPeriode,
+    setAtelierId,
+    refetch: fetchDashboardData
+  };
+
   return (
-    <DashboardContext.Provider
-      value={{
-        data,
-        loading,
-        periode,
-        atelierId,
-        setPeriode,
-        setAtelierId
-      }}
-    >
+    <DashboardContext.Provider value={contextValue}>
       {children}
     </DashboardContext.Provider>
   );
+};
+
+export const useDashboardData = () => {
+  const context = useContext(DashboardContext);
+  if (context === undefined) {
+    throw new Error('useDashboardData must be used within a DashboardDataProvider');
+  }
+  return context;
 };

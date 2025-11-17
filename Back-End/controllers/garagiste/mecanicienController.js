@@ -17,7 +17,7 @@ export const createMecanicien = async (req, res) => {
     
     const mecanicien = new Mecanicien({
       ...req.body,
-      garagisteId: req.user._id   // ✅ lien avec le garagiste
+      garageId: req.user.garageId   // ✅ lien avec le garagiste
     });
     await mecanicien.save();
     res.status(201).json(mecanicien);
@@ -41,7 +41,7 @@ export const updateMecanicien = async (req, res) => {
     
     const { id } = req.params;
     const mecanicien = await Mecanicien.findOneAndUpdate(
-      { _id: id, garagisteId: req.user._id },  // ✅ filtrage par garagisteId
+      { _id: id, garageId: req.user.garageId },  // ✅ filtrage par garageId
       req.body,                               // champs à mettre à jour
       { new: true }
     );
@@ -61,7 +61,7 @@ export const updateMecanicien = async (req, res) => {
 export const deleteMecanicien = async (req, res) => {
   try {
     const { id } = req.params;
-    const mecanicien = await Mecanicien.findOneAndDelete({_id: id, garagisteId: req.user._id });
+    const mecanicien = await Mecanicien.findOneAndDelete({_id: id, garageId: req.user.garageId});
     if (!mecanicien) return res.status(404).json({ error: "Mécanicien non trouvé" });
     res.json({ message: "Mécanicien supprimé avec succès" });
   } catch (err) {
@@ -72,7 +72,7 @@ export const deleteMecanicien = async (req, res) => {
 // 📌 Récupérer tous les mécaniciens
 export const getAllMecaniciens = async (req, res) => {
   try {
-    const mecaniciens = await Mecanicien.find({ garagisteId: req.user._id });
+    const mecaniciens = await Mecanicien.find({ garageId: req.user.garageId });
     res.json(mecaniciens);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -83,7 +83,7 @@ export const getAllMecaniciens = async (req, res) => {
 export const getMecanicienById = async (req, res) => {
   try {
     const { id } = req.params;
-    const mecanicien = await Mecanicien.findOne({ id, garagisteId: req.user._id });
+    const mecanicien = await Mecanicien.findOne({ id,garageId: req.user.garageId });
     if (!mecanicien) return res.status(404).json({ error: "Mécanicien non trouvé" });
     res.json(mecanicien);
   } catch (err) {
@@ -103,7 +103,7 @@ export const getMecaniciensByService = async (req, res) => {
     // recherche dans le tableau "services"
     const mecaniciens = await Mecanicien.find({
       "services.serviceId": serviceObjectId,
-      garagisteId: req.user._id 
+      garageId: req.user.garageId
     });
 
     if (!mecaniciens || mecaniciens.length === 0) {

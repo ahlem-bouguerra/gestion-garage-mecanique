@@ -35,6 +35,9 @@ const Dashboard: React.FC = () => {
   const [atelierId, setAtelierId] = useState<string>('tous');
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false);
+    const getAuthToken = () => {
+        return localStorage.getItem('token') || sessionStorage.getItem('token');
+    };
 
   // Fonction pour récupérer les données
   const fetchDashboardData = async () => {
@@ -45,7 +48,9 @@ const Dashboard: React.FC = () => {
         ...(atelierId !== 'tous' && { atelier: atelierId })
       });
 
-      const response = await fetch(`http://localhost:5000/api/dashboard/charge-atelier?${params}`);
+      const response = await fetch(`http://localhost:5000/api/dashboard/charge-atelier?${params}`, {
+                headers: { Authorization: `Bearer ${getAuthToken()}` }
+            });
       const result = await response.json();
       setData(result);
     } catch (error) {

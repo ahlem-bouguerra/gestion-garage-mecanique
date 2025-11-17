@@ -3,7 +3,7 @@ import Service from '../../models/Service.js';
 
 export const getAllServices = async (req, res) => {
   try {
-    const services = await Service.find({garagisteId: req.user._id});
+    const services = await Service.find({garageId: req.user.garageId});
     console.log("✅ services récupérées:", services.length);
     res.json(services);
   } catch (error) {
@@ -16,7 +16,7 @@ export const getAllServices = async (req, res) => {
 export const getServiceById = async (req, res) => {
   try {
     const { id } = req.params;
-    const service = await Service.findOne({_id:id , garagisteId: req.user._id});
+    const service = await Service.findOne({_id:id , garageId: req.user.garageId});
 
     if (!service) {
       return res.status(404).json({ error: 'service non trouvée' });
@@ -43,7 +43,7 @@ export const createService = async (req, res) => {
     // Vérifier si le service existe déjà pour ce garagiste
     const serviceExistant = await Service.findOne({ 
       name, 
-      garagisteId: req.user._id 
+      garageId: req.user.garageId 
     });
     
     if (serviceExistant) {
@@ -56,7 +56,7 @@ export const createService = async (req, res) => {
       name, 
       description, 
       statut, 
-      garagisteId: req.user._id 
+      garageId: req.user.garageId 
     });
     
     await service.save();
@@ -84,7 +84,7 @@ export const updateService = async (req, res) => {
     const updateData = req.body;
 
     const serviceModifie = await Service.findOneAndUpdate(
-      { _id: id, garagisteId: req.user._id },
+      { _id: id, garageId: req.user.garageId },
       updateData,
       { new: true, runValidators: true }
     );
@@ -107,7 +107,7 @@ export const deleteService = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const serviceSupprimee = await Service.findOneAndDelete({_id: id, garagisteId: req.user._id });
+    const serviceSupprimee = await Service.findOneAndDelete({_id: id, garageId: req.user.garageId});
 
     if (!serviceSupprimee) {
       return res.status(404).json({ error: 'service non trouvée' });

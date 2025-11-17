@@ -10,12 +10,7 @@ import { hasPermission, hasAnyPermission } from '../../utils/permissionChecker.j
 export const CreateFacture = async (req, res) => {
   try {
     // 🔐 Vérifier la permission
-    if (!hasPermission(req.user, 'create_facture')) {
-      return res.status(403).json({ 
-        success: false, 
-        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
-      });
-    }
+  
     const { devisId } = req.params;
 
     // Validation de l'ObjectId
@@ -27,7 +22,7 @@ export const CreateFacture = async (req, res) => {
     }
 
     // 1️⃣ Vérifier si le devis existe et est accepté
-    const devis = await Devis.findOne({_id: devisId, garagisteId: req.user._id });
+    const devis = await Devis.findOne({_id: devisId, garageId: req.user.garageId });
     if (!devis) {
       return res.status(404).json({ success: false, message: 'Devis non trouvé' });
     }
@@ -38,7 +33,7 @@ export const CreateFacture = async (req, res) => {
     const ficheClient = await FicheClient.findById(devis.clientId);
 
     // 2️⃣ Vérifier si une facture existe déjà pour ce devis
-    const existingFacture = await Facture.findOne({ devisId: devis._id , garagisteId: req.user._id  });
+    const existingFacture = await Facture.findOne({ devisId: devis._id , garageId: req.user.garageId  });
     if (existingFacture) {
       return res.status(400).json({ success: false, message: 'Une facture existe déjà pour ce devis', facture: existingFacture });
     }
@@ -57,7 +52,7 @@ export const CreateFacture = async (req, res) => {
       devisId: devis._id,
        clientId: devis.clientId,
        realClientId: ficheClient?.clientId || null,
-       garagisteId: req.user._id ,  // ← ici
+       garageId: req.user.garageId ,  // ← ici
         clientInfo: {
           nom: devis.clientName,
           telephone: devis.clientPhone,
@@ -127,7 +122,7 @@ export const GetAllFactures = async (req, res) => {
     } = req.query;
 
     // Construction de la requête avec filtres
-    let query = {garagisteId: req.user._id};
+    let query = {garageId: req.user.garageId};
 
     if (clientId && mongoose.Types.ObjectId.isValid(clientId)) {
       query.clientId = clientId;
@@ -193,7 +188,7 @@ export const GetFactureById = async (req, res) => {
       });
     }
 
-    const facture = await Facture.findOne({ _id: id, garagisteId: req.user._id })
+    const facture = await Facture.findOne({ _id: id, garageId: req.user.garageId })
       .populate('clientId', 'nom email telephone adresse')
       .populate('devisId', 'id status')
       .populate('services', 'name description');
@@ -230,7 +225,7 @@ export const getFactureByDevis = async (req, res) => {
     }
 
     const facture = await Facture.findOne({ 
-      garagisteId: req.user._id,
+      garageId: req.user.garageId,
       devisId: req.params.devisId,
       status: 'active'
     }).populate("devisId");
@@ -268,7 +263,7 @@ export const MarquerFacturePayed = async (req, res) => {
       });
     }
 
-    const facture = await Facture.findOne({ _id: id, garagisteId: req.user._id });
+    const facture = await Facture.findOne({ _id: id, garageId: req.user.garageId });
     if (!facture) {
       return res.status(404).json({
         success: false,
@@ -314,7 +309,7 @@ export const UpdateFacture = async (req, res) => {
     }
 
     const updatedFacture = await Facture.findByIdAndUpdate(
-      { _id: id, garagisteId: req.user._id },
+      { _id: id, garageId: req.user.garageId },
       {
         notes,
         dueDate: dueDate ? new Date(dueDate) : undefined,
@@ -358,7 +353,7 @@ export const DeleteFacture = async (req, res) => {
       });
     }
 
-    const facture = await Facture.findOne({ _id: id, garagisteId: req.user._id });;
+    const facture = await Facture.findOne({ _id: id, garageId: req.user.garageId});;
     
     if (!facture) {
       return res.status(404).json({
@@ -398,7 +393,7 @@ export const StaticFacture = async (req, res) => {
   {
     $match: {
       status: 'active', // <-- exclut les factures annulées
-      garagisteId: req.user._id 
+      garageId: req.user.garageId
     }
   },
   {
@@ -519,7 +514,7 @@ export const CreateFactureWithCredit = async (req, res) => {
     // 1. Récupérer le devis avec filtrage garagiste
     const devis = await Devis.findOne({ 
       _id: devisId, 
-      garagisteId: req.user._id 
+      garageId: req.user.garageId
     });
     if (!devis) {
       return res.status(404).json({ 
@@ -532,7 +527,7 @@ export const CreateFactureWithCredit = async (req, res) => {
     const existingFacture = await Facture.findOne({ 
       devisId: devisId, 
       status: 'active',
-      garagisteId: req.user._id 
+      garageId: req.user.garageId
     });
 
     let creditNote = null;
@@ -567,7 +562,7 @@ export const CreateFactureWithCredit = async (req, res) => {
         reason: 'Annulation suite à modification du devis',
         creditDate: new Date(),
         createdBy: req.user?.id,
-        garagisteId: req.user._id
+        garageId: req.user.garageId
       });
 
       await creditNote.save();
@@ -627,7 +622,7 @@ export const CreateFactureWithCredit = async (req, res) => {
       invoiceDate: new Date(),
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       createdBy: req.user?.id,
-      garagisteId: req.user._id,
+      garageId: req.user.garageId,
       status: 'active'
     };
 
@@ -709,13 +704,13 @@ export const getCreditNoteById = async (req, res) => {
     console.log('🔍 Recherche avoir ID:', creditNoteId);
     console.log('👤 User ID:', req.user._id);
     
-    // Vérifiez d'abord si l'avoir existe (sans filtre garagisteId)
+    // Vérifiez d'abord si l'avoir existe (sans filtre garageId)
     const existsCheck = await CreditNote.findById(creditNoteId);
     console.log('💾 Avoir existe?', !!existsCheck);
     
     const creditNote = await CreditNote.findOne({
       _id: creditNoteId,
-      garagisteId: req.user._id
+     garageId: req.user.garageId
     })
     .populate('clientId', 'nom email telephone adresse')
     .populate('originalFactureId', 'numeroFacture')
@@ -751,9 +746,9 @@ export const GetPaymentsOverviewData = async (req, res) => {
     const { timeFrame = 'monthly' } = req.query;
     
     // ✅ IMPORTANT : Convertir en ObjectId si c'est une string
-    const garagisteId = mongoose.Types.ObjectId.isValid(req.user._id) 
-      ? new mongoose.Types.ObjectId(req.user._id)
-      : req.user._id;
+    const garageId = mongoose.Types.ObjectId.isValid(req.user.garageId) 
+      ? new mongoose.Types.ObjectId(req.user.garageId)
+      : req.user.garageId;
 
     // Déterminer la plage de dates selon le timeFrame
     let startDate, groupFormat;
@@ -791,7 +786,7 @@ export const GetPaymentsOverviewData = async (req, res) => {
     const facturesData = await Facture.aggregate([
       {
         $match: {
-          garagisteId: garagisteId, // ✅ ObjectId converti
+          garageId: garageId, // ✅ ObjectId converti
           status: 'active',
           invoiceDate: { $gte: startDate }
         }
@@ -851,9 +846,9 @@ export const GetPaymentsOverviewData = async (req, res) => {
 export const GetWeeksProfitData = async (req, res) => {
   try {
     const { weeksCount = 12 } = req.query;
-    const garagisteId = mongoose.Types.ObjectId.isValid(req.user._id) 
-      ? new mongoose.Types.ObjectId(req.user._id)
-      : req.user._id;
+    const garageId = mongoose.Types.ObjectId.isValid(req.user.garageId) 
+      ? new mongoose.Types.ObjectId(req.user.garageId)
+      : req.user.garageId;
 
     const weeksAgo = new Date();
     weeksAgo.setDate(weeksAgo.getDate() - (weeksCount * 7));
@@ -861,7 +856,7 @@ export const GetWeeksProfitData = async (req, res) => {
     const facturesData = await Facture.aggregate([
       {
         $match: {
-          garagisteId: garagisteId,
+          garageId: garageId,
           status: 'active',
           invoiceDate: { $gte: weeksAgo }
         }
@@ -911,15 +906,15 @@ export const GetDevicesUsedData = async (req, res) => {
   try {
     console.log('📊 GetDevicesUsedData appelé');
     
-    const garagisteId = mongoose.Types.ObjectId.isValid(req.user._id) 
-      ? new mongoose.Types.ObjectId(req.user._id)
-      : req.user._id;
+    const garageId = mongoose.Types.ObjectId.isValid(req.user.garageId) 
+      ? new mongoose.Types.ObjectId(req.user.garageId)
+      : req.user.garageId;
 
     // ✅ Agrégation par statut de paiement
     const devicesData = await Facture.aggregate([
       {
         $match: {
-          garagisteId: garagisteId,
+          garageId: garageId,
           status: 'active'
         }
       },

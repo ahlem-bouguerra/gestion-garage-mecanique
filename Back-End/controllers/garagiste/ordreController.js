@@ -22,7 +22,7 @@ export const createOrdreTravail = async (req, res) => {
     // Vérifier que le devis existe
     const devis = await Devis.findOne({ 
       id: devisId,
-      garagisteId: req.user._id 
+      garageId: req.user.garageId
     });
     if (!devis) {
       return res.status(404).json({
@@ -34,7 +34,7 @@ export const createOrdreTravail = async (req, res) => {
     // Vérifier si un ordre existe déjà pour ce devis
     const existingOrdre = await OrdreTravail.findOne({ 
       devisId,
-      garagisteId: req.user._id 
+      garageId: req.user.garageId
     });
     if (existingOrdre) {
       return res.status(400).json({
@@ -101,7 +101,7 @@ export const createOrdreTravail = async (req, res) => {
     // Créer l'ordre de travail avec le numéro généré
     const ordreTravail = new OrdreTravail({
       devisId: devis.id,
-      garagisteId: req.user._id,
+      garageId: req.user.garageId,
       clientInfo: {
         nom: devis.clientName,
         ClientId : devis.clientId,
@@ -167,7 +167,7 @@ export const getOrdresTravail = async (req, res) => {
 
     // Construction du filtre
     const filter = {
-      garagisteId: req.user._id  
+     garageId: req.user.garageId
     };
     
     // ✅ AJOUT : Exclure les ordres supprimés
@@ -241,7 +241,7 @@ export const getOrdreTravailById = async (req, res) => {
     
     const ordre = await OrdreTravail.findOne({
       _id: id,
-      garagisteId: req.user._id
+      garageId: req.user.garageId
     })
       .populate('devisId', 'id clientName vehicleInfo inspectionDate services')
       .populate('atelierId', 'name localisation')
@@ -290,7 +290,7 @@ export const updateStatusOrdreTravail = async (req, res) => {
     const ordre = await OrdreTravail.findOneAndUpdate(
       { 
         _id: id,
-        garagisteId: req.user._id
+        garageId: req.user.garageId
       },
       { 
         status, 
@@ -327,7 +327,7 @@ export const demarrerOrdre = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const ordre = await OrdreTravail.findOne({_id: id,garagisteId: req.user._id})
+    const ordre = await OrdreTravail.findOne({_id: id,garageId: req.user.garageId})
     if (!ordre) {
       return res.status(404).json({
         success: false,
@@ -362,7 +362,7 @@ export const terminerOrdre = async (req, res) => {
 
     const ordre = await OrdreTravail.findOne({
       _id: id,
-      garagisteId: req.user._id
+     garageId: req.user.garageId
     });
     if (!ordre) {
       return res.status(404).json({
@@ -397,13 +397,13 @@ export const getStatistiques = async (req, res) => {
   try {
     const { atelierId } = req.query;
 
-    const stats = await OrdreTravail.getStatistiques(atelierId, req.user._id);
+    const stats = await OrdreTravail.getStatistiques(atelierId, req.user.garageId);
 
     // Statistiques additionnelles
     const statsParPriorite = await OrdreTravail.aggregate([
       {
         $match: {
-          garagisteId: new mongoose.Types.ObjectId(req.user._id),
+          garageId: new mongoose.Types.ObjectId(req.user.garageId),
           ...(atelierId && { atelierId: new mongoose.Types.ObjectId(atelierId) })
         }
       },
@@ -441,7 +441,7 @@ export const supprimerOrdreTravail = async (req, res) => {
 
     const ordre = await OrdreTravail.findOne({
       _id: id,
-      garagisteId: req.user._id
+      garageId: req.user.garageId
     });
     if (!ordre) {
       return res.status(404).json({
@@ -484,7 +484,7 @@ export const getOrdresParDevisId = async (req, res) => {
     // Chercher un ordre existant pour ce devis
     const existingOrdre = await OrdreTravail.findOne({ 
       devisId: devisId,
-      garagisteId: req.user._id 
+      garageId: req.user.garageId
     });
     
     if (existingOrdre) {
@@ -512,11 +512,11 @@ export const getOrdresByStatus = async (req, res) => {
     const filter = status === 'supprime' 
       ? { 
           status: 'supprime',
-          garagisteId: req.user._id
+          garageId: req.user.garageId
         }
       : { 
           status: status, 
-          garagisteId: req.user._id,
+          garageId: req.user.garageId,
           $and: [{ status: { $ne: 'supprime' } }] 
         };
 
@@ -560,7 +560,7 @@ export const getOrdresByAtelier = async (req, res) => {
     // ✅ AJOUT : Exclure les ordres supprimés + filtrer par garagiste
     const filter = { 
       atelierId: atelierId,
-      garagisteId: req.user._id,
+      garageId: req.user.garageId,
       status: { $ne: 'supprime' }
     };
 
@@ -613,7 +613,7 @@ export const updateOrdreTravail = async (req, res) => {
     // Chercher l'ordre existant avec filtrage par garagiste
     const ordre = await OrdreTravail.findOne({
       _id: id,
-      garagisteId: req.user._id
+      garageId: req.user.garageId
     });
     if (!ordre) {
       return res.status(404).json({
@@ -762,7 +762,7 @@ export const getOrdresSupprimes = async (req, res) => {
 
     // Filtrer par garagiste connecté et statut supprimé
     const filter = {
-      garagisteId: req.user._id,
+      garageId: req.user.garageId,
       status: 'supprime'
     };
 

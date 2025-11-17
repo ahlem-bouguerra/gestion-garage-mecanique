@@ -355,7 +355,7 @@ router.get('/carnet-entretien/vehicule/:vehiculeId', authMiddleware, getCarnetBy
 router.post('/creer-manuel', authMiddleware, creerCarnetManuel);
 
 // ========== DASHBOARD ==========
-router.get('/dashboard/charge-atelier', getDashboardData);
+router.get('/dashboard/charge-atelier',authMiddleware, getDashboardData);
 router.get('/dashboard/charge-mensuelle', authMiddleware, getChargeMensuelle);
 
 // ========== SEARCH ==========
