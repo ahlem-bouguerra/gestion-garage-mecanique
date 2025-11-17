@@ -24,6 +24,18 @@ export default function RolePermissionManager() {
   const [selectedRole, setSelectedRole] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
+
+    useEffect(() => {
+    const header = document.querySelector("header");
+    if (!header) return;
+
+    if (showRoleModal || showPermissionModal || showAssignModal) {
+      header.classList.add("hidden");
+    } else {
+      header.classList.remove("hidden");
+    }
+  }, [showRoleModal, showPermissionModal, showAssignModal]);
+
   // Chargement des données
   useEffect(() => {
     loadRoles();
@@ -50,6 +62,22 @@ const getAuthHeaders = () => ({
       alert('Erreur lors du chargement des rôles');
     }
   };
+
+
+  const selectAllPermissions = () => {
+  // Tu dois créer un tableau avec tous les IDs des permissions
+  // permissions est ton tableau d'objets permissions
+  // Chaque permission a un _id
+  // Tu utilises .map() pour transformer le tableau d'objets en tableau d'IDs
+  
+  const allPermissionIds = permissions.map(perm => perm._id);
+  setSelectedPermissions(allPermissionIds);
+};
+
+const deselectAllPermissions = () => {
+  // Tu vides simplement le tableau selectedPermissions
+  setSelectedPermissions([]);
+};
 
 
 
@@ -516,7 +544,7 @@ const handleAssignPermissions = async () => {
       {/* Modal Affectation */}
       {showAssignModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-         <div className="bg-white rounded-xl p-6 max-w-4xl w-full shadow-2xl max-h-[80vh] overflow-y-auto">
+         <div className="bg-white rounded-xl p-8 w-[95vw] h-[95vh] shadow-2xl overflow-y-auto">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">
               Affecter des Permissions
             </h3>
@@ -530,6 +558,20 @@ const handleAssignPermissions = async () => {
 
             <div className="mb-6">
   <label className="block text-gray-700 mb-3">Sélectionnez les permissions</label>
+  <div className="flex gap-2 mb-3">
+  <button
+    onClick={selectAllPermissions}
+    className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm"
+  >
+    ✓ Tout sélectionner
+  </button>
+  <button
+    onClick={deselectAllPermissions}
+    className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
+  >
+    ✗ Tout désélectionner
+  </button>
+</div>
   <div className="grid grid-cols-5 gap-x-4 gap-y-2">
     {permissions.map(perm => (
       <label

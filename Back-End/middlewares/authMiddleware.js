@@ -3,7 +3,7 @@ import { Garagiste } from "../models/Garagiste.js";
 import { Users } from "../models/Users.js";
 import { GaragisteRole } from "../models/GaragisteRole.js";
 import { Role } from "../models/Role.js";
-
+import { getUserPermissions } from '../utils/permissionChecker.js'; 
 
 // ========== MIDDLEWARE D'AUTHENTIFICATION PRINCIPAL ==========
 export const authMiddleware = async (req, res, next) => {
@@ -11,8 +11,8 @@ export const authMiddleware = async (req, res, next) => {
     console.log('🔐 AuthMiddleware - Headers:', req.headers.authorization);
     
     const token = req.headers.authorization
-      ?.replace(/Bearer\s+/gi, '')  // Retire tous les "Bearer" (insensible à la casse)
-      .trim();
+    ?.replace(/Bearer\s+/gi, '')  // Retire tous les "Bearer" (insensible à la casse)
+    .trim();
     
     if (!token) {
       console.log('❌ Token manquant');
@@ -33,18 +33,14 @@ export const authMiddleware = async (req, res, next) => {
         path: 'garage',
         select: 'nom matriculeFiscal isActive governorateName cityName'
       })
-      .lean(); // ⭐ .lean() pour de meilleures performances
+      .lean(); // ⭐ Ajoute .lean() pour de meilleures performances
 
     if (!user) {
       console.log('❌ Garagiste non trouvé pour ID:', decoded.userId);
       return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
 
-    console.log('🔍 User chargé:', {
-      _id: user._id,
-      email: user.email,
-      garage: user.garage
-    });
+    console.log('🔍 Garage chargé:', user.garage); // ⭐ Debug
 
     // ✅ Vérifier si le garage existe et est actif
     if (user.garage) {
@@ -56,43 +52,25 @@ export const authMiddleware = async (req, res, next) => {
       }
     } else {
       console.log('⚠️ Aucun garage associé pour:', user.email);
-      // Décide si c'est une erreur bloquante ou non
+      // ⭐ Décide si c'est une erreur ou non
       // return res.status(400).json({ message: "Aucun garage associé" });
     }
-
-    // ✅ CORRECTION IMPORTANTE : Extraire correctement le garageId
-    // Avec .lean(), user.garage est un objet simple, pas un document Mongoose
-    const garageId = user.garage?._id 
-      ? user.garage._id 
-      : (decoded.garageId || null);
-
+const permissions = await getUserPermissions(user._id);
     // ✅ Attacher l'utilisateur complet à req.user
-    req.user = {
-      id: user._id,
-      _id: user._id,
-      email: user.email,
-      nom: user.nom,
-      prenom: user.prenom,
-      telephone: user.telephone,
-      role: user.role,
-      garage: user.garage,
-      garageId: garageId,  // ← garageId extrait correctement
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
-    };
+    // ⭐ APRÈS (ajoute garageId explicitement)
+req.user = {
+  ...user,
+  garageId: user.garage?._id || null,  // ← Ajoute cette ligne
+  permissions
+
+};
     
     console.log('✅ Garagiste authentifié:', {
-      id: req.user.id,
-      email: req.user.email,
-      garage: req.user.garage?.nom || 'Aucun garage',
-      garageId: req.user.garageId,
-      garageIdType: typeof req.user.garageId
+      id: user._id,
+      email: user.email,
+      garage: user.garage?.nom || 'Aucun garage',
+      garageId: req.user.garageId,  // ← Utilise req.user.garageId maintenant
     });
-    
-    // ✅ Vérification finale
-    if (!req.user.garageId) {
-      console.warn('⚠️ ATTENTION: garageId est null/undefined');
-    }
     
     next();
     

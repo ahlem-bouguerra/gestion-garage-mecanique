@@ -120,8 +120,6 @@ export const getAllDevis = async (req, res) => {
 };
 
 
-// GET /api/vehicules/:id - Récupérer un véhicule spécifique
-// Version corrigée de getDevisById
 export const getDevisById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -172,7 +170,6 @@ export const getDevisByNum = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 export const updateDevisStatus = async (req, res) => {
   try {
@@ -290,7 +287,6 @@ export const updateDevis = async (req, res) => {
   }
 };
 
-
 export const updateFactureId = async (req, res) => {
   try {
     const { id } = req.params;
@@ -371,8 +367,6 @@ export const deleteDevis = async (req, res) => {
     });
   }
 };
-
-
 
 export const acceptDevis = async (req, res) => {
   try {

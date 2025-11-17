@@ -10,6 +10,14 @@ import { hasPermission, hasAnyPermission } from '../../utils/permissionChecker.j
 export const CreateFacture = async (req, res) => {
   try {
     // 🔐 Vérifier la permission
+
+       // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'create_facture')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
   
     const { devisId } = req.params;
 
@@ -109,6 +117,13 @@ export const CreateFacture = async (req, res) => {
 
 export const GetAllFactures = async (req, res) => {
   try {
+           // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'view_facture')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
     const {
       clientInfo,
       clientId,
@@ -178,6 +193,13 @@ export const GetAllFactures = async (req, res) => {
 
 export const GetFactureById = async (req, res) => {
   try {
+               // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'view_facture')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
     const { id } = req.params;
 
     // Validation de l'ObjectId
@@ -217,6 +239,14 @@ export const GetFactureById = async (req, res) => {
 
 export const getFactureByDevis = async (req, res) => {
   try {
+
+               // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'view_facture')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+      });
+    }
     // ✅ Vérification de sécurité
     if (!req.user || !req.user._id) {
       return res.status(401).json({ 
@@ -244,6 +274,12 @@ export const getFactureByDevis = async (req, res) => {
 };
 export const MarquerFacturePayed = async (req, res) => {
   try {
+       if (!hasPermission(req.user, 'mark_facture_paid')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Seul un Admin peut marquer une facture comme payée" 
+      });
+    }
     const { id } = req.params;
     const { paymentAmount, paymentMethod, paymentDate } = req.body;
 
@@ -297,6 +333,13 @@ export const MarquerFacturePayed = async (req, res) => {
 
 export const UpdateFacture = async (req, res) => {
   try {
+
+     if (!hasPermission(req.user, 'update_facture')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Seul un Admin peut marquer une facture comme payée" 
+      });
+    }
     const { id } = req.params;
     const { notes, dueDate } = req.body;
 
@@ -343,6 +386,13 @@ export const UpdateFacture = async (req, res) => {
 
 export const DeleteFacture = async (req, res) => {
   try {
+
+         if (!hasPermission(req.user, 'delete_facture')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Seul un Admin peut marquer une facture comme payée" 
+      });
+    }
     const { id } = req.params;
 
     // Validation de l'ObjectId
@@ -389,6 +439,14 @@ export const DeleteFacture = async (req, res) => {
 
 export const StaticFacture = async (req, res) => {
   try {
+
+             if (!hasPermission(req.user, 'view_facture_stats')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Seul un Admin peut marquer une facture comme payée" 
+      });
+    }
+
     const stats = await Facture.aggregate([
   {
     $match: {
@@ -499,6 +557,13 @@ export const StaticFacture = async (req, res) => {
 
 export const CreateFactureWithCredit = async (req, res) => {
   try {
+
+             if (!hasPermission(req.user, 'create_credit_note')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Seul un Admin peut marquer une facture comme payée" 
+      });
+    }
     const { devisId } = req.params;
     const { createCreditNote = false } = req.body;
     const timbreFiscal = 1.000;
@@ -700,6 +765,13 @@ export const CreateFactureWithCredit = async (req, res) => {
 
 export const getCreditNoteById = async (req, res) => {
   try {
+
+             if (!hasPermission(req.user, 'view_credit_note')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Seul un Admin peut marquer une facture comme payée" 
+      });
+    }
     const { creditNoteId } = req.params;
     console.log('🔍 Recherche avoir ID:', creditNoteId);
     console.log('👤 User ID:', req.user._id);
@@ -739,6 +811,13 @@ export const getCreditNoteById = async (req, res) => {
 
 export const GetPaymentsOverviewData = async (req, res) => {
   try {
+
+             if (!hasPermission(req.user, 'view_facture')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Seul un Admin peut marquer une facture comme payée" 
+      });
+    }
     console.log('📊 GetPaymentsOverviewData appelé');
     console.log('👤 User ID:', req.user._id);
     console.log('⏰ TimeFrame:', req.query.timeFrame);
@@ -845,6 +924,13 @@ export const GetPaymentsOverviewData = async (req, res) => {
 };
 export const GetWeeksProfitData = async (req, res) => {
   try {
+
+             if (!hasPermission(req.user, 'view_facture')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Seul un Admin peut marquer une facture comme payée" 
+      });
+    }
     const { weeksCount = 12 } = req.query;
     const garageId = mongoose.Types.ObjectId.isValid(req.user.garageId) 
       ? new mongoose.Types.ObjectId(req.user.garageId)
@@ -904,6 +990,13 @@ export const GetWeeksProfitData = async (req, res) => {
 
 export const GetDevicesUsedData = async (req, res) => {
   try {
+
+             if (!hasPermission(req.user, 'view_facture')) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Seul un Admin peut marquer une facture comme payée" 
+      });
+    }
     console.log('📊 GetDevicesUsedData appelé');
     
     const garageId = mongoose.Types.ObjectId.isValid(req.user.garageId) 
