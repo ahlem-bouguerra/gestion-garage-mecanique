@@ -13,9 +13,9 @@ const permissions = [
   { name: 'update_facture', description: 'Modifier des factures' },//
   { name: 'delete_facture', description: 'Supprimer des factures' },//
   { name: 'mark_facture_paid', description: 'Marquer une facture comme payée' },//
-  { name: 'view_facture_stats', description: 'Voir les statistiques des factures' },
-  { name: 'create_credit_note', description: 'Créer des avoirs' },
-  { name: 'view_credit_note', description: 'Voir des avoirs'},
+  { name: 'view_facture_stats', description: 'Voir les statistiques des factures' },//
+  { name: 'create_credit_note', description: 'Créer des avoirs' },//
+  { name: 'view_credit_note', description: 'Voir des avoirs'},//
 
   { name: 'view_mecanicien', description: 'Voir les mécaniciens' },
   { name: 'create_mecanicien', description: 'Créer des mécaniciens' },
@@ -32,8 +32,8 @@ const permissions = [
   { name: 'update_service', description: 'Modifier des services' },
   { name: 'delete_service', description: 'Supprimer des services' },
 
-    { name: 'view_devis', description: 'Voir les devis' },
-  { name: 'create_devis', description: 'Créer des devis' },
+    { name: 'view_devis', description: 'Voir les devis' },//
+  { name: 'create_devis', description: 'Créer des devis' },//
   { name: 'update_devis', description: 'Modifier des devis' },
   { name: 'delete_devis', description: 'Supprimer des devis' },
   { name: 'accept_devis', description: 'Accepter un devis' },

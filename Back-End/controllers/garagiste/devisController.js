@@ -1,8 +1,18 @@
 import Devis from "../../models/Devis.js";
 import OrdreTravail from '../../models/Ordre.js'; 
+import { hasAnyPermission,hasPermission } from "../../utils/permissionChecker.js";
 
 export const createDevis = async (req, res) => {
   try {
+
+   // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'create_devis')) {
+        return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+        });
+    }
+
     console.log('📥 Données reçues:', req.body);
 
     const { clientId, clientName, vehicleInfo,vehiculeId, inspectionDate, services,montantTVA,montantRemise, tvaRate,remiseRate, maindoeuvre,estimatedTime } = req.body;
@@ -83,6 +93,14 @@ export const createDevis = async (req, res) => {
 
 export const getAllDevis = async (req, res) => {
   try {
+       // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'view_devis')) {
+        return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+        });
+    }
+
     const { status, clientName, dateDebut, dateFin } = req.query;
     const filters = {};
     filters.garageId= req.user.garage;
@@ -122,6 +140,13 @@ export const getAllDevis = async (req, res) => {
 
 export const getDevisById = async (req, res) => {
   try {
+       // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'view_devis')) {
+        return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+        });
+    }
     const { id } = req.params;
     
     let devis;
@@ -148,6 +173,13 @@ export const getDevisById = async (req, res) => {
 
 export const getDevisByNum = async (req, res) => {
   try {
+       // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'view_devis')) {
+        return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+        });
+    }
     const { id } = req.params; // ex: "DEV017"
 
     // 🔎 Recherche du devis via le champ "id" (pas _id)
@@ -173,6 +205,14 @@ export const getDevisByNum = async (req, res) => {
 
 export const updateDevisStatus = async (req, res) => {
   try {
+
+       // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['create_devis','view_devis'])) {
+        return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+        });
+    }
     const { id } = req.params;
     const { status } = req.body;
 
@@ -205,6 +245,13 @@ export const updateDevisStatus = async (req, res) => {
 
 export const updateDevis = async (req, res) => {
   try {
+       // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['update_devis','create_devis'])) {
+        return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+        });
+    }
     const { id } = req.params;
     const { clientId, clientName, vehicleInfo, inspectionDate, services, tvaRate,remiseRate,montantTVA,montantRemise, maindoeuvre ,estimatedTime} = req.body;
 
@@ -289,6 +336,14 @@ export const updateDevis = async (req, res) => {
 
 export const updateFactureId = async (req, res) => {
   try {
+
+       // 🔐 Vérifier la permission
+    if (!hasPermission(req.user, 'create_devis')) {
+        return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+        });
+    }
     const { id } = req.params;
     const updateData = req.body;
 
@@ -336,6 +391,13 @@ export const updateFactureId = async (req, res) => {
 
 export const deleteDevis = async (req, res) => {
   try {
+       // 🔐 Vérifier la permission
+    if (!hasAnyPermission(req.user, ['create_devis','delete_devis'])) {
+        return res.status(403).json({ 
+        success: false, 
+        message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
+        });
+    }
     const { id } = req.params;
 
     const devis = await Devis.findOne({ id, garageId: req.user.garage});
