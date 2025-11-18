@@ -224,7 +224,7 @@ const fetchGaragisteDetails = async () => {
                   </h3>
                   
                   {data.permissions.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       {data.permissions.map((permission: any) => (
                         <div
                           key={permission.id}
@@ -236,7 +236,7 @@ const fetchGaragisteDetails = async () => {
                               {permission.category}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-600">{permission.description}</p>
+                          
                         </div>
                       ))}
                     </div>

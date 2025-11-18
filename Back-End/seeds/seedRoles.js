@@ -16,6 +16,10 @@ const roles = [
   {
     name: "Mécanicien",
     description: "Mécanicien avec accès aux réparations"
+  },
+  {
+    name: "Super Admin",
+    description: "Administrateur principale de toute l'application, accès complet"
   }
 ];
 

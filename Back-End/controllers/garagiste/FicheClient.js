@@ -7,14 +7,6 @@ import { hasAnyPermission,hasPermission } from "../../utils/permissionChecker.js
 
 export const createFicheClient = async (req, res) => {
   try {
-       // 🔐 Vérifier la permission
-    if (!hasPermission(req.user, 'create_client')) {
-      return res.status(403).json({ 
-      success: false, 
-      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
-      });
-    }
-
     if (!req.user || !req.user.garageId) {
       return res.status(401).json({ error: "Utilisateur non authentifié ou garage manquant" });
     }
@@ -46,14 +38,6 @@ export const createFicheClient = async (req, res) => {
 
 export const getFicheClients = async (req, res) => {
   try {
-    // 🔐 Vérifier la permission
-    if (!hasAnyPermission(req.user, ['view_all_clients','create_client','view_client'])) {
-      return res.status(403).json({ 
-      success: false, 
-      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
-      });
-    }
-
     const clients = await FicheClient.find({
       garageId: req.user.garageId
     });
@@ -67,15 +51,6 @@ export const getFicheClients = async (req, res) => {
 
 export const getFicheClientById = async (req, res) => {
   try {
-
-       // 🔐 Vérifier la permission
-    if (!hasAnyPermission(req.user, ['view_all_clients','create_client','view_client'])) {
-      return res.status(403).json({ 
-      success: false, 
-      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
-      });
-    }
-
     const fiche = await FicheClient.findOne({
       _id: req.params._id,
       garageId: req.user.garageId
@@ -95,15 +70,7 @@ export const getFicheClientById = async (req, res) => {
 export const getFicheClientNoms = async (req, res) => {
   try {
 
-       // 🔐 Vérifier la permission
-    if (!hasAnyPermission(req.user, ['view_all_clients','create_client','view_client','view_client_noms'])) {
-      return res.status(403).json({ 
-      success: false, 
-      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
-      });
-    }
 
-  
     const clients = await FicheClient.find(
       { garageId: req.user.garageId },
       { nom: 1, type: 1, _id: 1 }
@@ -118,14 +85,6 @@ export const getFicheClientNoms = async (req, res) => {
 
 export const updateFicheClient = async (req, res) => {
   try {
-    
-       // 🔐 Vérifier la permission
-    if (!hasAnyPermission(req.user, ['create_client','update_client'])) {
-      return res.status(403).json({ 
-      success: false, 
-      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
-      });
-    }
 
 
     const fiche = await FicheClient.findOneAndUpdate(
@@ -150,13 +109,6 @@ export const updateFicheClient = async (req, res) => {
 export const deleteFicheClient = async (req, res) => {
   try {
 
-       // 🔐 Vérifier la permission
-    if (!hasAnyPermission(req.user, ['create_devis','delete_client','update_client'])) {
-      return res.status(403).json({ 
-      success: false, 
-      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
-      });
-    }
   
     const fiche = await FicheClient.findOneAndDelete({
       _id: req.params._id,
@@ -176,15 +128,6 @@ export const deleteFicheClient = async (req, res) => {
 
 export const getHistoriqueVisiteByIdClient = async (req, res) => {
   try {
-       // 🔐 Vérifier la permission
-    if (!hasPermission(req.user, 'view_client_historique_detail')) {
-      return res.status(403).json({ 
-      success: false, 
-      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
-      });
-    }
-
-
 
     const { clientId } = req.params;
 
@@ -247,14 +190,6 @@ export const getHistoriqueVisiteByIdClient = async (req, res) => {
 
 export const getHistoryVisite = async (req, res) => {
   try {
-
-    if (!hasPermission(req.user, 'view_client_historique_simple')) {
-      return res.status(403).json({ 
-      success: false, 
-      message: "Accès refusé : Vous n'avez pas la permission de créer des factures" 
-      });
-    }
-
     const { clientId } = req.params;
 
     const client = await FicheClient.findOne({

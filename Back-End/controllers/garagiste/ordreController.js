@@ -274,7 +274,7 @@ export const getOrdreTravailById = async (req, res) => {
   }
 };
 
-export const updateStatusOrdreTravail = async (req, res) => {
+/*export const updateStatusOrdreTravail = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -320,7 +320,7 @@ export const updateStatusOrdreTravail = async (req, res) => {
       error: 'Erreur serveur lors de la mise à jour du statut'
     });
   }
-};
+};*/
 
 // Ajouter au controller backend
 export const demarrerOrdre = async (req, res) => {

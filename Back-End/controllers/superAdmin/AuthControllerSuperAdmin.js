@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Users } from "../../models/Users.js";
 import { sendVerificationEmailForCient } from "../../utils/mailerSuperAdmin.js";
+import { UserRole } from "../../models/UserRole.js";
+import { Role } from "../../models/Role.js";
 
 // ========== INSCRIPTION UTILISATEUR PUBLIC (NON SUPER ADMIN) ==========
 export const registerUser = async (req, res) => {
@@ -44,6 +46,17 @@ export const registerUser = async (req, res) => {
       phone,
       isVerified: false,
       isSuperAdmin: false // ✅ FORCÉ À FALSE
+    });
+
+     let superAdminRole = await Role.findOne({ name: "SuperAdmin" });
+    if (!superAdminRole) {
+      // Si le rôle n'existe pas, on le crée
+      superAdminRole = await Role.create({ name: "SuperAdmin", description: "Rôle SuperAdmin par défaut" });
+    }
+
+    await UserRole.create({
+      userId: newUser._id,
+      roleId: superAdminRole._id
     });
     
     console.log("✅ Utilisateur créé:", {

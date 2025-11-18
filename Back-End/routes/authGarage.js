@@ -16,7 +16,7 @@ import { sendDevisByEmail } from '../utils/sendDevis.js';
 import { createMecanicien, updateMecanicien, deleteMecanicien, getAllMecaniciens, getMecanicienById, getMecaniciensByService } from "../controllers/garagiste/mecanicienController.js";
 import { getAllAteliers, getAtelierById, createAtelier, updateAtelier, deleteAtelier } from '../controllers/garagiste/atelierController.js';
 import { getAllServices, getServiceById, createService, updateService, deleteService } from '../controllers/garagiste/serviceController.js';
-import { createOrdreTravail, getOrdresTravail, getOrdreTravailById, updateStatusOrdreTravail, demarrerOrdre, terminerOrdre, getStatistiques, supprimerOrdreTravail, getOrdresParDevisId, getOrdresByStatus, getOrdresSupprimes, getOrdresByAtelier, updateOrdreTravail } from '../controllers/garagiste/ordreController.js';
+import { createOrdreTravail, getOrdresTravail, getOrdreTravailById, /*updateStatusOrdreTravail,*/ demarrerOrdre, terminerOrdre, getStatistiques, supprimerOrdreTravail, getOrdresParDevisId, getOrdresByStatus, getOrdresSupprimes, getOrdresByAtelier, updateOrdreTravail } from '../controllers/garagiste/ordreController.js';
 import { CreateFacture, CreateFactureWithCredit, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture, getCreditNoteById ,GetPaymentsOverviewData,GetWeeksProfitData,GetDevicesUsedData} from '../controllers/garagiste/facturesController.js';
 import { getCarnetByVehiculeId, creerCarnetManuel } from '../controllers/garagiste/carnetController.js';
 import { getDashboardData ,getChargeMensuelle} from '../controllers/garagiste/ChargeAtelier.js';
@@ -322,7 +322,7 @@ router.delete('/deleteService/:id', authMiddleware, deleteService);
 router.post('/createOrdre', authMiddleware, createOrdreTravail);
 router.get('/', authMiddleware, getOrdresTravail);
 router.get('/getOrdreTravailById/:id', authMiddleware, getOrdreTravailById);
-router.put('/:id/status', authMiddleware, updateStatusOrdreTravail);
+/*router.put('/:id/status', authMiddleware, updateStatusOrdreTravail);*/
 router.put('/ordre-travail/:id/demarrer', authMiddleware, demarrerOrdre);
 router.put('/ordre-travail/:id/terminer', authMiddleware, terminerOrdre);
 router.delete('/:id', authMiddleware, supprimerOrdreTravail);
