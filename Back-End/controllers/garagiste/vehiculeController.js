@@ -2,7 +2,7 @@ import Vehicule from '../../models/Vehicule.js';
 import FicheClient from '../../models/FicheClient.js';
 import FicheClientVehicule from '../../models/FicheClientVehicule.js';
 import {Client} from '../../models/Client.js';
-import { hasAllPermissions,hasAnyPermission ,hasPermission } from '../../utils/permissionChecker.js';
+
 
 // ==========================================
 // 📋 RÉCUPÉRER TOUS LES VÉHICULES DU GARAGE

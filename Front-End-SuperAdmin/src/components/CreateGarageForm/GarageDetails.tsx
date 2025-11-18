@@ -214,7 +214,7 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
                       <h3 className="font-semibold text-gray-900">{garagiste.username}</h3>
                       {garagiste.roles && garagiste.roles.length > 0 && (
                         <span className="inline-block mt-1 bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded font-medium">
-                          {garagiste.roles[0].name}
+                          {garagiste.roles.name}
                         </span>
                       )}
                     </div>

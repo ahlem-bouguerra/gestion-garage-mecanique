@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Check, X, Shield, Key, Link } from 'lucide-react';
-import axios from 'axios';
+import axiosInstance from './axiosConfig';
 
-const API_BASE = 'http://localhost:5000/api'; // Adaptez selon votre configuration
+
 
 export default function RolePermissionManager() {
   const [activeTab, setActiveTab] = useState('roles');
@@ -54,9 +54,7 @@ const getAuthHeaders = () => ({
 
   const loadRoles = async () => {
     try {
-      const { data } = await axios.get(`${API_BASE}/getAllRoles`, {
-      headers: getAuthHeaders()
-    });
+      const { data } = await axiosInstance.get(`/getAllRoles`);
       setRoles(data);
     } catch (error) {
       alert('Erreur lors du chargement des rôles');
@@ -83,7 +81,7 @@ const deselectAllPermissions = () => {
 
   const loadPermissions = async () => {
     try {
-      const { data } = await axios.get(`${API_BASE}/getAllPermissions`);
+      const { data } = await axiosInstance.get(`/getAllPermissions`);
       setPermissions(data);
     } catch (error) {
       alert('Erreur lors du chargement des permissions');
@@ -92,7 +90,7 @@ const deselectAllPermissions = () => {
 
   const loadRolePermissions = async () => {
     try {
-      const { data } = await axios.get(`${API_BASE}/getAllRolePermissions`);
+      const { data } = await axiosInstance.get(`/getAllRolePermissions`);
       setRolePermissions(data);
     } catch (error) {
       alert('Erreur lors du chargement des associations');
@@ -110,13 +108,13 @@ const handleSaveRole = async () => {
   setLoading(true);
   try {
     const url = editingId 
-      ? `${API_BASE}/updateRole/${editingId}` 
-      : `${API_BASE}/creeRole`;
+      ? `/updateRole/${editingId}` 
+      : `/creeRole`;
     
     // ✅ VERSION AXIOS
     const { data } = editingId
-      ? await axios.put(url, roleForm)
-      : await axios.post(url, roleForm);
+      ? await axiosInstance.put(url, roleForm)
+      : await axiosInstance.post(url, roleForm);
 
     alert(data.message);
     loadRoles();
@@ -134,7 +132,7 @@ const handleDeleteRole = async (id) => {
 
   try {
     // ✅ VERSION AXIOS
-    const { data } = await axios.delete(`${API_BASE}/deleteRole/${id}`);
+    const { data } = await axiosInstance.delete(`/deleteRole/${id}`);
     alert(data.message);
     loadRoles();
     loadRolePermissions();
@@ -153,13 +151,13 @@ const handleSavePermission = async () => {
   setLoading(true);
   try {
     const url = editingId 
-      ? `${API_BASE}/updatePermission/${editingId}` 
-      : `${API_BASE}/creePermission`;
+      ? `/updatePermission/${editingId}` 
+      : `/creePermission`;
     
     // ✅ VERSION AXIOS
     const { data } = editingId
-      ? await axios.put(url, permissionForm)
-      : await axios.post(url, permissionForm);
+      ? await axiosInstance.put(url, permissionForm)
+      : await axiosInstance.post(url, permissionForm);
 
     alert(data.message);
     loadPermissions();
@@ -177,7 +175,7 @@ const handleDeletePermission = async (id) => {
 
   try {
     // ✅ VERSION AXIOS
-    const { data } = await axios.delete(`${API_BASE}/deletePermission/${id}`);
+    const { data } = await axiosInstance.delete(`/deletePermission/${id}`);
     alert(data.message);
     loadPermissions();
     loadRolePermissions();
@@ -202,16 +200,13 @@ const handleAssignPermissions = async () => {
     
     for (const assoc of existingAssociations) {
       // ✅ VERSION AXIOS
-      await axios.delete(`${API_BASE}/deleteRolePermission/${assoc._id}`);
+      await axiosInstance.delete(`/deleteRolePermission/${assoc._id}`);
     }
 
     // Créer les nouvelles associations
     for (const permId of selectedPermissions) {
       // ✅ VERSION AXIOS
-      await axios.post(`${API_BASE}/creeRolePermission`, {
-        roleId: selectedRole,
-        permissionId: permId
-      });
+      await axiosInstance.post(`/creeRolePermission`);
     }
 
     alert('Permissions affectées avec succès');

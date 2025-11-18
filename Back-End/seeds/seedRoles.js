@@ -10,7 +10,7 @@ const roles = [
     description: "Administrateur principal du garage, accès complet"
   },
   {
-    name: "Employé",
+    name: "Employé Garage",
     description: "Employé avec accès limité"
   },
   {
