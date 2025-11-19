@@ -42,7 +42,7 @@ import {
   deleteGarage,
   getGaragisteById,
 } from "../controllers/superAdmin/garageController.js";
-import { superAdminMiddleware } from "../middlewares/authMiddleware.js";
+import { superAdminMiddleware } from "../middlewares/superAdminAuthMiddleware.js";
 import { hasRole } from "../utils/permissionChecker.js";
 import {
   registerUser,

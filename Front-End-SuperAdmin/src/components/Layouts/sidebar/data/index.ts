@@ -37,6 +37,12 @@ export const NAV_DATA = [
         
         ],
       },
+      {
+        title: "Gestion des Devis",
+        url: "/devis",
+        icon: FileText,
+        items: [],
+      },
    
     /*  {
         title: "Historique Services",

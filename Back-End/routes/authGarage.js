@@ -25,6 +25,8 @@ import { getReservations, updateReservation } from '../controllers/garagiste/ger
 import { isGarageAdmin } from "../middlewares/authMiddleware.js";
 import { createEmploye } from "../controllers/garagiste/EmployeController.js";
 import { hasRole ,hasAccess } from "../utils/permissionChecker.js";
+import { authGaragisteOuSuperAdmin } from "../middlewares/combinedAuth.js"
+
 
 const router = express.Router();
 
@@ -285,14 +287,14 @@ router.delete('/vehicules/:id', authMiddleware, hasAccess('Admin Garage'),dissoc
 router.get('/vehicules/proprietaire/:clientId', authMiddleware, getVehiculesByProprietaire);
 
 // ========== DEVIS ==========
-router.post('/createdevis', authMiddleware, hasAccess('Admin Garage'),createDevis);
-router.get('/Devis', authMiddleware, getAllDevis);
-router.get('/Devis/:id', authMiddleware, getDevisById);
-router.get('/devis/code/:id', authMiddleware, getDevisByNum);
-router.put('/Devis/:id/status', authMiddleware,hasAccess('Admin Garage'), updateDevisStatus);
-router.put('/Devis/:id', authMiddleware,hasAccess('Admin Garage'), updateDevis);
-router.put('/updateId/:id', authMiddleware, hasAccess('Admin Garage'),updateFactureId);
-router.delete('/Devis/:id', authMiddleware, hasAccess('Admin Garage'),deleteDevis);
+router.post('/createdevis', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'),createDevis);
+router.get('/Devis', authGaragisteOuSuperAdmin, getAllDevis);
+router.get('/Devis/:id', authGaragisteOuSuperAdmin, getDevisById);
+router.get('/devis/code/:id', authGaragisteOuSuperAdmin, getDevisByNum);
+router.put('/Devis/:id/status', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), updateDevisStatus);
+router.put('/Devis/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), updateDevis);
+router.put('/updateId/:id', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),updateFactureId);
+router.delete('/Devis/:id', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),deleteDevis);
 router.get("/devis/:devisId/accept", acceptDevis);
 router.get("/devis/:devisId/refuse", refuseDevis);
 router.post('/devis/:devisId/send-email', authMiddleware,hasAccess('Admin Garage'), sendDevisByEmail);
