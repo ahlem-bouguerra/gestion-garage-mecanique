@@ -124,14 +124,32 @@ const CarnetEntretien: React.FC = () => {
 
   const fetchCarnetEntretien = async (vehiculeId: string) => {
     try {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+
       setLoading(true);
       setError("");
 
       const response = await axios.get(`${API_BASE_URL}/carnet-entretien/vehicule/${vehiculeId}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setData(response.data);
     } catch (error: any) {
+       if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       console.error("Erreur chargement carnet d'entretien:", error);
       setError(error.response?.data?.error || "Erreur lors du chargement");
     } finally {
@@ -156,6 +174,13 @@ const CarnetEntretien: React.FC = () => {
     if (!vehiculeId) return;
 
     try {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       setSaving(true);
       
       const response = await axios.post(`${API_BASE_URL}/creer-manuel`, {
@@ -169,7 +194,7 @@ const CarnetEntretien: React.FC = () => {
         })),
         cout: formData.cout
         }, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
 
@@ -185,6 +210,16 @@ const CarnetEntretien: React.FC = () => {
       setShowAddForm(false);
 
     } catch (error: any) {
+       if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       console.error("Erreur ajout entretien:", error);
       setError(error.response?.data?.error || "Erreur lors de l'ajout");
     } finally {

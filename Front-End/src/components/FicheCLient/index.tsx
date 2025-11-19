@@ -179,7 +179,7 @@ const fetchAllVehicules = async (): Promise<void> => {
         
         // ⭐ VÉRIFICATION DES ERREURS D'AUTORISATION
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            alert("❌ Accès refusé : Vous n'avez pas la permission");
             return;
         }
         
@@ -300,7 +300,7 @@ const fetchAllVehicules = async (): Promise<void> => {
     } catch (error:any) {
       setError("Erreur lors du chargement des clients");
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            alert("❌ Accès refusé : Vous n'avez pas la permission");
             return;
         }
         
@@ -332,7 +332,7 @@ const fetchAllVehicules = async (): Promise<void> => {
       return response.data;
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            alert("❌ Accès refusé : Vous n'avez pas la permission");
             return null;
         }
         
@@ -371,7 +371,7 @@ const fetchAllVehicules = async (): Promise<void> => {
       }
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
             return null;
         }
         
@@ -422,7 +422,7 @@ const fetchAllVehicules = async (): Promise<void> => {
       return [];
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
             return [];
         }
         
@@ -501,7 +501,7 @@ const fetchAllVehicules = async (): Promise<void> => {
       return response.data;
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
             throw error;
         }
         
@@ -542,7 +542,7 @@ const fetchAllVehicules = async (): Promise<void> => {
       return response.data;
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
             throw error;
         }
         
@@ -584,7 +584,7 @@ const fetchAllVehicules = async (): Promise<void> => {
       alert("Client supprimé avec succès !");
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
             return ;
         }
         
@@ -691,7 +691,7 @@ const fetchAllVehicules = async (): Promise<void> => {
       closeModal();
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            alert("❌ Accès refusé : Vous n'avez pas la permission");
             return ;
         }
       console.error("Erreur lors de la soumission:", error);

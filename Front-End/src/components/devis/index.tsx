@@ -53,55 +53,55 @@ const GarageQuoteSystem = () => {
   );
 
   // Composant Alert personnalisé
-const Alert = ({ variant = 'info', title, description, onClose }) => {
-  const variants = {
-    warning: {
-      bg: 'bg-yellow-50 border-yellow-200',
-      icon: 'text-yellow-600',
-      title: 'text-yellow-800',
-      desc: 'text-yellow-700'
-    },
-    success: {
-      bg: 'bg-green-50 border-green-200',
-      icon: 'text-green-600',
-      title: 'text-green-800',
-      desc: 'text-green-700'
-    },
-    error: {
-      bg: 'bg-red-50 border-red-200',
-      icon: 'text-red-600',
-      title: 'text-red-800',
-      desc: 'text-red-700'
-    },
-    info: {
-      bg: 'bg-blue-50 border-blue-200',
-      icon: 'text-blue-600',
-      title: 'text-blue-800',
-      desc: 'text-blue-700'
-    }
-  };
+  const Alert = ({ variant = 'info', title, description, onClose }) => {
+    const variants = {
+      warning: {
+        bg: 'bg-yellow-50 border-yellow-200',
+        icon: 'text-yellow-600',
+        title: 'text-yellow-800',
+        desc: 'text-yellow-700'
+      },
+      success: {
+        bg: 'bg-green-50 border-green-200',
+        icon: 'text-green-600',
+        title: 'text-green-800',
+        desc: 'text-green-700'
+      },
+      error: {
+        bg: 'bg-red-50 border-red-200',
+        icon: 'text-red-600',
+        title: 'text-red-800',
+        desc: 'text-red-700'
+      },
+      info: {
+        bg: 'bg-blue-50 border-blue-200',
+        icon: 'text-blue-600',
+        title: 'text-blue-800',
+        desc: 'text-blue-700'
+      }
+    };
 
-  const style = variants[variant] || variants.info;
+    const style = variants[variant] || variants.info;
 
-  return (
-    <div className={`${style.bg} border rounded-lg p-4 mb-6 flex items-start`}>
-      <AlertCircle className={`h-5 w-5 ${style.icon} mr-3 flex-shrink-0 mt-0.5`} />
-      <div className="flex-1">
-        {title && <h3 className={`font-semibold ${style.title} mb-1`}>{title}</h3>}
-        {description && <p className={`text-sm ${style.desc}`}>{description}</p>}
+    return (
+      <div className={`${style.bg} border rounded-lg p-4 mb-6 flex items-start`}>
+        <AlertCircle className={`h-5 w-5 ${style.icon} mr-3 flex-shrink-0 mt-0.5`} />
+        <div className="flex-1">
+          {title && <h3 className={`font-semibold ${style.title} mb-1`}>{title}</h3>}
+          {description && <p className={`text-sm ${style.desc}`}>{description}</p>}
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className={`${style.icon} hover:opacity-70 ml-3`}
+            aria-label="Fermer"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
-      {onClose && (
-        <button
-          onClick={onClose}
-          className={`${style.icon} hover:opacity-70 ml-3`}
-          aria-label="Fermer"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      )}
-    </div>
-  );
-};
+    );
+  };
 
   useEffect(() => {
     const fetchUserWithLocation = async () => {
@@ -113,7 +113,17 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCurrentUser(response.data);
-      } catch (error) {
+      } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
         console.error("Erreur:", error);
       }
     };
@@ -154,18 +164,6 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
     }
   }, [selectedFacture]);
 
-  const generateInvoice = (quote) => {
-    const invoice = {
-      ...quote,
-      invoiceNumber: `FAC-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
-      invoiceDate: new Date().toISOString().split('T')[0],
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 jours
-      type: 'facture'
-    };
-
-    setInvoiceData(invoice);
-    setSelectedInvoice(invoice);
-  };
 
   const printInvoice = async () => {
     setIsGeneratingPDF(true);
@@ -458,12 +456,12 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
     const finalTotalTTC = totalTTC - montantRemise;
 
     return {
-    totalHT,
-    totalTTC,
-    finalTotalTTC,
-    montantTVA,
-    montantRemise,
-    totalServicesHT
+      totalHT,
+      totalTTC,
+      finalTotalTTC,
+      montantTVA,
+      montantRemise,
+      totalServicesHT
     };
   };
 
@@ -639,9 +637,14 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
 
   const sendDevisByEmail = async (devisId) => {
     try {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       setLoading(true);
-
-      const token = localStorage.getItem("token"); // ou Cookies.get("token")
 
       // 1. Envoyer l'email avec token dans headers
       const response = await axios.post(
@@ -666,7 +669,17 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
           quote.id === devisId ? { ...quote, status: 'envoye' } : quote
         ));
       }
-    } catch (error) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       showError(error.response?.data?.message || 'Erreur lors de l\'envoi');
     } finally {
       setLoading(false);
@@ -675,14 +688,31 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
 
   const fetchClients = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/clients/noms', {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      const response = await axios.get('http://localhost:5000/api/clients/noms', {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
-      const data = await response.json();
+      const data = response.data;
       // Puisque l'API retourne directement le tableau, pas besoin de data.data
       setClients(data);
 
-    } catch (error) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       console.error('Erreur lors de la récupération des clients:', error);
       setClients([]); // En cas d'erreur, initialiser avec un tableau vide
     }
@@ -696,19 +726,35 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
 
     setLoadingVehicules(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/vehicules/proprietaire/${clientId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
       }
+      const response = await axios.get(
+        `http://localhost:5000/api/vehicules/proprietaire/${clientId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
 
-      const vehiculesData = await response.json();
+      const vehiculesData = response.data;
       setVehicules(vehiculesData);
 
       console.log(`✅ ${vehiculesData.length} véhicules chargés pour le client`);
-    } catch (error) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       console.error('❌ Erreur lors du chargement des véhicules:', error);
       setVehicules([]);
       // Optionnel: afficher une notification d'erreur à l'utilisateur
@@ -777,9 +823,15 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
 
 
   const devisApi = {
-    create: async (devisData, token) => {
+    create: async (devisData) => {
       try {
-        const token = localStorage.getItem("token");
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
         const response = await axios.post(
           "http://localhost:5000/api/createdevis",
           devisData,
@@ -793,7 +845,17 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
         console.log("TOKEN envoyé :", token);
 
         return response.data;
-      } catch (error) {
+      } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
         throw new Error(error.response?.data?.message || "Erreur lors de la création du devis");
       }
     },
@@ -802,46 +864,114 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
 
     getAll: async (filters = {}) => {
       try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
         const response = await axios.get("http://localhost:5000/api/Devis", {
           params: filters,
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         return response.data;
-      } catch (error) {
+      } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
         throw new Error(error.response?.data?.message || "Erreur lors de la récupération des devis");
       }
     },
 
     updateStatus: async (devisId, status) => {
       try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
         const response = await axios.put(`http://localhost:5000/api/Devis/${devisId}/status`,
           { status },
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         return response.data;
-      } catch (error) {
+      } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
         throw new Error(error.response?.data?.message || "Erreur lors du changement de statut");
       }
     },
     update: async (devisId, devisData) => {
       try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
         const response = await axios.put(`http://localhost:5000/api/Devis/${devisId}`,
           devisData,
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         return response.data;
-      } catch (error) {
+      } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
         throw new Error(error.response?.data?.message || "Erreur lors de la mise à jour du devis");
       }
     },
 
     delete: async (devisId) => {
       try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
         const response = await axios.delete(`http://localhost:5000/api/Devis/${devisId}`,
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         return response.data;
-      } catch (error) {
+      } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
         throw new Error(error.response?.data?.message || "Erreur lors de la suppression");
       }
     }
@@ -887,27 +1017,34 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
 
 
 
-const showError = (message) => {
-  const id = Date.now();
-  setNotifications(prev => [...prev, { id, variant: 'error', title: 'Erreur', description: message }]);
-  setTimeout(() => removeNotification(id), 5000);
-};
+  const showError = (message) => {
+    const id = Date.now();
+    setNotifications(prev => [...prev, { id, variant: 'error', title: 'Erreur', description: message }]);
+    setTimeout(() => removeNotification(id), 5000);
+  };
 
-const showSuccess = (message) => {
-  const id = Date.now();
-  setNotifications(prev => [...prev, { id, variant: 'success', title: 'Succès', description: message }]);
-  setTimeout(() => removeNotification(id), 3000);
-};
+  const showSuccess = (message) => {
+    const id = Date.now();
+    setNotifications(prev => [...prev, { id, variant: 'success', title: 'Succès', description: message }]);
+    setTimeout(() => removeNotification(id), 3000);
+  };
 
-const removeNotification = (id) => {
-  setNotifications(prev => prev.filter(notif => notif.id !== id));
-};
+  const removeNotification = (id) => {
+    setNotifications(prev => prev.filter(notif => notif.id !== id));
+  };
 
   const createWorkOrder = async (quote) => {
     try {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       // Vérifier si un ordre existe déjà pour ce devis
       const response = await axios.get(`http://localhost:5000/api/ordre-travail/by-devis/${quote.id}`,
-        { headers: { Authorization: `Bearer ${getAuthToken()}` } });
+        { headers: { Authorization: `Bearer ${token}` } });
 
       if (response.data.exists) {
         // Ordre existe déjà - rediriger vers les détails
@@ -918,7 +1055,17 @@ const removeNotification = (id) => {
         localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
         router.push('/gestion-ordres');
       }
-    } catch (error) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       // En cas d'erreur, procéder comme avant (création)
       localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
       router.push('/gestion-ordres');
@@ -934,10 +1081,27 @@ const removeNotification = (id) => {
 
   const checkFactureExists = async (devisId) => {
     try {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       const response = await axios.get(`http://localhost:5000/api/devis/${devisId}`,
-        { headers: { Authorization: `Bearer ${getAuthToken()}` } });
+        { headers: { Authorization: `Bearer ${token}` } });
       return response.data.success ? response.data.data : null;
-    } catch (error) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       if (error.response?.status === 404) {
         return null; // Pas de facture trouvée
       }
@@ -946,55 +1110,61 @@ const removeNotification = (id) => {
     }
   };
 
-  const createFactureFromDevis = async (devis) => {
-    try {
-      setLoading(true);
+const createFactureFromDevis = async (devis) => {
+  try {
+    // ⭐ VÉRIFIER LE TOKEN DÈS LE DÉBUT
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      return; // ⭐ Arrêter immédiatement
+    }
 
-      const devisId = devis._id || devis.id;
-      console.log('🔍 Création facture pour devis:', devisId);
+    setLoading(true);
 
-      // Vérifier si une facture active existe déjà
-      const existingFacture = await checkActiveFactureExists(devisId);
+    const devisId = devis._id || devis.id;
+    console.log('🔍 Création facture pour devis:', devisId);
 
-      if (existingFacture) {
-        // Vérifier si le devis a été modifié
-        const isDevisModified = checkIfDevisModified(devis, existingFacture);
+    const existingFacture = await checkActiveFactureExists(devisId);
 
-        if (isDevisModified) {
-          // Proposer les options à l'utilisateur
-          const userChoice = await showImprovedFactureModal(existingFacture, devis);
+    if (existingFacture) {
+      const isDevisModified = checkIfDevisModified(devis, existingFacture);
 
-          switch (userChoice) {
-            case 'view_existing':
-              setSelectedFacture(existingFacture);
-              showSuccess('Facture existante affichée');
-              return;
+      if (isDevisModified) {
+        const userChoice = await showImprovedFactureModal(existingFacture, devis);
 
-            case 'replace_with_credit':
-              await replaceFactureWithCredit(devis, existingFacture);
-              return;
+        switch (userChoice) {
+          case 'view_existing':
+            setSelectedFacture(existingFacture);
+            showSuccess('Facture existante affichée');
+            return;
 
-            case 'cancel':
-              return;
-          }
-        } else {
-          // Pas de modification - afficher la facture existante
-          setSelectedFacture(existingFacture);
-          showSuccess('Facture existante affichée');
-          return;
+          case 'replace_with_credit':
+            await replaceFactureWithCredit(devis, existingFacture);
+            return;
+
+          case 'cancel':
+            return;
         }
       } else {
-        // Créer nouvelle facture (première fois)
-        await createNewFacture(devis);
+        setSelectedFacture(existingFacture);
+        showSuccess('Facture existante affichée');
+        return;
       }
-
-    } catch (error) {
-      console.error('❌ Erreur:', error);
-      showError(error.response?.data?.message || 'Erreur lors de la gestion de facture');
-    } finally {
-      setLoading(false);
+    } else {
+      await createNewFacture(devis);
     }
-  };
+
+  } catch (error) {
+    console.error('❌ Erreur:', error);
+    
+    // ⭐ NE PAS afficher d'erreur si c'est 401/403 (déjà géré)
+    if (error.response?.status !== 403 && error.response?.status !== 401) {
+      showError(error.response?.data?.message || 'Erreur lors de la gestion de facture');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
   const checkIfDevisModified = (devis, facture) => {
     if (!devis.updatedAt || !facture.createdAt) return false;
 
@@ -1082,7 +1252,13 @@ const removeNotification = (id) => {
   // ✅ Fonction pour remplacer une facture avec avoir (utilise votre endpoint existant)
   const replaceFactureWithCredit = async (devis, oldFacture) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
 
       // ✅ Utilise votre endpoint existant avec createCreditNote: true
       const response = await axios.post(
@@ -1113,7 +1289,17 @@ const removeNotification = (id) => {
           [devis.id]: newFacture
         }));
       }
-    } catch (error) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       console.error('❌ Erreur:', error);
       showError(error.response?.data?.message || 'Erreur lors du remplacement de la facture');
     }
@@ -1122,7 +1308,13 @@ const removeNotification = (id) => {
   // ✅ Créer une nouvelle facture (première fois) - utilise votre endpoint simple
   const createNewFacture = async (devis) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        throw new Error("Token invalide"); 
+      }
 
       // ✅ Utilise l'endpoint simple pour première création
       const response = await axios.post(
@@ -1148,31 +1340,57 @@ const removeNotification = (id) => {
           [devis.id]: newFacture
         }));
       }
-    } catch (error) {
-      console.error('❌ Erreur:', error);
-      showError(error.response?.data?.message || 'Erreur lors de la création de facture');
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
+        const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la création de facture';
+        showError(errorMessage);
+        throw error; // ⭐ IMPORTANT: Propager l'erreur pour arrêter l'exécution
     }
   };
 
   // ✅ Fonction pour vérifier facture active (exclut les factures annulées)
-  const checkActiveFactureExists = async (devisId) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/factureByDevis/${devisId}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
+const checkActiveFactureExists = async (devisId) => {
+  try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide"); // ⭐ Propager l'erreur
+    }
+    const response = await axios.get(`http://localhost:5000/api/factureByDevis/${devisId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-      // Vérifier que la facture est active (pas annulée)
-      const facture = response.data;
-      return facture && facture.status !== 'cancelled' ? facture : null;
-    } catch (error) {
-      if (error.response?.status === 404) {
-        return null;
-      }
-      console.error('Erreur vérification facture:', error);
+    const facture = response.data;
+    return facture && facture.status !== 'cancelled' ? facture : null;
+  } catch (error) {
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error; // ⭐ Propager l'erreur au lieu de retourner null
+    }
+    
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error; // ⭐ Propager l'erreur
+    }
+    
+    if (error.response?.status === 404) {
       return null;
     }
-  };
-
+    
+    console.error('Erreur vérification facture:', error);
+    throw error; // ⭐ Propager toute autre erreur
+  }
+};
 
 
   return (
@@ -1184,17 +1402,17 @@ const removeNotification = (id) => {
           <p className="text-gray-600">Système de devis pour atelier mécanique</p>
         </div>
         {/* Notifications */}
-<div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
-  {notifications.map(notif => (
-    <Alert
-      key={notif.id}
-      variant={notif.variant}
-      title={notif.title}
-      description={notif.description}
-      onClose={() => removeNotification(notif.id)}
-    />
-  ))}
-</div>
+        <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+          {notifications.map(notif => (
+            <Alert
+              key={notif.id}
+              variant={notif.variant}
+              title={notif.title}
+              description={notif.description}
+              onClose={() => removeNotification(notif.id)}
+            />
+          ))}
+        </div>
 
         {/* Navigation Tabs */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
@@ -1567,8 +1785,8 @@ const removeNotification = (id) => {
                               key={pageNumber}
                               onClick={() => setCurrentPage(pageNumber)}
                               className={`px-3 py-2 text-sm font-medium rounded-md ${isCurrentPage
-                                  ? 'bg-blue-600 text-white'
-                                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
                                 }`}
                             >
                               {pageNumber}
@@ -1808,34 +2026,34 @@ const removeNotification = (id) => {
                 ))}
               </div>
             </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Main D’œuvre
-                </label>
-                <input
-                  type="number"
-                  value={maindoeuvre}
-                  className="w-100 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onChange={(e) => setMaindoeuvre(parseFloat(e.target.value) || 0)}
-                />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Main D’œuvre
+              </label>
+              <input
+                type="number"
+                value={maindoeuvre}
+                className="w-100 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(e) => setMaindoeuvre(parseFloat(e.target.value) || 0)}
+              />
 
-              </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Remise (%) *
-                </label>
-                <input
-                  type="number"
-                  step="1"
-                  min="0"
-                  max="100"
-                  value={remiseRate}
-                  onChange={(e) => setRemiseRate(parseFloat(e.target.value) || 0)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="20"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Remise (%) *
+              </label>
+              <input
+                type="number"
+                step="1"
+                min="0"
+                max="100"
+                value={remiseRate}
+                onChange={(e) => setRemiseRate(parseFloat(e.target.value) || 0)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="20"
+              />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div>
@@ -2064,7 +2282,7 @@ const removeNotification = (id) => {
                       <span>TVA ({selectedQuote.tvaRate || 20}%):</span>
                       <span>
                         {(
-                          ((selectedQuote.montantTVA || 0) ) 
+                          ((selectedQuote.montantTVA || 0))
                         ).toFixed(3)} Dinnar
                       </span>
                     </div>
@@ -2073,7 +2291,7 @@ const removeNotification = (id) => {
                       <span>REMISE ({selectedQuote.remiseRate || 0}%):</span>
                       <span>
                         {(
-                          ((selectedQuote.montantRemise || 0) )
+                          ((selectedQuote.montantRemise || 0))
                         ).toFixed(3)} Dinnar
                       </span>
                     </div>
@@ -2085,7 +2303,7 @@ const removeNotification = (id) => {
                         {(
                           (selectedQuote.totalServicesHT || 0) +
                           (selectedQuote.maindoeuvre || 0) +
-                          ((selectedQuote.montantTVA || 0)) 
+                          ((selectedQuote.montantTVA || 0))
                         ).toFixed(3)} Dinnar
                       </span>
                     </div>
@@ -2094,7 +2312,7 @@ const removeNotification = (id) => {
                       <span>Total TTC aprés remise :</span>
                       <span>
                         {(
-                          ((selectedQuote.totalTTC || 0) - ((selectedQuote.montantRemise || 0)) )
+                          ((selectedQuote.totalTTC || 0) - ((selectedQuote.montantRemise || 0)))
                         ).toFixed(3)} Dinnar
                       </span>
                     </div>
