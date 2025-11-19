@@ -17,13 +17,23 @@ const getAuthHeaders = () => ({
 export const ordresTravailAPI = {
   // Récupérer un devis par code avec vérification d'ordres existants
   async getDevisByCode(devisId) {
-    const response = await axios.get(`${API_BASE_URL}/devis/code/${devisId}`, getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.get(`${API_BASE_URL}/devis/code/${devisId}`,token);
     return response.data;
   },
 
   // Créer un nouvel ordre de travail
   async createOrdre(ordreData) {
-    const response = await axios.post(`${API_BASE_URL}/createOrdre`, ordreData, getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.post(`${API_BASE_URL}/createOrdre`, ordreData, token);
     return response.data;
   },
 
@@ -39,6 +49,12 @@ export const ordresTravailAPI = {
     let baseUrl = API_BASE_URL;
     let response;
 
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+
     // Construire l'URL selon les filtres
     if (filters.status) {
       baseUrl = `${API_BASE_URL}/ordres/status/${filters.status}`;
@@ -46,16 +62,16 @@ export const ordresTravailAPI = {
         page: page.toString(),
         limit: limit.toString()
       });
-      response = await axios.get(`${baseUrl}?${statusParams}`, getAuthHeaders());
+      response = await axios.get(`${baseUrl}?${statusParams}`, token);
     } else if (filters.atelier) {
       baseUrl = `${API_BASE_URL}/ordres/atelier/${filters.atelier}`;
       const atelierParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString()
       });
-      response = await axios.get(`${baseUrl}?${atelierParams}`, getAuthHeaders());
+      response = await axios.get(`${baseUrl}?${atelierParams}`, token);
     } else {
-      response = await axios.get(`${baseUrl}?${params}`, getAuthHeaders());
+      response = await axios.get(`${baseUrl}?${params}`,token);
     }
 
     // Normaliser la structure de réponse
@@ -90,8 +106,13 @@ export const ordresTravailAPI = {
       page: page.toString(),
       limit: limit.toString()
     });
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
 
-    const response = await axios.get(`${API_BASE_URL}/ordres/status/${status}?${params}`, getAuthHeaders());
+    const response = await axios.get(`${API_BASE_URL}/ordres/status/${status}?${params}`, token);
     return response.data;
   },
 
@@ -101,14 +122,24 @@ export const ordresTravailAPI = {
       page: page.toString(),
       limit: limit.toString()
     });
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
 
-    const response = await axios.get(`${API_BASE_URL}/ordres/atelier/${atelierId}?${params}`, getAuthHeaders());
+    const response = await axios.get(`${API_BASE_URL}/ordres/atelier/${atelierId}?${params}`, token);
     return response.data;
   },
 
   // Récupérer les détails d'un ordre
   async getOrdreDetails(ordreId) {
-    const response = await axios.get(`${API_BASE_URL}/getOrdreTravailById/${ordreId}`, getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.get(`${API_BASE_URL}/getOrdreTravailById/${ordreId}`, token);
     
     // Normaliser la réponse - certaines APIs retournent { success: true, ordre: {} }
     if (response.data.success && response.data.ordre) {
@@ -122,54 +153,94 @@ export const ordresTravailAPI = {
 
   // Démarrer un ordre
   async demarrerOrdre(ordreId) {
-    const response = await axios.put(`${API_BASE_URL}/ordre-travail/${ordreId}/demarrer`, {}, getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.put(`${API_BASE_URL}/ordre-travail/${ordreId}/demarrer`, {},token);
     return response.data;
   },
 
   // Terminer un ordre
   async terminerOrdre(ordreId) {
-    const response = await axios.put(`${API_BASE_URL}/ordre-travail/${ordreId}/terminer`, {}, getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.put(`${API_BASE_URL}/ordre-travail/${ordreId}/terminer`, {}, token);
     return response.data;
   },
 
   // Modifier le statut d'un ordre
   async updateStatusOrdre(ordreId, status) {
-    const response = await axios.put(`${API_BASE_URL}/${ordreId}/status`, { status }, getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.put(`${API_BASE_URL}/${ordreId}/status`, { status },token);
     return response.data;
   },
 
   // Modifier un ordre
   async updateOrdre(ordreId, updateData) {
-    const response = await axios.put(`${API_BASE_URL}/modifier/${ordreId}`, updateData, getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.put(`${API_BASE_URL}/modifier/${ordreId}`, updateData, token);
     return response.data;
   },
 
   // Supprimer un ordre (soft delete)
   async deleteOrdre(ordreId) {
-    const response = await axios.delete(`${API_BASE_URL}/${ordreId}`, getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.delete(`${API_BASE_URL}/${ordreId}`, token);
     return response.data;
   },
 
   // Récupérer les ordres supprimés
   async getOrdresSupprimes(page = 1, limit = 10) {
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString()
     });
 
-    const response = await axios.get(`${API_BASE_URL}/ordres/status/supprime?${params}`, getAuthHeaders());
+    const response = await axios.get(`${API_BASE_URL}/ordres/status/supprime?${params}`, token);
     return response.data;
   },
 
   // Vérifier si un ordre existe pour un devis
   async getOrdresParDevisId(devisId) {
-    const response = await axios.get(`${API_BASE_URL}/ordre-travail/by-devis/${devisId}`, getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.get(`${API_BASE_URL}/ordre-travail/by-devis/${devisId}`, token);
     return response.data;
   },
 
   // Récupérer les statistiques
   async getStatistiques() {
-    const response = await axios.get(`${API_BASE_URL}/statistiques`, getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.get(`${API_BASE_URL}/statistiques`, token);
     
     // Normaliser la réponse
     if (response.data.success && response.data.statistiques) {
@@ -183,20 +254,35 @@ export const ordresTravailAPI = {
 
   // Services auxiliaires
   async getServices() {
-    const response = await axios.get('http://localhost:5000/api/getAllServices', getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.get('http://localhost:5000/api/getAllServices', token);
     return response.data;
   },
 
   async getAteliers() {
-    const response = await axios.get('http://localhost:5000/api/getAllAteliers', getAuthHeaders());
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const response = await axios.get('http://localhost:5000/api/getAllAteliers',token);
     return response.data;
   },
 
   async getMecaniciensByService(serviceId) {
+     const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
     if (!serviceId) {
       return [];
     }
-    const response = await axios.get(`http://localhost:5000/api/mecaniciens/by-service/${serviceId}`, getAuthHeaders());
+    const response = await axios.get(`http://localhost:5000/api/mecaniciens/by-service/${serviceId}`,token);
     return response.data;
   }
 };

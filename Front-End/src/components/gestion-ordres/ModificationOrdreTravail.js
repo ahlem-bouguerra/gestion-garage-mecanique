@@ -144,7 +144,10 @@ const ModificationOrdreTravail = ({
       await ordresTravailAPI.updateOrdre(ordre._id, updateData);
       onSaved();
 
-    } catch (err) {
+    } catch (error) {
+        if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      }
       let errorMessage = 'Erreur lors de la modification';
 
       if (err.response?.data?.error) {

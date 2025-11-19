@@ -87,7 +87,10 @@ const AjoutOrdreTravail = ({
         taches: tachesFromServices
       });
 
-    } catch (err) {
+    } catch (error) {
+      if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      }
       onError(`Erreur lors du chargement du devis: ${err.message}`);
     } finally {
       setLoading(false);
@@ -181,7 +184,10 @@ const AjoutOrdreTravail = ({
 
       onOrdreSaved();
 
-    } catch (err) {
+    } catch (error) {
+        if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      }
       onError(err.message || 'Erreur lors de la sauvegarde');
     } finally {
       setLoading(false);

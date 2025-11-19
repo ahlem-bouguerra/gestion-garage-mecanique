@@ -53,12 +53,26 @@ const ServicesManager = () => {
   const fetchServices = async () => {
     try {
       setLoading(true);
+      const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
       const response = await axios.get(`${API_BASE_URL}/getAllServices`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
       setServices(response.data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des services:', error);
+    } catch (error: any) {
+    // ⭐ AJOUTER la gestion 401/403
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
     } finally {
       setLoading(false);
     }
@@ -68,12 +82,27 @@ const ServicesManager = () => {
   const createService = async () => {
     try {
       setError('');
+      const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
       await axios.post(`${API_BASE_URL}/createService`, formData, {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
       await fetchServices();
       closeModal();
-    } catch (error) {
+    } catch (error: any) {
+    // ⭐ AJOUTER la gestion 401/403
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
       console.error('Erreur lors de la création du service:', error);
       setError(error.response?.data?.error || 'Une erreur est survenue');
     }
@@ -84,6 +113,11 @@ const updateService = async () => {
   if (!selectedService) return;
 
   try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
     await axios.put(
       `${API_BASE_URL}/updateService/${selectedService._id}`,
       formData, // objet JSON classique
@@ -97,6 +131,16 @@ const updateService = async () => {
     await fetchServices();
     closeModal();
   } catch (error: any) {
+    // ⭐ AJOUTER la gestion 401/403
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
     console.error("Erreur lors de la mise à jour du service:", error.response?.data || error.message);
   }
 };
@@ -107,11 +151,26 @@ const updateService = async () => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce service ?')) return;
 
     try {
+      const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
       await axios.delete(`${API_BASE_URL}/deleteService/${id}` ,{
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
       await fetchServices();
-    } catch (error) {
+    } catch (error: any) {
+    // ⭐ AJOUTER la gestion 401/403
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
       console.error('Erreur lors de la suppression du service:', error);
     }
   };

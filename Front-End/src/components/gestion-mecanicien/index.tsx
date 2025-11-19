@@ -80,50 +80,138 @@ const MecaniciensManager = () => {
 
   // API calls
   const API_BASE_URL = 'http://localhost:5000/api';
+  
 
   const mecaniciensApi = {
-    getAll: async (): Promise<Mecanicien[]> => {
-      const { data } = await axios.get(`${API_BASE_URL}/getAllMecaniciens`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-      return data;
-    },
+
+getAll: async (): Promise<Mecanicien[]> => {
+  try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+    const { data } = await axios.get(`${API_BASE_URL}/getAllMecaniciens`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return data;
+  } catch (error: any) {
+    // ⭐ AJOUTER la gestion 401/403
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
+    throw error;
+  }
+},
 
     getById: async (id: string): Promise<Mecanicien> => {
-      const { data } = await axios.get(`${API_BASE_URL}/getMecanicienById/${id}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-      return data;
-    },
+  try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide"); // ⭐ Au lieu de return
+    }
+    const { data } = await axios.get(`${API_BASE_URL}/getMecanicienById/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return data;
+  } catch (error: any) {
+    // ⭐ AJOUTER la gestion 401/403
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
+    throw error;
+  }
+},
 
-    create: async (data: object): Promise<Mecanicien> => {
-      try {
-        const res = await axios.post(`${API_BASE_URL}/createMecanicien`, data, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-        return res.data;
-      } catch (error: any) {
-        throw new Error(error.response?.data?.error || "Erreur lors de la création");
-      }
-    },
+create: async (data: object): Promise<Mecanicien> => {
+  try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide"); // ⭐ Au lieu de return
+    }
+    const res = await axios.post(`${API_BASE_URL}/createMecanicien`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+  } catch (error: any) {
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
+    throw new Error(error.response?.data?.error || "Erreur lors de la création");
+  }
+},
 
     update: async (id: string, data: object): Promise<Mecanicien> => {
       try {
+              const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        throw new Error("Token invalide");
+      }
         const res = await axios.put(`${API_BASE_URL}/updateMecanicien/${id}`, data, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
         return res.data;
-      } catch (error: any) {
+      }  catch (error: any) {
+       if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
         throw new Error(error.response?.data?.error || "Erreur lors de la modification");
       }
     },
 
     delete: async (id: string): Promise<void> => {
       try {
+              const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        throw new Error("Token invalide");
+      }
         await axios.delete(`${API_BASE_URL}/deleteMecanicien/${id}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
-      } catch (error: any) {
+      }  catch (error: any) {
+       if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
         throw new Error(error.response?.data?.error || "Erreur lors de la suppression");
       }
     }
@@ -149,11 +237,28 @@ const MecaniciensManager = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
+              const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
         const response = await axios.get('http://localhost:5000/api/getAllServices', {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
         setAvailableServices(response.data);
-      } catch (error) {
+      }  catch (error: any) {
+       if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
         console.error('Erreur lors du chargement des services:', error);
       }
     };
