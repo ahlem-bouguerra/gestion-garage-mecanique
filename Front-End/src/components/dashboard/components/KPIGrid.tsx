@@ -1,7 +1,7 @@
 "use client";
-// src/components/dashboard/components/KPIGrid.tsx
 import React from 'react';
-import { Activity, Clock, Calendar, TrendingUp, CheckCircle } from 'lucide-react';
+import { Activity, Clock, Calendar, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react';
+
 interface KPICardProps {
   title: string;
   value: string | number;
@@ -15,17 +15,19 @@ interface KPIGridProps {
   statistiques: {
     total: number;
     totalHeuresEstimees: number;
-    // totalHeuresReelles: number; // Pas disponible
-    totalOrdresTermines?: number; // Nombre d'ordres terminés
-    totalOrdresEnRetard?: number; // Nombre d'ordres en retard
-    totalOrdresATemps?: number; // Nombre d'ordres livrés à temps
+    totalOrdresTermines?: number;
+    totalOrdresEnRetard?: number;
+    totalOrdresATemps?: number;
+    enCours?: number;
+    termines?: number;
   };
   tempsMoyenInterventions: {
     tempsMoyenEstime: number;
-    tempsMoyenReel?: number; // Pas toujours disponible
+    tempsMoyenReel?: number;
   };
   periode: 'jour' | 'semaine' | 'mois';
   date?: string;
+  hasAccess?: boolean; // ← Ajouter
 }
 
 const KPICard: React.FC<KPICardProps> = ({ 
@@ -58,9 +60,26 @@ const KPIGrid: React.FC<KPIGridProps> = ({
   statistiques, 
   tempsMoyenInterventions, 
   periode, 
-  date 
+  date,
+  hasAccess = true // ← Ajouter avec valeur par défaut
 }) => {
-  // Vérifications de sécurité
+  // ✅ Afficher message si pas d'accès
+  if (!hasAccess) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {[...Array(4)].map((_, index) => (
+          <div key={index} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-300">
+            <div className="flex flex-col items-center justify-center py-4">
+              <AlertCircle className="h-8 w-8 text-red-500 mb-2" />
+              <p className="text-sm text-gray-600 text-center">Aucun accès</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Vérifications de sécurité (loading state)
   if (!statistiques || !tempsMoyenInterventions) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -77,26 +96,21 @@ const KPIGrid: React.FC<KPIGridProps> = ({
     );
   }
 
-  // OPTION 1: Taux de complétion (si vous avez totalOrdresTermines)
   const tauxCompletion = statistiques.total > 0
-  ? Math.round((statistiques.totalOrdresTermines / statistiques.total) * 100)
-  : null;
+    ? Math.round(((statistiques.totalOrdresTermines || 0) / statistiques.total) * 100)
+    : null;
 
-  // OPTION 2: Taux de ponctualité (si vous avez totalOrdresATemps)
   const tauxPonctualite = statistiques.totalOrdresATemps && statistiques.totalOrdresTermines && statistiques.totalOrdresTermines > 0
     ? Math.round((statistiques.totalOrdresATemps / statistiques.totalOrdresTermines) * 100)
     : null;
 
-  // OPTION 3: Efficacité basée sur les temps moyens (si vous avez tempsMoyenReel)
   const efficaciteTemps = tempsMoyenInterventions.tempsMoyenReel && tempsMoyenInterventions.tempsMoyenEstime > 0
     ? Math.round((tempsMoyenInterventions.tempsMoyenEstime / tempsMoyenInterventions.tempsMoyenReel) * 100)
     : null;
 
-  // OPTION 4: Charge de travail en pourcentage (basé sur une capacité théorique)
-  const capaciteTheorique = 40; // 40h par semaine par exemple
+  const capaciteTheorique = 40;
   const chargeWorkload = Math.round((statistiques.totalHeuresEstimees / capaciteTheorique) * 100);
 
-  // Fonction pour formater le sous-titre selon la période
   const getSubtitle = (baseText: string) => {
     switch(periode) {
       case 'jour':
@@ -110,67 +124,60 @@ const KPIGrid: React.FC<KPIGridProps> = ({
     }
   };
 
-  // Fonction pour obtenir la couleur selon le pourcentage
   const getPercentageColor = (percentage: number, reverse: boolean = false) => {
     if (reverse) {
-      // Pour la charge de travail, plus c'est élevé, plus c'est rouge
-      if (percentage >= 100) return '#ef4444'; // Rouge
-      if (percentage >= 80) return '#f59e0b';  // Orange
-      return '#10b981'; // Vert
+      if (percentage >= 100) return '#ef4444';
+      if (percentage >= 80) return '#f59e0b';
+      return '#10b981';
     } else {
-      // Pour l'efficacité, plus c'est élevé, plus c'est vert
-      if (percentage >= 90) return '#10b981'; // Vert
-      if (percentage >= 70) return '#f59e0b'; // Orange
-      return '#ef4444'; // Rouge
+      if (percentage >= 90) return '#10b981';
+      if (percentage >= 70) return '#f59e0b';
+      return '#ef4444';
     }
   };
 
-  // Déterminer quelle métrique d'efficacité utiliser (par ordre de préférence)
-const getEfficiencyMetric = () => {
-  if (tauxCompletion !== null) {
+  const getEfficiencyMetric = () => {
+    if (tauxCompletion !== null) {
+      return {
+        value: `${tauxCompletion}%`,
+        subtitle: tauxCompletion === 0 ? "Aucun ordre terminé" : "Taux de complétion",
+        color: getPercentageColor(tauxCompletion),
+        icon: CheckCircle
+      };
+    }
+    
+    if (statistiques.total > 0 && statistiques.enCours !== undefined && statistiques.termines !== undefined) {
+      const progressionTravaux = Math.round(
+        ((statistiques.enCours + statistiques.termines) / statistiques.total) * 100
+      );
+      return {
+        value: `${progressionTravaux}%`,
+        subtitle: "Progression des travaux",
+        color: getPercentageColor(progressionTravaux),
+        icon: Activity
+      };
+    }
+    
+    if (statistiques.total > 0 && statistiques.enCours !== undefined) {
+      const efficaciteOperationnelle = Math.round(
+        (statistiques.enCours / statistiques.total) * 100
+      );
+      return {
+        value: `${efficaciteOperationnelle}%`,
+        subtitle: "Travaux en cours",
+        color: efficaciteOperationnelle > 50 ? '#10b981' : 
+               efficaciteOperationnelle > 25 ? '#f59e0b' : '#ef4444',
+        icon: TrendingUp
+      };
+    }
+    
     return {
-      value: `${tauxCompletion}%`,
-      subtitle: tauxCompletion === 0 ? "Aucun ordre terminé" : "Taux de complétion",
-      color: getPercentageColor(tauxCompletion),
-      icon: CheckCircle
+      value: `${chargeWorkload}%`,
+      subtitle: "Charge de travail",
+      color: getPercentageColor(chargeWorkload, true),
+      icon: Clock
     };
-  }
-  
-  // 2. Progression des travaux (ordres en cours / total)
-  if (statistiques.total > 0) {
-    const progressionTravaux = Math.round(
-      ((statistiques.enCours + statistiques.termines) / statistiques.total) * 100
-    );
-    return {
-      value: `${progressionTravaux}%`,
-      subtitle: "Progression des travaux",
-      color: getPercentageColor(progressionTravaux),
-      icon: Activity
-    };
-  }
-  
-  // 3. Efficacité opérationnelle (basée sur le ratio travaux actifs)
-  if (statistiques.total > 0) {
-    const efficaciteOperationnelle = Math.round(
-      (statistiques.enCours / statistiques.total) * 100
-    );
-    return {
-      value: `${efficaciteOperationnelle}%`,
-      subtitle: "Travaux en cours",
-      color: efficaciteOperationnelle > 50 ? '#10b981' : 
-             efficaciteOperationnelle > 25 ? '#f59e0b' : '#ef4444',
-      icon: TrendingUp
-    };
-  }
-  
-  // Fallback: Charge de travail (comme actuellement)
-  return {
-    value: `${chargeWorkload}%`,
-    subtitle: "Charge de travail",
-    color: getPercentageColor(chargeWorkload, true),
-    icon: Clock
   };
-};
 
   const efficiencyMetric = getEfficiencyMetric();
 

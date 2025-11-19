@@ -9,10 +9,14 @@ export default function GarageDashboard() {
   const [upcomingReservations, setUpcomingReservations] = useState([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(true);
-      const getAuthToken = () => {
-      return localStorage.getItem('token') || sessionStorage.getItem('token');
-    };
-
+  const getAuthToken = () => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (token && token !== 'null' && token !== 'undefined') {
+      return token;
+    }
+    return null;
+  };
+  const [hasAccess, setHasAccess] = useState(true);
   // Fonction pour filtrer les réservations
   const filterReservations = (allReservations) => {
     const today = new Date();
@@ -49,34 +53,77 @@ export default function GarageDashboard() {
     return reservationDate < today;
   };
 
+
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/reservations", {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
+        const token = getAuthToken();
         
-        // Filtrer les réservations avec dates non passées
+        if (!token) {
+          setHasAccess(false);
+          setLoading(false);
+          return;
+        }
+
+        const res = await axios.get("http://localhost:5000/api/reservations", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
         const filteredReservations = res.data.filter(reservation => 
           !isDatePassed(reservation.creneauDemande.date)
         );
         
         setReservations(filteredReservations);
         filterReservations(filteredReservations);
+        setHasAccess(true);
         setLoading(false);
       } catch (err) {
-        console.error("Erreur fetch reservations:", err);
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          setHasAccess(false);
+        }
         setLoading(false);
       }
     };
     
     fetchReservations();
     
-    // Actualiser toutes les 5 minutes
     const interval = setInterval(fetchReservations, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
+
+    if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Accès refusé</h2>
+          <p className="text-gray-600 mb-6">Vous n'avez pas l'accès à cette page</p>
+          <Link 
+            href="/login" 
+            className="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+          >
+            Se connecter
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement du dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
 
   const getStatusColor = (status) => {
