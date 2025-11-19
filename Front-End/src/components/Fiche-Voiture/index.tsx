@@ -569,9 +569,19 @@ export default function VehiculeManagement() {
 
     const fetchClients = async () => {
         try {
+
+            const token = getAuthToken();
+      
+            // ⭐ VÉRIFICATION CRITIQUE
+            if (!token || token === 'null' || token === 'undefined') {
+                console.error('❌ Aucun token valide trouvé');
+                // Rediriger vers le login
+                window.location.href = '/auth/sign-in';
+                return;
+            }
             setError("");
             const response = await axios.get(`${API_BASE_URL}/clients/noms`, {
-                headers: { Authorization: `Bearer ${getAuthToken()}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
             console.log("🔍 Clients reçus:", response.data);
 
@@ -590,9 +600,18 @@ export default function VehiculeManagement() {
 
     const fetchVehicules = async () => {
         try {
+            const token = getAuthToken();
+      
+            // ⭐ VÉRIFICATION CRITIQUE
+            if (!token || token === 'null' || token === 'undefined') {
+                console.error('❌ Aucun token valide trouvé');
+                // Rediriger vers le login
+                window.location.href = '/auth/sign-in';
+                return;
+            }
             setError("");
             const response = await axios.get(`${API_BASE_URL}/vehicules`, {
-                headers: { Authorization: `Bearer ${getAuthToken()}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
             setVehicules(response.data);
         } catch (error: any) {
@@ -757,28 +776,36 @@ export default function VehiculeManagement() {
         setShowVisiteModal(true);
     };
 
-    const handleVehiculeSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+const handleVehiculeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-        // ✅ VALIDATION FINALE AVANT SOUMISSION
-        if (!isVehiculeFormValid()) {
-            showError("Veuillez corriger les erreurs dans le formulaire");
+    // ✅ VALIDATION FINALE AVANT SOUMISSION
+    if (!isVehiculeFormValid()) {
+        showError("Veuillez corriger les erreurs dans le formulaire");
+        return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+            // Rediriger vers le login
+            window.location.href = '/auth/sign-in';
             return;
         }
-
-        setLoading(true);
-        setError("");
-
-        try {
-            const submitData = {
-                marque: vehiculeForm.marque.trim(),
-                modele: vehiculeForm.modele.trim(),
-                immatriculation: vehiculeForm.immatriculation.trim().toUpperCase(),
-                annee: vehiculeForm.annee ? parseInt(vehiculeForm.annee) : undefined,
-                couleur: vehiculeForm.couleur.trim() || undefined,
-                typeCarburant: vehiculeForm.typeCarburant,
-                kilometrage: vehiculeForm.kilometrage ? parseInt(vehiculeForm.kilometrage.replace(/\s/g, '')) : undefined,
-                carteGrise: vehiculeForm.carteGrise?.numeroCG || vehiculeForm.carteGrise?.numeroChassis ? {
+        
+        const submitData = {
+            marque: vehiculeForm.marque.trim(),
+            modele: vehiculeForm.modele.trim(),
+            immatriculation: vehiculeForm.immatriculation.trim().toUpperCase(),
+            annee: vehiculeForm.annee ? parseInt(vehiculeForm.annee) : undefined,
+            couleur: vehiculeForm.couleur.trim() || undefined,
+            typeCarburant: vehiculeForm.typeCarburant,
+            kilometrage: vehiculeForm.kilometrage ? parseInt(vehiculeForm.kilometrage.replace(/\s/g, '')) : undefined,
+            carteGrise: vehiculeForm.carteGrise?.numeroCG || vehiculeForm.carteGrise?.numeroChassis ? {
                 numeroCG: vehiculeForm.carteGrise.numeroCG?.trim() || undefined,
                 numeroChassis: vehiculeForm.carteGrise.numeroChassis?.trim() || undefined,
                 dateMiseCirculation: vehiculeForm.carteGrise.dateMiseCirculation || undefined,
@@ -788,49 +815,86 @@ export default function VehiculeManagement() {
                 dateVisite: vehiculeForm.carteGrise.dateVisite || undefined,
                 dateProchaineVisite: vehiculeForm.carteGrise.dateProchaineVisite || undefined
             } : undefined
-            };
+        };
 
-            console.log("📤 Données à envoyer:", submitData);
+        console.log("📤 Données à envoyer:", submitData);
 
-            if (modalType === "add") {
-                submitData.proprietaireId = vehiculeForm.proprietaireId;
-                await axios.post(`${API_BASE_URL}/vehicules`, submitData, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
-                });
-                showSuccess("Véhicule ajouté avec succès!");
-            } else if (modalType === "edit" && selectedVehicule) {
-                await axios.put(`${API_BASE_URL}/vehicules/${selectedVehicule._id}`, submitData, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
-                });
-                showSuccess("Véhicule modifié avec succès!");
+        if (modalType === "add") {
+            submitData.proprietaireId = vehiculeForm.proprietaireId;
+            await axios.post(`${API_BASE_URL}/vehicules`, submitData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            showSuccess("Véhicule ajouté avec succès !");
+        } 
+        else if (modalType === "edit" && selectedVehicule) {
+            await axios.put(`${API_BASE_URL}/vehicules/${selectedVehicule._id}`, submitData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            showSuccess("Véhicule modifié avec succès !");
+        }
+
+        fetchVehicules();
+        setShowVehiculeModal(false);
+
+    } catch (error: any) {
+        
+        // ⭐ VÉRIFICATION DES ERREURS D'AUTORISATION
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission d'effectuer cette action");
+            return;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return;
+        }
+
+        
+        
+    } finally {
+        setLoading(false);
+    }
+};
+
+const deleteVehicule = async (vehicule: Vehicule) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ?`)) {
+        try {
+            const token = getAuthToken();
+  
+            // ⭐ VÉRIFICATION CRITIQUE
+            if (!token || token === 'null' || token === 'undefined') {
+                window.location.href = '/auth/sign-in';
+                return;
             }
-
+            
+            await axios.delete(`${API_BASE_URL}/vehicules/${vehicule._id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
             fetchVehicules();
-            setShowVehiculeModal(false);
+            showSuccess("Véhicule supprimé avec succès!");
+            
         } catch (error: any) {
-            console.error("❌ Erreur soumission véhicule:", error);
-            const errorMessage = error.response?.data?.error || error.message;
-            showError(`Erreur: ${errorMessage}`);
-        } finally {
-            setLoading(false);
-        }
-    };
 
-    const deleteVehicule = async (vehicule: Vehicule) => {
-        if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ?`)) {
-            try {
-                await axios.delete(`${API_BASE_URL}/vehicules/${vehicule._id}`, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
-                });;
-                fetchVehicules();
-                showSuccess("Véhicule supprimé avec succès!");
-            } catch (error: any) {
-                console.error("❌ Erreur suppression:", error);
-                const errorMessage = error.response?.data?.error || error.message;
-                showError(`Erreur suppression: ${errorMessage}`);
+            
+            // ⭐ VÉRIFICATION DES ERREURS D'AUTORISATION
+            if (error.response?.status === 403) {
+                alert("❌ Accès refusé : Vous n'avez pas la permission de supprimer ce véhicule");
+                return;
             }
+            
+            if (error.response?.status === 401) {
+                alert("❌ Session expirée : Veuillez vous reconnecter");
+                window.location.href = '/auth/sign-in';
+                return;
+            }
+            
+            const errorMessage = error.response?.data?.error || error.message;
+            showError(`Erreur suppression: ${errorMessage}`);
         }
-    };
+    }
+};
 
     const getVehiculeVisites = (vehiculeId: string) => {
         return visites.filter(v => v.vehiculeId === vehiculeId);

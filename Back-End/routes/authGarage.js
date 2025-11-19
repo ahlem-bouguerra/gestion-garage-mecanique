@@ -364,7 +364,7 @@ router.get('/search', search);
 
 // ========== RESERVATIONS ==========
 router.get('/reservations',authMiddleware, getReservations);
-router.put('/update/reservations/:id',authMiddleware, hasAccess('Admin Garage'),updateReservation);
+router.put('/update/reservations/:id',authMiddleware,updateReservation);
 
 
 

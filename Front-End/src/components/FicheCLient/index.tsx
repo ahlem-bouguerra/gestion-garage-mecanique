@@ -110,6 +110,12 @@ export default function ClientForm() {
     }
   }, [clients]);
 
+      const showError = (message: string) => {
+        console.error("❌ Erreur:", message);
+        setError(typeof message === 'string' ? message : 'Une erreur est survenue');
+        setTimeout(() => setError(""), 5000);
+    };
+
 
   useEffect(() => {
     const header = document.querySelector('header');
@@ -122,45 +128,72 @@ export default function ClientForm() {
     }
   }, [loadingHistory, selectedClient]);
 
-  const fetchAllVehicules = async (): Promise<void> => {
+const fetchAllVehicules = async (): Promise<void> => {
     try {
-      console.log("🚗 Chargement de tous les véhicules...");
-      const response = await axios.get(`${API_BASE_URL}/vehicules`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-      setVehicules(response.data);
-
-      const vehiculesParClient: { [clientId: string]: Vehicule[] } = {};
-      response.data.forEach((vehicule: any) => {
-        let clientId: string;
-
-        if (typeof vehicule.proprietaireId === 'string') {
-          clientId = vehicule.proprietaireId;
-        } else if (vehicule.proprietaireId && vehicule.proprietaireId._id) {
-          clientId = vehicule.proprietaireId._id;
-        } else {
-          console.warn("Structure proprietaireId inattendue:", vehicule.proprietaireId);
-          return;
+        const token = getAuthToken();
+      
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+            // Rediriger vers le login
+            window.location.href = '/auth/sign-in';
+            return;
         }
+        
+        console.log("🚗 Chargement de tous les véhicules...");
+        const response = await axios.get(`${API_BASE_URL}/vehicules`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        setVehicules(response.data);
 
-        if (!vehiculesParClient[clientId]) {
-          vehiculesParClient[clientId] = [];
+        const vehiculesParClient: { [clientId: string]: Vehicule[] } = {};
+        response.data.forEach((vehicule: any) => {
+            let clientId: string;
+
+            if (typeof vehicule.proprietaireId === 'string') {
+                clientId = vehicule.proprietaireId;
+            } else if (vehicule.proprietaireId && vehicule.proprietaireId._id) {
+                clientId = vehicule.proprietaireId._id;
+            } else {
+                console.warn("Structure proprietaireId inattendue:", vehicule.proprietaireId);
+                return;
+            }
+
+            if (!vehiculesParClient[clientId]) {
+                vehiculesParClient[clientId] = [];
+            }
+
+            const vehiculePropre = {
+                ...vehicule,
+                proprietaireId: clientId
+            };
+
+            vehiculesParClient[clientId].push(vehiculePropre);
+        });
+
+        setClientVehicules(vehiculesParClient);
+        console.log("✅ Véhicules organisés par client:", vehiculesParClient);
+        
+    } catch (error: any) {
+        console.error("❌ Erreur chargement véhicules:", error);
+        
+        // ⭐ VÉRIFICATION DES ERREURS D'AUTORISATION
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            return;
         }
-
-        const vehiculePropre = {
-          ...vehicule,
-          proprietaireId: clientId
-        };
-
-        vehiculesParClient[clientId].push(vehiculePropre);
-      });
-
-      setClientVehicules(vehiculesParClient);
-      console.log("✅ Véhicules organisés par client:", vehiculesParClient);
-    } catch (error) {
-      console.error("❌ Erreur lors du chargement des véhicules:", error);
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return;
+        }
+        
+        // Autres erreurs
+        const errorMessage = error.response?.data?.error || error.message;
+        showError(`Erreur chargement véhicules: ${errorMessage}`);
     }
-  };
+};
 
   const validateTunisianPhone = (phone: string) => {
     const cleaned = phone.replace(/[\s\-]/g, '');
@@ -251,14 +284,31 @@ export default function ClientForm() {
   const fetchAllClients = async (): Promise<void> => {
     setLoading(true);
     try {
+      const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       const response = await axios.get(`${API_BASE_URL}/GetAll`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setClients(response.data);
       setError("");
-    } catch (error) {
-      console.error("Erreur lors de la récupération des clients:", error);
+    } catch (error:any) {
       setError("Erreur lors du chargement des clients");
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            return;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return;
+        }
     } finally {
       setLoading(false);
     }
@@ -266,14 +316,31 @@ export default function ClientForm() {
 
   const fetchClientById = async (id: string | number): Promise<Client | null> => {
     try {
+            const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return null;
+      }
       console.log("🔍 Récupération du client avec ID:", id);
       const response = await axios.get(`${API_BASE_URL}/GetOne/${id}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       console.log("📥 Client récupéré:", response.data);
       return response.data;
-    } catch (error) {
-      console.error("Erreur lors de la récupération du client:", error);
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            return null;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return null;
+        }
       setError("Erreur lors du chargement du client");
       return null;
     }
@@ -281,8 +348,16 @@ export default function ClientForm() {
 
   const fetchClientResume = async (clientId: string) => {
     try {
+            const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/visites-resume`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.data.success) {
@@ -294,7 +369,17 @@ export default function ClientForm() {
           }
         }));
       }
-    } catch (error: any) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            return null;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return null;
+        }
       if (error.response?.status !== 404) {
         console.error("❌ Erreur lors du chargement du résumé:", error);
       }
@@ -310,10 +395,18 @@ export default function ClientForm() {
 
   const fetchClientHistorique = async (clientId: string): Promise<HistoriqueVisite[]> => {
     try {
+            const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return[];
+      }
       console.log("📋 Chargement historique pour client:", clientId);
       setLoadingHistory(true);
-      const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/historique`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/historique`, 
+         { headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.data.success) {
@@ -327,7 +420,17 @@ export default function ClientForm() {
         return historique;
       }
       return [];
-    } catch (error: any) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            return [];
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return [];
+        }
       if (error.response?.status === 404) {
         setError("Routes d'historique non configurées dans le backend");
       } else {
@@ -384,11 +487,29 @@ export default function ClientForm() {
 
   const createClient = async (clientData: any): Promise<any> => {
     try {
+            const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       const response = await axios.post(`${API_BASE_URL}/Creation`, clientData, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
-    } catch (error: any) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       if (error.response && error.response.data && error.response.data.error) {
         throw new Error(error.response.data.error);
       }
@@ -398,6 +519,14 @@ export default function ClientForm() {
 
   const updateClient = async (id: string | number, clientData: FormData): Promise<any> => {
     try {
+            const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       console.log("🔄 Frontend updateClient - ID reçu:", id);
       console.log("🔄 Frontend updateClient - Données:", clientData);
 
@@ -406,11 +535,22 @@ export default function ClientForm() {
       }
 
       const response = await axios.put(`${API_BASE_URL}/updateOne/${id}`, clientData, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       console.log("✅ Réponse serveur:", response.data);
+
       return response.data;
-    } catch (error) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       console.error("❌ Erreur dans updateClient:", error);
       throw error;
     }
@@ -420,7 +560,6 @@ export default function ClientForm() {
     console.log("🗑️ Frontend - Suppression du client avec ID:", id);
 
     if (!id) {
-      console.error("❌ ID undefined dans deleteClient");
       alert("Erreur: ID du client non défini");
       return;
     }
@@ -430,13 +569,30 @@ export default function ClientForm() {
     }
 
     try {
+            const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       await axios.delete(`${API_BASE_URL}/deleteOne/${id}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setClients(clients.filter(client => client._id !== id && client.id !== id));
       alert("Client supprimé avec succès !");
-    } catch (error) {
-      console.error("Erreur lors de la suppression:", error);
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            return ;
+        }
+        
+        if (error.response?.status === 401) {
+            alert("❌ Session expirée : Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return ;
+        }
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       alert("Erreur lors de la suppression : " + errorMessage);
     }
@@ -533,7 +689,11 @@ export default function ClientForm() {
       await fetchAllClients();
       await fetchAllVehicules();
       closeModal();
-    } catch (error) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            alert("❌ Accès refusé : Vous n'avez pas la permission de consulter les véhicules");
+            return ;
+        }
       console.error("Erreur lors de la soumission:", error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       setError("Erreur : " + errorMessage);
