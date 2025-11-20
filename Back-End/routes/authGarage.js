@@ -11,7 +11,7 @@ import { completeProfile, getProfile ,updateProfile,updateGarageInfo} from "../c
 import { enhancedLocationRoutes } from "../apiDataFetcher.js";
 import { createFicheClient, getFicheClients, getFicheClientById, updateFicheClient, deleteFicheClient, getFicheClientNoms, getHistoriqueVisiteByIdClient, getHistoryVisite } from "../controllers/garagiste/FicheClient.js";
 import { getAllVehicules, getVehiculeById, createVehicule, updateVehicule, dissocierVehicule, getVehiculesByProprietaire } from '../controllers/garagiste/vehiculeController.js';
-import { createDevis, getAllDevis, getDevisById, getDevisByNum, updateDevisStatus, updateDevis, deleteDevis,getAllDevisByGarage, acceptDevis, refuseDevis, updateFactureId } from '../controllers/garagiste/devisController.js';
+import { createDevis, getAllDevis, getDevisById, getDevisByNum, updateDevisStatus, updateDevis, deleteDevis,getAllDevisByGarage, acceptDevis, refuseDevis, updateFactureId ,deleteDevisForSuperAdmin } from '../controllers/garagiste/devisController.js';
 import { sendDevisByEmail } from '../utils/sendDevis.js';
 import { createMecanicien, updateMecanicien, deleteMecanicien, getAllMecaniciens, getMecanicienById, getMecaniciensByService } from "../controllers/garagiste/mecanicienController.js";
 import { getAllAteliers, getAtelierById, createAtelier, updateAtelier, deleteAtelier } from '../controllers/garagiste/atelierController.js';
@@ -22,7 +22,6 @@ import { getCarnetByVehiculeId, creerCarnetManuel } from '../controllers/garagis
 import { getDashboardData ,getChargeMensuelle} from '../controllers/garagiste/ChargeAtelier.js';
 import { search } from '../controllers/clients/ChercherGarage.js';
 import { getReservations, updateReservation } from '../controllers/garagiste/gererReservation.js';
-import { isGarageAdmin } from "../middlewares/authMiddleware.js";
 import { createEmploye } from "../controllers/garagiste/EmployeController.js";
 import { hasRole ,hasAccess } from "../utils/permissionChecker.js";
 import { authGaragisteOuSuperAdmin } from "../middlewares/combinedAuth.js"
@@ -259,7 +258,7 @@ router.get("/get-profile", authMiddleware, getProfile);
 // Mettre à jour les infos personnelles du garagiste (nom, téléphone, photo)
 router.put("/profile/personal", authMiddleware, updateProfile);
 // Mettre à jour les infos du garage (localisation, description, etc.)
-router.put("/profile/garage", authMiddleware,isGarageAdmin, updateGarageInfo);
+router.put("/profile/garage", authMiddleware,hasAccess('Admin Garage'), updateGarageInfo);
 
 
 
@@ -288,18 +287,20 @@ router.delete('/vehicules/:id', authMiddleware, hasAccess('Admin Garage'),dissoc
 router.get('/vehicules/proprietaire/:clientId', authGaragisteOuSuperAdmin, getVehiculesByProprietaire);
 
 // ========== DEVIS ==========
-router.post('/createdevis', authGaragisteOuSuperAdmin,createDevis);
+router.post('/createdevis', authGaragisteOuSuperAdmin,hasAccess('Admin Garage','Super Admin'),createDevis);
 router.get('/Devis', authGaragisteOuSuperAdmin, getAllDevis);
 router.get('/devis/:id', authGaragisteOuSuperAdmin, getDevisById);
 router.get('/devis/code/:id', authGaragisteOuSuperAdmin, getDevisByNum);
 router.put('/Devis/:id/status', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), updateDevisStatus);
-router.put('/Devis/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), updateDevis);
+router.put('/Devis/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage','Super Admin'), updateDevis);
 router.put('/updateId/:id', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),updateFactureId);
 router.delete('/Devis/:id', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),deleteDevis);
+router.delete('/deleteDevis/:id',superAdminMiddleware,hasRole("Super Admin"),deleteDevisForSuperAdmin);
 router.get("/devis/:devisId/accept", acceptDevis);
 router.get("/devis/:devisId/refuse", refuseDevis);
-router.post('/devis/:devisId/send-email', authMiddleware,hasAccess('Admin Garage'), sendDevisByEmail);
+router.post('/devis/:devisId/send-email', authGaragisteOuSuperAdmin,hasAccess('Admin Garage','Super Admin'), sendDevisByEmail);
 router.get('/garage-devis/:garageId',superAdminMiddleware,getAllDevisByGarage);
+
 // ========== MECANICIENS ==========
 router.post("/createMecanicien", authMiddleware, hasAccess('Admin Garage'),createMecanicien);
 router.get("/getAllMecaniciens", authMiddleware, getAllMecaniciens);

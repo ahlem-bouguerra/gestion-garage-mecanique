@@ -2,7 +2,7 @@
 
 import { createTimeFrameExtractor } from "@/utils/timeframe-extractor";
 import { Metadata } from "next";
-import DevisCreateForm from "@/components/create-devis-alone-SuperAdmin"
+import DevisUpdateForm from "@/components/update-devis-alone-SuperAdmin"
 
 
 
@@ -26,7 +26,7 @@ export default async function Page(props: PropsType) {
       <div>
 
         <div className="col-span-12 xl:col-span-5">
-          <DevisCreateForm />
+          <DevisUpdateForm />
         </div>
       </div>
     </>

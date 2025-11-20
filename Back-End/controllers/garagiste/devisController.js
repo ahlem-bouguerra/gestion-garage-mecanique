@@ -248,21 +248,57 @@ export const updateDevisStatus = async (req, res) => {
 export const updateDevis = async (req, res) => {
   try {
     const { id } = req.params;
-    const { clientId, clientName, vehicleInfo, inspectionDate, services, tvaRate,remiseRate,montantTVA,montantRemise, maindoeuvre ,estimatedTime} = req.body;
+    const { 
+      clientId, 
+      clientName, 
+      vehicleInfo, 
+      inspectionDate, 
+      services, 
+      tvaRate,
+      remiseRate,
+      montantTVA,
+      montantRemise, 
+      maindoeuvre,
+      estimatedTime,
+      garageId
+    } = req.body;
 
-    console.log('🔄 Mise à jour devis:', id);
-    console.log('📥 Nouvelles données:', req.body);
+    console.log('🔄 Mise à jour devis ID:', id);
 
-    // Vérifier que le devis existe
-    const existingDevis = await Devis.findOne({ id, garageId: req.user.garage });
+    const targetGarageId = garageId || req.user?.garage;
+
+    if (!targetGarageId) {
+      return res.status(400).json({
+        success: false,
+        message: 'garageId manquant'
+      });
+    }
+
+    console.log('🏢 Garage cible:', targetGarageId);
+
+    // ✅ Déterminer le critère de recherche
+    const isMongoId = id.match(/^[0-9a-fA-F]{24}$/);
+    const searchCriteria = {
+      ...(isMongoId ? { _id: id } : { id: id }),
+      garageId: targetGarageId
+    };
+
+    console.log('🔍 Critères de recherche:', searchCriteria);
+
+    // Vérifier l'existence
+    const existingDevis = await Devis.findOne(searchCriteria);
+
     if (!existingDevis) {
+      console.log('❌ Devis non trouvé');
       return res.status(404).json({
         success: false,
         message: 'Devis non trouvé'
       });
     }
 
-    // ✅ RECALCULER LES TOTAUX (même logique que create)
+    console.log('✅ Devis trouvé:', existingDevis.id);
+
+    // Recalculer les totaux
     let totalServicesHT = 0;
     const processedServices = services.map(service => {
       const serviceTotal = service.quantity * service.unitPrice;
@@ -274,37 +310,32 @@ export const updateDevis = async (req, res) => {
     const totalTTC = totalHT + montantTVA;
     const finalTotalTTC = totalTTC - montantRemise;
 
-    console.log('🔢 Nouveaux calculs:');
-    console.log('- Total services HT:', totalServicesHT);
-    console.log('- Main d\'œuvre:', maindoeuvre || 0);
-    console.log('- Total HT:', totalHT);
-    console.log('- Total TTC:', totalTTC);
-    console.log('- Total TTC après remise:', finalTotalTTC);
+    console.log('🔢 Calculs:', { totalHT, totalTTC, finalTotalTTC });
 
-    // Mettre à jour le devis
+    // Mettre à jour
     const updatedDevis = await Devis.findOneAndUpdate(
-      { id, garageId: req.user.garage },
+      searchCriteria,
       {
         clientId,
         clientName,
         vehicleInfo,
         inspectionDate,
         services: processedServices,
-        totalServicesHT: totalServicesHT,
-        totalHT: totalHT,
+        totalServicesHT,
+        totalHT,
         totalTTC,
         finalTotalTTC,
         remiseRate: remiseRate || 0,
-        tvaRate: tvaRate || 20,
-        montantRemise : montantRemise || 0,
-        montantTVA : montantTVA || 0,
+        tvaRate: tvaRate || 19,
+        montantRemise: montantRemise || 0,
+        montantTVA: montantTVA || 0,
         maindoeuvre: maindoeuvre || 0,
-        status: 'brouillon', // ✅ Remettre en brouillon après modification
+        status: 'brouillon',
         estimatedTime,
       },
       {
-        new: true, // Retourner le document mis à jour
-        runValidators: true // Valider les données
+        new: true,
+        runValidators: true
       }
     );
 

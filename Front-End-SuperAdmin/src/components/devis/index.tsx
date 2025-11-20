@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getAllGarages, getDevisByGarage, getDevisById } from "./api";
+import { getAllGarages, getDevisByGarage, getDevisById ,deleteDevis ,sendDevisByMail} from "./api";
 import { Plus, Edit2, Eye, Send, Check, X, Car, User, Calendar, FileText, Euro, AlertCircle, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -107,6 +107,46 @@ export default function DevisSuperAdminPage() {
     setLoadingDevisId(null);
   };
 
+  const handleDeleteDevis = async (devisId: string) => {
+  if (!confirm("⚠️ Êtes-vous sûr de vouloir supprimer ce devis ?")) {
+    return;
+  }
+
+  try {
+    await deleteDevis(devisId);
+    alert("✅ Devis supprimé avec succès");
+    // Recharger la liste des devis
+    handleGarageChange(selectedGarage);
+  } catch (error) {
+    console.error("Erreur suppression:", error);
+    alert("❌ Erreur lors de la suppression du devis");
+  }
+  };
+
+const handleSendDevis = async (devisId: string) => {
+  console.log('🚀 handleSendDevis appelé');
+  console.log('📋 devisId:', devisId);
+  console.log('🏢 selectedGarage:', selectedGarage);
+  
+  if (!selectedGarage) {
+    alert("⚠️ Aucun garage sélectionné !");
+    return;
+  }
+  
+  if (!confirm("⚠️ Êtes-vous sûr d'envoyer ce devis par mail ?")) {
+    return;
+  }
+
+  try {
+    await sendDevisByMail(devisId, selectedGarage);
+    alert("✅ Devis envoyé avec succès");
+    handleGarageChange(selectedGarage);
+  } catch (error) {
+    console.error("Erreur envoi:", error);
+    alert("❌ Erreur lors de l'envoi du devis");
+  }
+};
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
@@ -206,24 +246,48 @@ export default function DevisSuperAdminPage() {
                       </span>
                     </div>
                   </div>
+<div className="flex gap-2">
+  <button
+    onClick={() => handleVoirDetails(d._id)}
+    disabled={loadingDevisId === d._id}
+    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+  >
+    {loadingDevisId === d._id ? (
+      <>
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+        Chargement...
+      </>
+    ) : (
+      <>
+        <Eye className="h-4 w-4" />
+        Voir détails
+      </>
+    )}
+  </button>
 
-                  <button
-                    onClick={() => handleVoirDetails(d._id)}
-                    disabled={loadingDevisId === d._id}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
-                  >
-                    {loadingDevisId === d._id ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Chargement...
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4" />
-                        Voir détails
-                      </>
-                    )}
-                  </button>
+  <button
+    onClick={() => router.push(`/update-devis-alone?garageId=${selectedGarage}&devisId=${d._id}`)}
+    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-yellow-700"
+  >
+    <Edit2 className="h-4 w-4" />
+    Modifier
+  </button>
+
+  <button
+    onClick={() => handleDeleteDevis(d._id)}
+    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-red-700"
+  >
+    <Trash2 className="h-4 w-4" />
+    Supprimer
+  </button>
+   <button
+    onClick={() => handleSendDevis(d._id)}
+    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-red-700"
+  >
+    <Trash2 className="h-4 w-4" />
+    Envoyer devis par mail
+  </button>
+</div>
                 </div>
               ))}
             </div>

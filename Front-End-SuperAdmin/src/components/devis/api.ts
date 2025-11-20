@@ -227,3 +227,108 @@ export const loadVehiculesByClient = async (clientId : string ,garageId?: string
 };
 
 
+export const updateDevis = async (devisId:string, devisData:any) => {
+      try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
+        const response = await axios.put(`http://localhost:5000/api/Devis/${devisId}`,
+          devisData,
+          {
+             headers:{
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              }
+          }
+        );
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          alert("❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
+        throw new Error(error.response?.data?.message || "Erreur lors de la mise à jour du devis");
+      }
+};
+
+
+export const deleteDevis = async (devisId:string) => {
+      try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
+        const response = await axios.delete(`http://localhost:5000/api/deleteDevis/${devisId}`,
+          {
+             headers:{
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              }
+          }
+        );
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          alert("❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
+        throw new Error(error.response?.data?.message || "Erreur lors de delete du devis");
+      }
+}
+
+
+export const sendDevisByMail = async (devisId:string ,garageId: string) => {
+      try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
+        const response = await axios.post(`http://localhost:5000/api/devis/${devisId}/send-email`,
+          { garageId },{
+             headers:{
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              }
+          }
+        );
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          alert("❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
+        throw new Error(error.response?.data?.message || "Erreur lors de l'envoi de devis par mail");
+      }
+}
+
+
+
+

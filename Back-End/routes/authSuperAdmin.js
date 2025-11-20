@@ -1,6 +1,5 @@
 import express from "express";
 import { verifEmailSuperAdmin } from "../controllers/superAdmin/VerifEmailSuperAdminController.js";
-import { adminAuthMiddleware } from "../middlewares/superAdminAuthMiddleware.js";
 import {
   createRole,
   getAllRoles,
@@ -65,7 +64,7 @@ import {
 const router = express.Router();
 
 // ========== ROUTE /ME (PROTÉGÉE) ==========
-router.get("/me", adminAuthMiddleware, async (req, res) => {
+router.get("/me", superAdminMiddleware, async (req, res) => {
   try {
     res.status(200).json({
       success: true,

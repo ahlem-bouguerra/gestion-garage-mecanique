@@ -41,7 +41,7 @@ export const authGaragisteOuSuperAdmin = async (req, res, next) => {
       }
       
       req.user = {
-        id: user._id,
+        _id: user._id,
         email: user.email,
         role: 'superadmin',
         isSuperAdmin: true,
@@ -75,7 +75,7 @@ export const authGaragisteOuSuperAdmin = async (req, res, next) => {
     }
     
     req.user = {
-      id: garagiste._id,
+      _id: garagiste._id,
       email: garagiste.email,
       role: 'garagiste',
       roles: roles,
