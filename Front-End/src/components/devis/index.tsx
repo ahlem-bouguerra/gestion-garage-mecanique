@@ -113,16 +113,16 @@ const GarageQuoteSystem = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCurrentUser(response.data);
-      } catch (error:any) {
+      } catch (error: any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
-            throw error;
+          alert("❌ Accès refusé : Vous n'avez pas la permission ");
+          throw error;
         }
-        
+
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
+          alert("❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
         }
         console.error("Erreur:", error);
       }
@@ -669,17 +669,17 @@ const GarageQuoteSystem = () => {
           quote.id === devisId ? { ...quote, status: 'envoye' } : quote
         ));
       }
-    } catch (error:any) {
-        if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
-            throw error;
-        }
-        
-        if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
-        }
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        alert("❌ Accès refusé : Vous n'avez pas la permission ");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        alert("❌ Session expirée : Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
       showError(error.response?.data?.message || 'Erreur lors de l\'envoi');
     } finally {
       setLoading(false);
@@ -702,17 +702,17 @@ const GarageQuoteSystem = () => {
       // Puisque l'API retourne directement le tableau, pas besoin de data.data
       setClients(data);
 
-    } catch (error:any) {
-        if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
-            throw error;
-        }
-        
-        if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
-        }
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        alert("❌ Accès refusé : Vous n'avez pas la permission ");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        alert("❌ Session expirée : Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
       console.error('Erreur lors de la récupération des clients:', error);
       setClients([]); // En cas d'erreur, initialiser avec un tableau vide
     }
@@ -744,17 +744,17 @@ const GarageQuoteSystem = () => {
       setVehicules(vehiculesData);
 
       console.log(`✅ ${vehiculesData.length} véhicules chargés pour le client`);
-    } catch (error:any) {
-        if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
-            throw error;
-        }
-        
-        if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
-        }
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        alert("❌ Accès refusé : Vous n'avez pas la permission ");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        alert("❌ Session expirée : Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
       console.error('❌ Erreur lors du chargement des véhicules:', error);
       setVehicules([]);
       // Optionnel: afficher une notification d'erreur à l'utilisateur
@@ -845,23 +845,20 @@ const GarageQuoteSystem = () => {
         console.log("TOKEN envoyé :", token);
 
         return response.data;
-      } catch (error:any) {
+      } catch (error: any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission");
-            throw error;
+          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          throw error;
         }
-        
+
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
+          alert("❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
         }
         throw new Error(error.response?.data?.message || "Erreur lors de la création du devis");
       }
     },
-
-
-
     getAll: async (filters = {}) => {
       try {
         const token = getAuthToken();
@@ -876,21 +873,20 @@ const GarageQuoteSystem = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         return response.data;
-      } catch (error:any) {
+      } catch (error: any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
-            throw error;
+          alert("❌ Accès refusé : Vous n'avez pas la permission ");
+          throw error;
         }
-        
+
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
+          alert("❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
         }
         throw new Error(error.response?.data?.message || "Erreur lors de la récupération des devis");
       }
     },
-
     updateStatus: async (devisId, status) => {
       try {
         const token = getAuthToken();
@@ -905,16 +901,16 @@ const GarageQuoteSystem = () => {
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         return response.data;
-      } catch (error:any) {
+      } catch (error: any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
-            throw error;
+          alert("❌ Accès refusé : Vous n'avez pas la permission ");
+          throw error;
         }
-        
+
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
+          alert("❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
         }
         throw new Error(error.response?.data?.message || "Erreur lors du changement de statut");
       }
@@ -933,21 +929,20 @@ const GarageQuoteSystem = () => {
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         return response.data;
-      } catch (error:any) {
+      } catch (error: any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission");
-            throw error;
+          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          throw error;
         }
-        
+
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
+          alert("❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
         }
         throw new Error(error.response?.data?.message || "Erreur lors de la mise à jour du devis");
       }
     },
-
     delete: async (devisId) => {
       try {
         const token = getAuthToken();
@@ -961,16 +956,16 @@ const GarageQuoteSystem = () => {
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         return response.data;
-      } catch (error:any) {
+      } catch (error: any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission");
-            throw error;
+          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          throw error;
         }
-        
+
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
+          alert("❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
         }
         throw new Error(error.response?.data?.message || "Erreur lors de la suppression");
       }
@@ -1055,17 +1050,17 @@ const GarageQuoteSystem = () => {
         localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
         router.push('/gestion-ordres');
       }
-    } catch (error:any) {
-        if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission");
-            throw error;
-        }
-        
-        if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
-        }
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        alert("❌ Accès refusé : Vous n'avez pas la permission");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        alert("❌ Session expirée : Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
       // En cas d'erreur, procéder comme avant (création)
       localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
       router.push('/gestion-ordres');
@@ -1091,17 +1086,17 @@ const GarageQuoteSystem = () => {
       const response = await axios.get(`http://localhost:5000/api/devis/${devisId}`,
         { headers: { Authorization: `Bearer ${token}` } });
       return response.data.success ? response.data.data : null;
-    } catch (error:any) {
-        if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission");
-            throw error;
-        }
-        
-        if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
-        }
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        alert("❌ Accès refusé : Vous n'avez pas la permission");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        alert("❌ Session expirée : Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
       if (error.response?.status === 404) {
         return null; // Pas de facture trouvée
       }
@@ -1110,61 +1105,61 @@ const GarageQuoteSystem = () => {
     }
   };
 
-const createFactureFromDevis = async (devis) => {
-  try {
-    // ⭐ VÉRIFIER LE TOKEN DÈS LE DÉBUT
-    const token = getAuthToken();
-    if (!token || token === 'null' || token === 'undefined') {
-      window.location.href = '/auth/sign-in';
-      return; // ⭐ Arrêter immédiatement
-    }
+  const createFactureFromDevis = async (devis) => {
+    try {
+      // ⭐ VÉRIFIER LE TOKEN DÈS LE DÉBUT
+      const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return; // ⭐ Arrêter immédiatement
+      }
 
-    setLoading(true);
+      setLoading(true);
 
-    const devisId = devis._id || devis.id;
-    console.log('🔍 Création facture pour devis:', devisId);
+      const devisId = devis._id || devis.id;
+      console.log('🔍 Création facture pour devis:', devisId);
 
-    const existingFacture = await checkActiveFactureExists(devisId);
+      const existingFacture = await checkActiveFactureExists(devisId);
 
-    if (existingFacture) {
-      const isDevisModified = checkIfDevisModified(devis, existingFacture);
+      if (existingFacture) {
+        const isDevisModified = checkIfDevisModified(devis, existingFacture);
 
-      if (isDevisModified) {
-        const userChoice = await showImprovedFactureModal(existingFacture, devis);
+        if (isDevisModified) {
+          const userChoice = await showImprovedFactureModal(existingFacture, devis);
 
-        switch (userChoice) {
-          case 'view_existing':
-            setSelectedFacture(existingFacture);
-            showSuccess('Facture existante affichée');
-            return;
+          switch (userChoice) {
+            case 'view_existing':
+              setSelectedFacture(existingFacture);
+              showSuccess('Facture existante affichée');
+              return;
 
-          case 'replace_with_credit':
-            await replaceFactureWithCredit(devis, existingFacture);
-            return;
+            case 'replace_with_credit':
+              await replaceFactureWithCredit(devis, existingFacture);
+              return;
 
-          case 'cancel':
-            return;
+            case 'cancel':
+              return;
+          }
+        } else {
+          setSelectedFacture(existingFacture);
+          showSuccess('Facture existante affichée');
+          return;
         }
       } else {
-        setSelectedFacture(existingFacture);
-        showSuccess('Facture existante affichée');
-        return;
+        await createNewFacture(devis);
       }
-    } else {
-      await createNewFacture(devis);
-    }
 
-  } catch (error) {
-    console.error('❌ Erreur:', error);
-    
-    // ⭐ NE PAS afficher d'erreur si c'est 401/403 (déjà géré)
-    if (error.response?.status !== 403 && error.response?.status !== 401) {
-      showError(error.response?.data?.message || 'Erreur lors de la gestion de facture');
+    } catch (error) {
+      console.error('❌ Erreur:', error);
+
+      // ⭐ NE PAS afficher d'erreur si c'est 401/403 (déjà géré)
+      if (error.response?.status !== 403 && error.response?.status !== 401) {
+        showError(error.response?.data?.message || 'Erreur lors de la gestion de facture');
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
   const checkIfDevisModified = (devis, facture) => {
     if (!devis.updatedAt || !facture.createdAt) return false;
 
@@ -1289,17 +1284,17 @@ const createFactureFromDevis = async (devis) => {
           [devis.id]: newFacture
         }));
       }
-    } catch (error:any) {
-        if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission");
-            throw error;
-        }
-        
-        if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
-        }
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        alert("❌ Accès refusé : Vous n'avez pas la permission");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        alert("❌ Session expirée : Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
       console.error('❌ Erreur:', error);
       showError(error.response?.data?.message || 'Erreur lors du remplacement de la facture');
     }
@@ -1313,7 +1308,7 @@ const createFactureFromDevis = async (devis) => {
       if (!token || token === 'null' || token === 'undefined') {
         // Rediriger vers le login
         window.location.href = '/auth/sign-in';
-        throw new Error("Token invalide"); 
+        throw new Error("Token invalide");
       }
 
       // ✅ Utilise l'endpoint simple pour première création
@@ -1340,57 +1335,57 @@ const createFactureFromDevis = async (devis) => {
           [devis.id]: newFacture
         }));
       }
-    } catch (error:any) {
-        if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
-            throw error;
-        }
-        
-        if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
-        }
-        const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la création de facture';
-        showError(errorMessage);
-        throw error; // ⭐ IMPORTANT: Propager l'erreur pour arrêter l'exécution
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        alert("❌ Accès refusé : Vous n'avez pas la permission ");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        alert("❌ Session expirée : Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
+      const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la création de facture';
+      showError(errorMessage);
+      throw error; // ⭐ IMPORTANT: Propager l'erreur pour arrêter l'exécution
     }
   };
 
   // ✅ Fonction pour vérifier facture active (exclut les factures annulées)
-const checkActiveFactureExists = async (devisId) => {
-  try {
-    const token = getAuthToken();
-    if (!token || token === 'null' || token === 'undefined') {
-      window.location.href = '/auth/sign-in';
-      throw new Error("Token invalide"); // ⭐ Propager l'erreur
-    }
-    const response = await axios.get(`http://localhost:5000/api/factureByDevis/${devisId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+  const checkActiveFactureExists = async (devisId) => {
+    try {
+      const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        throw new Error("Token invalide"); // ⭐ Propager l'erreur
+      }
+      const response = await axios.get(`http://localhost:5000/api/factureByDevis/${devisId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-    const facture = response.data;
-    return facture && facture.status !== 'cancelled' ? facture : null;
-  } catch (error) {
-    if (error.response?.status === 403) {
-      alert("❌ Accès refusé : Vous n'avez pas la permission");
-      throw error; // ⭐ Propager l'erreur au lieu de retourner null
+      const facture = response.data;
+      return facture && facture.status !== 'cancelled' ? facture : null;
+    } catch (error) {
+      if (error.response?.status === 403) {
+        alert("❌ Accès refusé : Vous n'avez pas la permission");
+        throw error; // ⭐ Propager l'erreur au lieu de retourner null
+      }
+
+      if (error.response?.status === 401) {
+        alert("❌ Session expirée : Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error; // ⭐ Propager l'erreur
+      }
+
+      if (error.response?.status === 404) {
+        return null;
+      }
+
+      console.error('Erreur vérification facture:', error);
+      throw error; // ⭐ Propager toute autre erreur
     }
-    
-    if (error.response?.status === 401) {
-      alert("❌ Session expirée : Veuillez vous reconnecter");
-      window.location.href = '/auth/sign-in';
-      throw error; // ⭐ Propager l'erreur
-    }
-    
-    if (error.response?.status === 404) {
-      return null;
-    }
-    
-    console.error('Erreur vérification facture:', error);
-    throw error; // ⭐ Propager toute autre erreur
-  }
-};
+  };
 
 
   return (

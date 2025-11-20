@@ -38,12 +38,37 @@ export const createFicheClient = async (req, res) => {
 
 export const getFicheClients = async (req, res) => {
   try {
-    const clients = await FicheClient.find({
-      garageId: req.user.garageId
-    });
+    let clients;
+    
+    // ⭐ Cas 1 : SuperAdmin avec garageId dans query params
+    if (req.user.isSuperAdmin) {
+      const { garageId } = req.query;
+      
+      if (!garageId) {
+        return res.status(400).json({ 
+          error: 'SuperAdmin doit spécifier un garageId en query parameter' 
+        });
+      }
+      
+      console.log('👑 SuperAdmin récupère les clients du garage:', garageId);
+      clients = await FicheClient.find({ garageId });
+    } 
+    // ⭐ Cas 2 : Garagiste - utilise son propre garage
+    else {
+      if (!req.user.garage) {
+        return res.status(400).json({ 
+          error: 'Garagiste non associé à un garage' 
+        });
+      }
+      
+      console.log('🔧 Garagiste récupère ses clients');
+      clients = await FicheClient.find({ garageId: req.user.garage });
+    }
 
     res.json(clients);
+    
   } catch (error) {
+    console.error('❌ Erreur getFicheClients:', error);
     res.status(500).json({ error: error.message });
   }
 };

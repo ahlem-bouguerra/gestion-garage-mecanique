@@ -115,18 +115,35 @@ export const getVehiculesByProprietaire = async (req, res) => {
 
     console.log("🔍 Recherche véhicules pour ficheClient:", clientId);
 
+    let garageIdToCheck;
+    
+    // ⭐ Déterminer le garageId selon le rôle
+    if (req.user.isSuperAdmin) {
+      const { garageId } = req.query;
+      
+      if (!garageId) {
+        return res.status(400).json({ 
+          error: 'SuperAdmin doit spécifier un garageId' 
+        });
+      }
+      
+      garageIdToCheck = garageId;
+    } else {
+      garageIdToCheck = req.user.garage;
+    }
+
     const ficheClient = await FicheClient.findOne({
       _id: clientId,
-      garageId : req.user.garageId
+      garageId: garageIdToCheck
     });
     
     if (!ficheClient) {
-      return res.status(404).json({ error: 'Client non trouvé dans votre garage' });
+      return res.status(404).json({ error: 'Client non trouvé dans ce garage' });
     }
 
     const liaisons = await FicheClientVehicule.find({
       ficheClientId: clientId,
-      garageId : req.user.garageId
+      garageId: garageIdToCheck
     }).select('vehiculeId');
     
     const vehiculeIds = liaisons.map(l => l.vehiculeId);
@@ -136,18 +153,18 @@ export const getVehiculesByProprietaire = async (req, res) => {
       statut: 'actif'
     }).sort({ createdAt: -1 });
 
-    // ✅ Enrichir avec les infos de FicheClient
     const vehiculesAvecClient = vehicules.map(v => {
       const vObj = v.toObject();
       vObj.proprietaireId = ficheClient;
       return vObj;
     });
 
-    console.log("✅ Véhicules trouvés pour", ficheClient.nom, ":", vehiculesAvecClient.length);
+    console.log("✅ Véhicules trouvés:", vehiculesAvecClient.length);
     res.json(vehiculesAvecClient);
+    
   } catch (error) {
     console.error("❌ Erreur getVehiculesByProprietaire:", error);
-    res.status(500).json({ error: `Erreur serveur: ${error.message}` });
+    res.status(500).json({ error: error.message });
   }
 };
 

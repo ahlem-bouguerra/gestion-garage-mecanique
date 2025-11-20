@@ -11,7 +11,7 @@ import { completeProfile, getProfile ,updateProfile,updateGarageInfo} from "../c
 import { enhancedLocationRoutes } from "../apiDataFetcher.js";
 import { createFicheClient, getFicheClients, getFicheClientById, updateFicheClient, deleteFicheClient, getFicheClientNoms, getHistoriqueVisiteByIdClient, getHistoryVisite } from "../controllers/garagiste/FicheClient.js";
 import { getAllVehicules, getVehiculeById, createVehicule, updateVehicule, dissocierVehicule, getVehiculesByProprietaire } from '../controllers/garagiste/vehiculeController.js';
-import { createDevis, getAllDevis, getDevisById, getDevisByNum, updateDevisStatus, updateDevis, deleteDevis, acceptDevis, refuseDevis, updateFactureId } from '../controllers/garagiste/devisController.js';
+import { createDevis, getAllDevis, getDevisById, getDevisByNum, updateDevisStatus, updateDevis, deleteDevis,getAllDevisByGarage, acceptDevis, refuseDevis, updateFactureId } from '../controllers/garagiste/devisController.js';
 import { sendDevisByEmail } from '../utils/sendDevis.js';
 import { createMecanicien, updateMecanicien, deleteMecanicien, getAllMecaniciens, getMecanicienById, getMecaniciensByService } from "../controllers/garagiste/mecanicienController.js";
 import { getAllAteliers, getAtelierById, createAtelier, updateAtelier, deleteAtelier } from '../controllers/garagiste/atelierController.js';
@@ -26,6 +26,7 @@ import { isGarageAdmin } from "../middlewares/authMiddleware.js";
 import { createEmploye } from "../controllers/garagiste/EmployeController.js";
 import { hasRole ,hasAccess } from "../utils/permissionChecker.js";
 import { authGaragisteOuSuperAdmin } from "../middlewares/combinedAuth.js"
+import {superAdminMiddleware} from "../middlewares/superAdminAuthMiddleware.js"
 
 
 const router = express.Router();
@@ -270,7 +271,7 @@ router.get('/locations/autocomplete', enhancedLocationRoutes.autocomplete);
 
 // ========== CLIENTS ==========
 router.post("/Creation", authMiddleware,hasAccess('Admin Garage'), createFicheClient);
-router.get("/GetAll", authMiddleware, getFicheClients);
+router.get("/GetAll", authGaragisteOuSuperAdmin, getFicheClients);
 router.get("/GetOne/:_id", authMiddleware, getFicheClientById);
 router.put("/updateOne/:_id", authMiddleware,hasAccess('Admin Garage'), updateFicheClient);
 router.delete("/deleteOne/:_id", authMiddleware,hasAccess('Admin Garage'), deleteFicheClient);
@@ -284,12 +285,12 @@ router.get('/vehicules/:id', authMiddleware, getVehiculeById);
 router.post('/vehicules', authMiddleware, hasAccess('Admin Garage'),createVehicule);
 router.put('/vehicules/:id', authMiddleware,hasAccess('Admin Garage'), updateVehicule);
 router.delete('/vehicules/:id', authMiddleware, hasAccess('Admin Garage'),dissocierVehicule);
-router.get('/vehicules/proprietaire/:clientId', authMiddleware, getVehiculesByProprietaire);
+router.get('/vehicules/proprietaire/:clientId', authGaragisteOuSuperAdmin, getVehiculesByProprietaire);
 
 // ========== DEVIS ==========
-router.post('/createdevis', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'),createDevis);
+router.post('/createdevis', authGaragisteOuSuperAdmin,createDevis);
 router.get('/Devis', authGaragisteOuSuperAdmin, getAllDevis);
-router.get('/Devis/:id', authGaragisteOuSuperAdmin, getDevisById);
+router.get('/devis/:id', authGaragisteOuSuperAdmin, getDevisById);
 router.get('/devis/code/:id', authGaragisteOuSuperAdmin, getDevisByNum);
 router.put('/Devis/:id/status', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), updateDevisStatus);
 router.put('/Devis/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), updateDevis);
@@ -298,7 +299,7 @@ router.delete('/Devis/:id', authGaragisteOuSuperAdmin, hasAccess('Admin Garage')
 router.get("/devis/:devisId/accept", acceptDevis);
 router.get("/devis/:devisId/refuse", refuseDevis);
 router.post('/devis/:devisId/send-email', authMiddleware,hasAccess('Admin Garage'), sendDevisByEmail);
-
+router.get('/garage-devis/:garageId',superAdminMiddleware,getAllDevisByGarage);
 // ========== MECANICIENS ==========
 router.post("/createMecanicien", authMiddleware, hasAccess('Admin Garage'),createMecanicien);
 router.get("/getAllMecaniciens", authMiddleware, getAllMecaniciens);

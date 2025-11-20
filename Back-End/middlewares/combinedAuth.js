@@ -1,90 +1,93 @@
 import jwt from 'jsonwebtoken';
 import {Garagiste} from '../models/Garagiste.js';
 import { Users } from '../models/Users.js';
-import { getUserPermissions } from '../utils/permissionChecker.js';
-import {Garage} from '../models/Garage.js'; // Importer le modèle Garage
+import { GaragisteRole } from '../models/GaragisteRole.js';
 
 export const authGaragisteOuSuperAdmin = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.replace(/Bearer\s+/gi, '').trim();
-
+    console.log("🔍 Headers reçus:", req.headers.authorization);
+    
+    const token = req.headers.authorization?.split(' ')[1];
+    
     if (!token) {
-      return res.status(401).json({ message: "Token manquant" });
+      console.log('❌ Token manquant dans la requête');
+      return res.status(401).json({ error: 'Token manquant' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.userId;
-
-    // 🔹 Essayer Garagiste
-    let user = await Garagiste.findById(userId)
-      .populate({
-        path: 'garage',
-        select: 'nom matriculeFiscal isActive governorateName cityName'
-      })
-      .lean();
-
-    if (user) {
-      const permissions = await getUserPermissions(user._id);
-
-      if (user.garage && !user.garage.isActive) {
-        return res.status(403).json({ message: "Votre garage est désactivé" });
-      }
-
-      req.user = {
-        ...user,
-        garage: user.garage?._id || null,  // ⭐ Utiliser "garage" au lieu de "garageId"
-        permissions,
-        type: 'garagiste'
-      };
-
-      console.log('✅ Garagiste authentifié:', user.email, 'Garage:', req.user.garage);
-      return next();
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log("✅ Token décodé:", decoded);
+    } catch (jwtError) {
+      console.log('❌ Erreur JWT:', jwtError.message);
+      return res.status(401).json({ error: 'Token invalide ou expiré' });
     }
-
-    // 🔹 Sinon essayer Super Admin
-    const superAdmin = await Users.findById(userId);
-    if (superAdmin && superAdmin.isSuperAdmin) {
+    
+    // ⭐ FIX : Utiliser userId au lieu de id
+    const userId = decoded.userId || decoded.id;
+    
+    if (!userId) {
+      console.log('❌ userId manquant dans le token');
+      return res.status(401).json({ error: 'Token invalide : userId manquant' });
+    }
+    
+    // ⭐ Cas 1 : SuperAdmin (Users)
+    if (decoded.isSuperAdmin) {
+      const user = await Users.findById(userId);  // ⭐ FIX ICI
       
-      // ⭐ POUR SUPER ADMIN : récupérer garageId depuis query, body ou params
-      const garageId = req.query.garageId || req.body.garageId || req.params.garageId;
-      
-      if (!garageId) {
-        return res.status(400).json({ 
-          message: "Super Admin doit spécifier un garageId (dans query, body ou params)" 
-        });
-      }
-
-      // ✅ Vérifier que le garage existe et est actif
-      const garage = await Garage.findById(garageId);
-      if (!garage) {
-        return res.status(404).json({ message: "Garage non trouvé" });
+      if (!user) {
+        console.log('❌ SuperAdmin non trouvé:', userId);
+        return res.status(401).json({ error: 'Utilisateur non trouvé' });
       }
       
-      if (!garage.isActive) {
-        return res.status(403).json({ message: "Ce garage est désactivé" });
-      }
-
       req.user = {
-        ...superAdmin.toObject(),
-        garage: garageId,  // ⭐ Utiliser "garage" comme pour garagiste
-        permissions: ['*'],
-        type: 'superAdmin'
+        id: user._id,
+        email: user.email,
+        role: 'superadmin',
+        isSuperAdmin: true,
+        garage: null
       };
       
-      console.log('✅ Super Admin authentifié:', superAdmin.email, 'Garage cible:', garageId);
+      console.log('✅ SuperAdmin authentifié:', req.user.email);
       return next();
     }
-
-    // ❌ Aucun accès
-    return res.status(403).json({ message: "Accès refusé" });
-
+    
+    // ⭐ Cas 2 : Garagiste
+    const garagiste = await Garagiste.findById(userId);  // ⭐ FIX ICI
+    
+    if (!garagiste) {
+      console.log('❌ Garagiste non trouvé:', userId);
+      return res.status(401).json({ error: 'Garagiste non trouvé' });
+    }
+    
+    if (!garagiste.isActive) {
+      console.log('❌ Compte désactivé');
+      return res.status(403).json({ error: 'Compte désactivé' });
+    }
+    
+    // ⭐ Récupérer les rôles du garagiste
+    let roles = [];
+    try {
+      const garagisteRoles = await GaragisteRole.find({ garagisteId: garagiste._id }).populate('roleId');
+      roles = garagisteRoles.map(gr => gr.roleId?.name).filter(Boolean);
+    } catch (roleError) {
+      console.error('⚠️ Erreur récupération rôles:', roleError);
+    }
+    
+    req.user = {
+      id: garagiste._id,
+      email: garagiste.email,
+      role: 'garagiste',
+      roles: roles,
+      isSuperAdmin: false,
+      garage: garagiste.garage
+    };
+    
+    console.log('✅ Garagiste authentifié:', req.user.email, 'Rôles:', req.user.roles);
+    next();
+    
   } catch (error) {
-    console.error('❌ Erreur authGaragisteOuSuperAdmin:', error);
-
-    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: "Token invalide ou expiré" });
-    }
-
-    return res.status(500).json({ message: "Erreur serveur" });
+    console.error('❌ Erreur serveur auth:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 };

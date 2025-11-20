@@ -5,11 +5,36 @@ import OrdreTravail from '../../models/Ordre.js';
 export const createDevis = async (req, res) => {
   try {
     console.log('📥 Données reçues:', req.body);
+    console.log('👤 Utilisateur:', req.user);
 
-    const { clientId, clientName, vehicleInfo,vehiculeId, inspectionDate, services,montantTVA,montantRemise, tvaRate,remiseRate, maindoeuvre,estimatedTime } = req.body;
+    const { clientId, clientName, vehicleInfo, vehiculeId, inspectionDate, services, montantTVA, montantRemise, tvaRate, remiseRate, maindoeuvre, estimatedTime, garageId } = req.body;
+
+    // ⭐ Détermine le garageId selon le rôle
+    let finalGarageId;
+    
+    if (req.user.isSuperAdmin) {
+      // SuperAdmin : doit fournir le garageId dans le body
+      if (!garageId) {
+        return res.status(400).json({
+          success: false,
+          message: 'SuperAdmin doit spécifier un garageId'
+        });
+      }
+      finalGarageId = garageId;
+      console.log('👑 SuperAdmin crée un devis pour le garage:', finalGarageId);
+    } else {
+      // Garagiste : utilise son propre garageId
+      if (!req.user.garage) {
+        return res.status(400).json({
+          success: false,
+          message: 'Garagiste non associé à un garage'
+        });
+      }
+      finalGarageId = req.user.garage;
+      console.log('🔧 Garagiste crée un devis pour son garage:', finalGarageId);
+    }
 
     // ✅ CALCUL CORRECT DES TOTAUX
-    // 1. Total des services (pièces seulement)
     let totalServicesHT = 0;
     const processedServices = services.map(service => {
       const serviceTotal = service.quantity * service.unitPrice;
@@ -17,12 +42,8 @@ export const createDevis = async (req, res) => {
       return { ...service, total: serviceTotal };
     });
 
-    // 2. Total HT = services + main d'œuvre
     const totalHT = totalServicesHT + (maindoeuvre || 0);
-
-    // 3. Total TTC = Total HT + TVA
     const totalTTC = totalHT + montantTVA;
-
     const finalTotalTTC = totalTTC - montantRemise;
 
     console.log('🔢 Calculs:');
@@ -41,7 +62,7 @@ export const createDevis = async (req, res) => {
       id: devisId,
       clientId,
       clientName,
-      garageId: req.user.garage,
+      garageId: finalGarageId,
       vehicleInfo,
       vehiculeId,
       inspectionDate,
@@ -51,8 +72,8 @@ export const createDevis = async (req, res) => {
       totalTTC,
       finalTotalTTC,
       remiseRate: remiseRate || 0,
-      montantTVA : montantTVA || 0,
-      montantRemise : montantRemise  || 0,
+      montantTVA: montantTVA || 0,
+      montantRemise: montantRemise || 0,
       tvaRate: tvaRate || 20,
       maindoeuvre: maindoeuvre || 0,
       status: 'brouillon',
@@ -130,10 +151,10 @@ export const getDevisById = async (req, res) => {
     // Vérifier si l'ID ressemble à un ObjectId MongoDB (24 caractères hex)
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
       // C'est un ObjectId MongoDB
-      devis = await Devis.findById(id).where({ garageId: req.user.garage });
+      devis = await Devis.findById(id);
     } else {
       // C'est un ID personnalisé (DEV001, DEV002, etc.)
-      devis = await Devis.findOne({ id: id, garageId: req.user.garage });
+      devis = await Devis.findOne({ id: id });
     }
     
     if (!devis) {
@@ -146,6 +167,26 @@ export const getDevisById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getAllDevisByGarage = async (req, res) => {
+  try {
+    const { garageId } = req.params; // 💥 Récupérer l'ID du garage depuis l'URL
+
+    const devis = await Devis.find({ garageId }).sort({ createdAt: -1 });
+
+    if (!devis || devis.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    return res.json(devis);
+
+  } catch (error) {
+    console.error("❌ Erreur getAllDevisByGarage:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 
 export const getDevisByNum = async (req, res) => {
   try {
@@ -443,3 +484,25 @@ export const refuseDevis = async (req, res) => {
     res.status(500).send(`<html><body><h1>❌ Erreur technique</h1></body></html>`);
   }
 };
+
+
+export const deleteDevisForSuperAdmin = async (req,res) =>{
+
+  try {
+    const { id } = req.params;
+
+    const devis = await Devis.findById(id);
+
+    if (!devis) {
+      return res.status(404).json({ error: 'Devis non trouvé' });
+    }
+
+    await Devis.findByIdAndDelete(id);
+    res.json({ message: 'Devis supprimé avec succès' });
+
+  } catch (error) {
+    console.error('❌ Erreur deleteDevisById:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
