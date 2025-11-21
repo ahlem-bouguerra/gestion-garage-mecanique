@@ -90,8 +90,8 @@ export const sendDevisByEmail = async (req, res) => {
 
       console.log('✅ SuperAdmin envoie pour le garage:');
       console.log('   🏢 Nom:', garageInfo.nom);
-      console.log('   📧 Email:', garagisteInfo?.email || 'Non renseigné');
-      console.log('   📱 Téléphone:', garagisteInfo?.phone || 'Non renseigné');
+      console.log('   📧 Email:', garagisteInfo?.emailProfessionnel || 'Non renseigné');
+      console.log('   📱 Téléphone:', garagisteInfo?.telephoneProfessionnel || 'Non renseigné');
     } else {
       // Garagiste : récupérer ses infos ET les infos du garage
       console.log('👨‍🔧 Garagiste - Récupération des infos');
@@ -121,9 +121,11 @@ export const sendDevisByEmail = async (req, res) => {
       hasGarageInfo: !!garageInfo,
       garageId: garageInfo?._id,
       nom: garageInfo?.nom,
-      hasGaragisteInfo: !!garagisteInfo,
-      garagisteEmail: garagisteInfo?.email,
-      garagistePhone: garagisteInfo?.phone
+            emailProfessionnel: garageInfo?.emailProfessionnel, // ⭐ AJOUT
+      telephoneProfessionnel: garageInfo?.telephoneProfessionnel,
+      hasGaragisteInfo: !!garageInfo,
+      garagisteEmail: garageInfo?.emailProfessionnel,
+      garagistePhone: garageInfo?.telephoneProfessionnel
     });
 
     if (!garageInfo || !garageInfo.nom) {
@@ -146,8 +148,8 @@ export const sendDevisByEmail = async (req, res) => {
     // ⭐ Préparer les données pour l'email
     const emailData = {
       username: garageInfo.nom,
-      email: garagisteInfo?.email , // Fallback sur email par défaut
-      phone: garagisteInfo?.phone || 'Non renseigné'
+      emailProfessionnel: garageInfo.emailProfessionnel || process.env.EMAIL_USER,
+      telephoneProfessionnel: garageInfo.telephoneProfessionnel || 'Non renseigné'
     };
 
     console.log('📧 Données email préparées:', emailData);
@@ -160,7 +162,7 @@ export const sendDevisByEmail = async (req, res) => {
       to: client.email,
       subject: `Devis ${devis.id} - ${garageInfo.nom}`,
       html: emailContent,
-      replyTo: garagisteInfo?.email || process.env.EMAIL_USER
+      replyTo: garageInfo?.emailProfessionnel || process.env.EMAIL_USER
     };
 
     await transporter.sendMail(mailOptions);
@@ -302,8 +304,8 @@ const generateDevisHTML = (devis, emailData) => {
           <div style="margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
             <p><strong>Contact :</strong></p>
             <p>🏢 Garage: ${emailData.username}</p>
-            <p>📧 Email: ${emailData.email}</p>
-            <p>📱 Téléphone: ${emailData.phone || 'Non renseigné'}</p>
+            <p>📧 Email: ${emailData.emailProfessionnel}</p>
+            <p>📱 Téléphone: ${emailData.telephoneProfessionnel || 'Non renseigné'}</p>
           </div>
         </div>
       </div>
