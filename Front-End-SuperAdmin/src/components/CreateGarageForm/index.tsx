@@ -9,12 +9,14 @@ import GarageList from './GarageList';
 import GarageForm from './GarageForm';
 import GaragisteForm from './GaragisteForm';
 import GarageDetails from './GarageDetails';
+import GarageEditForm from './GarageEditForm';
+import { deleteGarage } from './api';
 
 // Import des fonctions API
-import { getAllGarages, getAllRoles, createGarage, createGaragiste } from './api';
+import { getAllGarages, getAllRoles, createGarage, createGaragiste, updateGarage } from './api';
 
 export default function GarageManagement() {
-  const [view, setView] = useState('list'); // 'list', 'createGarage', 'addGaragiste'  'details'
+  const [view, setView] = useState('list');
   const [step, setStep] = useState(1);
   const [selectedGarageForDetails, setSelectedGarageForDetails] = useState(null);
   const [garages, setGarages] = useState([]);
@@ -24,6 +26,7 @@ export default function GarageManagement() {
   const [success, setSuccess] = useState('');
   const [createdGarage, setCreatedGarage] = useState(null);
   const [selectedGarage, setSelectedGarage] = useState(null);
+  const [garageToEdit, setGarageToEdit] = useState(null);
   
   const [garageData, setGarageData] = useState({
     garagenom: '',
@@ -34,6 +37,8 @@ export default function GarageManagement() {
     description: '',
     horaires: '',
     services: '',
+    emailProfessionnel:'',
+    telephoneProfessionnel:'',
   });
 
   const [garagisteData, setGaragisteData] = useState({
@@ -44,12 +49,8 @@ export default function GarageManagement() {
     roleId: ''
   });
 
-  const handleViewDetails = (garage: any) => {
-  setSelectedGarageForDetails(garage);
-  setView('details');
-};
-
-  // Charger les données initiales
+  // ========== FONCTIONS ==========
+  
   useEffect(() => {
     fetchGarages();
     fetchRoles();
@@ -97,7 +98,7 @@ export default function GarageManagement() {
     try {
       const garage = await createGarage(garageData);
       setCreatedGarage(garage);
-      setSuccess(`Garage "${garage.nom}" créé avec succès !`);
+      setSuccess(`Garage "${garage.garagenom}" créé avec succès !`);
       
       setTimeout(() => {
         setStep(2);
@@ -134,10 +135,69 @@ export default function GarageManagement() {
     }
   };
 
+  // ⭐ FONCTION EDIT - DÉFINIE ICI
+  const handleEditGarage = (garage: any) => {
+    console.log('🔧 Édition du garage:', garage);
+    setGarageToEdit(garage);
+    setGarageData({
+      garagenom: garage.garagenom || '', // ⭐ ATTENTION: garagenom pas garagenom
+      matriculefiscal: garage.matriculeFiscal || '',
+      emailProfessionnel: garage.emailProfessionnel || '',
+      telephoneProfessionnel: garage.telephoneProfessionnel || '',
+      governorateName: garage.governorateName || '',
+      cityName: garage.cityName || '',
+      streetAddress: garage.streetAddress || '',
+      description: garage.description || '',
+      horaires: garage.horaires || '',
+      services: Array.isArray(garage.services) ? garage.services.join(', ') : garage.services || '',
+    });
+    setView('editGarage');
+  };
+
+  const handleUpdateGarage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const updateData = {
+        garagenom: garageData.garagenom, // ⭐ Convertir garagenom → garagenom
+        emailProfessionnel: garageData.emailProfessionnel,
+        telephoneProfessionnel: garageData.telephoneProfessionnel,
+        governorateName: garageData.governorateName,
+        cityName: garageData.cityName,
+        streetAddress: garageData.streetAddress,
+        description: garageData.description,
+        horaires: garageData.horaires,
+        services: garageData.services,
+      };
+
+      await updateGarage((garageToEdit as any)._id, updateData);
+      setSuccess('✅ Garage modifié avec succès !');
+      
+      setTimeout(() => {
+        resetForm();
+        fetchGarages();
+        setView('list');
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de la modification');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewDetails = (garage: any) => {
+    setSelectedGarageForDetails(garage);
+    setView('details');
+  };
+
   const resetForm = () => {
     setStep(1);
     setCreatedGarage(null);
     setSelectedGarage(null);
+    setGarageToEdit(null); // ⭐ IMPORTANT
     setGarageData({
       garagenom: '',
       matriculefiscal: '',
@@ -147,6 +207,8 @@ export default function GarageManagement() {
       description: '',
       horaires: '',
       services: '',
+      emailProfessionnel: '',
+      telephoneProfessionnel:'',
     });
     setGaragisteData({
       username: '',
@@ -179,19 +241,68 @@ export default function GarageManagement() {
     setView('addGaragiste');
   };
 
-  // ========== VUE LISTE ==========
+    const handleDeleteGarage = async (garage: any) => {
+    // Confirmation de suppression
+    const confirmMessage = `⚠️ ATTENTION : Cette action va supprimer :
+    
+- Le garage "${garage.nom}"
+- Tous les garagistes de ce garage
+- Toutes leurs données associées
+
+Cette action est IRRÉVERSIBLE !
+
+Voulez-vous vraiment continuer ?`;
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    // Double confirmation pour plus de sécurité
+    const finalConfirm = prompt(
+      `Pour confirmer, tapez le nom du garage : "${garage.nom}"`
+    );
+
+    if (finalConfirm !== garage.nom) {
+      alert("❌ Nom incorrect. Suppression annulée.");
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await deleteGarage(garage._id);
+      
+      alert(`✅ ${result.message}\n\n${result.deletedGaragistes} garagiste(s) supprimé(s)`);
+      
+      // Recharger la liste
+      await fetchGarages();
+      
+    } catch (err: any) {
+      const errorMessage = err.message || 'Erreur lors de la suppression du garage';
+      alert(`❌ ${errorMessage}`);
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+  // ========== VUES (RENDER) ==========
+
+  // ⭐ VUE LISTE - UNE SEULE FOIS
   if (view === 'list') {
     return (
       <GarageList
-  garages={garages}
-  onCreateGarage={startCreateGarage}
-  onAddGaragiste={startAddGaragiste}
-  onViewDetails={handleViewDetails} // Ajouter cette ligne
-/>
+        garages={garages}
+        onCreateGarage={startCreateGarage}
+        onAddGaragiste={startAddGaragiste}
+        onViewDetails={handleViewDetails}
+        onEditGarage={handleEditGarage} // ✅ Maintenant définie
+        onDeleteGarage={handleDeleteGarage}
+      />
     );
   }
 
-  // ========== VUE CRÉATION GARAGE ==========
+  // VUE CRÉATION GARAGE
   if (view === 'createGarage') {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -206,7 +317,6 @@ export default function GarageManagement() {
             </button>
           </div>
 
-          {/* Stepper */}
           <div className="flex items-center gap-4 mb-6">
             <div className={`flex items-center gap-2 ${step === 1 ? 'text-blue-600' : 'text-green-600'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
@@ -229,7 +339,6 @@ export default function GarageManagement() {
             </div>
           </div>
 
-          {/* Messages */}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -244,18 +353,15 @@ export default function GarageManagement() {
             </div>
           )}
 
-          {/* Étape 1 : Formulaire Garage */}
           {step === 1 && (
             <GarageForm
               garageData={garageData}
               onChange={handleGarageChange}
               onSubmit={handleCreateGarage}
-              onCancel={() => { resetForm(); setView('list'); }}
               loading={loading}
             />
           )}
 
-          {/* Étape 2 : Formulaire Garagiste */}
           {step === 2 && createdGarage && (
             <GaragisteForm
               garagisteData={garagisteData}
@@ -266,7 +372,7 @@ export default function GarageManagement() {
               onCancel={resetForm}
               loading={loading}
               showBackButton={true}
-              successMessage={`Garage "${(createdGarage as any).nom}" créé avec succès. Ajoutez maintenant un administrateur pour ce garage.`}
+              successMessage={`Garage "${(createdGarage as any).garagenom}" créé avec succès. Ajoutez maintenant un administrateur pour ce garage.`}
             />
           )}
         </div>
@@ -274,7 +380,50 @@ export default function GarageManagement() {
     );
   }
 
-  // ========== VUE AJOUT GARAGISTE ==========
+  // ⭐ VUE ÉDITION GARAGE
+  if (view === 'editGarage' && garageToEdit) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Modifier le Garage</h1>
+              <p className="text-gray-600 mt-1">{(garageToEdit as any).garagenom}</p>
+            </div>
+            <button
+              onClick={() => { resetForm(); setView('list'); }}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              <p className="text-red-800 text-sm">{error}</p>
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
+              <p className="text-green-800 text-sm">{success}</p>
+            </div>
+          )}
+
+          <GarageEditForm
+            garageData={garageData}
+            onChange={handleGarageChange}
+            onSubmit={handleUpdateGarage}
+            loading={loading}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // VUE AJOUT GARAGISTE
   if (view === 'addGaragiste' && selectedGarage) {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -282,7 +431,7 @@ export default function GarageManagement() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Ajouter un Garagiste</h1>
-              <p className="text-gray-600 mt-1">Pour le garage: {(selectedGarage as any).nom}</p>
+              <p className="text-gray-600 mt-1">Pour le garage: {(selectedGarage as any).garagenom}</p>
             </div>
             <button
               onClick={() => { resetForm(); setView('list'); }}
@@ -318,19 +467,20 @@ export default function GarageManagement() {
       </div>
     );
   }
-if (view === 'details' && selectedGarageForDetails) {
-  return (
-    <GarageDetails
-      garageId={selectedGarageForDetails._id} // <-- ici
-      onBack={() => {
-        setSelectedGarageForDetails(null);
-        setView('list');
-      }}
-      onAddGaragiste={() => startAddGaragiste(selectedGarageForDetails)}
-    />
-  );
-}
 
+  // VUE DÉTAILS
+  if (view === 'details' && selectedGarageForDetails) {
+    return (
+      <GarageDetails
+        garageId={(selectedGarageForDetails as any)._id}
+        onBack={() => {
+          setSelectedGarageForDetails(null);
+          setView('list');
+        }}
+        onAddGaragiste={() => startAddGaragiste(selectedGarageForDetails)}
+      />
+    );
+  }
 
   return null;
 }

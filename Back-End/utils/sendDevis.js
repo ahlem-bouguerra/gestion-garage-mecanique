@@ -146,7 +146,7 @@ export const sendDevisByEmail = async (req, res) => {
     // ⭐ Préparer les données pour l'email
     const emailData = {
       username: garageInfo.nom,
-      email: garagisteInfo?.email || process.env.EMAIL_USER, // Fallback sur email par défaut
+      email: garagisteInfo?.email , // Fallback sur email par défaut
       phone: garagisteInfo?.phone || 'Non renseigné'
     };
 

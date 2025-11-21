@@ -1,14 +1,15 @@
+// components/garage/GarageEditForm.tsx
 import { Building2, Loader2, ArrowRight, Clock } from 'lucide-react';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-interface GarageFormProps {
+interface GarageEditFormProps {
   garageData: any;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
   loading: boolean;
 }
 
-export default function GarageForm({ garageData, onChange, onSubmit, loading }: GarageFormProps) {
+export default function GarageEditForm({ garageData, onChange, onSubmit, loading }: GarageEditFormProps) {
   const [phoneError, setPhoneError] = useState("");
   const [horaires, setHoraires] = useState({
     lundi: { debut: '08:00', fin: '19:00', ferme: false },
@@ -20,41 +21,38 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
     dimanche: { debut: '', fin: '', ferme: true }
   });
 
-  // ✅ Validation téléphone tunisien (8 chiffres)
+  // Initialiser les horaires depuis garageData
+  useEffect(() => {
+    if (garageData.horaires) {
+      // Parser la chaîne existante et mettre à jour l'état
+      // Cette fonction est simplifiée, adapte-la selon ton format exact
+      console.log('Horaires existants:', garageData.horaires);
+    }
+  }, [garageData.horaires]);
+
   const validateTunisianPhone = (phone: string) => {
     const cleaned = phone.replace(/[\s\-+]/g, '');
-    
-    // Enlever le préfixe 216 si présent
     const number = cleaned.startsWith('216') ? cleaned.slice(3) : cleaned;
-    
-    // Vérifier que c'est exactement 8 chiffres et commence par 2, 4, 5, 7, ou 9
     const tunisianPattern = /^[24579]\d{7}$/;
 
     if (!number) return "Numéro requis";
     if (number.length !== 8) return "Le numéro doit contenir exactement 8 chiffres";
-    if (!tunisianPattern.test(number)) return "Numéro invalide (doit commencer par 2, 4, 5, 7 ou 9)";
+    if (!tunisianPattern.test(number)) return "Numéro invalide";
     return "";
   };
 
-  // ✅ Formater le numéro pendant la saisie
   const formatPhoneNumber = (value: string) => {
-    // Enlever tout sauf les chiffres
     const cleaned = value.replace(/\D/g, '');
-    
-    // Limiter à 8 chiffres
     const limited = cleaned.slice(0, 8);
     
-    // Formater: XX XXX XXX
     if (limited.length <= 2) return limited;
     if (limited.length <= 5) return `${limited.slice(0, 2)} ${limited.slice(2)}`;
     return `${limited.slice(0, 2)} ${limited.slice(2, 5)} ${limited.slice(5)}`;
   };
 
-  // ✅ Gérer le changement de téléphone avec formatage
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhoneNumber(e.target.value);
     
-    // Créer un événement synthétique pour garder la compatibilité
     const syntheticEvent = {
       ...e,
       target: {
@@ -65,23 +63,15 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
     } as React.ChangeEvent<HTMLInputElement>;
     
     onChange(syntheticEvent);
-    
-    // Validation
     const error = validateTunisianPhone(formatted);
     setPhoneError(error);
   };
 
-  // ✅ Générer la chaîne horaires pour le backend
   const generateHorairesString = (horaireData: typeof horaires) => {
     const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
     const joursAbrev: Record<string, string> = {
-      lundi: 'Lun',
-      mardi: 'Mar',
-      mercredi: 'Mer',
-      jeudi: 'Jeu',
-      vendredi: 'Ven',
-      samedi: 'Sam',
-      dimanche: 'Dim'
+      lundi: 'Lun', mardi: 'Mar', mercredi: 'Mer', jeudi: 'Jeu',
+      vendredi: 'Ven', samedi: 'Sam', dimanche: 'Dim'
     };
 
     let result: string[] = [];
@@ -94,22 +84,18 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
         : `${h.debut.replace(':', 'h')}-${h.fin.replace(':', 'h')}`;
 
       if (tempGroup && tempGroup.horaire === horaire) {
-        // Même horaire, ajouter au groupe
         tempGroup.jours.push(joursAbrev[jour]);
       } else {
-        // Horaire différent, finaliser le groupe précédent
         if (tempGroup) {
           const joursStr = tempGroup.jours.length > 1 
             ? `${tempGroup.jours[0]}-${tempGroup.jours[tempGroup.jours.length - 1]}`
             : tempGroup.jours[0];
           result.push(`${joursStr}: ${tempGroup.horaire}`);
         }
-        // Créer un nouveau groupe
         tempGroup = { jours: [joursAbrev[jour]], horaire };
       }
     });
 
-    // Ajouter le dernier groupe
     if (tempGroup) {
       const joursStr = tempGroup.jours.length > 1 
         ? `${tempGroup.jours[0]}-${tempGroup.jours[tempGroup.jours.length - 1]}`
@@ -120,7 +106,6 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
     return result.join(', ');
   };
 
-  // ✅ Gérer le changement d'horaires
   const handleHoraireChange = (jour: string, field: 'debut' | 'fin' | 'ferme', value: string | boolean) => {
     const newHoraires = {
       ...horaires,
@@ -132,9 +117,7 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
     
     setHoraires(newHoraires);
     
-    // Générer la chaîne et mettre à jour garageData
     const horaireString = generateHorairesString(newHoraires);
-    
     const syntheticEvent = {
       target: {
         name: 'horaires',
@@ -156,10 +139,10 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
   ];
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <div onSubmit={onSubmit} className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
         <Building2 className="w-6 h-6 text-blue-600" />
-        <h2 className="text-xl font-semibold text-gray-900">Informations du Garage</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Modifier le Garage</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -169,11 +152,11 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
           </label>
           <input
             type="text"
-            name="garagenom"
-            value={garageData.garagenom}
+            name="nom"
+            value={garageData.nom || ''}
             onChange={onChange}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             placeholder="Garage Auto Plus"
           />
         </div>
@@ -185,11 +168,10 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
           <input
             type="email"
             name="emailProfessionnel"
-            value={garageData.emailProfessionnel}
+            value={garageData.emailProfessionnel || ''}
             onChange={onChange}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="contact@garage.tn"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -200,36 +182,30 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
           <input
             type="tel"
             name="telephoneProfessionnel"
-            value={garageData.telephoneProfessionnel}
+            value={garageData.telephoneProfessionnel || ''}
             onChange={handlePhoneChange}
             required
             maxLength={10}
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 transition-colors
-              ${phoneError ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 
+              ${phoneError ? "border-red-500" : "border-gray-300"}
             `}
             placeholder="20 123 456"
           />
-          {phoneError && (
-            <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-              <span>⚠️</span> {phoneError}
-            </p>
-          )}
-          <p className="text-gray-500 text-xs mt-1">Format: 8 chiffres (ex: 20 123 456)</p>
+          {phoneError && <p className="text-red-500 text-sm mt-1">⚠️ {phoneError}</p>}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Matricule Fiscal <span className="text-red-500">*</span>
+            Matricule Fiscal
           </label>
           <input
             type="text"
-            name="matriculefiscal"
-            value={garageData.matriculefiscal}
-            onChange={onChange}
-            required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="1234567/A/M/000"
+            name="matriculeFiscal"
+            value={garageData.matriculeFiscal || ''}
+            disabled
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
           />
+          <p className="text-xs text-gray-500 mt-1">Le matricule fiscal ne peut pas être modifié</p>
         </div>
 
         <div>
@@ -237,10 +213,9 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
           <input
             type="text"
             name="governorateName"
-            value={garageData.governorateName}
+            value={garageData.governorateName || ''}
             onChange={onChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Tunis"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -249,10 +224,9 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
           <input
             type="text"
             name="cityName"
-            value={garageData.cityName}
+            value={garageData.cityName || ''}
             onChange={onChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ariana"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -261,10 +235,9 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
           <input
             type="text"
             name="streetAddress"
-            value={garageData.streetAddress}
+            value={garageData.streetAddress || ''}
             onChange={onChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="123 Avenue de la République"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -272,15 +245,14 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
           <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
           <textarea
             name="description"
-            value={garageData.description}
+            value={garageData.description || ''}
             onChange={onChange}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Garage spécialisé dans la réparation et l'entretien automobile..."
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        {/* ✅ SECTION HORAIRES AMÉLIORÉE */}
+        {/* Section Horaires (identique au formulaire de création) */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
             <Clock className="w-4 h-4 text-blue-600" />
@@ -299,7 +271,7 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
                       type="checkbox"
                       checked={h.ferme}
                       onChange={(e) => handleHoraireChange(key, 'ferme', e.target.checked)}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      className="w-4 h-4 text-blue-600 rounded"
                     />
                     <span className="text-sm text-gray-600">Fermé</span>
                   </label>
@@ -310,14 +282,14 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
                         type="time"
                         value={h.debut}
                         onChange={(e) => handleHoraireChange(key, 'debut', e.target.value)}
-                        className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
                       />
-                      <span className="text-gray-500">à</span>
+                      <span>à</span>
                       <input
                         type="time"
                         value={h.fin}
                         onChange={(e) => handleHoraireChange(key, 'fin', e.target.value)}
-                        className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
                       />
                     </>
                   )}
@@ -326,7 +298,6 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
             })}
           </div>
 
-          {/* Aperçu de la chaîne générée */}
           {garageData.horaires && (
             <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-800">
@@ -343,33 +314,33 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
           <input
             type="text"
             name="services"
-            value={garageData.services}
+            value={garageData.services || ''}
             onChange={onChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Réparation moteur, Vidange, Climatisation, Freinage"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
 
       <div className="flex gap-4 pt-6 border-t">
         <button
-          type="submit"
+          type="button"
+          onClick={onSubmit}
           disabled={loading || !!phoneError}
-          className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              Création en cours...
+              Modification en cours...
             </>
           ) : (
             <>
-              Créer le Garage
+              Enregistrer les modifications
               <ArrowRight className="w-5 h-5" />
             </>
           )}
         </button>
       </div>
-    </form>
+    </div>
   );
 }

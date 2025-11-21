@@ -90,22 +90,34 @@ export const createGarage = async (garageData: any) => {
 export const createGaragiste = async (garageId: string, garagisteData: any) => {
   try {
     const token = getAuthToken();
-    // ⭐ VÉRIFICATION CRITIQUE
+    
     if (!token || token === 'null' || token === 'undefined') {
-      // Rediriger vers le login
       window.location.href = '/auth/sign-in';
       return;
     }
-    const response = await axios.post(`${API_BASE}/garages/${garageId}/garagiste`, garagisteData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+    
+    // ⭐ DEBUG : Voir ce qui est envoyé
+    console.log('🔍 createGaragiste appelé avec:');
+    console.log('   garageId:', garageId);
+    console.log('   garagisteData:', garagisteData);
+    
+    const response = await axios.post(
+      `${API_BASE}/garages/${garageId}/garagiste`, 
+      garagisteData, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
       }
-    });
-
+    );
 
     return response.data.garagiste;
+    
   } catch (error: any) {
+    // ⭐ Afficher l'erreur détaillée du backend
+    console.error('❌ Erreur création garagiste:', error.response?.data);
+    
     if (error.response?.status === 403) {
       alert("❌ Accès refusé : Vous n'avez pas la permission");
       throw error;
@@ -116,7 +128,14 @@ export const createGaragiste = async (garageId: string, garagisteData: any) => {
       window.location.href = '/auth/sign-in';
       throw error;
     }
-    console.error('Erreur création garagiste:', error);
+    
+    // ⭐ Afficher le message d'erreur complet
+    if (error.response?.status === 400) {
+      const errorMsg = error.response.data?.message || 'Données invalides';
+      alert(`❌ Erreur 400 : ${errorMsg}`);
+      console.error('Détails erreur 400:', error.response.data);
+    }
+    
     throw error;
   }
 };
@@ -364,5 +383,99 @@ export const removeGaragistePermission = async (permissionAssociationId: string)
     }
     console.error('Erreur suppression permission:', error);
     throw new Error(error.response?.data?.message || 'Erreur lors de la suppression de la permission');
+  }
+};
+
+
+// Ajoute cette fonction après createGarage dans ton fichier api.ts
+
+export const updateGarage = async (garageId: string, garageData: any) => {
+  try {
+    const token = getAuthToken();
+    
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      return;
+    }
+    
+    // Traiter les services comme pour createGarage
+    const servicesArray = garageData.services
+      ? garageData.services.split(',').map((s: string) => s.trim()).filter(Boolean)
+      : [];
+
+    const response = await axios.put(
+      `${API_BASE}/garages/${garageId}`,
+      {
+        ...garageData,
+        services: servicesArray,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
+      }
+    );
+
+    return response.data.garage;
+    
+  } catch (error: any) {
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
+    
+    console.error('Erreur modification garage:', error);
+    throw error;
+  }
+};
+
+// components/garage/api.ts
+
+export const deleteGarage = async (garageId: string) => {
+  try {
+    const token = getAuthToken();
+    
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      return;
+    }
+    
+    const response = await axios.delete(
+      `${API_BASE}/garages/${garageId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      }
+    );
+
+    return response.data;
+    
+  } catch (error: any) {
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
+
+    if (error.response?.status === 400) {
+      // Erreur métier (ex: garage contient encore des employés)
+      throw new Error(error.response.data?.message || 'Impossible de supprimer ce garage');
+    }
+    
+    console.error('Erreur suppression garage:', error);
+    throw error;
   }
 };

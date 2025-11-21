@@ -61,7 +61,16 @@ const garageSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  }
+  },
+        emailProfessionnel: { 
+        type: String, 
+        required: true,  // Email officiel du garage
+        unique: true 
+    },
+    telephoneProfessionnel: { 
+        type: String, 
+        required: true  // Téléphone fixe ou mobile du garage
+    }
 
 }, {
     timestamps: true

@@ -22,6 +22,8 @@ export const createGarage = async (req, res) => {
     description,
     horaires,
     services,
+    emailProfessionnel,
+    telephoneProfessionnel
   } = req.body;
 
   console.log("📥 Création du garage:", req.body);
@@ -56,6 +58,8 @@ export const createGarage = async (req, res) => {
       description: description || "",
       horaires: horaires || "",
       services: services || [],
+      emailProfessionnel: emailProfessionnel || "",
+      telephoneProfessionnel: telephoneProfessionnel || "",
       garagisteAdmins: []  // Seulement les admins seront ici
     });
 
@@ -285,14 +289,14 @@ export const updateGarage = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
-    delete updateData.garagisteAdmin;
+    delete updateData.garagisteAdmins;
     delete updateData.matriculeFiscal;
 
     const garage = await Garage.findByIdAndUpdate(
       id,
       updateData,
       { new: true, runValidators: true }
-    ).populate('garagisteAdmin', 'username email phone');
+    ).populate('garagisteAdmins', 'username email phone');
 
     if (!garage) {
       return res.status(404).json({ message: "Garage non trouvé" });
@@ -342,7 +346,7 @@ export const toggleGarageStatus = async (req, res) => {
   }
 };
 
-// ========== SUPPRIMER UN GARAGE ==========
+// ========== SUPPRIMER UN GARAGE AVEC CES GARAGISTES ==========
 export const deleteGarage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -352,30 +356,40 @@ export const deleteGarage = async (req, res) => {
       return res.status(404).json({ message: "Garage non trouvé" });
     }
 
-    const garagistesCount = await Garagiste.countDocuments({ garage: id });
-    
-    if (garagistesCount > 1) {
-      return res.status(400).json({ 
-        message: "Impossible de supprimer ce garage. Il contient encore des employés." 
-      });
-    }
+    // ⭐ Récupérer TOUS les garagistes du garage
+    const allGaragistes = await Garagiste.find({ garage: id });
+    const garagisteIds = allGaragistes.map(g => g._id);
 
-    if (garage.garagisteAdmin) {
-      await GaragisteRole.deleteMany({ garagisteId: garage.garagisteAdmin });
-      await Garagiste.deleteOne({ _id: garage.garagisteAdmin });
+    if (garagisteIds.length > 0) {
+      // Supprimer tous les rôles
+      await GaragisteRole.deleteMany({ 
+        garagisteId: { $in: garagisteIds } 
+      });
+      
+      // Supprimer tous les garagistes
+      await Garagiste.deleteMany({ 
+        _id: { $in: garagisteIds } 
+      });
+      
+      console.log(`✅ ${garagisteIds.length} garagiste(s) supprimé(s)`);
     }
     
+    // Supprimer le garage
     await Garage.deleteOne({ _id: id });
 
     console.log("✅ Garage supprimé:", id);
 
     res.json({
-      message: "Garage et garagiste admin supprimés avec succès"
+      message: "Garage et tous ses garagistes supprimés avec succès",
+      deletedGaragistes: garagisteIds.length
     });
 
   } catch (error) {
     console.error("❌ Erreur deleteGarage:", error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ 
+      message: "Erreur serveur",
+      error: error.message 
+    });
   }
 };
 
