@@ -1,38 +1,40 @@
+// models/Service.js
 import mongoose from "mongoose";
 
-const Servicechema = new mongoose.Schema({
+const ServiceSchema = new mongoose.Schema({
   id: {
-    type: String, unique: true, default: "" 
-},
+    type: String, 
+    unique: true, 
+    default: "" 
+  },
   name: {
     type: String,
-    required :true,
-    enum: {
-      values: ["Entretien et révision", "Réparation mécanique", "Pneumatiques et suspension", "Électricité et électronique","Freinage et sécurité","Carrosserie et peinture","Services complémentaires"],
-      message: 'Service non disponible'
-    }
+    required: true,
+    unique: true, // Service unique globalement
+    trim: true
   },
   description: {
     type: String,
-    required :true,
+    required: true,
   },
   statut: { 
     type: String,
-    required: [true, 'Le statut est obligatoire'],
-    enum: {
-      values: ["Actif", "Désactivé"],
-      message: 'Le statut sélectionné n\'est pas valide'
-    },
+    required: true,
+    enum: ["Actif", "Désactivé"],
     default: "Actif" 
   },
-
-     garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true }
+  // Service créé par Super Admin
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Users',
+    required: true
+  }
+}, {
+  timestamps: true
 });
-// À la fin de ton schema, AVANT export default
-Servicechema.index({ name: 1, garageId: 1 }, { unique: true });
 
-// 🔹 Générer matricule auto : EMP001, EMP002, ...
-Servicechema.pre("save", async function (next) {
+// Auto-génération ID
+ServiceSchema.pre("save", async function (next) {
   if (!this.isNew) return next();
 
   try {
@@ -49,5 +51,4 @@ Servicechema.pre("save", async function (next) {
   }
 });
 
-
-export default mongoose.model("Service", Servicechema);
+export default mongoose.model("Service", ServiceSchema);

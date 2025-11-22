@@ -244,7 +244,7 @@ create: async (data: object): Promise<Mecanicien> => {
         window.location.href = '/auth/sign-in';
         return;
       }
-        const response = await axios.get('http://localhost:5000/api/getAllServices', {
+        const response = await axios.get('http://localhost:5000/api/services/available-for-mechanics', {
         headers: { Authorization: `Bearer ${token}` }
       });
         setAvailableServices(response.data);

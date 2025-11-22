@@ -47,7 +47,7 @@ const UnifiedManagementDashboard: React.FC<UnifiedManagementDashboardProps> = ({
       id: 'service',
       label: 'services',
       icon: Wrench,
-      description: 'Gestion des espaces de travail',
+      description: 'Gestion des services de travail',
       component: ServicesManager
     }
   ];

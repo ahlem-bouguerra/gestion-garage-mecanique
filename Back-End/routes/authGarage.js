@@ -15,7 +15,7 @@ import { createDevis, getAllDevis, getDevisById, getDevisByNum, updateDevisStatu
 import { sendDevisByEmail } from '../utils/sendDevis.js';
 import { createMecanicien, updateMecanicien, deleteMecanicien, getAllMecaniciens, getMecanicienById, getMecaniciensByService } from "../controllers/garagiste/mecanicienController.js";
 import { getAllAteliers, getAtelierById, createAtelier, updateAtelier, deleteAtelier } from '../controllers/garagiste/atelierController.js';
-import { getAllServices, getServiceById, createService, updateService, deleteService } from '../controllers/garagiste/serviceController.js';
+import {getAvailableServices,getMyGarageServices,addServiceToGarage,removeServiceFromGarage,getServicesForMechanics} from '../controllers/garagiste/serviceController.js';
 import { createOrdreTravail, getOrdresTravail, getOrdreTravailById, /*updateStatusOrdreTravail,*/ demarrerOrdre, terminerOrdre, getStatistiques, supprimerOrdreTravail, getOrdresParDevisId, getOrdresByStatus, getOrdresSupprimes, getOrdresByAtelier, updateOrdreTravail } from '../controllers/garagiste/ordreController.js';
 import { CreateFacture, CreateFactureWithCredit, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture, getCreditNoteById ,GetPaymentsOverviewData,GetWeeksProfitData,GetDevicesUsedData} from '../controllers/garagiste/facturesController.js';
 import { getCarnetByVehiculeId, creerCarnetManuel } from '../controllers/garagiste/carnetController.js';
@@ -317,11 +317,11 @@ router.put('/updateAtelier/:id', authMiddleware, hasAccess('Admin Garage'),updat
 router.delete('/deleteAtelier/:id', authMiddleware, hasAccess('Admin Garage'),deleteAtelier);
 
 // ========== SERVICES ==========
-router.get('/getAllServices', authMiddleware, getAllServices);
-router.get('/getServiceById/:id', authMiddleware, getServiceById);
-router.post('/createService', authMiddleware, hasAccess('Admin Garage'),createService);
-router.put('/updateService/:id', authMiddleware,hasAccess('Admin Garage'), updateService);
-router.delete('/deleteService/:id', authMiddleware, hasAccess('Admin Garage'),deleteService);
+router.get('/services/available', authMiddleware, hasAccess('Admin Garage'),getAvailableServices);
+router.get('/services/my-garage', authMiddleware,getMyGarageServices);
+router.post('/services/add', authMiddleware, hasAccess('Admin Garage'),addServiceToGarage);
+router.delete('/services/:id/remove', authMiddleware,hasAccess('Admin Garage'), removeServiceFromGarage);
+router.get('/services/available-for-mechanics',authMiddleware,getServicesForMechanics)
 
 // ========== ORDRES DE TRAVAIL ==========
 router.post('/createOrdre', authMiddleware,hasAccess('Admin Garage'), createOrdreTravail);

@@ -259,7 +259,7 @@ export const ordresTravailAPI = {
       window.location.href = '/auth/sign-in';
       throw new Error("Token invalide");
     }
-    const response = await axios.get('http://localhost:5000/api/getAllServices', token);
+    const response = await axios.get('http://localhost:5000/api/services/available-for-mechanics', token);
     return response.data;
   },
 

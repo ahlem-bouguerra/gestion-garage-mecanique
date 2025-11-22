@@ -1,123 +1,119 @@
+// controllers/garagiste/garageServiceController.js
+import GarageService from '../../models/GarageService.js';
 import Service from '../../models/Service.js';
 
-
-export const getAllServices = async (req, res) => {
+// ✅ GARAGISTE : Voir tous les services disponibles (créés par Super Admin)
+export const getAvailableServices = async (req, res) => {
   try {
-    const services = await Service.find({garageId: req.user.garageId});
-    console.log("✅ services récupérées:", services.length);
+    const services = await Service.find({ 
+      statut: 'Actif' 
+    }).sort({ name: 1 });
+    
+    console.log(`✅ ${services.length} services disponibles`);
     res.json(services);
   } catch (error) {
-    console.error("❌ Erreur getAllservices:", error);
+    console.error("❌ Erreur getAvailableServices:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
-
-export const getServiceById = async (req, res) => {
+// ✅ GARAGISTE : Voir les services de SON garage
+export const getMyGarageServices = async (req, res) => {
   try {
-    const { id } = req.params;
-    const service = await Service.findOne({_id:id , garageId: req.user.garageId});
+    const garageServices = await GarageService.find({ 
+      garageId: req.user.garageId 
+    })
+    .populate('serviceId')
+    .sort({ addedAt: -1 });
+    
+    console.log(`✅ ${garageServices.length} services dans le garage`);
+    res.json(garageServices);
+  } catch (error) {
+    console.error("❌ Erreur getMyGarageServices:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
 
+// ✅ GARAGISTE : Ajouter un service à son garage
+export const addServiceToGarage = async (req, res) => {
+  try {
+    const { serviceId } = req.body;
+    
+    if (!serviceId) {
+      return res.status(400).json({ error: 'Service ID requis' });
+    }
+
+    // Vérifier que le service existe et est actif
+    const service = await Service.findOne({ 
+      _id: serviceId, 
+      statut: 'Actif' 
+    });
+    
     if (!service) {
-      return res.status(404).json({ error: 'service non trouvée' });
-    }
-
-    res.json(service);
-  } catch (error) {
-    console.error("❌ Erreur getserviceById:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
-
-
-export const createService = async (req, res) => {
-  try {
-    const {name, description, statut} = req.body;
-    
-    if (!name || !description) {
-      return res.status(400).json({ 
-        error: 'Les champs nom et description sont obligatoires'
+      return res.status(404).json({ 
+        error: 'Service non trouvé ou désactivé' 
       });
     }
 
-    // Vérifier si le service existe déjà pour ce garagiste
-    const serviceExistant = await Service.findOne({ 
-      name, 
-      garageId: req.user.garageId 
+    // Vérifier si déjà ajouté
+    const existant = await GarageService.findOne({
+      garageId: req.user.garageId,
+      serviceId
     });
-    
-    if (serviceExistant) {
+
+    if (existant) {
       return res.status(409).json({ 
-        error: 'Vous avez déjà ce service dans votre liste' 
+        error: 'Ce service est déjà dans votre garage' 
       });
     }
 
-    const service = new Service({ 
-      name, 
-      description, 
-      statut, 
-      garageId: req.user.garageId 
+    // Créer la relation
+    const garageService = new GarageService({
+      garageId: req.user.garageId,
+      serviceId
     });
-    
-    await service.save();
-    console.log("✅ service créé:", service);
-    res.status(201).json(service);
-    
+
+    await garageService.save();
+    await garageService.populate('serviceId');
+
+    console.log("✅ Service ajouté au garage:", garageService);
+    res.status(201).json(garageService);
   } catch (error) {
-    console.error("❌ Erreur createService:", error);
-    
-    // Gestion des erreurs d'enum
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ 
-        error: 'Service non valide. Veuillez choisir un service dans la liste.' 
-      });
-    }
-    
+    console.error("❌ Erreur addServiceToGarage:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
-
-export const updateService = async (req, res) => {
+// ✅ GARAGISTE : Retirer un service de son garage
+export const removeServiceFromGarage = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
 
-    const serviceModifie = await Service.findOneAndUpdate(
-      { _id: id, garageId: req.user.garageId },
-      updateData,
-      { new: true, runValidators: true }
-    );
+    const garageService = await GarageService.findOneAndDelete({
+      _id: id,
+      garageId: req.user.garageId
+    });
 
-    if (!serviceModifie) {
-      return res.status(404).json({ error: 'service non trouvée' });
+    if (!garageService) {
+      return res.status(404).json({ error: 'Service non trouvé dans votre garage' });
     }
 
-    console.log("✅ service modifiée:", serviceModifie);
-    res.json(serviceModifie);
-
+    console.log("🗑️ Service retiré du garage:", garageService);
+    res.json({ message: 'Service retiré du garage avec succès' });
   } catch (error) {
-    console.error("❌ Erreur updateservice:", error);
+    console.error("❌ Erreur removeServiceFromGarage:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
-
-export const deleteService = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const serviceSupprimee = await Service.findOneAndDelete({_id: id, garageId: req.user.garageId});
-
-    if (!serviceSupprimee) {
-      return res.status(404).json({ error: 'service non trouvée' });
-    }
-
-    console.log("🗑️ service supprimée:", serviceSupprimee);
-    res.json({ message: "service supprimée avec succès" });
-
-  } catch (error) {
-    console.error("❌ Erreur deleteservice:", error);
-    res.status(500).json({ error: error.message });
-  }
+// Retourne uniquement les services du garage, format simple
+export const getServicesForMechanics = async (req, res) => {
+  const garageServices = await GarageService.find({ 
+    garageId: req.user.garageId 
+  }).populate('serviceId');
+  
+  // Extraire uniquement les services
+  const services = garageServices.map(gs => gs.serviceId);
+  
+  res.json(services);
 };

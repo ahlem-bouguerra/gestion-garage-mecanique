@@ -61,6 +61,13 @@ import {
   deactivateGaragiste,
 } from "../controllers/superAdmin/garageController.js";
 
+import {
+  createGlobalService, 
+  getAllGlobalServices,
+  updateGlobalService,
+  deleteGlobalService
+} from "../controllers/superAdmin/serviceController.js"
+
 const router = express.Router();
 
 // ========== ROUTE /ME (PROTÉGÉE) ==========
@@ -140,5 +147,11 @@ router.post("/createGaragisteRole", superAdminMiddleware, hasRole("Super Admin")
 router.get("/getAllGaragisteRoles", superAdminMiddleware, hasRole("Super Admin"), getAllGaragisteRoles);
 router.get("/getGaragisteRoleById/:id", superAdminMiddleware, hasRole("Super Admin"), getGaragisteRoleById);
 router.delete("/deleteGaragisteRole/:id", superAdminMiddleware, hasRole("Super Admin"), deleteGaragisteRole);
+
+
+router.post('/services', superAdminMiddleware, hasRole("Super Admin"), createGlobalService);
+router.get('/services', superAdminMiddleware, hasRole("Super Admin"), getAllGlobalServices);
+router.put('/services/:id', superAdminMiddleware, hasRole("Super Admin"), updateGlobalService);
+router.delete('/services/:id', superAdminMiddleware, hasRole("Super Admin"), deleteGlobalService);
 
 export default router;
