@@ -11,12 +11,12 @@ export const NAV_DATA = [
         items: [],
       },
    
-      /*{
-        title: "Tableau de bord",
-        url: "/client/dashboard",
+      {
+        title: "gestion-services",
+        url: "/gestion-services",
         icon: User,
         items: [],
-      },*/
+      },
       {
         title: "Les SuperAdmins",
         url: "/tableSuperAdmin",
@@ -44,12 +44,12 @@ export const NAV_DATA = [
         items: [],
       },
    
-    /*  {
-        title: "Historique Services",
-        url: "/client/historique",
+      {
+        title: "Gestion Des Ordres",
+        url: "/gestion-ordres",
         icon: Clock,
         items: [],
-      },*/
+      },
     ],
   },
   {

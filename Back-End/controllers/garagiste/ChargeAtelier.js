@@ -36,7 +36,7 @@ export const getDashboardData = async (req, res) => {
       enAttente: 0,
       enCours: 0, 
       termines: 0,
-      suspendus: 0,
+      Supprimés: 0,
       totalHeuresEstimees: 0,
       totalOrdresTermines: 0
     };
@@ -57,7 +57,7 @@ export const getDashboardData = async (req, res) => {
           statistiques.totalOrdresTermines = stat.count;
           break;
         case 'suspendu':
-          statistiques.suspendus = stat.count;
+          statistiques.Supprimés = stat.count;
           break;
         default:
           console.log('⚠️ Statut non reconnu:', stat._id);
@@ -66,7 +66,7 @@ export const getDashboardData = async (req, res) => {
     
     // ✅ Calculer le total depuis les statuts individuels
     statistiques.total = statistiques.enAttente + statistiques.enCours + 
-                        statistiques.termines + statistiques.suspendus;
+                        statistiques.termines + statistiques.Supprimés;
     
     // ✅ Ajouter les heures estimées depuis chargeAtelier
     if (chargeAtelier.length > 0) {

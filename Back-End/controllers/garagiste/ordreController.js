@@ -5,78 +5,97 @@ import Service from '../../models/Service.js';
 import Mecanicien from '../../models/Mecanicien.js';
 import mongoose from 'mongoose';
 
-
 export const createOrdreTravail = async (req, res) => {
   try {
-     console.log("📥 Données reçues pour ordre de travail:", req.body);
-    const { devisId, dateCommence, atelierId, priorite, description, taches } = req.body;
+    console.log("📥 Données reçues pour ordre de travail:", req.body);
 
-    // Validation des données requises
+    const { devisId, dateCommence, atelierId, priorite, description, taches } = req.body;
+    const { garageId } = req.query;
+
+    // ⭐ Détermination du garage
+    let targetGarageId;
+    if (req.user.isSuperAdmin && garageId) {
+      targetGarageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      targetGarageId = req.user.garageId || req.user.garage;
+    }
+
+    if (!targetGarageId) {
+      return res.status(400).json({ success: false, error: "garageId introuvable." });
+    }
+
+    // 🔎 Vérification des champs obligatoires
     if (!devisId || !dateCommence || !atelierId || !taches || taches.length === 0) {
       return res.status(400).json({
         success: false,
-        error: 'Données manquantes : devisId, dateCommence, atelierId et taches sont obligatoires'
+        error: 'Champs requis manquants : devisId, dateCommence, atelierId, taches'
       });
     }
 
-    // Vérifier que le devis existe
-    const devis = await Devis.findOne({ 
+    // 🔎 Vérifier que le devis existe
+    const devis = await Devis.findOne({
       id: devisId,
-      garageId: req.user.garageId
+      garageId: targetGarageId
     });
+
     if (!devis) {
       return res.status(404).json({
         success: false,
-        error: `Devis ${devisId} non trouvé`
+        error: `Devis ${devisId} non trouvé dans ce garage`
       });
     }
 
-    // Vérifier si un ordre existe déjà pour ce devis
-    const existingOrdre = await OrdreTravail.findOne({ 
+    // 🚫 Vérifier si un OT existe déjà
+    const existingOrdre = await OrdreTravail.findOne({
       devisId,
-      garageId: req.user.garageId
+      garageId: targetGarageId
     });
+
     if (existingOrdre) {
       return res.status(400).json({
         success: false,
-        error: `Un ordre de travail est déjà créé pour le devis ${devisId}`
+        error: `Un ordre de travail existe déjà pour le devis ${devisId}`
       });
     }
 
-    // Vérifier que l'atelier existe
-    const atelier = await Atelier.findById(atelierId);
+    // 🔎 Vérifier l’atelier
+    const atelier = await Atelier.findOne({
+      _id: atelierId,
+      garageId: targetGarageId
+    });
+
     if (!atelier) {
-      return res.status(404).json({
-        success: false,
-        error: 'Atelier non trouvé'
-      });
+      return res.status(404).json({ success: false, error: 'Atelier non trouvé dans ce garage' });
     }
 
-    // Valider et enrichir les tâches
+    // ✨ Valider et enrichir les tâches
     const tachesEnrichies = [];
+
     for (const tache of taches) {
       if (!tache.serviceId || !tache.mecanicienId) {
         return res.status(400).json({
           success: false,
-          error: 'Chaque tâche doit avoir un serviceId et mecanicienId'
+          error: 'Chaque tâche doit contenir serviceId et mecanicienId'
         });
       }
 
-      // Récupérer les informations du service
       const service = await Service.findById(tache.serviceId);
       if (!service) {
         return res.status(404).json({
           success: false,
-          error: `Service non trouvé pour la tâche: ${tache.description}`
+          error: `Service introuvable pour la tâche "${tache.description}"`
         });
       }
 
-      // Récupérer les informations du mécanicien
-      const mecanicien = await Mecanicien.findById(tache.mecanicienId);
+      const mecanicien = await Mecanicien.findOne({
+        _id: tache.mecanicienId,
+        garageId: targetGarageId
+      });
+
       if (!mecanicien) {
         return res.status(404).json({
           success: false,
-          error: `Mécanicien non trouvé pour la tâche: ${tache.description}`
+          error: `Mécanicien introuvable ou n'appartient pas à ce garage`
         });
       }
 
@@ -85,7 +104,7 @@ export const createOrdreTravail = async (req, res) => {
         quantite: tache.quantite || 1,
         serviceId: tache.serviceId,
         serviceNom: service.name,
-        mecanicienId: tache.mecanicienId,
+        mecanicienId: mecanicien._id,
         mecanicienNom: mecanicien.nom,
         estimationHeures: tache.estimationHeures || 1,
         notes: tache.notes || '',
@@ -93,18 +112,18 @@ export const createOrdreTravail = async (req, res) => {
       });
     }
 
-    // Calculer la date de fin prévue (estimation basée sur les heures)
-    const totalHeuresEstimees = tachesEnrichies.reduce((total, tache) => total + tache.estimationHeures, 0);
+    // ⏳ Calcul de la date de fin prévue
+    const totalHeures = tachesEnrichies.reduce((sum, t) => sum + t.estimationHeures, 0);
     const dateFinPrevue = new Date(dateCommence);
-    dateFinPrevue.setHours(dateFinPrevue.getHours() + totalHeuresEstimees);
+    dateFinPrevue.setHours(dateFinPrevue.getHours() + totalHeures);
 
-    // Créer l'ordre de travail avec le numéro généré
+    // 🆕 Création de l'ordre de travail
     const ordreTravail = new OrdreTravail({
       devisId: devis.id,
-      garageId: req.user.garageId,
+      garageId: targetGarageId,
       clientInfo: {
         nom: devis.clientName,
-        ClientId : devis.clientId,
+        ClientId: devis.clientId,
         telephone: devis.clientPhone,
         email: devis.clientEmail,
         adresse: devis.clientAddress
@@ -113,8 +132,6 @@ export const createOrdreTravail = async (req, res) => {
         nom: devis.vehicleInfo,
         vehiculeId: devis.vehiculeId,
       },
-
- 
       dateCommence: new Date(dateCommence),
       dateFinPrevue,
       atelierId,
@@ -126,9 +143,8 @@ export const createOrdreTravail = async (req, res) => {
     });
 
     const ordreSauve = await ordreTravail.save();
-    console.log("📥 Données reçues pour ordre de travail:", ordreTravail);
 
-    // Populer les références pour la réponse
+    // 🔗 Populate des relations
     await ordreSauve.populate([
       { path: 'devisId', select: 'id clientName vehicleInfo vehiculeId' },
       { path: 'atelierId', select: 'name localisation' },
@@ -136,20 +152,21 @@ export const createOrdreTravail = async (req, res) => {
       { path: 'taches.mecanicienId', select: 'nom' }
     ]);
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'Ordre de travail créé avec succès',
       ordre: ordreSauve
     });
 
   } catch (error) {
-    console.error('Erreur création ordre de travail:', error);
+    console.error('❌ Erreur création ordre de travail:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Erreur serveur lors de la création de l\'ordre de travail'
+      error: error.message || 'Erreur serveur'
     });
   }
 };
+
 
 export const getOrdresTravail = async (req, res) => {
   try {
@@ -162,21 +179,23 @@ export const getOrdresTravail = async (req, res) => {
       dateDebut,
       dateFin,
       sortBy = 'createdAt',
-      sortOrder = 'desc'
+      sortOrder = 'desc',
+      garageId // ⭐ NOUVEAU : Paramètre pour SuperAdmin
     } = req.query;
 
-    // Construction du filtre
-    const filter = {
-     garageId: req.user.garageId
-    };
+    // ⭐ Construction du filtre selon le rôle
+    const filter = {};
     
-    // ✅ AJOUT : Exclure les ordres supprimés
-    filter.status = { $ne: 'supprime' };
-    
-    // Si status est fourni ET différent de 'supprime', l'utiliser
-    if (status && status !== 'supprime') {
-      filter.status = status;
+    // Si SuperAdmin ET garageId fourni, utiliser ce garageId
+    // Sinon, utiliser le garageId de l'utilisateur connecté
+    if (req.user.isSuperAdmin && garageId) {
+      filter.garageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      filter.garageId = req.user.garage || req.user.garageId;
     }
+    // Si SuperAdmin sans garageId, pas de filtre garage (tous les ordres)
+    
+ 
     
     if (atelier) filter.atelierId = atelier;
     if (priorite) filter.priorite = priorite;
@@ -187,6 +206,8 @@ export const getOrdresTravail = async (req, res) => {
         $lte: new Date(dateFin)
       };
     }
+
+    console.log('🔍 Filtre appliqué:', filter);
 
     // Options de tri
     const sortOptions = {};
@@ -237,12 +258,17 @@ export const getOrdreTravailById = async (req, res) => {
   try {
     const { id } = req.params;
     
-    console.log('Recherche ordre avec ID:', id); // Debug
+    console.log('Recherche ordre avec ID:', id);
     
-    const ordre = await OrdreTravail.findOne({
-      _id: id,
-      garageId: req.user.garageId
-    })
+    // ⭐ Construction du filtre selon le rôle
+    const filter = { _id: id };
+    
+    // Si pas SuperAdmin, filtrer par garage
+    if (!req.user.isSuperAdmin) {
+      filter.garageId = req.user.garage || req.user.garageId;
+    }
+    
+    const ordre = await OrdreTravail.findOne(filter)
       .populate('devisId', 'id clientName vehicleInfo inspectionDate services')
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name description')
@@ -251,14 +277,14 @@ export const getOrdreTravailById = async (req, res) => {
       .populate('updatedBy', 'nom email');
 
     if (!ordre) {
-      console.log('Ordre non trouvé pour ID:', id); // Debug
+      console.log('Ordre non trouvé pour ID:', id);
       return res.status(404).json({
         success: false,
         error: 'Ordre de travail non trouvé'
       });
     }
 
-    console.log('Ordre trouvé:', ordre.numeroOrdre); // Debug
+    console.log('Ordre trouvé:', ordre.numeroOrdre);
     
     res.json({
       success: true,
@@ -395,18 +421,36 @@ export const terminerOrdre = async (req, res) => {
 
 export const getStatistiques = async (req, res) => {
   try {
-    const { atelierId } = req.query;
+    const { atelierId, garageId } = req.query; // ⭐ AJOUT : garageId depuis query
 
-    const stats = await OrdreTravail.getStatistiques(atelierId, req.user.garageId);
+    // ⭐ Déterminer quel garageId utiliser
+    let targetGarageId;
+    if (req.user.isSuperAdmin && garageId) {
+      // SuperAdmin avec garageId spécifique
+      targetGarageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      // Garagiste : utiliser son propre garage
+      targetGarageId = req.user.garageId || req.user.garage;
+    }
+    // Si SuperAdmin sans garageId, targetGarageId reste undefined = stats globales
+
+    console.log('📊 Récupération stats pour garageId:', targetGarageId);
+
+    const stats = await OrdreTravail.getStatistiques(atelierId, targetGarageId);
 
     // Statistiques additionnelles
+    const matchFilter = {};
+    
+    if (targetGarageId) {
+      matchFilter.garageId = new mongoose.Types.ObjectId(targetGarageId);
+    }
+    
+    if (atelierId) {
+      matchFilter.atelierId = new mongoose.Types.ObjectId(atelierId);
+    }
+
     const statsParPriorite = await OrdreTravail.aggregate([
-      {
-        $match: {
-          garageId: new mongoose.Types.ObjectId(req.user.garageId),
-          ...(atelierId && { atelierId: new mongoose.Types.ObjectId(atelierId) })
-        }
-      },
+      { $match: matchFilter },
       {
         $group: {
           _id: '$priorite',
@@ -505,20 +549,22 @@ export const getOrdresParDevisId = async (req, res) => {
 export const getOrdresByStatus = async (req, res) => {
   try {
     const { status } = req.params;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, garageId } = req.query; // ⭐ NOUVEAU
 
-    // ✅ AJOUT : Si on cherche des ordres supprimés explicitement, les inclure
-    // Sinon, les exclure toujours
+    // ⭐ Construction du filtre
     const filter = status === 'supprime' 
-      ? { 
-          status: 'supprime',
-          garageId: req.user.garageId
-        }
+      ? { status: 'supprime' }
       : { 
-          status: status, 
-          garageId: req.user.garageId,
+          status: status,
           $and: [{ status: { $ne: 'supprime' } }] 
         };
+    
+    // ⭐ Ajouter le filtre garage selon le rôle
+    if (req.user.isSuperAdmin && garageId) {
+      filter.garageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      filter.garageId = req.user.garage || req.user.garageId;
+    }
 
     const options = {
       sort: { createdAt: -1 },
@@ -552,17 +598,23 @@ export const getOrdresByStatus = async (req, res) => {
   }
 };
 
+
 export const getOrdresByAtelier = async (req, res) => {
   try {
     const { atelierId } = req.params;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, garageId } = req.query; // ⭐ NOUVEAU
 
-    // ✅ AJOUT : Exclure les ordres supprimés + filtrer par garagiste
     const filter = { 
       atelierId: atelierId,
-      garageId: req.user.garageId,
       status: { $ne: 'supprime' }
     };
+    
+    // ⭐ Ajouter le filtre garage selon le rôle
+    if (req.user.isSuperAdmin && garageId) {
+      filter.garageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      filter.garageId = req.user.garage || req.user.garageId;
+    }
 
     const options = {
       sort: { createdAt: -1 },

@@ -268,7 +268,7 @@ OrdreTravailSchema.statics.getStatistiques = async function(atelierId = null, ga
         enAttente: { $sum: { $cond: [{ $eq: ['$status', 'en_attente'] }, 1, 0] } },
         enCours: { $sum: { $cond: [{ $eq: ['$status', 'en_cours'] }, 1, 0] } },
         termines: { $sum: { $cond: [{ $eq: ['$status', 'termine'] }, 1, 0] } },
-        suspendus: { $sum: { $cond: [{ $eq: ['$status', 'suspendu'] }, 1, 0] } },
+        Supprimés: { $sum: { $cond: [{ $eq: ['$status', 'Supprimés'] }, 1, 0] } },
         totalHeuresEstimees: { $sum: '$totalHeuresEstimees' },
         totalHeuresReelles: { $sum: '$totalHeuresReelles' }
       }
@@ -280,7 +280,7 @@ OrdreTravailSchema.statics.getStatistiques = async function(atelierId = null, ga
     enAttente: 0,
     enCours: 0,
     termines: 0,
-    suspendus: 0,
+    Supprimés: 0,
     totalHeuresEstimees: 0,
     totalHeuresReelles: 0
   };

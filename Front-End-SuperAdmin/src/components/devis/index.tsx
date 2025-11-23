@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getAllGarages, getDevisByGarage, getDevisById ,deleteDevis ,sendDevisByMail} from "./api";
-import { Plus, Edit2, Eye, Send, Check, X, Car, User, Calendar, FileText, Euro, AlertCircle, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Eye, Send, Check, X, Car, User, Calendar, FileText, Euro, AlertCircle, Trash2,Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Devis {
@@ -260,7 +260,6 @@ const handleSendDevis = async (devisId: string) => {
     ) : (
       <>
         <Eye className="h-4 w-4" />
-        Voir détails
       </>
     )}
   </button>
@@ -270,7 +269,6 @@ const handleSendDevis = async (devisId: string) => {
     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-yellow-700"
   >
     <Edit2 className="h-4 w-4" />
-    Modifier
   </button>
 
   <button
@@ -278,14 +276,13 @@ const handleSendDevis = async (devisId: string) => {
     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-red-700"
   >
     <Trash2 className="h-4 w-4" />
-    Supprimer
   </button>
    <button
     onClick={() => handleSendDevis(d._id)}
     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-red-700"
   >
-    <Trash2 className="h-4 w-4" />
-    Envoyer devis par mail
+    <Mail className="h-4 w-4" />
+
   </button>
 </div>
                 </div>

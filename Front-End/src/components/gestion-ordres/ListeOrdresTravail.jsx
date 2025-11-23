@@ -23,7 +23,7 @@ const ListeOrdresTravail = ({
     'en_attente': { label: 'En attente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
     'en_cours': { label: 'En cours', color: 'bg-blue-100 text-blue-800', icon: Wrench },
     'termine': { label: 'Terminé', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-    'suspendu': { label: 'Suspendu', color: 'bg-red-100 text-red-800', icon: AlertCircle },
+    'supprime': { label: 'supprime', color: 'bg-red-100 text-red-800', icon: AlertCircle },
     'supprime': { label: 'supprime', color: 'bg-red-100 text-red-800', icon: X },
 
   };
@@ -135,8 +135,8 @@ const loadOrdresSupprimes = async () => {
               <div className="text-sm text-gray-600">En Cours</div>
             </div>
             <div className="bg-red-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-red-600">{statistiques.suspendus}</div>
-              <div className="text-sm text-gray-600">Suspendus</div>
+              <div className="text-2xl font-bold text-red-600">{statistiques.supprime}</div>
+              <div className="text-sm text-gray-600">Supprimés</div>
             </div>
           </div>
         </div>

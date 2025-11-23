@@ -23,7 +23,7 @@ export const authGaragisteOuSuperAdmin = async (req, res, next) => {
       return res.status(401).json({ error: 'Token invalide ou expiré' });
     }
     
-    // ⭐ FIX : Utiliser userId au lieu de id
+    // ⭐ Utiliser userId au lieu de id
     const userId = decoded.userId || decoded.id;
     
     if (!userId) {
@@ -33,7 +33,7 @@ export const authGaragisteOuSuperAdmin = async (req, res, next) => {
     
     // ⭐ Cas 1 : SuperAdmin (Users)
     if (decoded.isSuperAdmin) {
-      const user = await Users.findById(userId);  // ⭐ FIX ICI
+      const user = await Users.findById(userId);
       
       if (!user) {
         console.log('❌ SuperAdmin non trouvé:', userId);
@@ -42,10 +42,12 @@ export const authGaragisteOuSuperAdmin = async (req, res, next) => {
       
       req.user = {
         _id: user._id,
+        id: user._id.toString(), // ⭐ AJOUT : alias pour compatibilité
         email: user.email,
         role: 'superadmin',
         isSuperAdmin: true,
-        garage: null
+        garage: null,
+        garageId: null // ⭐ AJOUT : pour cohérence
       };
       
       console.log('✅ SuperAdmin authentifié:', req.user.email);
@@ -53,7 +55,7 @@ export const authGaragisteOuSuperAdmin = async (req, res, next) => {
     }
     
     // ⭐ Cas 2 : Garagiste
-    const garagiste = await Garagiste.findById(userId);  // ⭐ FIX ICI
+    const garagiste = await Garagiste.findById(userId);
     
     if (!garagiste) {
       console.log('❌ Garagiste non trouvé:', userId);
@@ -76,14 +78,16 @@ export const authGaragisteOuSuperAdmin = async (req, res, next) => {
     
     req.user = {
       _id: garagiste._id,
+      id: garagiste._id.toString(), // ⭐ AJOUT : alias pour compatibilité
       email: garagiste.email,
       role: 'garagiste',
       roles: roles,
       isSuperAdmin: false,
-      garage: garagiste.garage
+      garage: garagiste.garage,
+      garageId: garagiste.garage // ⭐ AJOUT : pour cohérence avec les controllers
     };
     
-    console.log('✅ Garagiste authentifié:', req.user.email, 'Rôles:', req.user.roles);
+    console.log('✅ Garagiste authentifié:', req.user.email, 'Rôles:', req.user.roles, 'GarageId:', req.user.garageId);
     next();
     
   } catch (error) {

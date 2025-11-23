@@ -108,12 +108,44 @@ export const removeServiceFromGarage = async (req, res) => {
 
 // Retourne uniquement les services du garage, format simple
 export const getServicesForMechanics = async (req, res) => {
-  const garageServices = await GarageService.find({ 
-    garageId: req.user.garageId 
-  }).populate('serviceId');
-  
-  // Extraire uniquement les services
-  const services = garageServices.map(gs => gs.serviceId);
-  
-  res.json(services);
+  try {
+    const { garageId } = req.query; // ⭐ Récupérer garageId depuis query params
+    
+    // ⭐ Déterminer quel garageId utiliser
+    let targetGarageId;
+    
+    if (req.user.isSuperAdmin && garageId) {
+      // SuperAdmin avec garageId spécifique
+      targetGarageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      // Garagiste : utiliser son propre garage
+      targetGarageId = req.user.garageId || req.user.garage;
+    }
+    
+    console.log('🔍 Recherche services pour garage:', targetGarageId);
+    
+    // ⭐ Construire le filtre
+    const filter = targetGarageId ? { garageId: targetGarageId } : {};
+    
+    const garageServices = await GarageService.find(filter).populate('serviceId');
+    
+    // Extraire uniquement les services
+    const services = garageServices
+      .map(gs => gs.serviceId)
+      .filter(service => service !== null); // ⭐ Filtrer les services null/undefined
+    
+    console.log("✅ Services récupérés:", services.length);
+    
+    res.json({
+      success: true,
+      services
+    });
+    
+  } catch (error) {
+    console.error("❌ Erreur getServicesForMechanics:", error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
 };

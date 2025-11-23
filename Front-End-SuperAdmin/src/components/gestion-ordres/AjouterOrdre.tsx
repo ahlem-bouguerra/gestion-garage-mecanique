@@ -1,0 +1,559 @@
+// CreateOrderModal.tsx - VERSION SIMPLIFIÉE AVEC VOS ENDPOINTS
+
+"use client";
+import React, { useState, useEffect } from 'react';
+import { X, Plus, Trash2, Save } from 'lucide-react';
+import {
+  createOrdre,
+  getAteliers,
+  getServices,
+  getMecaniciensByService,
+  getDevisByCode
+} from './api';
+
+interface CreateOrderModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  garageId: string;
+  garageName: string;
+  onSuccess: () => void;
+}
+
+const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
+  isOpen,
+  onClose,
+  garageId,
+  garageName,
+  onSuccess
+}) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const [ateliers, setAteliers] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
+  const [mecaniciens, setMecaniciens] = useState<any[]>([]);
+  const [devisData, setDevisData] = useState<any>(null);
+  
+  const [formData, setFormData] = useState({
+    devisId: '',
+    dateCommence: '',
+    atelierId: '',
+    priorite: 'normale',
+    description: '',
+    taches: [] as any[]
+  });
+
+  // Charger les données du garage
+  useEffect(() => {
+    if (isOpen && garageId) {
+      loadGarageData();
+    }
+  }, [isOpen, garageId]);
+
+  const loadGarageData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('📥 Chargement données pour garage:', garageId);
+      
+      // ⭐ Utiliser vos endpoints existants avec garageId
+      const [ateliersRes, servicesRes] = await Promise.all([
+        getAteliers(garageId),
+        getServices(garageId)
+      ]);
+
+      console.log('✅ Ateliers:', ateliersRes);
+      console.log('✅ Services:', servicesRes);
+
+      setAteliers(ateliersRes?.ateliers || ateliersRes || []);
+      setServices(servicesRes?.services || servicesRes || []);
+      
+    } catch (err: any) {
+      console.error('❌ Erreur chargement données garage:', err);
+      setError('Erreur lors du chargement des données');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadDevis = async () => {
+    if (!formData.devisId) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('📥 Chargement devis:', formData.devisId, 'pour garage:', garageId);
+      
+      const response = await getDevisByCode(formData.devisId, garageId);
+      
+      console.log('✅ Réponse devis:', response);
+      
+      if (response.exists && response.ordre) {
+        setError(`Un ordre existe déjà pour ce devis (${response.ordre.numeroOrdre})`);
+        return;
+      }
+
+      // Si pas d'ordre existant, charger les détails du devis
+      // Vous devrez peut-être ajuster selon votre structure de réponse
+      const devis = response.devis || response;
+      
+      setDevisData(devis);
+      
+      // Créer les tâches depuis les services du devis
+      const taches = (devis.services || []).map((service: any, index: number) => ({
+        id: index + 1,
+        description: service.piece || service.name || service.description,
+        quantite: service.quantity || 1,
+        serviceId: '',
+        mecanicienId: '',
+        estimationHeures: 1,
+        notes: ''
+      }));
+
+      setFormData(prev => ({
+        ...prev,
+        taches,
+        description: `Ordre de travail pour devis ${devis.id}`
+      }));
+
+    } catch (err: any) {
+      console.error('❌ Erreur chargement devis:', err);
+      setError('Devis non trouvé ou inaccessible');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMecaniciensForService = async (serviceId: string) => {
+    try {
+      console.log('📥 Chargement mécaniciens pour service:', serviceId);
+      
+      const response = await getMecaniciensByService(serviceId, garageId);
+      
+      console.log('✅ Mécaniciens:', response);
+      
+      setMecaniciens(response?.mecaniciens || response || []);
+    } catch (err: any) {
+      console.error('❌ Erreur chargement mécaniciens:', err);
+    }
+  };
+
+  const addTache = () => {
+    setFormData(prev => ({
+      ...prev,
+      taches: [
+        ...prev.taches,
+        {
+          id: Date.now(),
+          description: '',
+          quantite: 1,
+          serviceId: '',
+          mecanicienId: '',
+          estimationHeures: 1,
+          notes: ''
+        }
+      ]
+    }));
+  };
+
+  const removeTache = (tacheId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      taches: prev.taches.filter(t => t.id !== tacheId)
+    }));
+  };
+
+  const updateTache = (tacheId: number, field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      taches: prev.taches.map(t => {
+        if (t.id === tacheId) {
+          const updated = { ...t, [field]: value };
+          
+          // Si on change le service, charger les mécaniciens et reset le mécanicien sélectionné
+          if (field === 'serviceId') {
+            loadMecaniciensForService(value);
+            updated.mecanicienId = '';
+          }
+          
+          return updated;
+        }
+        return t;
+      })
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Validation
+      if (!formData.devisId || !formData.dateCommence || !formData.atelierId) {
+        setError('Veuillez remplir tous les champs obligatoires');
+        return;
+      }
+
+      if (formData.taches.length === 0) {
+        setError('Ajoutez au moins une tâche');
+        return;
+      }
+
+      if (formData.taches.some(t => !t.serviceId || !t.mecanicienId)) {
+        setError('Toutes les tâches doivent avoir un service et un mécanicien');
+        return;
+      }
+
+      const ordreData = {
+        devisId: formData.devisId,
+        dateCommence: formData.dateCommence,
+        atelierId: formData.atelierId,
+        priorite: formData.priorite,
+        description: formData.description,
+        garageId, // ⭐ IMPORTANT pour SuperAdmin
+        taches: formData.taches.map(t => ({
+          description: t.description,
+          quantite: t.quantite,
+          serviceId: t.serviceId,
+          mecanicienId: t.mecanicienId,
+          estimationHeures: t.estimationHeures,
+          notes: t.notes
+        }))
+      };
+
+      console.log('📤 Envoi ordre:', ordreData);
+
+      await createOrdre(ordreData);
+      
+      console.log('✅ Ordre créé avec succès');
+      
+      onSuccess();
+      onClose();
+      
+      // Reset form
+      setFormData({
+        devisId: '',
+        dateCommence: '',
+        atelierId: '',
+        priorite: 'normale',
+        description: '',
+        taches: []
+      });
+      setDevisData(null);
+
+    } catch (err: any) {
+      console.error('❌ Erreur création ordre:', err);
+      setError(err.response?.data?.error || 'Erreur lors de la création');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Créer un Ordre de Travail
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Garage: {garageName}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="mx-6 mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-red-800 text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Devis */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              ID Devis *
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={formData.devisId}
+                onChange={(e) => setFormData(prev => ({ ...prev, devisId: e.target.value }))}
+                className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Ex: DEV-0001"
+              />
+              <button
+                type="button"
+                onClick={loadDevis}
+                disabled={loading || !formData.devisId}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? 'Chargement...' : 'Charger'}
+              </button>
+            </div>
+          </div>
+
+          {devisData && (
+            <>
+              {/* Info Devis */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="font-medium text-gray-900 mb-2">Informations Devis</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">Client:</span>
+                    <span className="ml-2 font-medium">{devisData.clientName}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Véhicule:</span>
+                    <span className="ml-2 font-medium">{devisData.vehicleInfo}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Paramètres */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date début *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.dateCommence}
+                    onChange={(e) => setFormData(prev => ({ ...prev, dateCommence: e.target.value }))}
+                    min={new Date().toISOString().slice(0, 16)}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Atelier *
+                  </label>
+                  <select
+                    value={formData.atelierId}
+                    onChange={(e) => setFormData(prev => ({ ...prev, atelierId: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">-- Sélectionner --</option>
+                    {ateliers.map(atelier => (
+                      <option key={atelier._id} value={atelier._id}>
+                        {atelier.name} ({atelier.localisation || 'N/A'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Priorité
+                  </label>
+                  <select
+                    value={formData.priorite}
+                    onChange={(e) => setFormData(prev => ({ ...prev, priorite: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="faible">Faible</option>
+                    <option value="normale">Normale</option>
+                    <option value="elevee">Élevée</option>
+                    <option value="urgente">Urgente</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Description de l'ordre de travail..."
+                />
+              </div>
+
+              {/* Tâches */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Tâches ({formData.taches.length})
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={addTache}
+                    className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Ajouter
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {formData.taches.map((tache, index) => (
+                    <div key={tache.id} className="border rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-start justify-between mb-3">
+                        <span className="text-sm font-medium text-gray-700">
+                          Tâche #{index + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeTache(tache.id)}
+                          className="p-1 text-red-600 hover:bg-red-50 rounded"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Description *
+                          </label>
+                          <input
+                            type="text"
+                            value={tache.description}
+                            onChange={(e) => updateTache(tache.id, 'description', e.target.value)}
+                            className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-blue-500"
+                            placeholder="Description de la tâche"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Quantité
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={tache.quantite}
+                            onChange={(e) => updateTache(tache.id, 'quantite', parseInt(e.target.value))}
+                            className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Service *
+                          </label>
+                          <select
+                            value={tache.serviceId}
+                            onChange={(e) => updateTache(tache.id, 'serviceId', e.target.value)}
+                            className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-blue-500"
+                            required
+                          >
+                            <option value="">-- Sélectionner --</option>
+                            {services.map(service => (
+                              <option key={service._id} value={service._id}>
+                                {service.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Mécanicien *
+                          </label>
+                          <select
+                            value={tache.mecanicienId}
+                            onChange={(e) => updateTache(tache.id, 'mecanicienId', e.target.value)}
+                            disabled={!tache.serviceId}
+                            className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                            required
+                          >
+                            <option value="">-- Sélectionner --</option>
+                            {mecaniciens.map(mec => (
+                              <option key={mec._id} value={mec._id}>
+                                {mec.nom}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Estimation (heures)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.5"
+                            min="0.5"
+                            value={tache.estimationHeures}
+                            onChange={(e) => updateTache(tache.id, 'estimationHeures', parseFloat(e.target.value))}
+                            className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Notes
+                          </label>
+                          <input
+                            type="text"
+                            value={tache.notes}
+                            onChange={(e) => updateTache(tache.id, 'notes', e.target.value)}
+                            placeholder="Notes optionnelles..."
+                            className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {formData.taches.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      Aucune tâche. Cliquez sur "Ajouter" pour en créer une.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-4 border-t">
+            <button
+              type="submit"
+              disabled={loading || !devisData || formData.taches.length === 0}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save className="w-4 h-4" />
+              {loading ? 'Création...' : 'Créer l\'Ordre'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="px-6 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            >
+              Annuler
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default CreateOrderModal;

@@ -3,12 +3,40 @@ import Atelier from '../../models/Atelier.js';
 
 export const getAllAteliers = async (req, res) => {
   try {
-    const ateliers = await Atelier.find({garageId: req.user.garageId});
-    console.log("✅ aleliers récupérées:", ateliers.length);
-    res.json(ateliers);
+    const { garageId } = req.query; // ⭐ Récupérer garageId depuis query params
+    
+    // ⭐ Déterminer quel garageId utiliser
+    let targetGarageId;
+    
+    if (req.user.isSuperAdmin && garageId) {
+      // SuperAdmin avec garageId spécifique
+      targetGarageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      // Garagiste : utiliser son propre garage
+      targetGarageId = req.user.garageId || req.user.garage;
+    }
+    // Si SuperAdmin sans garageId, targetGarageId reste undefined = tous les ateliers
+    
+    console.log('🔍 Recherche ateliers pour garage:', targetGarageId);
+    
+    // ⭐ Construire le filtre
+    const filter = targetGarageId ? { garageId: targetGarageId } : {};
+    
+    const ateliers = await Atelier.find(filter);
+    
+    console.log("✅ Ateliers récupérés:", ateliers.length);
+    
+    res.json({ 
+      success: true,
+      ateliers 
+    });
+    
   } catch (error) {
     console.error("❌ Erreur getAllAteliers:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
   }
 };
 

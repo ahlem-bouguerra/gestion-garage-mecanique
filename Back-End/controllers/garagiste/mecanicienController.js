@@ -93,26 +93,60 @@ export const getMecanicienById = async (req, res) => {
 
 
 // GET /api/mecaniciens/by-service/:serviceId
+// GET /api/mecaniciens/by-service/:serviceId
 export const getMecaniciensByService = async (req, res) => {
   try {
     const { serviceId } = req.params;
+    const { garageId } = req.query; // ⭐ Peut être fourni si SuperAdmin
 
-    // ⚠️ convertir en ObjectId
-    const serviceObjectId = new mongoose.Types.ObjectId(serviceId);
+    // ⭐ Déterminer quel garage utiliser
+    let targetGarageId;
 
-    // recherche dans le tableau "services"
-    const mecaniciens = await Mecanicien.find({
-      "services.serviceId": serviceObjectId,
-      garageId: req.user.garageId
-    });
-
-    if (!mecaniciens || mecaniciens.length === 0) {
-      return res.status(404).json({ error: `Aucun mécanicien trouvé pour le service ${serviceId}` });
+    if (req.user.isSuperAdmin && garageId) {
+      // SuperAdmin → garage passé dans query params
+      targetGarageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      // Garagiste → son propre garage
+      targetGarageId = req.user.garageId || req.user.garage;
     }
 
-    res.json(mecaniciens);
+    if (!targetGarageId) {
+      return res.status(400).json({
+        success: false,
+        error: "Aucun garageId valide fourni."
+      });
+    }
+
+    // ⚠️ Convertir serviceId en ObjectId
+    const serviceObjectId = new mongoose.Types.ObjectId(serviceId);
+
+    console.log("🔍 Recherche mécaniciens pour service:", serviceId, "dans garage:", targetGarageId);
+
+    // 🎯 Recherche des mécaniciens filtrés par service + garage
+    const mecaniciens = await Mecanicien.find({
+      garageId: targetGarageId,
+      "services.serviceId": serviceObjectId
+    });
+
+    // ⚠ Aucun mécanicien trouvé
+    if (!mecaniciens || mecaniciens.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: `Aucun mécanicien trouvé pour le service ${serviceId} dans ce garage.`
+      });
+    }
+
+    // 🎉 Succès
+    return res.json({
+      success: true,
+      mecaniciens
+    });
+
   } catch (error) {
     console.error("❌ Erreur getMecaniciensByService:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 };

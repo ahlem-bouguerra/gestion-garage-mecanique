@@ -307,10 +307,10 @@ router.get("/getAllMecaniciens", authMiddleware, getAllMecaniciens);
 router.get("/getMecanicienById/:id", authMiddleware, getMecanicienById);
 router.put("/updateMecanicien/:id", authMiddleware,hasAccess('Admin Garage'), updateMecanicien);
 router.delete("/deleteMecanicien/:id", authMiddleware,hasAccess('Admin Garage'), deleteMecanicien);
-router.get('/mecaniciens/by-service/:serviceId', authMiddleware, getMecaniciensByService);
+router.get('/mecaniciens/by-service/:serviceId', authGaragisteOuSuperAdmin, getMecaniciensByService);
 
 // ========== ATELIERS ==========
-router.get('/getAllAteliers', authMiddleware, getAllAteliers);
+router.get('/getAllAteliers', authGaragisteOuSuperAdmin, getAllAteliers);
 router.get('/getAtelierById/:id', authMiddleware, getAtelierById);
 router.post('/createAtelier', authMiddleware,hasAccess('Admin Garage'), createAtelier);
 router.put('/updateAtelier/:id', authMiddleware, hasAccess('Admin Garage'),updateAtelier);
@@ -321,22 +321,22 @@ router.get('/services/available', authMiddleware, hasAccess('Admin Garage'),getA
 router.get('/services/my-garage', authMiddleware,getMyGarageServices);
 router.post('/services/add', authMiddleware, hasAccess('Admin Garage'),addServiceToGarage);
 router.delete('/services/:id/remove', authMiddleware,hasAccess('Admin Garage'), removeServiceFromGarage);
-router.get('/services/available-for-mechanics',authMiddleware,getServicesForMechanics)
+router.get('/services/available-for-mechanics',authGaragisteOuSuperAdmin,getServicesForMechanics)
 
 // ========== ORDRES DE TRAVAIL ==========
-router.post('/createOrdre', authMiddleware,hasAccess('Admin Garage'), createOrdreTravail);
-router.get('/', authMiddleware, getOrdresTravail);
-router.get('/getOrdreTravailById/:id', authMiddleware, getOrdreTravailById);
+router.post('/createOrdre', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), createOrdreTravail);
+router.get('/', authGaragisteOuSuperAdmin, getOrdresTravail);
+router.get('/getOrdreTravailById/:id', authGaragisteOuSuperAdmin, getOrdreTravailById);
 /*router.put('/:id/status', authMiddleware, updateStatusOrdreTravail);*/
-router.put('/ordre-travail/:id/demarrer', authMiddleware,hasAccess('Admin Garage'), demarrerOrdre);
-router.put('/ordre-travail/:id/terminer', authMiddleware,hasAccess('Admin Garage'), terminerOrdre);
-router.delete('/:id', authMiddleware,hasAccess('Admin Garage'), supprimerOrdreTravail);
-router.put('/modifier/:id', authMiddleware,hasAccess('Admin Garage'), updateOrdreTravail);
-router.get('/statistiques', authMiddleware, getStatistiques);
-router.get('/ordre-travail/by-devis/:devisId', authMiddleware, getOrdresParDevisId);
-router.get("/ordres/status/:status", authMiddleware, getOrdresByStatus);
-router.get('/ordres/status/supprime', authMiddleware, getOrdresSupprimes);
-router.get("/ordres/atelier/:atelierId", authMiddleware, getOrdresByAtelier);
+router.put('/ordre-travail/:id/demarrer', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), demarrerOrdre);
+router.put('/ordre-travail/:id/terminer', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), terminerOrdre);
+router.delete('/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), supprimerOrdreTravail);
+router.put('/modifier/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), updateOrdreTravail);
+router.get('/statistiques', authGaragisteOuSuperAdmin, getStatistiques);
+router.get('/ordre-travail/by-devis/:devisId', authGaragisteOuSuperAdmin, getOrdresParDevisId);
+router.get("/ordres/status/:status", authGaragisteOuSuperAdmin, getOrdresByStatus);
+router.get('/ordres/status/supprime', authGaragisteOuSuperAdmin, getOrdresSupprimes);
+router.get("/ordres/atelier/:atelierId", authGaragisteOuSuperAdmin, getOrdresByAtelier);
 
 // ========== FACTURES ==========
 router.post('/create/:devisId', authMiddleware,hasAccess('Admin Garage'), CreateFacture);
