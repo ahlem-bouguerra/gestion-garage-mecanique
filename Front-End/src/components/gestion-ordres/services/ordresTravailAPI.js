@@ -270,7 +270,7 @@ export const ordresTravailAPI = {
         'http://localhost:5000/api/services/available-for-mechanics',
         getAuthHeaders()
       );
-      return response.data;
+      return response.data.services || response.data;
     } catch (error) {
       console.error('❌ Erreur getServices:', error);
       throw error;

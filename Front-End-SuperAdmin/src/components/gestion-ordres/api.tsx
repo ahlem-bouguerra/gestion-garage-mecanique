@@ -374,8 +374,7 @@ export const getMecaniciensByService = async (serviceId: string, garageId?: stri
 
 /**
  * Récupérer un devis par code
- */
-export const getDevisByCode = async (devisId: string, garageId?: string) => {
+ */export const getDevisDetails = async (devisId: string, garageId?: string) => {
   try {
     const token = getAuthToken();
     
@@ -386,6 +385,55 @@ export const getDevisByCode = async (devisId: string, garageId?: string) => {
 
     const params = garageId ? { garageId } : {};
     
+    console.log('📥 Récupération devis:', devisId, 'pour garage:', garageId);
+    
+    // 🔍 ESSAYEZ CES DIFFÉRENTES ROUTES (une à la fois)
+    
+    // Option 1: Route avec /code/
+    // const url = `${API_BASE}/devis/code/${devisId}`;
+    
+    // Option 2: Route directe par ID
+    const url = `${API_BASE}/devis/${devisId}`;
+    
+    // Option 3: Route avec query param
+    // const url = `${API_BASE}/devis?code=${devisId}`;
+    
+    console.log('🔗 URL appelée:', url, 'params:', params);
+    
+    const response = await axios.get(url, {
+      params,
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    console.log('✅ Devis récupéré:', response.data);
+    return response.data;
+
+  } catch (error: any) {
+    console.error('❌ Erreur getDevisDetails:', error.response?.data || error.message);
+    console.error('🔗 URL qui a échoué:', error.config?.url);
+    console.error('📋 Status:', error.response?.status);
+    console.error('📋 Message backend:', error.response?.data?.error || error.response?.data?.message);
+    console.error('💡 Vérifiez que le devis existe dans la BDD avec le bon garageId');
+    throw error;
+  }
+};
+
+/**
+ * Vérifier si un ordre existe pour un devis
+ */
+export const checkOrdreExists = async (devisId: string, garageId?: string) => {
+  try {
+    const token = getAuthToken();
+    
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      return;
+    }
+
+    const params = garageId ? { garageId } : {};
+    
+    console.log('📥 Vérification ordre pour devis:', devisId);
+    
     const response = await axios.get(
       `${API_BASE}/ordre-travail/by-devis/${devisId}`,
       {
@@ -394,7 +442,60 @@ export const getDevisByCode = async (devisId: string, garageId?: string) => {
       }
     );
 
+    console.log('✅ Vérification ordre:', response.data);
     return response.data;
+
+  } catch (error: any) {
+    console.error('❌ Erreur checkOrdreExists:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+/**
+ * ⭐ MÉTHODE COMBINÉE : Récupérer devis + vérifier ordre existant
+ * Cette fonction combine les deux appels pour donner une réponse complète
+ */
+export const getDevisByCode = async (devisId: string, garageId?: string) => {
+  try {
+    console.log('🔍 getDevisByCode appelé avec:', { devisId, garageId });
+    
+    // 1️⃣ D'ABORD vérifier si un ordre existe (car cet endpoint semble fonctionner)
+    const ordreCheck = await checkOrdreExists(devisId, garageId);
+    console.log('✅ Vérification ordre:', ordreCheck);
+    
+    // Si la vérification retourne déjà le devis, on l'utilise
+    if (ordreCheck.devis) {
+      const result = {
+        devis: ordreCheck.devis,
+        exists: ordreCheck.exists || false,
+        ordre: ordreCheck.ordre || null,
+        ordres: ordreCheck.exists && ordreCheck.ordre ? [ordreCheck.ordre] : []
+      };
+      
+      console.log('✅ Résultat (depuis checkOrdreExists):', result);
+      return result;
+    }
+    
+    // 2️⃣ Si pas de devis dans ordreCheck, essayer getDevisDetails
+    try {
+      const devis = await getDevisDetails(devisId, garageId);
+      
+      const result = {
+        devis: devis,
+        exists: ordreCheck.exists || false,
+        ordre: ordreCheck.ordre || null,
+        ordres: ordreCheck.exists && ordreCheck.ordre ? [ordreCheck.ordre] : []
+      };
+      
+      console.log('✅ Résultat combiné:', result);
+      return result;
+      
+    } catch (devisError: any) {
+      // Si getDevisDetails échoue mais qu'on a pas d'ordre existant, 
+      // c'est que le devis n'existe vraiment pas
+      console.error('⚠️ Devis introuvable:', devisError.response?.data);
+      throw new Error(devisError.response?.data?.error || 'Devis non trouvé');
+    }
 
   } catch (error: any) {
     console.error('❌ Erreur getDevisByCode:', error.response?.data || error.message);

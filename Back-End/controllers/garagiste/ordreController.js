@@ -524,12 +524,29 @@ export const supprimerOrdreTravail = async (req, res) => {
 export const getOrdresParDevisId = async (req, res) => {
   try {
     const { devisId } = req.params;
+    const { garageId } = req.query; // ou req.params selon votre route
+    
+    // Déterminer le garageId à utiliser
+    let targetGarageId;
+    
+    if (req.user.role === 'superadmin') {
+      // Super admin peut spécifier un garageId ou voir tous les garages
+      targetGarageId = garageId || null;
+    } else {
+      // Utilisateur normal utilise son propre garageId
+      targetGarageId = req.user.garageId;
+    }
+    
+    // Construire la requête
+    const query = { devisId: devisId };
+    
+    // Ajouter le filtre garageId seulement si nécessaire
+    if (targetGarageId) {
+      query.garageId = targetGarageId;
+    }
     
     // Chercher un ordre existant pour ce devis
-    const existingOrdre = await OrdreTravail.findOne({ 
-      devisId: devisId,
-      garageId: req.user.garageId
-    });
+    const existingOrdre = await OrdreTravail.findOne(query);
     
     if (existingOrdre) {
       return res.json({
