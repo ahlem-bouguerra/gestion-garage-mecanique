@@ -252,30 +252,48 @@ export const updateOrdre = async (ordreId: string, ordreData: any) => {
 /**
  * Supprimer un ordre de travail (soft delete)
  */
-export const deleteOrdre = async (ordreId: string) => {
+export const deleteOrdre = async (ordreId: string, garageId?: string) => {
   try {
     const token = getAuthToken();
     
     if (!token || token === 'null' || token === 'undefined') {
       window.location.href = '/auth/sign-in';
-      return;
+      throw new Error("Token invalide");
     }
 
+    console.log('🗑️ Suppression ordre:', ordreId);
+
     const response = await axios.delete(
-      `${API_BASE}/${ordreId}`,
+      `${API_BASE}/Delete-definitif/${ordreId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-        }
+        },
+        data: garageId ? { garageId } : {} // Pour SuperAdmin
       }
     );
 
+    console.log('✅ Ordre supprimé:', response.data);
     return response.data;
-
+    
   } catch (error: any) {
     console.error('❌ Erreur deleteOrdre:', error.response?.data || error.message);
-    throw error;
+    
+    if (error.response?.status === 403) {
+      throw new Error("Accès refusé : Vous n'avez pas la permission");
+    }
+    
+    if (error.response?.status === 401) {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Session expirée");
+    }
+    
+    if (error.response?.status === 404) {
+      throw new Error("Ordre de travail non trouvé");
+    }
+    
+    throw new Error(error.response?.data?.error || "Erreur lors de la suppression");
   }
 };
 // api.tsx - AJOUTER CES FONCTIONS

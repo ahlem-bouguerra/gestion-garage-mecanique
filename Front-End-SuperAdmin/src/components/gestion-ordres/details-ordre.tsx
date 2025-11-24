@@ -228,7 +228,7 @@ const GeneralTab = ({ ordre, devisDetails, formatDate }) => (
         </h3>
         <div className="space-y-3">
           <div>
-            <span className="text-gray-600 text-sm">Modèle</span>
+            <span className="text-gray-600 text-sm">Inforamation</span>
             <p className="font-medium text-gray-900">
               {devisDetails?.vehicleInfo || ordre?.vehiculedetails?.nom || 'N/A'}
             </p>
@@ -266,7 +266,7 @@ const GeneralTab = ({ ordre, devisDetails, formatDate }) => (
           <div>
             <span className="text-gray-600 text-sm">Temps estimé</span>
             <p className="font-medium text-gray-900">
-              {devisDetails.estimatedTime.value} {devisDetails.estimatedTime.unit}
+             Heures: {ordre.totalHeuresEstimees} 
             </p>
           </div>
         )}
@@ -338,10 +338,7 @@ const TachesTab = ({ taches, formatDate }) => (
                     <Clock className="w-4 h-4" />
                     Estimation: {tache.estimationHeures}h
                   </span>
-                  <span className="flex items-center gap-1">
-                    <CheckCircle className="w-4 h-4" />
-                    Réelles: {tache.heuresReelles || 0}h
-                  </span>
+               
                 </div>
                 {tache.serviceNom && (
                   <p className="text-sm text-blue-600 mt-2">📦 Service: {tache.serviceNom}</p>
@@ -428,23 +425,6 @@ const FinancierTab = ({ devisDetails, formatPrice }) => (
         </div>
       </div>
 
-      {/* Détails supplémentaires */}
-      <div className="mt-8 pt-6 border-t border-green-200">
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="text-center p-4 bg-white rounded-lg">
-            <p className="text-gray-600 mb-1">Services</p>
-            <p className="text-2xl font-bold text-blue-600">
-              {devisDetails?.services?.length || 0}
-            </p>
-          </div>
-          <div className="text-center p-4 bg-white rounded-lg">
-            <p className="text-gray-600 mb-1">Pièces</p>
-            <p className="text-2xl font-bold text-green-600">
-              {devisDetails?.pieces?.length || 0}
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 );

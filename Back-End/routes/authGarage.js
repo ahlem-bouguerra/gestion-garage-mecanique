@@ -16,7 +16,7 @@ import { sendDevisByEmail } from '../utils/sendDevis.js';
 import { createMecanicien, updateMecanicien, deleteMecanicien, getAllMecaniciens, getMecanicienById, getMecaniciensByService } from "../controllers/garagiste/mecanicienController.js";
 import { getAllAteliers, getAtelierById, createAtelier, updateAtelier, deleteAtelier } from '../controllers/garagiste/atelierController.js';
 import {getAvailableServices,getMyGarageServices,addServiceToGarage,removeServiceFromGarage,getServicesForMechanics} from '../controllers/garagiste/serviceController.js';
-import { createOrdreTravail, getOrdresTravail, getOrdreTravailById, /*updateStatusOrdreTravail,*/ demarrerOrdre, terminerOrdre, getStatistiques, supprimerOrdreTravail, getOrdresParDevisId, getOrdresByStatus, getOrdresSupprimes, getOrdresByAtelier, updateOrdreTravail } from '../controllers/garagiste/ordreController.js';
+import { createOrdreTravail, getOrdresTravail, getOrdreTravailById, /*updateStatusOrdreTravail,*/ demarrerOrdre, terminerOrdre, getStatistiques, supprimerOrdreTravail, getOrdresParDevisId, getOrdresByStatus, getOrdresSupprimes, getOrdresByAtelier, updateOrdreTravail,deleteOrdreTravailDefinitif } from '../controllers/garagiste/ordreController.js';
 import { CreateFacture, CreateFactureWithCredit, GetAllFactures, GetFactureById, getFactureByDevis, MarquerFacturePayed, UpdateFacture, DeleteFacture, StaticFacture, getCreditNoteById ,GetPaymentsOverviewData,GetWeeksProfitData,GetDevicesUsedData} from '../controllers/garagiste/facturesController.js';
 import { getCarnetByVehiculeId, creerCarnetManuel } from '../controllers/garagiste/carnetController.js';
 import { getDashboardData ,getChargeMensuelle} from '../controllers/garagiste/ChargeAtelier.js';
@@ -336,6 +336,7 @@ router.get('/statistiques', authGaragisteOuSuperAdmin, getStatistiques);
 router.get('/ordre-travail/by-devis/:devisId', authGaragisteOuSuperAdmin, getOrdresParDevisId);
 router.get("/ordres/status/:status", authGaragisteOuSuperAdmin, getOrdresByStatus);
 router.get('/ordres/status/supprime', authGaragisteOuSuperAdmin, getOrdresSupprimes);
+router.delete('/Delete-definitif/:id',superAdminMiddleware,deleteOrdreTravailDefinitif);
 router.get("/ordres/atelier/:atelierId", authGaragisteOuSuperAdmin, getOrdresByAtelier);
 
 // ========== FACTURES ==========

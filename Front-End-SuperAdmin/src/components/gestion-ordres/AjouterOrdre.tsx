@@ -108,7 +108,7 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
         quantite: service.quantity || 1,
         serviceId: '',
         mecanicienId: '',
-        estimationHeures: 1,
+        estimationHeures: service.estimationHeures,
         notes: ''
       }));
 
@@ -148,10 +148,10 @@ const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
         {
           id: Date.now(),
           description: '',
-          quantite: 1,
+          quantite: '',
           serviceId: '',
           mecanicienId: '',
-          estimationHeures: 1,
+          estimationHeures: '',
           notes: ''
         }
       ]

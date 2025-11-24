@@ -529,7 +529,7 @@ export const getOrdresParDevisId = async (req, res) => {
     // Déterminer le garageId à utiliser
     let targetGarageId;
     
-    if (req.user.role === 'superadmin') {
+    if (req.user.role === 'Super Admin') {
       // Super admin peut spécifier un garageId ou voir tous les garages
       targetGarageId = garageId || null;
     } else {
@@ -673,17 +673,52 @@ export const updateOrdreTravail = async (req, res) => {
       atelierId,
       priorite,
       description,
-      taches
+      taches,
+      garageId
     } = req.body;
 
-    console.log('Modification ordre ID:', id);
-    console.log('Données reçues:', req.body);
+    console.log('🔍 DEBUG UPDATE ORDRE:');
+    console.log('- Ordre ID:', id);
+    console.log('- req.user.role:', req.user?.role);
+    console.log('- req.user.isSuperAdmin:', req.user?.isSuperAdmin);
+    console.log('- garageId dans body:', garageId);
 
-    // Chercher l'ordre existant avec filtrage par garagiste
+    // Déterminer le garageId à utiliser
+    let targetGarageId;
+    
+    // ✅ CORRECTION : Vérifier aussi isSuperAdmin et rendre insensible à la casse
+    if (req.user.isSuperAdmin === true || req.user.role?.toLowerCase() === 'Super Admin') {
+      console.log('✅ SuperAdmin détecté');
+      
+      if (garageId) {
+        targetGarageId = garageId;
+        console.log('✅ GarageId fourni dans body:', targetGarageId);
+      } else {
+        // Si pas de garageId fourni, chercher l'ordre sans filtre garage
+        const ordreTemp = await OrdreTravail.findById(id);
+        if (!ordreTemp) {
+          return res.status(404).json({
+            success: false,
+            error: 'Ordre de travail non trouvé'
+          });
+        }
+        targetGarageId = ordreTemp.garageId;
+        console.log('✅ GarageId récupéré de l\'ordre existant:', targetGarageId);
+      }
+    } else {
+      // Pour les autres rôles, utiliser le garageId de l'utilisateur
+      targetGarageId = req.user.garageId;
+      console.log('✅ Admin Garage - targetGarageId:', targetGarageId);
+    }
+
+    console.log('🔍 Recherche ordre avec _id:', id, 'et garageId:', targetGarageId);
+    
+    // Chercher l'ordre existant avec le garageId approprié
     const ordre = await OrdreTravail.findOne({
       _id: id,
-      garageId: req.user.garageId
+      garageId: targetGarageId
     });
+    
     if (!ordre) {
       return res.status(404).json({
         success: false,
@@ -881,6 +916,62 @@ export const getOrdresSupprimes = async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message || 'Erreur serveur lors de la récupération des ordres supprimés'
+    });
+  }
+};
+
+
+export const deleteOrdreTravailDefinitif = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { garageId } = req.body;
+
+    console.log('🗑️ Suppression ordre ID:', id);
+
+    let targetGarageId;
+    
+    if (req.user.isSuperAdmin === true || req.user.role?.toLowerCase() === 'Super Admin') {
+      if (garageId) {
+        targetGarageId = garageId;
+      } else {
+        const ordreTemp = await OrdreTravail.findById(id);
+        if (!ordreTemp) {
+          return res.status(404).json({
+            success: false,
+            error: 'Ordre de travail non trouvé'
+          });
+        }
+        targetGarageId = ordreTemp.garageId;
+      }
+    } else {
+      targetGarageId = req.user.garageId;
+    }
+
+    // Supprimer directement
+    const ordre = await OrdreTravail.findOneAndDelete({
+      _id: id,
+      garageId: targetGarageId
+    });
+    
+    if (!ordre) {
+      return res.status(404).json({
+        success: false,
+        error: 'Ordre de travail non trouvé'
+      });
+    }
+
+    console.log('✅ Ordre supprimé définitivement:', ordre.numeroOrdre);
+
+    res.json({
+      success: true,
+      message: 'Ordre de travail supprimé définitivement'
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur suppression ordre de travail:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Erreur serveur lors de la suppression'
     });
   }
 };

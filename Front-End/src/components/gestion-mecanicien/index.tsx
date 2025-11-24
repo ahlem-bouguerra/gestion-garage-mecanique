@@ -233,37 +233,58 @@ create: async (data: object): Promise<Mecanicien> => {
 
 
 
-  // Load available services
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-              const token = getAuthToken();
+// Load available services
+useEffect(() => {
+  const fetchServices = async () => {
+    try {
+      const token = getAuthToken();
       // ⭐ VÉRIFICATION CRITIQUE
       if (!token || token === 'null' || token === 'undefined') {
         // Rediriger vers le login
         window.location.href = '/auth/sign-in';
         return;
       }
-        const response = await axios.get('http://localhost:5000/api/services/available-for-mechanics', {
+      
+      const response = await axios.get('http://localhost:5000/api/services/available-for-mechanics', {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      // ⭐ CORRECTION : Gérer la structure de la réponse
+      console.log('📥 Services reçus:', response.data);
+      
+      // Si la réponse est un objet avec une propriété "services"
+      if (response.data && Array.isArray(response.data.services)) {
+        setAvailableServices(response.data.services);
+      } 
+      // Si la réponse est directement un tableau
+      else if (Array.isArray(response.data)) {
         setAvailableServices(response.data);
-      }  catch (error: any) {
-       if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
-            throw error;
-        }
-        
-        if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
-        }
-        console.error('Erreur lors du chargement des services:', error);
+      } 
+      // Sinon, initialiser avec un tableau vide
+      else {
+        console.warn('⚠️ Format de réponse inattendu:', response.data);
+        setAvailableServices([]);
       }
-    };
-    fetchServices();
-  }, []);
+      
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        alert("❌ Accès refusé : Vous n'avez pas la permission");
+        throw error;
+      }
+      
+      if (error.response?.status === 401) {
+        alert("❌ Session expirée : Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
+      
+      console.error('Erreur lors du chargement des services:', error);
+      // ⭐ En cas d'erreur, initialiser avec un tableau vide
+      setAvailableServices([]);
+    }
+  };
+  fetchServices();
+}, []);
 
   // Service management functions
   const addService = () => {

@@ -1,10 +1,11 @@
-// SuperAdminDashboard.tsx - VERSION AMÉLIORÉE AVEC DÉTAILS
+// SuperAdminDashboard.tsx - VERSION COMPLÈTE AVEC MODIFICATION
 
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Filter, AlertCircle, TrendingUp, Plus, Eye } from 'lucide-react';
-import { getAllGarages, getOrdresByGarage, getStatistiques, getDevisDetails } from './api';
+import { Filter, AlertCircle, Plus, Eye, Edit,Trash2 } from 'lucide-react';
+import { getAllGarages, getOrdresByGarage, getStatistiques, getDevisDetails,deleteOrdre } from './api';
 import CreateOrderModal from './AjouterOrdre';
+import EditOrderModal from './EditOrderModal';
 import OrderDetailsModal from './details-ordre';
 
 interface Garage {
@@ -13,7 +14,6 @@ interface Garage {
   matriculeFiscal: string;
   phone?: string;
   email?: string;
-  garagisteAdmins?: any[];
 }
 
 interface OrdreTravail {
@@ -23,38 +23,34 @@ interface OrdreTravail {
   status: string;
   priorite: string;
   dateCommence: string;
-  clientInfo?: {
-    nom: string;
-  };
-  vehiculedetails?: {
-    nom: string;
-  };
-}
-
-interface Stats {
-  statistiques?: {
-    total: number;
-    enAttente: number;
-    enCours: number;
-    termines: number;
-    Supprimés: number;
-  };
+  clientInfo?: { nom: string };
+  vehiculedetails?: { nom: string };
+  taches?: any[];
 }
 
 const SuperAdminDashboard: React.FC = () => {
   const [garages, setGarages] = useState<Garage[]>([]);
   const [selectedGarage, setSelectedGarage] = useState<Garage | null>(null);
   const [ordres, setOrdres] = useState<OrdreTravail[]>([]);
+  
+  // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  
+  // Données sélectionnées
+  const [selectedOrdre, setSelectedOrdre] = useState<OrdreTravail | null>(null);
   const [selectedDevisDetails, setSelectedDevisDetails] = useState<any>(null);
+  const [success,setSuccess] = useState("");
+  
   const [filters, setFilters] = useState({
     status: '',
     priorite: '',
     page: 1,
-    limit: 5,
+    limit: 10,
   });
-  const [stats, setStats] = useState<Stats | null>(null);
+  
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
@@ -66,64 +62,17 @@ const SuperAdminDashboard: React.FC = () => {
     hasPrev: false,
   });
 
-
-    useEffect(() => {
+  // Gérer la visibilité du header
+  useEffect(() => {
     const header = document.querySelector('header');
     if (!header) return;
 
-    if (showDetailsModal || selectedDevisDetails) {
+    if (showDetailsModal || showEditModal || showCreateModal) {
       header.classList.add("hidden");
     } else {
       header.classList.remove("hidden");
     }
-  }, [showDetailsModal ,selectedDevisDetails]);
-
-  const handleCreateOrder = () => {
-    if (!selectedGarage) {
-      setError('Veuillez sélectionner un garage');
-      return;
-    }
-    setShowCreateModal(true);
-  };
-
-  const handleOrderCreated = () => {
-    setShowCreateModal(false);
-    loadOrdres();
-    loadStats();
-  };
-
-  // Fonction pour voir les détails d'un ordre
-  const handleViewDetails = async (ordre: OrdreTravail) => {
-    try {
-      setLoading(true);
-      setError(null);
-      console.log('🔍 Consultation détails ordre:', ordre.numeroOrdre);
-      
-      // Si vous avez un devisId, récupérer les détails
-      if (ordre.devisId) {
-        const devisId = typeof ordre.devisId === 'string' ? ordre.devisId : ordre.devisId._id;
-        const devisDetails = await getDevisDetails(devisId, selectedGarage?._id);
-        console.log('✅ Détails devis récupérés:', devisDetails);
-        
-        // Afficher le modal avec les détails
-        setSelectedDevisDetails(devisDetails);
-        setShowDetailsModal(true);
-      } else {
-        console.warn('⚠️ Pas de devisId pour cet ordre');
-        setError('Cet ordre n\'a pas de devis associé');
-      }
-    } catch (error: any) {
-      console.error('❌ Erreur consultation détails:', error);
-      setError('Erreur lors de la consultation des détails: ' + (error.response?.data?.message || error.message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCloseDetails = () => {
-    setShowDetailsModal(false);
-    setSelectedDevisDetails(null);
-  };
+  }, [showDetailsModal, showEditModal, showCreateModal]);
 
   // Charger les garages au montage
   useEffect(() => {
@@ -217,6 +166,107 @@ const SuperAdminDashboard: React.FC = () => {
     setFilters(prev => ({ ...prev, page: 1 }));
     setOrdres([]);
     setStats(null);
+  };
+
+  const handleCreateOrder = () => {
+    if (!selectedGarage) {
+      setError('Veuillez sélectionner un garage');
+      return;
+    }
+    setShowCreateModal(true);
+  };
+
+  const handleEditOrder = (ordre: OrdreTravail) => {
+    if (!selectedGarage) {
+      setError('Veuillez sélectionner un garage');
+      return;
+    }
+    console.log('✏️ Modification ordre:', ordre.numeroOrdre);
+    setSelectedOrdre(ordre);
+    setShowEditModal(true);
+  };
+
+  const handleViewDetails = async (ordre: OrdreTravail) => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('🔍 Consultation détails ordre:', ordre.numeroOrdre);
+      
+      if (ordre.devisId) {
+        const devisId = typeof ordre.devisId === 'string' ? ordre.devisId : ordre.devisId._id;
+        const devisDetails = await getDevisDetails(devisId, selectedGarage?._id);
+        console.log('✅ Détails devis récupérés:', devisDetails);
+        
+        setSelectedOrdre(ordre);
+        setSelectedDevisDetails(devisDetails);
+        setShowDetailsModal(true);
+      } else {
+        console.warn('⚠️ Pas de devisId pour cet ordre');
+        setError('Cet ordre n\'a pas de devis associé');
+      }
+    } catch (error: any) {
+      console.error('❌ Erreur consultation détails:', error);
+      setError('Erreur lors de la consultation des détails');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteOrdre = async (ordre: any) => {
+  // Demander confirmation avec détails
+  const confirmed = window.confirm(
+    `⚠️ ATTENTION : Suppression définitive !\n\n` +
+    `Ordre: ${ordre.numeroOrdre}\n` +
+    `Client: ${ordre.clientInfo?.nom || 'N/A'}\n` +
+    `Véhicule: ${ordre.vehiculedetails?.nom || 'N/A'}\n\n` +
+    `Cette action est IRRÉVERSIBLE.\n` +
+    `Êtes-vous absolument sûr ?`
+  );
+  
+  if (!confirmed) return;
+
+  try {
+    setLoading(true);
+    
+    // Appeler l'API avec le garageId pour SuperAdmin
+    await deleteOrdre(ordre._id, selectedGarage);
+    
+    // Message de succès
+    setSuccess('✅ Ordre supprimé définitivement');
+    
+    // Recharger la liste des ordres
+    await loadOrdres();
+    
+  } catch (error: any) {
+    console.error('❌ Erreur suppression ordre:', error);
+    setError(error.message || 'Erreur lors de la suppression');
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const handleOrderCreated = () => {
+    setShowCreateModal(false);
+    loadOrdres();
+    loadStats();
+  };
+
+  const handleOrderUpdated = () => {
+    setShowEditModal(false);
+    setSelectedOrdre(null);
+    loadOrdres();
+    loadStats();
+  };
+
+  const handleCloseDetails = () => {
+    setShowDetailsModal(false);
+    setSelectedOrdre(null);
+    setSelectedDevisDetails(null);
+  };
+
+  const handleEditFromDetails = () => {
+    setShowDetailsModal(false);
+    setShowEditModal(true);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -419,16 +469,40 @@ const SuperAdminDashboard: React.FC = () => {
                             </p>
                           </div>
                           
-                          {/* Bouton Voir Détails */}
-                          <button
-                            onClick={() => handleViewDetails(ordre)}
-                            disabled={loading}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                            title="Voir les détails de l'ordre"
-                          >
-                            <Eye className="w-4 h-4" />
-                            <span className="text-sm font-medium">Détails</span>
-                          </button>
+                          {/* Boutons Actions */}
+                          <div className="flex items-center gap-2 shrink-0">
+                            {/* Bouton Modifier - Visible si pas terminé ou supprimé */}
+                            {ordre.status !== 'termine' && ordre.status !== 'supprime' && (
+                              <button
+                                onClick={() => handleEditOrder(ordre)}
+                                disabled={loading}
+                                className="flex items-center gap-2 px-3 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Modifier l'ordre"
+                              >
+                                <Edit className="w-4 h-4" />
+                                <span className="text-sm font-medium">Modifier</span>
+                              </button>
+                            )}
+
+                            {/* Bouton Voir Détails */}
+                            <button
+                              onClick={() => handleViewDetails(ordre)}
+                              disabled={loading}
+                              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Voir les détails de l'ordre"
+                            >
+                              <Eye className="w-4 h-4" />
+                              <span className="text-sm font-medium">Détails</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteOrdre(ordre)}
+                              disabled={loading}
+                              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span>Supprimer</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))
@@ -462,294 +536,42 @@ const SuperAdminDashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Modals */}
         {selectedGarage && (
-          <CreateOrderModal
-            isOpen={showCreateModal}
-            onClose={() => setShowCreateModal(false)}
-            garageId={selectedGarage._id}
-            garageName={selectedGarage.nom}
-            onSuccess={handleOrderCreated}
-          />
-        )}
-
-        {/* Modal Détails */}
-        {showDetailsModal && selectedDevisDetails && (
-  <OrderDetailsModal
-    ordre={ordres.find(o => o.devisId === selectedDevisDetails.id)}
-    devisDetails={selectedDevisDetails}
-    onClose={handleCloseDetails}
-    onEdit={() => {
-      // Votre logique de modification
-      console.log('Modifier ordre');
-    }}
-    onDemarrer={async () => {
-      // Votre logique de démarrage
-      await ordresTravailAPI.demarrerOrdre(ordre._id);
-      loadOrdres();
-    }}
-    onTerminer={async () => {
-      // Votre logique de fin
-      await ordresTravailAPI.terminerOrdre(ordre._id);
-      loadOrdres();
-    }}
-    loading={loading}
-  />
-)}
-      </div>
-    </div>
-  );
-};
-
-// Composant pour afficher les détails dans le modal
-const OrderDetailsContent: React.FC<{ devisDetails: any; onClose: () => void }> = ({ 
-  devisDetails, 
-  onClose 
-}) => {
-  const [activeTab, setActiveTab] = useState<'info' | 'services' | 'pieces'>('info');
-
-  const getStatusBadge = (status: string) => {
-    const badges: Record<string, { bg: string; text: string }> = {
-      en_attente: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
-      en_cours: { bg: 'bg-blue-100', text: 'text-blue-800' },
-      termine: { bg: 'bg-green-100', text: 'text-green-800' },
-      valide: { bg: 'bg-green-100', text: 'text-green-800' },
-    };
-    return badges[status] || { bg: 'bg-gray-100', text: 'text-gray-800' };
-  };
-
-  const formatStatus = (status: string) => {
-    return status.replace('_', ' ').charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-TN', {
-      style: 'currency',
-      currency: 'TND'
-    }).format(price);
-  };
-
-  const StatusBadge = getStatusBadge(devisDetails.status);
-
-  return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6 pb-4 border-b">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Détails de l'Ordre
-          </h2>
-          <p className="text-lg text-gray-600">
-            Devis: <span className="font-semibold text-blue-600">{devisDetails.id}</span>
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${StatusBadge.bg}`}>
-            <span className={`font-semibold ${StatusBadge.text}`}>
-              {formatStatus(devisDetails.status)}
-            </span>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
-          >
-            ✕
-          </button>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="mb-6">
-        <div className="flex gap-2 border-b">
-          <button
-            onClick={() => setActiveTab('info')}
-            className={`px-6 py-3 font-medium transition ${
-              activeTab === 'info'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Informations Générales
-          </button>
-          <button
-            onClick={() => setActiveTab('services')}
-            className={`px-6 py-3 font-medium transition ${
-              activeTab === 'services'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Services ({devisDetails.services?.length || 0})
-          </button>
-          <button
-            onClick={() => setActiveTab('pieces')}
-            className={`px-6 py-3 font-medium transition ${
-              activeTab === 'pieces'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Pièces ({devisDetails.pieces?.length || 0})
-          </button>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="space-y-6">
-        {/* Tab: Informations */}
-        {activeTab === 'info' && (
           <>
-            {/* Client */}
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">Client</h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-600">Nom:</span>
-                  <span className="ml-2 font-medium">{devisDetails.clientName}</span>
-                </div>
-                {devisDetails.clientPhone && (
-                  <div>
-                    <span className="text-gray-600">Tél:</span>
-                    <span className="ml-2 font-medium">{devisDetails.clientPhone}</span>
-                  </div>
-                )}
-                {devisDetails.clientEmail && (
-                  <div>
-                    <span className="text-gray-600">Email:</span>
-                    <span className="ml-2 font-medium">{devisDetails.clientEmail}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+            <CreateOrderModal
+              isOpen={showCreateModal}
+              onClose={() => setShowCreateModal(false)}
+              garageId={selectedGarage._id}
+              garageName={selectedGarage.nom}
+              onSuccess={handleOrderCreated}
+            />
 
-            {/* Véhicule */}
-            <div className="bg-green-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">Véhicule</h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-600">Modèle:</span>
-                  <span className="ml-2 font-medium">{devisDetails.vehicleInfo}</span>
-                </div>
-                {devisDetails.vehiclePlate && (
-                  <div>
-                    <span className="text-gray-600">Immatriculation:</span>
-                    <span className="ml-2 font-medium">{devisDetails.vehiclePlate}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+            {selectedOrdre && (
+              <EditOrderModal
+                isOpen={showEditModal}
+                onClose={() => {
+                  setShowEditModal(false);
+                  setSelectedOrdre(null);
+                }}
+                ordre={selectedOrdre}
+                garageId={selectedGarage._id}
+                garageName={selectedGarage.nom}
+                onSuccess={handleOrderUpdated}
+              />
+            )}
 
-            {/* Dates */}
-            <div className="bg-purple-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">Planification</h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-600">Créé le:</span>
-                  <span className="ml-2 font-medium">{formatDate(devisDetails.createdAt)}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Temps estimé:</span>
-                  <span className="ml-2 font-medium">
-                    {devisDetails.estimatedTime?.value} {devisDetails.estimatedTime?.unit}
-                  </span>
-                </div>
-              </div>
-            </div>
+            {showDetailsModal && selectedOrdre && selectedDevisDetails && (
+              <OrderDetailsModal
+                ordre={selectedOrdre}
+                devisDetails={selectedDevisDetails}
+                onClose={handleCloseDetails}
+                onEdit={handleEditFromDetails}
+                loading={loading}
+              />
+            )}
           </>
         )}
-
-        {/* Tab: Services */}
-        {activeTab === 'services' && (
-          <div className="space-y-3">
-            {devisDetails.services && devisDetails.services.length > 0 ? (
-              devisDetails.services.map((service: any) => (
-                <div key={service._id} className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900">{service.name}</h4>
-                      {service.description && (
-                        <p className="text-sm text-gray-600 mt-1">{service.description}</p>
-                      )}
-                      <div className="flex gap-4 mt-2 text-sm text-gray-500">
-                        <span>Qté: {service.quantity}</span>
-                        <span>Prix unitaire: {formatPrice(service.price)}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-blue-600">
-                        {formatPrice(service.price * service.quantity)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-gray-500 py-8">Aucun service</p>
-            )}
-          </div>
-        )}
-
-        {/* Tab: Pièces */}
-        {activeTab === 'pieces' && (
-          <div className="space-y-3">
-            {devisDetails.pieces && devisDetails.pieces.length > 0 ? (
-              devisDetails.pieces.map((piece: any) => (
-                <div key={piece._id} className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900">{piece.name}</h4>
-                      {piece.reference && (
-                        <p className="text-sm text-gray-600 mt-1">Réf: {piece.reference}</p>
-                      )}
-                      <div className="flex gap-4 mt-2 text-sm text-gray-500">
-                        <span>Qté: {piece.quantity}</span>
-                        <span>Prix unitaire: {formatPrice(piece.price)}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-green-600">
-                        {formatPrice(piece.price * piece.quantity)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-gray-500 py-8">Aucune pièce</p>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Résumé financier */}
-      <div className="mt-6 pt-6 border-t">
-        <h3 className="font-semibold text-gray-900 mb-4">Résumé Financier</h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Total HT</span>
-            <span className="font-semibold">{formatPrice(devisDetails.totalHT)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">TVA ({devisDetails.tva}%)</span>
-            <span className="font-semibold">
-              {formatPrice(devisDetails.totalHT * (devisDetails.tva / 100))}
-            </span>
-          </div>
-          <div className="flex justify-between pt-2 border-t">
-            <span className="text-lg font-bold">Total TTC</span>
-            <span className="text-2xl font-bold text-green-600">
-              {formatPrice(devisDetails.totalTTC)}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );
