@@ -735,12 +735,12 @@ const GestionFactures: React.FC = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <h1 className="text-3xl font-bold text-blue-600">
-                      {currentUser?.username || "Nom du garage"}
+                      {factureDetails.garageId?.nom || "Nom du garage"}
                     </h1>
                     <div className="mt-2 text-gray-600">
-                      <p>{currentUser?.governorateName}-{currentUser?.cityName}-{currentUser?.streetAddress || "Adresse non renseignée"}</p>
-                      <p>Tél: {currentUser?.phone || "Non renseigné"}</p>
-                      <p>Email: {currentUser?.email || "Non renseigné"}</p>
+                      <p>{factureDetails.garageId?.governorateName}-{factureDetails.garageId?.cityName}-{factureDetails.garageId?.streetAddress || "Adresse non renseignée"}</p>
+                      <p>Tél: {factureDetails.garageId?.telephoneProfessionnel || "Non renseigné"}</p>
+                      <p>Email: {factureDetails.garageId?.emailProfessionnel || "Non renseigné"}</p>
                     </div>
                   </div>
 

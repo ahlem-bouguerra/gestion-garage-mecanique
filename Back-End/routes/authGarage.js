@@ -340,20 +340,20 @@ router.delete('/Delete-definitif/:id',superAdminMiddleware,deleteOrdreTravailDef
 router.get("/ordres/atelier/:atelierId", authGaragisteOuSuperAdmin, getOrdresByAtelier);
 
 // ========== FACTURES ==========
-router.post('/create/:devisId', authMiddleware,hasAccess('Admin Garage'), CreateFacture);
-router.post('/create-with-credit/:devisId', authMiddleware,hasAccess('Admin Garage'), CreateFactureWithCredit);
-router.get('/getFactures', authMiddleware, GetAllFactures);
-router.get('/getFacture/:id', authMiddleware, GetFactureById);
-router.get('/factureByDevis/:devisId',authMiddleware, getFactureByDevis);
-router.put('/:id/payment', authMiddleware, hasAccess('Admin Garage'),MarquerFacturePayed);
-router.put('/:id', authMiddleware,hasAccess('Admin Garage'), UpdateFacture);
-router.delete('/:id', authMiddleware,hasAccess('Admin Garage'), DeleteFacture);
-router.get('/stats/summary', authMiddleware, StaticFacture);
+router.post('/create/:devisId', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), CreateFacture);
+router.post('/create-with-credit/:devisId', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), CreateFactureWithCredit);
+router.get('/getFactures', authGaragisteOuSuperAdmin, GetAllFactures);
+router.get('/getFacture/:id', authGaragisteOuSuperAdmin, GetFactureById);
+router.get('/factureByDevis/:devisId',authGaragisteOuSuperAdmin, getFactureByDevis);
+router.put('/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), UpdateFacture);
+router.put('/:id/payment', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),MarquerFacturePayed);
+router.delete('/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), DeleteFacture);
+router.get('/stats/summary', authGaragisteOuSuperAdmin, StaticFacture);
 
-router.get('/credit-note/:creditNoteId', authMiddleware,hasAccess('Admin Garage'), getCreditNoteById);
-router.get('/factures/charts/payments-overview', authMiddleware,hasAccess('Admin Garage'), GetPaymentsOverviewData);
-router.get('/factures/charts/weeks-profit', authMiddleware, hasAccess('Admin Garage'),GetWeeksProfitData);
-router.get('/factures/charts/devices-used', authMiddleware,hasAccess('Admin Garage'), GetDevicesUsedData);
+router.get('/credit-note/:creditNoteId', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), getCreditNoteById);
+router.get('/factures/charts/payments-overview', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), GetPaymentsOverviewData);
+router.get('/factures/charts/weeks-profit', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),GetWeeksProfitData);
+router.get('/factures/charts/devices-used', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), GetDevicesUsedData);
 
 
 // ========== CARNET ENTRETIEN ==========

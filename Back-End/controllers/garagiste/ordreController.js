@@ -300,55 +300,7 @@ export const getOrdreTravailById = async (req, res) => {
   }
 };
 
-/*export const updateStatusOrdreTravail = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
 
-    const statusValides = ['en_attente', 'en_cours', 'termine', 'suspendu'];
-    if (!statusValides.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Statut invalide'
-      });
-    }
-
-    const ordre = await OrdreTravail.findOneAndUpdate(
-      { 
-        _id: id,
-        garageId: req.user.garageId
-      },
-      { 
-        status, 
-        updatedBy: req.user?.id,
-        ...(status === 'termine' && { dateFinReelle: new Date() })
-      },
-      { new: true }
-    ).populate('atelierId', 'name');
-
-    if (!ordre) {
-      return res.status(404).json({
-        success: false,
-        error: 'Ordre de travail non trouvé'
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Statut mis à jour avec succès',
-      ordre
-    });
-
-  } catch (error) {
-    console.error('Erreur mise à jour statut:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Erreur serveur lors de la mise à jour du statut'
-    });
-  }
-};*/
-
-// Ajouter au controller backend
 export const demarrerOrdre = async (req, res) => {
   try {
     const { id } = req.params;

@@ -1,4 +1,4 @@
-import { Car, Calendar, FileText, User, Settings, CreditCard, Clock, MapPin,LinkIcon } from 'lucide-react';
+import { Car, Calendar, FileText, User, Settings2,Wrench, CreditCard, Clock, MapPin,LinkIcon } from 'lucide-react';
 
 export const NAV_DATA = [
   {
@@ -14,7 +14,7 @@ export const NAV_DATA = [
       {
         title: "gestion-services",
         url: "/gestion-services",
-        icon: User,
+        icon: Wrench,
         items: [],
       },
       {
@@ -26,7 +26,7 @@ export const NAV_DATA = [
       {
         title: "Gestion des Garages et des Garagistes Statut",
         url: "/table-garage-garagite-statut",
-        icon: User,
+        icon: Settings2,
         items: [ ],
       },
       {
