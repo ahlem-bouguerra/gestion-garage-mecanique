@@ -1,0 +1,39 @@
+[
+
+  {
+    "_id": "691b039cf15086b702a46920",
+    "nom": "ali meca",
+    "dateNaissance": "2000-02-01T00:00:00.000Z",
+    "telephone": "21939809",
+    "email": "mecanicien@gmail.com",
+    "matricule": "EMP002",
+    "poste": "Mécanicien",
+    "dateEmbauche": "2025-11-17T00:00:00.000Z",
+    "typeContrat": "CDI",
+    "statut": "Actif",
+    "salaire": 200,
+    "services": [
+      {
+        "serviceId": "6921ea5de9338b8d1ea0ba1a",
+        "name": "climatisation",
+        "_id": "6925a0fe4a4e57acd84015e8"
+      },
+      {
+        "serviceId": "6911db6a227f68139eab73bf",
+        "name": "Entretien et révision",
+        "_id": "6921e7387a3c592047ddabc1"
+      },
+      {
+        "serviceId": "691cd9fab41d0eb4e4469726",
+        "name": "Électricité et électronique",
+        "_id": "6921ec8f805e0617286bb9db"
+      }
+    ],
+    "experience": "pas d'experience",
+    "permisConduire": "B",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-17T11:14:36.025Z",
+    "updatedAt": "2025-11-24T09:12:25.586Z",
+    "__v": 0
+  }
+]

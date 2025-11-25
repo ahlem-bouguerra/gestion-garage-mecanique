@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "691af6c0143c7678f8f10730",
+    "nom": "ahlem bouguerra",
+    "type": "particulier",
+    "adresse": "soussez",
+    "telephone": "21939800",
+    "email": "ahlembouguerra12@gmail.com",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0,
+    "adresseSociete": "",
+    "emailSociete": "",
+    "nomSociete": "",
+    "telephoneSociete": ""
+  },
+  {
+    "_id": "691af6f2143c7678f8f10755",
+    "nom": "test",
+    "type": "professionnel",
+    "adresse": "mounastir",
+    "telephone": "21939801",
+    "email": "test@gamil.com",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "nomSociete": "ISET",
+    "telephoneSociete": "21939800",
+    "emailSociete": "demco@gmail.com",
+    "adresseSociete": "sousse",
+    "__v": 0
+  },
+  {
+    "_id": "691cd7bb3d6e4797132ff5f3",
+    "nom": "teesdt2",
+    "type": "particulier",
+    "adresse": "testtt2",
+    "telephone": "21111111",
+    "email": "tesr2@gamil.com",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
+  },
+  {
+    "_id": "691f78f8163a17aa79fb6995",
+    "nom": "helmi",
+    "type": "particulier",
+    "adresse": "sousse",
+    "telephone": "20000000",
+    "email": "ahlembouguerra25@gmail.com",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
+  }
+]

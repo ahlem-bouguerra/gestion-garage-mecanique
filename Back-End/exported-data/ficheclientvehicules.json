@@ -1,0 +1,189 @@
+[
+  {
+    "_id": "68de76fee0d6b66b8eb486c8",
+    "ficheClientId": "68cc2210b9fdea44215cb759",
+    "vehiculeId": "68de76fee0d6b66b8eb486c5",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
+    "dateAssociation": "2025-10-02T12:58:38.375Z",
+    "createdAt": "2025-10-02T12:58:38.376Z",
+    "updatedAt": "2025-10-02T12:58:38.376Z",
+    "__v": 0
+  },
+  {
+    "_id": "68fb8360bbb9ec0d536de990",
+    "ficheClientId": "68fb8360bbb9ec0d536de989",
+    "vehiculeId": "68de6263ed300bc79d2310e4",
+    "notes": "Ajouté via réservation 68fb8355bbb9ec0d536de970",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
+    "dateAssociation": "2025-10-24T13:47:12.780Z",
+    "createdAt": "2025-10-24T13:47:12.781Z",
+    "updatedAt": "2025-10-24T13:47:12.781Z",
+    "__v": 0
+  },
+  {
+    "_id": "68fe2b5b1cf6c4cdd5b14fb6",
+    "ficheClientId": "68fb8360bbb9ec0d536de989",
+    "vehiculeId": "68de5f140cdf932e549d7173",
+    "notes": "Ajouté via réservation 68fe2b511cf6c4cdd5b14f9b",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
+    "dateAssociation": "2025-10-26T14:08:27.890Z",
+    "createdAt": "2025-10-26T14:08:27.890Z",
+    "updatedAt": "2025-10-26T14:08:27.890Z",
+    "__v": 0
+  },
+  {
+    "_id": "68ff46f20f282da499e7a4be",
+    "ficheClientId": "68d3b1fff361d30191e1a0af",
+    "vehiculeId": "68ff46f20f282da499e7a4bb",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
+    "dateAssociation": "2025-10-27T10:18:26.345Z",
+    "createdAt": "2025-10-27T10:18:26.345Z",
+    "updatedAt": "2025-10-27T10:18:26.345Z",
+    "__v": 0
+  },
+  {
+    "_id": "69007fed671272b7adb957af",
+    "ficheClientId": "68ee73b66c88c6be130d9bea",
+    "vehiculeId": "69007fed671272b7adb957ac",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
+    "dateAssociation": "2025-10-28T08:33:49.429Z",
+    "createdAt": "2025-10-28T08:33:49.430Z",
+    "updatedAt": "2025-10-28T08:33:49.430Z",
+    "__v": 0
+  },
+  {
+    "_id": "6900ad694b98ce0dcd0a3617",
+    "ficheClientId": "6900ad694b98ce0dcd0a3612",
+    "vehiculeId": "6900ac1b4b98ce0dcd0a3570",
+    "notes": "Ajouté via réservation 6900ac304b98ce0dcd0a358f",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
+    "dateAssociation": "2025-10-28T11:47:53.373Z",
+    "createdAt": "2025-10-28T11:47:53.373Z",
+    "updatedAt": "2025-10-28T11:47:53.373Z",
+    "__v": 0
+  },
+  {
+    "_id": "6901de3475deb6fa0aae40bf",
+    "ficheClientId": "6901de3475deb6fa0aae40bc",
+    "vehiculeId": "68de6263ed300bc79d2310e4",
+    "notes": "Ajouté via réservation 6901dd6275deb6fa0aae3fe1",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
+    "dateAssociation": "2025-10-29T09:28:20.302Z",
+    "createdAt": "2025-10-29T09:28:20.302Z",
+    "updatedAt": "2025-10-29T09:28:20.302Z",
+    "__v": 0
+  },
+  {
+    "_id": "6901e0f784b16346b6d9e698",
+    "ficheClientId": "6901e0f784b16346b6d9e695",
+    "vehiculeId": "68de5f140cdf932e549d7173",
+    "notes": "Ajouté via réservation 6901e09384b16346b6d9e678",
+    "garageId": "68c880c20cb349894f35be59",
+    "dateAssociation": "2025-10-29T09:40:07.776Z",
+    "createdAt": "2025-10-29T09:40:07.776Z",
+    "updatedAt": "2025-10-29T09:40:07.776Z",
+    "__v": 0
+  },
+  {
+    "_id": "6901e51c84b16346b6d9e930",
+    "ficheClientId": "6901e0f784b16346b6d9e695",
+    "vehiculeId": "68de6263ed300bc79d2310e4",
+    "notes": "Ajouté via réservation 6901e50f84b16346b6d9e912",
+    "garageId": "68c880c20cb349894f35be59",
+    "dateAssociation": "2025-10-29T09:57:48.732Z",
+    "createdAt": "2025-10-29T09:57:48.733Z",
+    "updatedAt": "2025-10-29T09:57:48.733Z",
+    "__v": 0
+  },
+  {
+    "_id": "690494e7d16fb86d8607db08",
+    "ficheClientId": "690494bdd16fb86d8607dacb",
+    "vehiculeId": "690494e7d16fb86d8607db05",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
+    "dateAssociation": "2025-10-31T10:52:23.569Z",
+    "createdAt": "2025-10-31T10:52:23.569Z",
+    "updatedAt": "2025-10-31T10:52:23.569Z",
+    "__v": 0
+  },
+  {
+    "_id": "6904cd77a12633edfbe5b201",
+    "ficheClientId": "68cc2210b9fdea44215cb759",
+    "vehiculeId": "68d3b225f361d30191e1a0cb",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
+    "dateAssociation": "2025-10-31T14:53:43.423Z",
+    "createdAt": "2025-10-31T14:53:43.427Z",
+    "updatedAt": "2025-10-31T14:53:43.427Z",
+    "__v": 0
+  },
+  {
+    "_id": "6911dc48227f68139eab7431",
+    "ficheClientId": "6911dc48227f68139eab742e",
+    "vehiculeId": "6911dc23227f68139eab73f4",
+    "notes": "Ajouté via réservation 6911dc3b227f68139eab7411",
+    "garageId": "6911cc17ccd145adc6354db7",
+    "dateAssociation": "2025-11-10T12:36:24.449Z",
+    "createdAt": "2025-11-10T12:36:24.449Z",
+    "updatedAt": "2025-11-10T12:36:24.449Z",
+    "__v": 0
+  },
+  {
+    "_id": "691ae987b3a8dd8c3875e869",
+    "ficheClientId": "691ae952b3a8dd8c3875e817",
+    "vehiculeId": "691ae987b3a8dd8c3875e866",
+    "garageId": "69147724cb1b9aa1eaa81e3d",
+    "dateAssociation": "2025-11-17T09:23:19.913Z",
+    "createdAt": "2025-11-17T09:23:19.913Z",
+    "updatedAt": "2025-11-17T09:23:19.913Z",
+    "__v": 0
+  },
+  {
+    "_id": "691af813397350c205d81a73",
+    "ficheClientId": "691af6f2143c7678f8f10755",
+    "vehiculeId": "691af813397350c205d81a70",
+    "garageId": "69147724cb1b9aa1eaa81e3d",
+    "dateAssociation": "2025-11-17T10:25:23.340Z",
+    "createdAt": "2025-11-17T10:25:23.340Z",
+    "updatedAt": "2025-11-17T10:25:23.340Z",
+    "__v": 0
+  },
+  {
+    "_id": "691af8fca7dcfc06162ccd19",
+    "ficheClientId": "691af6f2143c7678f8f10755",
+    "vehiculeId": "691af8fca7dcfc06162ccd16",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "dateAssociation": "2025-11-17T10:29:16.150Z",
+    "createdAt": "2025-11-17T10:29:16.150Z",
+    "updatedAt": "2025-11-17T10:29:16.150Z",
+    "__v": 0
+  },
+  {
+    "_id": "691b3a6269fbb0ac63fcc497",
+    "ficheClientId": "691af6c0143c7678f8f10730",
+    "vehiculeId": "691b3a6269fbb0ac63fcc494",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "dateAssociation": "2025-11-17T15:08:18.273Z",
+    "createdAt": "2025-11-17T15:08:18.273Z",
+    "updatedAt": "2025-11-17T15:08:18.273Z",
+    "__v": 0
+  },
+  {
+    "_id": "691d9545807a8aa37603d04b",
+    "ficheClientId": "691af6c0143c7678f8f10730",
+    "vehiculeId": "691d9545807a8aa37603d048",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "dateAssociation": "2025-11-19T10:00:37.035Z",
+    "createdAt": "2025-11-19T10:00:37.035Z",
+    "updatedAt": "2025-11-19T10:00:37.035Z",
+    "__v": 0
+  },
+  {
+    "_id": "691f7928163a17aa79fb6a0f",
+    "ficheClientId": "691f78f8163a17aa79fb6995",
+    "vehiculeId": "691f7928163a17aa79fb6a0c",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "dateAssociation": "2025-11-20T20:25:12.334Z",
+    "createdAt": "2025-11-20T20:25:12.335Z",
+    "updatedAt": "2025-11-20T20:25:12.335Z",
+    "__v": 0
+  }
+]

@@ -1,0 +1,487 @@
+[
+
+  {
+    "_id": "691b03aff15086b702a4695e",
+    "devisId": "DEV014",
+    "clientInfo": {
+      "nom": "test",
+      "ClientId": "691af6f2143c7678f8f10755"
+    },
+    "vehiculedetails": {
+      "nom": "azer 123 - 123TUN12",
+      "vehiculeId": "691af8fca7dcfc06162ccd16"
+    },
+    "dateCommence": "2025-11-17T11:15:00.000Z",
+    "dateFinPrevue": "2025-11-17T12:15:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV014",
+    "taches": [
+      {
+        "description": "ggg",
+        "quantite": 1,
+        "serviceId": "691b0347f15086b702a468d0",
+        "serviceNom": "Pneumatiques et suspension",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "691b03aff15086b702a4695f",
+        "createdAt": "2025-11-17T11:14:55.312Z",
+        "updatedAt": "2025-11-17T11:14:55.312Z"
+      }
+    ],
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-17T11:14:55.313Z",
+    "updatedAt": "2025-11-23T12:06:33.932Z",
+    "numeroOrdre": "ORD-0002",
+    "__v": 0,
+    "dateFinReelle": "2025-11-23T10:02:51.454Z"
+  },
+  {
+    "_id": "691d89c54e4c9efa40807097",
+    "devisId": "DEV015",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "citroen 201 - TUN789",
+      "vehiculeId": "691b3a6269fbb0ac63fcc494"
+    },
+    "dateCommence": "2025-11-19T09:11:00.000Z",
+    "dateFinPrevue": "2025-11-19T10:11:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV015",
+    "taches": [
+      {
+        "description": "q<sdfg",
+        "quantite": 1,
+        "serviceId": "691b0347f15086b702a468d0",
+        "serviceNom": "Pneumatiques et suspension",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "691d89c54e4c9efa40807098",
+        "createdAt": "2025-11-19T09:11:33.873Z",
+        "updatedAt": "2025-11-19T09:11:33.873Z"
+      }
+    ],
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-19T09:11:33.873Z",
+    "updatedAt": "2025-11-23T12:14:51.577Z",
+    "numeroOrdre": "ORD-0003",
+    "__v": 0,
+    "dateFinReelle": "2025-11-23T12:14:26.183Z",
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "691dbdbe807a8aa37603e700",
+    "devisId": "DEV016",
+    "clientInfo": {
+      "nom": "test",
+      "ClientId": "691af6f2143c7678f8f10755"
+    },
+    "vehiculedetails": {
+      "nom": "azer 123 - 123TUN12",
+      "vehiculeId": "691af8fca7dcfc06162ccd16"
+    },
+    "dateCommence": "2025-11-23T12:53:00.000Z",
+    "dateFinPrevue": "2025-11-23T13:53:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "termine",
+    "description": "Ordre de travail généré depuis le devis DEV016",
+    "taches": [
+      {
+        "description": "eee",
+        "quantite": 1,
+        "serviceId": "691b0347f15086b702a468d0",
+        "serviceNom": "Pneumatiques et suspension",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "691dbdbe807a8aa37603e701",
+        "createdAt": "2025-11-19T12:53:18.267Z",
+        "updatedAt": "2025-11-19T12:53:18.267Z"
+      }
+    ],
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-19T12:53:18.268Z",
+    "updatedAt": "2025-11-23T12:14:23.339Z",
+    "numeroOrdre": "ORD-0004",
+    "__v": 0,
+    "dateFinReelle": "2025-11-23T12:14:23.337Z"
+  },
+  {
+    "_id": "6922db237b31481af93643a8",
+    "devisId": "DEV020",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "cc 10 (11TUN12)",
+      "vehiculeId": "691d9545807a8aa37603d048"
+    },
+    "dateCommence": "2025-11-23T07:59:00.000Z",
+    "dateFinPrevue": "2025-11-23T09:59:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_cours",
+    "description": "Ordre de travail généré depuis le devis DEV020",
+    "taches": [
+      {
+        "description": "aaa",
+        "quantite": 1,
+        "serviceId": "6911db6a227f68139eab73bf",
+        "serviceNom": "Entretien et révision",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6922db237b31481af93643a9",
+        "createdAt": "2025-11-23T12:14:31.989Z",
+        "updatedAt": "2025-11-23T12:14:31.989Z"
+      },
+      {
+        "description": "bb",
+        "quantite": 1,
+        "serviceId": "691cd9fab41d0eb4e4469726",
+        "serviceNom": "Électricité et électronique",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6922db237b31481af93643aa",
+        "createdAt": "2025-11-23T12:14:31.990Z",
+        "updatedAt": "2025-11-23T12:14:31.990Z"
+      }
+    ],
+    "totalHeuresEstimees": 2,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 2,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T10:00:03.373Z",
+    "updatedAt": "2025-11-23T12:14:40.036Z",
+    "numeroOrdre": "ORD-0005",
+    "__v": 2,
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "6922f8ad71f90cf76a16f702",
+    "devisId": "DEV019",
+    "clientInfo": {
+      "nom": "helmi",
+      "ClientId": "691f78f8163a17aa79fb6995"
+    },
+    "vehiculedetails": {
+      "nom": "ppp p1 - 52TUN77",
+      "vehiculeId": "691f7928163a17aa79fb6a0c"
+    },
+    "dateCommence": "2025-11-23T12:05:00.000Z",
+    "dateFinPrevue": "2025-11-23T13:05:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "termine",
+    "description": "Ordre de travail généré depuis le devis DEV019",
+    "taches": [
+      {
+        "description": "aaaa",
+        "quantite": 1,
+        "serviceId": "6911db6a227f68139eab73bf",
+        "serviceNom": "Entretien et révision",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6922f8ad71f90cf76a16f703",
+        "createdAt": "2025-11-23T12:06:05.924Z",
+        "updatedAt": "2025-11-23T12:06:05.924Z"
+      }
+    ],
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T12:06:05.925Z",
+    "updatedAt": "2025-11-23T12:06:41.830Z",
+    "numeroOrdre": "ORD-0006",
+    "__v": 0,
+    "dateFinReelle": "2025-11-23T12:06:41.829Z"
+  },
+  {
+    "_id": "6922faf1dd9115eea286b1bf",
+    "devisId": "DEV021",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "cc 10 (11TUN12)",
+      "vehiculeId": "691d9545807a8aa37603d048"
+    },
+    "dateCommence": "2025-11-23T12:15:00.000Z",
+    "dateFinPrevue": "2025-11-23T13:15:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_cours",
+    "description": "Ordre de travail généré depuis le devis DEV021",
+    "taches": [
+      {
+        "description": "aaaaa",
+        "quantite": 1,
+        "serviceId": "6911db6a227f68139eab73bf",
+        "serviceNom": "Entretien et révision",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6922faf1dd9115eea286b1c0",
+        "createdAt": "2025-11-23T12:15:45.011Z",
+        "updatedAt": "2025-11-23T12:15:45.011Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T12:15:45.011Z",
+    "updatedAt": "2025-11-23T13:10:41.034Z",
+    "numeroOrdre": "ORD-0007",
+    "__v": 0
+  },
+  {
+    "_id": "6923127809a5989674a26dc1",
+    "devisId": "DEV018",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "cc 10 - 11TUN12",
+      "vehiculeId": "691d9545807a8aa37603d048"
+    },
+    "dateCommence": "2025-11-23T13:56:00.000Z",
+    "dateFinPrevue": "2025-11-23T14:56:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_attente",
+    "description": "Ordre de travail généré depuis le devis DEV018",
+    "taches": [
+      {
+        "description": "rt",
+        "quantite": 1,
+        "serviceId": "6911db6a227f68139eab73bf",
+        "serviceNom": "Entretien et révision",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6923127809a5989674a26dc2",
+        "createdAt": "2025-11-23T13:56:08.580Z",
+        "updatedAt": "2025-11-23T13:56:08.580Z"
+      }
+    ],
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T13:56:08.581Z",
+    "updatedAt": "2025-11-23T13:56:08.581Z",
+    "numeroOrdre": "ORD-0008",
+    "__v": 0
+  },
+  {
+    "_id": "692312aa09a5989674a26e73",
+    "devisId": "DEV017",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "cc 10 - 11TUN12",
+      "vehiculeId": "691d9545807a8aa37603d048"
+    },
+    "dateCommence": "2025-11-23T13:56:00.000Z",
+    "dateFinPrevue": "2025-11-23T14:56:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_attente",
+    "description": "Ordre de travail généré depuis le devis DEV017",
+    "taches": [
+      {
+        "description": "qss",
+        "quantite": 1,
+        "serviceId": "691b0347f15086b702a468d0",
+        "serviceNom": "Pneumatiques et suspension",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "692312aa09a5989674a26e74",
+        "createdAt": "2025-11-23T13:56:58.333Z",
+        "updatedAt": "2025-11-23T13:56:58.333Z"
+      }
+    ],
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T13:56:58.334Z",
+    "updatedAt": "2025-11-23T13:56:58.334Z",
+    "numeroOrdre": "ORD-0009",
+    "__v": 0
+  },
+  {
+    "_id": "6923278e0a8695033342b845",
+    "devisId": "DEV022",
+    "clientInfo": {
+      "nom": "helmi",
+      "ClientId": "691f78f8163a17aa79fb6995"
+    },
+    "vehiculedetails": {
+      "nom": "ppp p1 - 52TUN77",
+      "vehiculeId": "691f7928163a17aa79fb6a0c"
+    },
+    "dateCommence": "2025-11-23T15:22:00.000Z",
+    "dateFinPrevue": "2025-11-23T16:22:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_cours",
+    "description": "Ordre de travail pour devis undefined",
+    "taches": [
+      {
+        "description": "RWTXH",
+        "quantite": 1,
+        "serviceId": "691b0347f15086b702a468d0",
+        "serviceNom": "Pneumatiques et suspension",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6923278e0a8695033342b846",
+        "createdAt": "2025-11-23T15:26:06.852Z",
+        "updatedAt": "2025-11-23T15:26:06.852Z"
+      }
+    ],
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T15:26:06.853Z",
+    "updatedAt": "2025-11-23T15:27:26.181Z",
+    "numeroOrdre": "ORD-0010",
+    "__v": 0
+  },
+  {
+    "_id": "692341034fa998e88a52c733",
+    "devisId": "DEV023",
+    "clientInfo": {
+      "nom": "test",
+      "ClientId": "691af6f2143c7678f8f10755"
+    },
+    "vehiculedetails": {
+      "nom": "azer 123 - 123TUN12",
+      "vehiculeId": "691af8fca7dcfc06162ccd16"
+    },
+    "dateCommence": "2025-11-23T17:14:00.000Z",
+    "dateFinPrevue": "2025-11-23T18:14:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_attente",
+    "description": "Ordre de travail pour devis undefined",
+    "taches": [
+      {
+        "description": "CCCCCC",
+        "quantite": 1,
+        "serviceId": "691b0347f15086b702a468d0",
+        "serviceNom": "Pneumatiques et suspension",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "692341034fa998e88a52c734",
+        "createdAt": "2025-11-23T17:14:43.233Z",
+        "updatedAt": "2025-11-23T17:14:43.233Z"
+      }
+    ],
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T17:14:43.234Z",
+    "updatedAt": "2025-11-23T17:14:43.234Z",
+    "numeroOrdre": "ORD-0011",
+    "__v": 0
+  }
+]

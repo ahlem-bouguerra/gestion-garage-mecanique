@@ -1,0 +1,25 @@
+[
+
+  {
+    "_id": "6921ea5de9338b8d1ea0ba1a",
+    "id": "SERV004",
+    "name": "climatisation",
+    "description": "ce service permet de ..........",
+    "statut": "Actif",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "createdAt": "2025-11-22T16:52:45.648Z",
+    "updatedAt": "2025-11-22T17:01:21.629Z",
+    "__v": 0
+  },
+  {
+    "_id": "6923222153b84ce050ea5208",
+    "id": "SERV005",
+    "name": "SWDX",
+    "description": "SDF",
+    "statut": "Actif",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "createdAt": "2025-11-23T15:02:57.700Z",
+    "updatedAt": "2025-11-23T15:02:57.700Z",
+    "__v": 0
+  }
+]

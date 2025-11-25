@@ -1,0 +1,16 @@
+[
+  {
+    "_id": "6911cb63ccd145adc6354d98",
+    "username": "magher",
+    "email": "ahlembouguerra@outlook.fr",
+    "password": "$2b$10$qUTzDStezxvCC79QDgOlRuWdas/UEO1l2klBtXkaanRylhuVPP/5K",
+    "phone": "26541236",
+    "isVerified": true,
+    "googleId": null,
+    "resetPasswordToken": "$2b$10$OuexKT.OZjOeRbmJmaGwN.6fWzLdyWsLqj/cxJSvM/XE1rQQs.N62",
+    "resetPasswordExpires": "2025-11-16T10:50:20.127Z",
+    "createdAt": "2025-11-10T11:24:19.451Z",
+    "updatedAt": "2025-11-16T09:50:20.130Z",
+    "__v": 0
+  }
+]

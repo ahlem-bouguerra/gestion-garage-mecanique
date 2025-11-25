@@ -1,0 +1,44 @@
+[
+  {
+    "_id": "691398cf7412d3ea832a4af6",
+    "username": "Admin ahlem",
+    "email": "ahlembouguerra@outlook.fr",
+    "password": "$2b$10$Mo3FxQX.WzRH5qgodjxoYe7gQGwsL.qpRJkSE1cNr7dOu8rY.MKLK",
+    "phone": "26541236",
+    "isVerified": true,
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isSuperAdmin": true,
+    "createdAt": "2025-11-11T20:13:03.802Z",
+    "updatedAt": "2025-11-16T10:04:35.803Z",
+    "__v": 0
+  },
+  {
+    "_id": "6915b3aae76b84adbb3e5916",
+    "username": "hacker",
+    "email": "hacker@test.com",
+    "password": "$2b$10$0GBPHhWVss5nOvkW65IhYuUpegLux8PoX8HuS6kKDYiDgx.9mkZXm",
+    "phone": "123456789",
+    "isVerified": true,
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isSuperAdmin": false,
+    "createdAt": "2025-11-13T10:32:10.293Z",
+    "updatedAt": "2025-11-18T19:54:32.437Z",
+    "__v": 0
+  },
+  {
+    "_id": "691c881ad6bff816e5d1d1fc",
+    "username": "super",
+    "email": "super@exemple.com",
+    "password": "$2b$10$4bRO6dYoM8m4kb4Y4fEMseRfOR5dlBV4Ocfeom6S/NjCG4ik7kHz2",
+    "phone": "27412369",
+    "isVerified": true,
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isSuperAdmin": true,
+    "createdAt": "2025-11-18T14:52:10.496Z",
+    "updatedAt": "2025-11-20T13:20:58.692Z",
+    "__v": 0
+  }
+]

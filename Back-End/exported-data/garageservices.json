@@ -1,0 +1,38 @@
+[
+  {
+    "_id": "6921e46e9690045b7d5f64ae",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "serviceId": "6911db6a227f68139eab73bf",
+    "addedAt": "2025-11-22T16:27:26.265Z",
+    "createdAt": "2025-11-22T16:27:26.269Z",
+    "updatedAt": "2025-11-22T16:27:26.269Z",
+    "__v": 0
+  },
+  {
+    "_id": "6921e4739690045b7d5f64c8",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "serviceId": "691b0347f15086b702a468d0",
+    "addedAt": "2025-11-22T16:27:31.315Z",
+    "createdAt": "2025-11-22T16:27:31.316Z",
+    "updatedAt": "2025-11-22T16:27:31.316Z",
+    "__v": 0
+  },
+  {
+    "_id": "6921e5806acb85459f5bc31f",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "serviceId": "691cd9fab41d0eb4e4469726",
+    "addedAt": "2025-11-22T16:32:00.949Z",
+    "createdAt": "2025-11-22T16:32:00.952Z",
+    "updatedAt": "2025-11-22T16:32:00.952Z",
+    "__v": 0
+  },
+  {
+    "_id": "6921ecb7805e0617286bba99",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "serviceId": "6921ea5de9338b8d1ea0ba1a",
+    "addedAt": "2025-11-22T17:02:47.389Z",
+    "createdAt": "2025-11-22T17:02:47.389Z",
+    "updatedAt": "2025-11-22T17:02:47.389Z",
+    "__v": 0
+  }
+]

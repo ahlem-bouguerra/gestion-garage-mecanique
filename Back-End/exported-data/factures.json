@@ -1,0 +1,647 @@
+[
+
+  {
+    "_id": "691afea3c7a462a0c9196c8d",
+    "numeroFacture": "FAC-016",
+    "devisId": "691afd3c1ca98faecdaa1f96",
+    "clientId": "691af6f2143c7678f8f10755",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "inspectionDate": "2025-11-17T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "ggg",
+        "quantity": 1,
+        "unitPrice": 200,
+        "total": 200,
+        "_id": "691afea3c7a462a0c9196c8e"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "remiseRate": 10,
+    "totalHT": 300,
+    "totalTVA": 60,
+    "totalRemise": 36,
+    "totalTTC": 360,
+    "finalTotalTTC": 325,
+    "timbreFiscal": 1,
+    "paymentStatus": "paye",
+    "paymentAmount": 325,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 3,
+      "minutes": 0
+    },
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-11-17T10:53:23.741Z",
+    "dueDate": "2025-12-17T10:53:23.741Z",
+    "createdAt": "2025-11-17T10:53:23.741Z",
+    "updatedAt": "2025-11-17T14:10:00.422Z",
+    "__v": 0,
+    "paymentDate": "2025-11-17T00:00:00.000Z",
+    "paymentMethod": "especes"
+  },
+  {
+    "_id": "691dadd8807a8aa37603dd6c",
+    "numeroFacture": "FAC-017",
+    "devisId": "691d89a64e4c9efa40807012",
+    "clientId": "691af6c0143c7678f8f10730",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "citroen 201 - TUN789",
+    "inspectionDate": "2025-11-19T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "q<sdfg",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "691dadd8807a8aa37603dd6d"
+      }
+    ],
+    "maindoeuvre": 110,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 210,
+    "totalTVA": 42,
+    "totalRemise": 0,
+    "totalTTC": 252,
+    "finalTotalTTC": 253,
+    "timbreFiscal": 1,
+    "paymentStatus": "paye",
+    "paymentAmount": 253,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 3,
+      "minutes": 0
+    },
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-11-19T11:45:28.398Z",
+    "dueDate": "2025-12-19T11:45:28.398Z",
+    "createdAt": "2025-11-19T11:45:28.398Z",
+    "updatedAt": "2025-11-24T13:58:30.209Z",
+    "__v": 0,
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque"
+  },
+  {
+    "_id": "691db529807a8aa37603e19b",
+    "numeroFacture": "FAC-018",
+    "devisId": "691db4ce807a8aa37603e0a7",
+    "clientId": "691af6f2143c7678f8f10755",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "inspectionDate": "2025-11-19T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "eee",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "691db529807a8aa37603e19c"
+      }
+    ],
+    "maindoeuvre": 10,
+    "tvaRate": 20,
+    "remiseRate": 9,
+    "totalHT": 110,
+    "totalTVA": 22,
+    "totalRemise": 11.879999999999999,
+    "totalTTC": 132,
+    "finalTotalTTC": 121.12,
+    "timbreFiscal": 1,
+    "paymentStatus": "annule",
+    "paymentAmount": 20,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 3,
+      "minutes": 0
+    },
+    "status": "cancelled",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-11-19T12:16:41.181Z",
+    "dueDate": "2025-12-19T12:16:41.181Z",
+    "createdAt": "2025-11-19T12:16:41.181Z",
+    "updatedAt": "2025-11-19T13:43:46.213Z",
+    "__v": 0,
+    "paymentDate": "2025-11-19T00:00:00.000Z",
+    "paymentMethod": "especes",
+    "cancelledAt": "2025-11-19T13:43:46.195Z",
+    "creditNoteId": "691dc992f059c09f59b104e9",
+    "replacedByFactureId": "691dc992f059c09f59b104f5"
+  },
+  {
+    "_id": "691dc992f059c09f59b104f5",
+    "numeroFacture": "FAC-019",
+    "devisId": "691db4ce807a8aa37603e0a7",
+    "clientId": "691af6f2143c7678f8f10755",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "invoiceDate": "2025-11-19T13:43:46.203Z",
+    "dueDate": "2025-12-19T13:43:46.203Z",
+    "inspectionDate": "2025-11-19T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "eee",
+        "quantity": 2,
+        "unitPrice": 100,
+        "total": 200,
+        "_id": "691dc992f059c09f59b104f6"
+      }
+    ],
+    "maindoeuvre": 10,
+    "tvaRate": 20,
+    "remiseRate": 9,
+    "totalHT": 210,
+    "totalTVA": 42,
+    "totalRemise": 22.68,
+    "totalTTC": 252,
+    "finalTotalTTC": 230.32,
+    "timbreFiscal": 1,
+    "paymentStatus": "paye",
+    "paymentAmount": 230.32,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 3,
+      "minutes": 0
+    },
+    "status": "active",
+    "replacedByFactureId": "691db529807a8aa37603e19b",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-19T13:43:46.209Z",
+    "updatedAt": "2025-11-24T13:57:35.288Z",
+    "__v": 0,
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque"
+  },
+  {
+    "_id": "69234330d2083783f08e7397",
+    "numeroFacture": "FAC-021",
+    "devisId": "69231a3f1cdb2556ebf7a744",
+    "clientId": "691af6f2143c7678f8f10755",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "inspectionDate": "2025-11-23T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "g",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "69234330d2083783f08e7398"
+      }
+    ],
+    "maindoeuvre": 98,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 198,
+    "totalTVA": 39.6,
+    "totalRemise": 0,
+    "totalTTC": 237.6,
+    "finalTotalTTC": 238.6,
+    "timbreFiscal": 1,
+    "paymentStatus": "paye",
+    "paymentAmount": 238.6,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-11-23T17:24:00.472Z",
+    "dueDate": "2025-12-23T17:24:00.472Z",
+    "createdAt": "2025-11-23T17:24:00.472Z",
+    "updatedAt": "2025-11-24T13:55:35.673Z",
+    "__v": 0,
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque"
+  },
+  {
+    "_id": "69234332d2083783f08e73bb",
+    "numeroFacture": "FAC-022",
+    "devisId": "6920bde94138eb5c201f1e62",
+    "clientId": "691af6c0143c7678f8f10730",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "cc 10 (11TUN12)",
+    "inspectionDate": "2025-11-21T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "aaa",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "69234332d2083783f08e73bc"
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 50,
+        "total": 50,
+        "_id": "69234332d2083783f08e73bd"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 19,
+    "remiseRate": 0,
+    "totalHT": 1150,
+    "totalTVA": 218.5,
+    "totalRemise": 0,
+    "totalTTC": 1368.5,
+    "finalTotalTTC": 1369.5,
+    "timbreFiscal": 1,
+    "paymentStatus": "paye",
+    "paymentAmount": 1369.5,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 4,
+      "minutes": 0
+    },
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-11-23T17:24:02.782Z",
+    "dueDate": "2025-12-23T17:24:02.782Z",
+    "createdAt": "2025-11-23T17:24:02.782Z",
+    "updatedAt": "2025-11-24T13:42:00.922Z",
+    "__v": 0,
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque"
+  },
+  {
+    "_id": "692447012daf12b0aa73d467",
+    "numeroFacture": "FAC-023",
+    "devisId": "69234321d2083783f08e730d",
+    "clientId": "691f78f8163a17aa79fb6995",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "helmi"
+    },
+    "vehicleInfo": "ppp p1 - 52TUN77",
+    "inspectionDate": "2025-11-23T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "dddd",
+        "quantity": 1,
+        "unitPrice": 700,
+        "total": 700,
+        "_id": "692447012daf12b0aa73d468"
+      }
+    ],
+    "maindoeuvre": 70,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 770,
+    "totalTVA": 154,
+    "totalRemise": 0,
+    "totalTTC": 924,
+    "finalTotalTTC": 925,
+    "timbreFiscal": 1,
+    "paymentStatus": "paye",
+    "paymentAmount": 925,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-11-24T11:52:33.929Z",
+    "dueDate": "2025-12-24T11:52:33.929Z",
+    "createdAt": "2025-11-24T11:52:33.929Z",
+    "updatedAt": "2025-11-24T13:31:57.177Z",
+    "__v": 0,
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "especes"
+  },
+  {
+    "_id": "6924658b0b51ea277f8e9d84",
+    "numeroFacture": "FAC-024",
+    "devisId": "6923402f4fa998e88a52c62b",
+    "clientId": "691af6f2143c7678f8f10755",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "inspectionDate": "2025-11-23T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "choffage",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "6924658b0b51ea277f8e9d85"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalRemise": 0,
+    "totalTTC": 240,
+    "finalTotalTTC": 241,
+    "timbreFiscal": 1,
+    "paymentStatus": "partiellement_paye",
+    "paymentAmount": 50,
+    "estimatedTime": {
+      "days": 1,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-11-24T14:02:51.174Z",
+    "dueDate": "2025-12-24T14:02:51.174Z",
+    "createdAt": "2025-11-24T14:02:51.174Z",
+    "updatedAt": "2025-11-24T14:03:08.405Z",
+    "__v": 0,
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "virement"
+  },
+  {
+    "_id": "69256f2bd929346ef89b68dd",
+    "numeroFacture": "FAC-025",
+    "devisId": "69256decd929346ef89b6852",
+    "clientId": "691af6c0143c7678f8f10730",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "inspectionDate": "2025-11-25T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "aa",
+        "quantity": 1,
+        "unitPrice": 10,
+        "total": 10,
+        "_id": "69256f2bd929346ef89b68de"
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "69256f2bd929346ef89b68df"
+      }
+    ],
+    "maindoeuvre": 1000,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 1110,
+    "totalTVA": 222,
+    "totalRemise": 0,
+    "totalTTC": 1332,
+    "finalTotalTTC": 1333,
+    "timbreFiscal": 1,
+    "paymentStatus": "annule",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 1,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "cancelled",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-11-25T08:56:11.078Z",
+    "dueDate": "2025-12-25T08:56:11.078Z",
+    "createdAt": "2025-11-25T08:56:11.078Z",
+    "updatedAt": "2025-11-25T10:16:55.467Z",
+    "__v": 0,
+    "cancelledAt": "2025-11-25T10:16:55.453Z",
+    "creditNoteId": "69258217bc90c33f84d87e25",
+    "replacedByFactureId": "69258217bc90c33f84d87e34"
+  },
+  {
+    "_id": "692579f2dcd8dc9aca73e57a",
+    "numeroFacture": "FAC-026",
+    "devisId": "69231a891cdb2556ebf7a892",
+    "clientId": "691f78f8163a17aa79fb6995",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "helmi"
+    },
+    "vehicleInfo": "ppp p1 - 52TUN77",
+    "inspectionDate": "2025-11-23T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "ulh",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "692579f2dcd8dc9aca73e57b"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalRemise": 0,
+    "totalTTC": 240,
+    "finalTotalTTC": 241,
+    "timbreFiscal": 1,
+    "paymentStatus": "annule",
+    "paymentAmount": 40,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "status": "cancelled",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-11-25T09:42:10.673Z",
+    "dueDate": "2025-12-25T09:42:10.673Z",
+    "createdAt": "2025-11-25T09:42:10.673Z",
+    "updatedAt": "2025-11-25T10:17:30.115Z",
+    "__v": 0,
+    "paymentDate": "2025-11-25T00:00:00.000Z",
+    "paymentMethod": "cheque",
+    "cancelledAt": "2025-11-25T10:17:30.098Z",
+    "creditNoteId": "6925823abc90c33f84d87f06",
+    "replacedByFactureId": "6925823abc90c33f84d87f13"
+  },
+  {
+    "_id": "69258217bc90c33f84d87e34",
+    "numeroFacture": "FAC-027",
+    "devisId": "69256decd929346ef89b6852",
+    "clientId": "691af6c0143c7678f8f10730",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "invoiceDate": "2025-11-25T10:16:55.459Z",
+    "dueDate": "2025-12-25T10:16:55.459Z",
+    "inspectionDate": "2025-11-25T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "aa",
+        "quantity": 1,
+        "unitPrice": 10,
+        "total": 10,
+        "_id": "69258217bc90c33f84d87e35"
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "69258217bc90c33f84d87e36"
+      }
+    ],
+    "maindoeuvre": 1000,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 1110,
+    "totalTVA": 222,
+    "totalRemise": 0,
+    "totalTTC": 1332,
+    "finalTotalTTC": 1333,
+    "timbreFiscal": 1,
+    "paymentStatus": "annule",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 1,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "cancelled",
+    "replacedByFactureId": "692582f3bc90c33f84d87fc8",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-25T10:16:55.465Z",
+    "updatedAt": "2025-11-25T10:20:35.361Z",
+    "__v": 0,
+    "cancelledAt": "2025-11-25T10:20:35.348Z",
+    "creditNoteId": "692582f3bc90c33f84d87fb9"
+  },
+  {
+    "_id": "6925823abc90c33f84d87f13",
+    "numeroFacture": "FAC-028",
+    "devisId": "69231a891cdb2556ebf7a892",
+    "clientId": "691f78f8163a17aa79fb6995",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "helmi"
+    },
+    "vehicleInfo": "ppp p1 - 52TUN77",
+    "invoiceDate": "2025-11-25T10:17:30.106Z",
+    "dueDate": "2025-12-25T10:17:30.106Z",
+    "inspectionDate": "2025-11-23T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "ulh",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "6925823abc90c33f84d87f14"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalRemise": 0,
+    "totalTTC": 240,
+    "finalTotalTTC": 241,
+    "timbreFiscal": 1,
+    "paymentStatus": "paye",
+    "paymentAmount": 241,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "active",
+    "replacedByFactureId": "692579f2dcd8dc9aca73e57a",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-25T10:17:30.112Z",
+    "updatedAt": "2025-11-25T10:38:48.643Z",
+    "__v": 0,
+    "paymentDate": "2025-11-25T00:00:00.000Z",
+    "paymentMethod": "especes"
+  },
+  {
+    "_id": "692582f3bc90c33f84d87fc8",
+    "numeroFacture": "FAC-029",
+    "devisId": "69256decd929346ef89b6852",
+    "clientId": "691af6c0143c7678f8f10730",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "invoiceDate": "2025-11-25T10:20:35.355Z",
+    "dueDate": "2025-12-25T10:20:35.355Z",
+    "inspectionDate": "2025-11-25T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "aa",
+        "quantity": 1,
+        "unitPrice": 10,
+        "total": 10,
+        "_id": "692582f3bc90c33f84d87fc9"
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "692582f3bc90c33f84d87fca"
+      }
+    ],
+    "maindoeuvre": 1000,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 1110,
+    "totalTVA": 222,
+    "totalRemise": 0,
+    "totalTTC": 1332,
+    "finalTotalTTC": 1333,
+    "timbreFiscal": 1,
+    "paymentStatus": "paye",
+    "paymentAmount": 1333,
+    "estimatedTime": {
+      "days": 1,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "status": "active",
+    "replacedByFactureId": "69258217bc90c33f84d87e34",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-25T10:20:35.358Z",
+    "updatedAt": "2025-11-25T10:21:02.110Z",
+    "__v": 0,
+    "paymentDate": "2025-11-25T00:00:00.000Z",
+    "paymentMethod": "virement"
+  }
+]

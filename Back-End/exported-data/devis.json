@@ -1,0 +1,458 @@
+[
+  {
+    "_id": "691afd3c1ca98faecdaa1f96",
+    "id": "DEV014",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientName": "test",
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "vehiculeId": "691af8fca7dcfc06162ccd16",
+    "factureId": null,
+    "inspectionDate": "2025-11-17",
+    "services": [
+      {
+        "piece": "ggg",
+        "quantity": 1,
+        "unitPrice": 200,
+        "total": 200
+      }
+    ],
+    "totalHT": 300,
+    "totalServicesHT": 200,
+    "totalTTC": 360,
+    "finalTotalTTC": 324,
+    "tvaRate": 20,
+    "remiseRate": 10,
+    "montantTVA": 60,
+    "montantRemise": 36,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 3,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-17T10:47:24.907Z",
+    "updatedAt": "2025-11-17T10:47:41.522Z",
+    "__v": 0
+  },
+  {
+    "_id": "691d89a64e4c9efa40807012",
+    "id": "DEV015",
+    "clientId": "691af6c0143c7678f8f10730",
+    "clientName": "ahlem bouguerra",
+    "vehicleInfo": "citroen 201 - TUN789",
+    "vehiculeId": "691b3a6269fbb0ac63fcc494",
+    "factureId": null,
+    "inspectionDate": "2025-11-19",
+    "services": [
+      {
+        "piece": "q<sdfg",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 210,
+    "totalServicesHT": 100,
+    "totalTTC": 252,
+    "finalTotalTTC": 252,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 42,
+    "montantRemise": 0,
+    "maindoeuvre": 110,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 3,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-19T09:11:02.515Z",
+    "updatedAt": "2025-11-19T09:11:02.515Z",
+    "__v": 0
+  },
+  {
+    "_id": "691db4ce807a8aa37603e0a7",
+    "id": "DEV016",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientName": "test",
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "vehiculeId": "691af8fca7dcfc06162ccd16",
+    "factureId": "691dc992f059c09f59b104f5",
+    "inspectionDate": "2025-11-19",
+    "services": [
+      {
+        "piece": "eee",
+        "quantity": 2,
+        "unitPrice": 100,
+        "total": 200
+      }
+    ],
+    "totalHT": 210,
+    "totalServicesHT": 200,
+    "totalTTC": 252,
+    "finalTotalTTC": 229.32,
+    "tvaRate": 20,
+    "remiseRate": 9,
+    "montantTVA": 42,
+    "montantRemise": 22.68,
+    "maindoeuvre": 10,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 3,
+      "minutes": 0
+    },
+    "status": "envoye",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-19T12:15:10.834Z",
+    "updatedAt": "2025-11-20T10:26:02.069Z",
+    "__v": 0
+  },
+  {
+    "_id": "691efca00a131b66943e40a6",
+    "id": "DEV017",
+    "clientId": "691af6c0143c7678f8f10730",
+    "clientName": "ahlem bouguerra",
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "vehiculeId": "691d9545807a8aa37603d048",
+    "factureId": null,
+    "inspectionDate": "2025-11-20",
+    "services": [
+      {
+        "piece": "qss",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 200,
+    "totalServicesHT": 100,
+    "totalTTC": 240,
+    "finalTotalTTC": 240,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 40,
+    "montantRemise": 0,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0
+    },
+    "status": "brouillon",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-20T11:33:52.062Z",
+    "updatedAt": "2025-11-20T20:46:57.270Z",
+    "__v": 0
+  },
+  {
+    "_id": "691f7894163a17aa79fb68de",
+    "id": "DEV018",
+    "clientId": "691af6c0143c7678f8f10730",
+    "clientName": "ahlem bouguerra",
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "vehiculeId": "691d9545807a8aa37603d048",
+    "factureId": null,
+    "inspectionDate": "2025-11-20",
+    "services": [
+      {
+        "piece": "rt",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 110,
+    "totalServicesHT": 100,
+    "totalTTC": 132,
+    "finalTotalTTC": 132,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 22,
+    "montantRemise": 0,
+    "maindoeuvre": 10,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0
+    },
+    "status": "envoye",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-20T20:22:44.369Z",
+    "updatedAt": "2025-11-20T20:22:48.140Z",
+    "__v": 0
+  },
+  {
+    "_id": "691f793d163a17aa79fb6a66",
+    "id": "DEV019",
+    "clientId": "691f78f8163a17aa79fb6995",
+    "clientName": "helmi",
+    "vehicleInfo": "ppp p1 - 52TUN77",
+    "vehiculeId": "691f7928163a17aa79fb6a0c",
+    "factureId": null,
+    "inspectionDate": "2025-11-20",
+    "services": [
+      {
+        "piece": "aaaa",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 200,
+    "totalServicesHT": 100,
+    "totalTTC": 240,
+    "finalTotalTTC": 240,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 40,
+    "montantRemise": 0,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-20T20:25:33.013Z",
+    "updatedAt": "2025-11-20T21:17:28.717Z",
+    "__v": 0
+  },
+  {
+    "_id": "6920bde94138eb5c201f1e62",
+    "id": "DEV020",
+    "clientId": "691af6c0143c7678f8f10730",
+    "clientName": "ahlem bouguerra",
+    "vehicleInfo": "cc 10 (11TUN12)",
+    "vehiculeId": "691d9545807a8aa37603d048",
+    "factureId": null,
+    "inspectionDate": "2025-11-21",
+    "services": [
+      {
+        "piece": "aaa",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 50,
+        "total": 50
+      }
+    ],
+    "totalHT": 1150,
+    "totalServicesHT": 1050,
+    "totalTTC": 1368.5,
+    "finalTotalTTC": 1368.5,
+    "tvaRate": 19,
+    "remiseRate": 0,
+    "montantTVA": 218.5,
+    "montantRemise": 0,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 4,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-21T19:30:49.887Z",
+    "updatedAt": "2025-11-21T19:34:31.073Z",
+    "__v": 0
+  },
+  {
+    "_id": "69231a3f1cdb2556ebf7a744",
+    "id": "DEV021",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientName": "test",
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "vehiculeId": "691af8fca7dcfc06162ccd16",
+    "factureId": null,
+    "inspectionDate": "2025-11-23",
+    "services": [
+      {
+        "piece": "g",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 198,
+    "totalServicesHT": 100,
+    "totalTTC": 237.6,
+    "finalTotalTTC": 237.6,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 39.6,
+    "montantRemise": 0,
+    "maindoeuvre": 98,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-23T14:29:20.015Z",
+    "updatedAt": "2025-11-23T14:29:20.015Z",
+    "__v": 0
+  },
+  {
+    "_id": "69231a891cdb2556ebf7a892",
+    "id": "DEV022",
+    "clientId": "691f78f8163a17aa79fb6995",
+    "clientName": "helmi",
+    "vehicleInfo": "ppp p1 - 52TUN77",
+    "vehiculeId": "691f7928163a17aa79fb6a0c",
+    "factureId": "6925823abc90c33f84d87f13",
+    "inspectionDate": "2025-11-23",
+    "services": [
+      {
+        "piece": "ulh",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 200,
+    "totalServicesHT": 100,
+    "totalTTC": 240,
+    "finalTotalTTC": 240,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 40,
+    "montantRemise": 0,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-23T14:30:33.062Z",
+    "updatedAt": "2025-11-25T10:17:30.118Z",
+    "__v": 0
+  },
+  {
+    "_id": "6923402f4fa998e88a52c62b",
+    "id": "DEV023",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientName": "test",
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "vehiculeId": "691af8fca7dcfc06162ccd16",
+    "factureId": null,
+    "inspectionDate": "2025-11-23",
+    "services": [
+      {
+        "piece": "choffage",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 200,
+    "totalServicesHT": 100,
+    "totalTTC": 240,
+    "finalTotalTTC": 240,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 40,
+    "montantRemise": 0,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 1,
+      "hours": 0,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-23T17:11:11.254Z",
+    "updatedAt": "2025-11-23T17:11:11.254Z",
+    "__v": 0
+  },
+  {
+    "_id": "69234321d2083783f08e730d",
+    "id": "DEV024",
+    "clientId": "691f78f8163a17aa79fb6995",
+    "clientName": "helmi",
+    "vehicleInfo": "ppp p1 - 52TUN77",
+    "vehiculeId": "691f7928163a17aa79fb6a0c",
+    "factureId": null,
+    "inspectionDate": "2025-11-23",
+    "services": [
+      {
+        "piece": "dddd",
+        "quantity": 1,
+        "unitPrice": 700,
+        "total": 700
+      }
+    ],
+    "totalHT": 770,
+    "totalServicesHT": 700,
+    "totalTTC": 924,
+    "finalTotalTTC": 924,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 154,
+    "montantRemise": 0,
+    "maindoeuvre": 70,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-23T17:23:45.310Z",
+    "updatedAt": "2025-11-23T17:23:52.782Z",
+    "__v": 0
+  },
+  {
+    "_id": "69256decd929346ef89b6852",
+    "id": "DEV025",
+    "clientId": "691af6c0143c7678f8f10730",
+    "clientName": "ahlem bouguerra",
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "vehiculeId": "691d9545807a8aa37603d048",
+    "factureId": "692582f3bc90c33f84d87fc8",
+    "inspectionDate": "2025-11-25",
+    "services": [
+      {
+        "piece": "aa",
+        "quantity": 1,
+        "unitPrice": 10,
+        "total": 10
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 1110,
+    "totalServicesHT": 110,
+    "totalTTC": 1332,
+    "finalTotalTTC": 1332,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 222,
+    "montantRemise": 0,
+    "maindoeuvre": 1000,
+    "estimatedTime": {
+      "days": 1,
+      "hours": 0,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-25T08:50:52.217Z",
+    "updatedAt": "2025-11-25T10:20:35.364Z",
+    "__v": 0
+  }
+]
