@@ -36,7 +36,6 @@ export default function GarageManagement() {
     streetAddress: '',
     description: '',
     horaires: '',
-    services: '',
     emailProfessionnel:'',
     telephoneProfessionnel:'',
     location: null as { type: string; coordinates: [number, number] } | null,
@@ -152,7 +151,6 @@ export default function GarageManagement() {
       streetAddress: garage.streetAddress || '',
       description: garage.description || '',
       horaires: garage.horaires || '',
-      services: Array.isArray(garage.services) ? garage.services.join(', ') : garage.services || '',
       location: garage.location || null,
     });
     setView('editGarage');
@@ -174,7 +172,6 @@ export default function GarageManagement() {
         streetAddress: garageData.streetAddress,
         description: garageData.description,
         horaires: garageData.horaires,
-        services: garageData.services,
         location: garageData.location, 
       };
 
@@ -211,7 +208,6 @@ export default function GarageManagement() {
       streetAddress: '',
       description: '',
       horaires: '',
-      services: '',
       emailProfessionnel: '',
       telephoneProfessionnel:'',
       location: null, 

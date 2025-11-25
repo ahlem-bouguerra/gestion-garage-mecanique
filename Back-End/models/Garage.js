@@ -54,9 +54,7 @@ const garageSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
-  services: [{
-    type: String
-  }],
+
   // Statut du garage
   isActive: {
     type: Boolean,

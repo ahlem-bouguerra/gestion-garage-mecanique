@@ -21,7 +21,6 @@ export const createGarage = async (req, res) => {
     location,
     description,
     horaires,
-    services,
     emailProfessionnel,
     telephoneProfessionnel
   } = req.body;
@@ -57,7 +56,6 @@ export const createGarage = async (req, res) => {
       location: location || undefined,
       description: description || "",
       horaires: horaires || "",
-      services: services || [],
       emailProfessionnel: emailProfessionnel || "",
       telephoneProfessionnel: telephoneProfessionnel || "",
       garagisteAdmins: []  // Seulement les admins seront ici
