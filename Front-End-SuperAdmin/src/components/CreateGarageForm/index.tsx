@@ -28,18 +28,20 @@ export default function GarageManagement() {
   const [selectedGarage, setSelectedGarage] = useState(null);
   const [garageToEdit, setGarageToEdit] = useState(null);
   
-  const [garageData, setGarageData] = useState({
-    garagenom: '',
-    matriculefiscal: '',
-    governorateName: '',
-    cityName: '',
-    streetAddress: '',
-    description: '',
-    horaires: '',
-    emailProfessionnel:'',
-    telephoneProfessionnel:'',
-    location: null as { type: string; coordinates: [number, number] } | null,
-  });
+const [garageData, setGarageData] = useState({
+  garagenom: '',
+  matriculefiscal: '',
+  governorateId: '',      // 🔥 AJOUTÉ
+  governorateName: '',
+  cityId: '',             // 🔥 AJOUTÉ
+  cityName: '',
+  streetAddress: '',
+  description: '',
+  horaires: '',
+  emailProfessionnel: '',
+  telephoneProfessionnel: '',
+  location: null as { type: string; coordinates: [number, number] } | null,
+});
 
   const [garagisteData, setGaragisteData] = useState({
     username: '',
@@ -138,90 +140,102 @@ export default function GarageManagement() {
 
 
   // ⭐ FONCTION EDIT - DÉFINIE ICI
-  const handleEditGarage = (garage: any) => {
-    console.log('🔧 Édition du garage:', garage);
-    setGarageToEdit(garage);
-    setGarageData({
-      garagenom: garage.garagenom || '', // ⭐ ATTENTION: garagenom pas garagenom
-      matriculefiscal: garage.matriculeFiscal || '',
-      emailProfessionnel: garage.emailProfessionnel || '',
-      telephoneProfessionnel: garage.telephoneProfessionnel || '',
-      governorateName: garage.governorateName || '',
-      cityName: garage.cityName || '',
-      streetAddress: garage.streetAddress || '',
-      description: garage.description || '',
-      horaires: garage.horaires || '',
-      location: garage.location || null,
-    });
-    setView('editGarage');
-  };
+// ⭐ FONCTION EDIT - MODIFIÉE
+const handleEditGarage = (garage: any) => {
+  console.log('🔧 Édition du garage:', garage);
+  setGarageToEdit(garage);
+  setGarageData({
+    garagenom: garage.nom || '',              // 🔥 CHANGÉ: nom au lieu de garagenom
+    matriculefiscal: garage.matriculeFiscal || '',
+    emailProfessionnel: garage.emailProfessionnel || '',
+    telephoneProfessionnel: garage.telephoneProfessionnel || '',
+    governorateId: garage.governorateId || '',     // 🔥 AJOUTÉ
+    governorateName: garage.governorateName || '',
+    cityId: garage.cityId || '',                   // 🔥 AJOUTÉ
+    cityName: garage.cityName || '',
+    streetAddress: garage.streetAddress || '',
+    description: garage.description || '',
+    horaires: garage.horaires || '',
+    location: garage.location || null,
+  });
+  setView('editGarage');
+};
 
-  const handleUpdateGarage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
+const handleUpdateGarage = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+  setSuccess('');
 
-    try {
-      const updateData = {
-        garagenom: garageData.garagenom, // ⭐ Convertir garagenom → garagenom
-        emailProfessionnel: garageData.emailProfessionnel,
-        telephoneProfessionnel: garageData.telephoneProfessionnel,
-        governorateName: garageData.governorateName,
-        cityName: garageData.cityName,
-        streetAddress: garageData.streetAddress,
-        description: garageData.description,
-        horaires: garageData.horaires,
-        location: garageData.location, 
-      };
+  try {
+    console.log('📤 Données envoyées:', garageData);
 
-      await updateGarage((garageToEdit as any)._id, updateData);
-      setSuccess('✅ Garage modifié avec succès !');
-      
-      setTimeout(() => {
-        resetForm();
-        fetchGarages();
-        setView('list');
-      }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de la modification');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const updateData = {
+      garagenom: garageData.garagenom,           // 🔥 Frontend → Backend
+      emailProfessionnel: garageData.emailProfessionnel,
+      telephoneProfessionnel: garageData.telephoneProfessionnel,
+      governorateId: garageData.governorateId,   // 🔥 AJOUTÉ
+      governorateName: garageData.governorateName,
+      cityId: garageData.cityId,                 // 🔥 AJOUTÉ
+      cityName: garageData.cityName,
+      streetAddress: garageData.streetAddress,
+      description: garageData.description,
+      horaires: garageData.horaires,
+      location: garageData.location, 
+    };
+
+    console.log('📦 Payload final:', updateData);
+
+    await updateGarage((garageToEdit as any)._id, updateData);
+    setSuccess('✅ Garage modifié avec succès !');
+    
+    setTimeout(() => {
+      resetForm();
+      fetchGarages();
+      setView('list');
+    }, 2000);
+  } catch (err: any) {
+    console.error('❌ Erreur:', err);
+    setError(err.message || 'Erreur lors de la modification');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleViewDetails = (garage: any) => {
     setSelectedGarageForDetails(garage);
     setView('details');
   };
 
-  const resetForm = () => {
-    setStep(1);
-    setCreatedGarage(null);
-    setSelectedGarage(null);
-    setGarageToEdit(null); // ⭐ IMPORTANT
-    setGarageData({
-      garagenom: '',
-      matriculefiscal: '',
-      governorateName: '',
-      cityName: '',
-      streetAddress: '',
-      description: '',
-      horaires: '',
-      emailProfessionnel: '',
-      telephoneProfessionnel:'',
-      location: null, 
-    });
-    setGaragisteData({
-      username: '',
-      email: '',
-      password: '',
-      phone: '',
-      roleId: roles.find((r: any) => r.name === 'Admin Garage')?._id || ''
-    });
-    setError('');
-    setSuccess('');
-  };
+const resetForm = () => {
+  setStep(1);
+  setCreatedGarage(null);
+  setSelectedGarage(null);
+  setGarageToEdit(null);
+  setGarageData({
+    garagenom: '',
+    matriculefiscal: '',
+    governorateId: '',      // 🔥 AJOUTÉ
+    governorateName: '',
+    cityId: '',             // 🔥 AJOUTÉ
+    cityName: '',
+    streetAddress: '',
+    description: '',
+    horaires: '',
+    emailProfessionnel: '',
+    telephoneProfessionnel: '',
+    location: null, 
+  });
+  setGaragisteData({
+    username: '',
+    email: '',
+    password: '',
+    phone: '',
+    roleId: roles.find((r: any) => r.name === 'Admin Garage')?._id || ''
+  });
+  setError('');
+  setSuccess('');
+};
 
   const startCreateGarage = () => {
     resetForm();
@@ -415,11 +429,20 @@ Voulez-vous vraiment continuer ?`;
           )}
 
           <GarageEditForm
-            garageData={garageData}
-            onChange={handleGarageChange}
-            onSubmit={handleUpdateGarage}
-            loading={loading}
-          />
+  garageData={garageData}
+  onChange={handleGarageChange}
+  onSubmit={handleUpdateGarage}
+  loading={loading}
+  onLocationChange={(coords) => {  // 🔥 AJOUTÉ
+    setGarageData(prev => ({
+      ...prev,
+      location: {
+        type: 'Point',
+        coordinates: [coords[1], coords[0]]
+      }
+    }));
+  }}
+/>
         </div>
       </div>
     );

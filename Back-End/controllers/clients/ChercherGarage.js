@@ -1,4 +1,4 @@
-import { Garagiste } from '../../models/Garagiste.js';
+import { Garage } from '../../models/Garage.js';
 import mongoose from 'mongoose';
 import axios from 'axios';
 
@@ -69,12 +69,12 @@ export const search = async (req, res) => {
 
     // Construction de la query de base
     let query = {
-      garagenom: { $exists: true, $ne: "", $ne: null }
+      nom: { $exists: true, $ne: "", $ne: null }
     };
 
     // Recherche par nom
     if (search && search.trim()) {
-      query.garagenom = { 
+      query.nom = { 
         $exists: true, 
         $ne: "", 
         $ne: null,
@@ -104,7 +104,7 @@ export const search = async (req, res) => {
     console.log('Query MongoDB:', JSON.stringify(query, null, 2));
 
     // Récupération des garages
-    let garages = await Garagiste.find(query)
+    let garages = await Garage.find(query)
       .populate('governorateId', 'name')
       .populate('cityId', 'name')
       .select('-password -resetPasswordToken -resetPasswordExpires -googleId')
@@ -126,7 +126,7 @@ export const search = async (req, res) => {
 
       for (const garage of garages) {
         if (!garage.location?.coordinates) {
-          console.log(`⚠️ ${garage.garagenom}: pas de coordonnées`);
+          console.log(`⚠️ ${garage.nom}: pas de coordonnées`);
           continue;
         }
 
@@ -137,7 +137,7 @@ export const search = async (req, res) => {
         
         // Filtrer par rayon
         if (straightDistance > maxDistanceKm) {
-          console.log(`❌ ${garage.garagenom}: ${straightDistance.toFixed(1)}km (hors rayon)`);
+          console.log(`❌ ${garage.nom}: ${straightDistance.toFixed(1)}km (hors rayon)`);
           continue;
         }
 
@@ -151,9 +151,9 @@ export const search = async (req, res) => {
           if (drivingData) {
             garage.drivingDistance = drivingData.distance;
             garage.estimatedTime = formatDuration(drivingData.duration);
-            console.log(`✅ ${garage.garagenom}: ${drivingData.distance.toFixed(1)}km en ${garage.estimatedTime}`);
+            console.log(`✅ ${garage.nom}: ${drivingData.distance.toFixed(1)}km en ${garage.estimatedTime}`);
           } else {
-            console.log(`⚠️ ${garage.garagenom}: ${straightDistance.toFixed(1)}km (route non calculée)`);
+            console.log(`⚠️ ${garage.nom}: ${straightDistance.toFixed(1)}km (route non calculée)`);
           }
         }
 

@@ -32,7 +32,8 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
   const [citiesList, setCitiesList] = useState<any[]>([]);
   const [governorateId, setGovernorateId] = useState("");
   const [cityId, setCityId] = useState("");
-  const [mechanicLocation, setMechanicLocation] = useState<[number, number]>([36.8065, 10.1815]);
+  const [mechanicLocation, setMechanicLocation] = useState<[number, number] | null>(null);
+  const [manualLocationSet, setManualLocationSet] = useState(false); // 🔥 Flag pour position manuelle
 
   // Initialiser la location depuis garageData
   useEffect(() => {
@@ -44,6 +45,17 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
       setMechanicLocation(coords);
     }
   }, [garageData.location]);
+
+  useEffect(() => {
+  if (garageData.governorateId) {
+    setGovernorateId(garageData.governorateId);
+    console.log('📍 Gouvernorat initialisé:', garageData.governorateId);
+  }
+  if (garageData.cityId) {
+    setCityId(garageData.cityId);
+    console.log('🏙️ Ville initialisée:', garageData.cityId);
+  }
+}, [garageData.governorateId, garageData.cityId]);
 
   // Récupération Gouvernorats
   useEffect(() => {
@@ -80,6 +92,12 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
   // Géocodage automatique
   useEffect(() => {
     const geocodeAddress = async () => {
+      // 🔥 Ne pas géocoder si l'utilisateur a déplacé manuellement le marqueur
+      if (manualLocationSet) {
+        console.log('⏭️ Géocodage ignoré : position manuelle définie');
+        return;
+      }
+
       if (!cityId || !garageData.streetAddress?.trim()) return;
 
       const selectedCity = citiesList.find((c: any) => c._id === cityId);
@@ -88,6 +106,7 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
       const fullAddress = `${garageData.streetAddress}, ${selectedCity.name}, Tunisia`;
       
       try {
+        console.log('🔍 Géocodage:', fullAddress);
         const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(fullAddress)}`;
         const response = await fetch(url);
         const data = await response.json();
@@ -99,6 +118,7 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
           ];
           setMechanicLocation(newLocation);
           if (onLocationChange) onLocationChange(newLocation);
+          console.log('✅ Position géocodée:', newLocation);
         } else {
           if (selectedCity.location?.coordinates) {
             const cityCoords: [number, number] = [
@@ -107,6 +127,7 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
             ];
             setMechanicLocation(cityCoords);
             if (onLocationChange) onLocationChange(cityCoords);
+            console.log('📍 Position centrée sur la ville:', cityCoords);
           }
         }
       } catch (error) {
@@ -116,56 +137,88 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
 
     const timer = setTimeout(geocodeAddress, 1000);
     return () => clearTimeout(timer);
-  }, [cityId, garageData.streetAddress, citiesList, onLocationChange]);
+  }, [cityId, garageData.streetAddress, citiesList, onLocationChange, manualLocationSet]);
 
-  const handleGovernorateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    setGovernorateId(value);
-    setCityId("");
-    
-    const selectedGov = governoratesList.find((g: any) => g._id === value);
-    
-    const syntheticEvent = {
-      ...e,
-      target: {
-        ...e.target,
-        name: 'governorateName',
-        value: selectedGov?.name || ''
-      }
-    } as React.ChangeEvent<HTMLSelectElement>;
-    
-    onChange(syntheticEvent);
-  };
 
-  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    setCityId(value);
+
+  // 🔥 NOUVEAU : Initialiser governorateId et cityId depuis garageData
+useEffect(() => {
+  if (garageData.governorateId) {
+    setGovernorateId(garageData.governorateId);
+    console.log('📍 Gouvernorat initialisé:', garageData.governorateId);
+  }
+  if (garageData.cityId) {
+    setCityId(garageData.cityId);
+    console.log('🏙️ Ville initialisée:', garageData.cityId);
+  }
+}, [garageData.governorateId, garageData.cityId]);
+
+const handleGovernorateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const value = e.target.value;
+  setGovernorateId(value);
+  setCityId("");
+  setManualLocationSet(false);
+  
+  const selectedGov = governoratesList.find((g: any) => g._id === value);
+  
+  // 🔥 Réinitialiser l'adresse
+  const addressEvent = {
+    target: { name: 'streetAddress', value: '' }
+  } as React.ChangeEvent<HTMLInputElement>;
+  onChange(addressEvent);
+  
+  // 🔥 Envoyer l'ID du gouvernorat
+  const idEvent = {
+    target: { name: 'governorateId', value: value }
+  } as React.ChangeEvent<HTMLInputElement>;
+  onChange(idEvent);
+  
+  // 🔥 Envoyer le nom du gouvernorat
+  const nameEvent = {
+    target: { name: 'governorateName', value: selectedGov?.name || '' }
+  } as React.ChangeEvent<HTMLSelectElement>;
+  onChange(nameEvent);
+};
+
+const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const value = e.target.value;
+  setCityId(value);
+  setManualLocationSet(false);
+  
+  const selectedCity = citiesList.find((c: any) => c._id === value);
+  
+  // 🔥 Réinitialiser l'adresse
+  const addressEvent = {
+    target: { name: 'streetAddress', value: '' }
+  } as React.ChangeEvent<HTMLInputElement>;
+  onChange(addressEvent);
+  
+  if (selectedCity?.location?.coordinates) {
+    const cityCoords: [number, number] = [
+      selectedCity.location.coordinates[1],
+      selectedCity.location.coordinates[0]
+    ];
     
-    const selectedCity = citiesList.find((c: any) => c._id === value);
-    
-    if (selectedCity?.location?.coordinates) {
-      const cityCoords: [number, number] = [
-        selectedCity.location.coordinates[1],
-        selectedCity.location.coordinates[0]
-      ];
-      
-      if (!garageData.streetAddress?.trim()) {
-        setMechanicLocation(cityCoords);
-        if (onLocationChange) onLocationChange(cityCoords);
-      }
+    if (!garageData.streetAddress?.trim()) {
+      setMechanicLocation(cityCoords);
+      if (onLocationChange) onLocationChange(cityCoords);
     }
-    
-    const syntheticEvent = {
-      ...e,
-      target: {
-        ...e.target,
-        name: 'cityName',
-        value: selectedCity?.name || ''
-      }
-    } as React.ChangeEvent<HTMLSelectElement>;
-    
-    onChange(syntheticEvent);
-  };
+  }
+  
+  // 🔥 Envoyer l'ID de la ville
+  const idEvent = {
+    target: { name: 'cityId', value: value }
+  } as React.ChangeEvent<HTMLInputElement>;
+  onChange(idEvent);
+  
+  // 🔥 Envoyer le nom de la ville
+  const nameEvent = {
+    target: { name: 'cityName', value: selectedCity?.name || '' }
+  } as React.ChangeEvent<HTMLSelectElement>;
+  onChange(nameEvent);
+};
+
+
 
   const validateTunisianPhone = (phone: string) => {
     const cleaned = phone.replace(/[\s\-+]/g, '');
@@ -425,11 +478,34 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
               <MapView 
                 location={mechanicLocation}
                 setLocation={(newLocation: [number, number]) => {
+                  console.log('📍 Position manuelle définie:', newLocation);
                   setMechanicLocation(newLocation);
+                  setManualLocationSet(true); // 🔥 Marquer que la position a été définie manuellement
                   if (onLocationChange) onLocationChange(newLocation);
                 }}
               />
             </div>
+
+            {/* 🔥 Bouton pour réactiver le géocodage automatique */}
+            {manualLocationSet && (
+              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-yellow-800 text-sm">
+                    📌 Position définie manuellement
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setManualLocationSet(false);
+                    console.log('🔄 Géocodage automatique réactivé');
+                  }}
+                  className="text-xs bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700 transition-colors"
+                >
+                  Réactiver géocodage auto
+                </button>
+              </div>
+            )}
           </div>
         )}
 

@@ -194,12 +194,12 @@ useEffect(() => {
   const handleReservation = (garage) => {
     const queryParams = new URLSearchParams({
       garageId: garage._id,
-      garageName: garage.garagenom,
+      nom: garage.nom,
       garageAddress: garage.streetAddress || '',
       garageCity: garage.cityId?.name || '',
       garageGovernorate: garage.governorateId?.name || '',
       garagePhone: garage.phone || '',
-      garageEmail: garage.email || ''
+      garageEmail: garage.emailProfessionnel || ''
     }).toString();
 
     router.push(`/demande-reservation?${queryParams}`);
@@ -351,7 +351,7 @@ useEffect(() => {
                 <div key={garage._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-3">
-                      <h3 className="text-xl font-semibold text-gray-800">{garage.garagenom}</h3>
+                      <h3 className="text-xl font-semibold text-gray-800">{garage.nom}</h3>
                       
                       <div className="flex flex-col items-end gap-1">
                         {garage.distance && (
@@ -377,10 +377,10 @@ useEffect(() => {
                         </span>
                       </div>
 
-                      {garage.phone && (
+                      {garage.telephoneProfessionnel && (
                         <div className="flex items-center gap-2">
                           <Phone className="h-4 w-4" />
-                          <span className="text-sm">{garage.phone}</span>
+                          <span className="text-sm">{garage.telephoneProfessionnel}</span>
                         </div>
                       )}
 
@@ -420,7 +420,7 @@ useEffect(() => {
       {selectedGarage && (
         <div className="bg-white rounded-lg shadow-lg p-6 mt-6 border-l-4 border-blue-500">
           <div className="flex justify-between items-start mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">{selectedGarage.garagenom}</h2>
+            <h2 className="text-2xl font-bold text-gray-800">{selectedGarage.nom}</h2>
             <button
               onClick={() => setSelectedGarage(null)}
               className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -445,20 +445,20 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {selectedGarage.phone && (
+                {selectedGarage.telephoneProfessionnel && (
                   <div className="flex items-center gap-3">
                     <span>📞</span>
-                    <a href={`tel:${selectedGarage.phone}`} className="hover:text-blue-600">
-                      {selectedGarage.phone}
+                    <a href={`tel:${selectedGarage.telephoneProfessionnel}`} className="hover:text-blue-600">
+                      {selectedGarage.telephoneProfessionnel}
                     </a>
                   </div>
                 )}
 
-                {selectedGarage.email && (
+                {selectedGarage.emailProfessionnel && (
                   <div className="flex items-center gap-3">
                     <span>✉️</span>
-                    <a href={`mailto:${selectedGarage.email}`} className="hover:text-blue-600">
-                      {selectedGarage.email}
+                    <a href={`mailto:${selectedGarage.emailProfessionnel}`} className="hover:text-blue-600">
+                      {selectedGarage.emailProfessionnel}
                     </a>
                   </div>
                 )}

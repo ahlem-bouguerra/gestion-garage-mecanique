@@ -30,16 +30,6 @@ const garageSchema = new mongoose.Schema({
         default: ""
     },
 
-    // Location optionnelle
-    location: {
-        type: {
-            type: String,
-            enum: ['Point']
-        },
-        coordinates: {
-            type: [Number] // [longitude, latitude]
-        }
-    },
   garagisteAdmins: [{ 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "Garagiste" 

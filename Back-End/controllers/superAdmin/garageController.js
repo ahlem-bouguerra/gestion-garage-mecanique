@@ -9,76 +9,65 @@ import { RolePermission } from "../../models/RolePermission.js";
 import { Permission } from "../../models/Permission.js";
 
 // ========== CRÉER UNIQUEMENT LE GARAGE (Étape 1) ==========
+// Dans votre route de création de garage
 export const createGarage = async (req, res) => {
-  const {
-    garagenom,
-    matriculefiscal,
-    governorateId,
-    governorateName,
-    cityId,
-    cityName,
-    streetAddress,
-    location,
-    description,
-    horaires,
-    emailProfessionnel,
-    telephoneProfessionnel
-  } = req.body;
-
-  console.log("📥 Création du garage:", req.body);
-
-  // Validation des champs obligatoires
-  if (!garagenom || !matriculefiscal) {
-    return res.status(400).json({ 
-      message: "Le nom et le matricule fiscal sont obligatoires.",
-      required: ["garagenom", "matriculefiscal"]
-    });
-  }
-
   try {
-    // Vérifier si le matricule fiscal existe déjà
-    const existingGarage = await Garage.findOne({ matriculeFiscal: matriculefiscal });
-    if (existingGarage) {
-      return res.status(400).json({ 
-        message: "Ce matricule fiscal est déjà utilisé." 
+    const {
+      garagenom,
+      emailProfessionnel,
+      telephoneProfessionnel,
+      matriculefiscal,
+      governorateId,      // 🔥 ID du gouvernorat
+      governorateName,    // 🔥 Nom du gouvernorat
+      cityId,             // 🔥 ID de la ville
+      cityName,           // 🔥 Nom de la ville
+      streetAddress,
+      location,
+      description,
+      horaires,
+      services
+    } = req.body;
+
+    // Validation
+    if (!governorateId || !cityId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le gouvernorat et la ville sont obligatoires'
       });
     }
 
-    // Créer le garage SANS garagiste admin pour le moment
-    const newGarage = await Garage.create({
+    // Créer le garage avec les IDs ET les noms
+    const newGarage = new Garage({
       nom: garagenom,
+      emailProfessionnel,
+      telephoneProfessionnel,
       matriculeFiscal: matriculefiscal,
-      governorateId: governorateId || null,
-      governorateName: governorateName || "",
-      cityId: cityId || null,
-      cityName: cityName || "",
-      streetAddress: streetAddress || "",
-      location: location || undefined,
-      description: description || "",
-      horaires: horaires || "",
-      emailProfessionnel: emailProfessionnel || "",
-      telephoneProfessionnel: telephoneProfessionnel || "",
-      garagisteAdmins: []  // Seulement les admins seront ici
+      governorateId: mongoose.Types.ObjectId(governorateId), // 🔥 ID
+      governorateName,                                         // 🔥 Nom
+      cityId: mongoose.Types.ObjectId(cityId),                // 🔥 ID
+      cityName,                                                // 🔥 Nom
+      streetAddress,
+      location,
+      description,
+      horaires,
+      services: services?.split(',').map(s => s.trim()),
+      garagisteAdmins: [req.user._id]
     });
 
-    console.log("✅ Garage créé:", newGarage._id);
+    await newGarage.save();
 
     res.status(201).json({
-      message: "Garage créé avec succès. Vous pouvez maintenant ajouter un garagiste.",
-      garage: {
-        id: newGarage._id,
-        nom: newGarage.nom,
-        matriculeFiscal: newGarage.matriculeFiscal,
-        governorateName: newGarage.governorateName,
-        cityName: newGarage.cityName
-      }
+      success: true,
+      message: 'Garage créé avec succès',
+      garage: newGarage
     });
 
-  } catch (err) {
-    console.error("❌ Erreur création garage:", err.message);
+  } catch (error) {
+    console.error('❌ Erreur création garage:', error);
     res.status(500).json({
-      message: "Erreur serveur lors de la création.",
-      error: err.message
+      success: false,
+      message: 'Erreur lors de la création du garage',
+      error: error.message
     });
   }
 };
@@ -285,22 +274,90 @@ export const getGarageById = async (req, res) => {
 export const updateGarage = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const {
+      garagenom,              // 🔥 Frontend envoie "garagenom"
+      emailProfessionnel,
+      telephoneProfessionnel,
+      governorateId,          // 🔥 ID
+      governorateName,        // 🔥 Nom
+      cityId,                 // 🔥 ID
+      cityName,               // 🔥 Nom
+      streetAddress,
+      location,
+      description,
+      horaires,
+      services
+    } = req.body;
 
-    delete updateData.garagisteAdmins;
-    delete updateData.matriculeFiscal;
+    console.log('📝 Mise à jour garage:', id);
+    console.log('📦 Corps de la requête:', {
+      garagenom,
+      governorateId,
+      governorateName,
+      cityId,
+      cityName
+    });
 
+    // 🔥 Vérifier que le nom existe
+    if (!garagenom) {
+      return res.status(400).json({ 
+        message: "Le nom du garage est requis" 
+      });
+    }
+
+    // Construire l'objet de mise à jour
+    const updateData = {
+      nom: garagenom,  // 🔥 Mapper garagenom → nom pour MongoDB
+      emailProfessionnel,
+      telephoneProfessionnel,
+      description,
+      horaires,
+      services
+    };
+
+    // 🔥 Ajouter les IDs seulement s'ils sont valides
+    if (governorateId && governorateId !== 'undefined' && governorateId.trim() !== '') {
+      updateData.governorateId = governorateId;
+      updateData.governorateName = governorateName;
+      console.log('✅ Gouvernorat:', governorateName, '(ID:', governorateId, ')');
+    }
+
+    if (cityId && cityId !== 'undefined' && cityId.trim() !== '') {
+      updateData.cityId = cityId;
+      updateData.cityName = cityName;
+      console.log('✅ Ville:', cityName, '(ID:', cityId, ')');
+    }
+
+    // Adresse et localisation
+    if (streetAddress !== undefined) {
+      updateData.streetAddress = streetAddress;
+    }
+
+    if (location?.coordinates && Array.isArray(location.coordinates)) {
+      updateData.location = {
+        type: 'Point',
+        coordinates: location.coordinates
+      };
+      console.log('✅ Localisation:', location.coordinates);
+    }
+
+    console.log('📦 Données à enregistrer:', updateData);
+
+    // Mettre à jour dans MongoDB
     const garage = await Garage.findByIdAndUpdate(
       id,
-      updateData,
-      { new: true, runValidators: true }
+      { $set: updateData },
+      { 
+        new: true,           // Retourner le document mis à jour
+        runValidators: true  // Valider les données
+      }
     ).populate('garagisteAdmins', 'username email phone');
 
     if (!garage) {
       return res.status(404).json({ message: "Garage non trouvé" });
     }
 
-    console.log("✅ Garage mis à jour:", garage._id);
+    console.log("✅ Garage mis à jour avec succès:", garage._id);
 
     res.json({
       message: "Garage mis à jour avec succès",
@@ -309,7 +366,10 @@ export const updateGarage = async (req, res) => {
 
   } catch (error) {
     console.error("❌ Erreur updateGarage:", error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ 
+      message: "Erreur serveur",
+      error: error.message 
+    });
   }
 };
 
