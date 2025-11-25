@@ -57,7 +57,7 @@ export const NAV_DATA = [
     items: [
       {
         title: "Factures & Paiements",
-        url: "/client-facture",
+        url: "/gestion-factures",
         icon: CreditCard,
         items: [],
       },

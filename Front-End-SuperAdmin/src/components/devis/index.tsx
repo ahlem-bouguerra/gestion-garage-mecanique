@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getAllGarages, getDevisByGarage, getDevisById ,deleteDevis ,sendDevisByMail} from "./api";
-import { Plus, Edit2, Eye, Send, Check, X, Car, User, Calendar, FileText, Euro, AlertCircle, Trash2,Mail } from 'lucide-react';
+import { getAllGarages, getDevisByGarage, getDevisById ,deleteDevis ,sendDevisByMail , createNewFacture, replaceFactureWithCredit, checkIfDevisModified, checkActiveFactureExists} from "./api";
+import { Plus, Edit2, Eye, Send,Loader, Check, X, Car, User, Calendar, FileText, Euro, AlertCircle, Trash2,Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Devis {
@@ -147,6 +147,128 @@ const handleSendDevis = async (devisId: string) => {
   }
 };
 
+const handleCreateFacture = async (devis: any) => {
+  try {
+    setLoading(true);
+
+    const garageId = devis.garageId;
+
+    console.log("🔍 Étape 1 : Vérification facture existante pour devis:", devis._id);
+
+    // 1️⃣ Vérifier si une facture active existe
+    const existingFacture = await checkActiveFactureExists(devis._id, garageId);
+
+    // ==========================================
+    // 🚀 CAS 1 : Aucune facture n'existe
+    // ==========================================
+    if (!existingFacture) {
+      console.log("✅ Aucune facture existante → Création directe");
+
+      const result = await createNewFacture(devis._id, garageId);
+
+      if (result?.success) {
+        alert(`✅ Facture N°${result.facture.numeroFacture} créée avec succès !`);
+        // Recharger la liste si nécessaire
+        // await fetchDevis();
+        return;
+      } else {
+        alert("❌ Impossible de créer la facture");
+        return;
+      }
+    }
+
+    // ==========================================
+    // 🚀 CAS 2 : Une facture existe déjà
+    // ==========================================
+    console.log("⚠️ Facture existante trouvée:", existingFacture.numeroFacture);
+
+    // 2️⃣ Vérifier si le devis a été modifié APRÈS la création de la facture
+    const isDevisModified = checkIfDevisModified(devis, existingFacture);
+
+    console.log("📊 Devis modifié ?", isDevisModified);
+    console.log("   - Devis updatedAt:", devis.updatedAt);
+    console.log("   - Facture createdAt:", existingFacture.createdAt);
+
+    // ==========================================
+    // 🚀 CAS 2A : Devis NON modifié
+    // ==========================================
+    if (!isDevisModified) {
+      alert(
+        `⚠️ Une facture active existe déjà pour ce devis !\n\n` +
+        `📄 Numéro : ${existingFacture.numeroFacture}\n` +
+        `📅 Date : ${new Date(existingFacture.createdAt).toLocaleDateString()}\n\n` +
+        `Le devis n'a pas été modifié depuis la création de cette facture.`
+      );
+      return;
+    }
+
+    // ==========================================
+    // 🚀 CAS 2B : Devis MODIFIÉ → Demander confirmation
+    // ==========================================
+    const userConfirmed = window.confirm(
+      `⚠️ Le devis a été modifié après la création de la facture !\n\n` +
+      `📄 Facture existante : ${existingFacture.numeroFacture}\n` +
+      `📅 Date facture : ${new Date(existingFacture.createdAt).toLocaleDateString()}\n` +
+      `🔄 Dernière modification devis : ${new Date(devis.updatedAt).toLocaleDateString()}\n\n` +
+      `Voulez-vous :\n` +
+      `✅ Créer un AVOIR pour annuler l'ancienne facture\n` +
+      `✅ Générer une NOUVELLE facture avec les données actuelles\n\n` +
+      `Confirmer cette action ?`
+    );
+
+    if (!userConfirmed) {
+      console.log("❌ Opération annulée par l'utilisateur");
+      return;
+    }
+
+    // 3️⃣ Créer l'avoir + nouvelle facture
+    console.log("🔄 Création avoir + nouvelle facture...");
+
+    const result = await replaceFactureWithCredit(devis._id, garageId);
+
+    if (result?.success) {
+      let message = `✅ Opération réussie !\n\n`;
+
+      if (result.creditNote) {
+        message += `📝 Avoir créé : ${result.creditNote.creditNumber}\n`;
+        message += `   (Annule la facture ${existingFacture.numeroFacture})\n\n`;
+      }
+
+      if (result.facture) {
+        message += `📄 Nouvelle facture : ${result.facture.numeroFacture}\n`;
+        message += `💰 Montant TTC : ${result.facture.finalTotalTTC?.toFixed(3)} DT`;
+      }
+
+      alert(message);
+
+      // Recharger la liste
+      // await fetchDevis();
+    } else {
+      alert("❌ Erreur lors de la création de l'avoir et de la nouvelle facture");
+    }
+
+  } catch (error: any) {
+    console.error("❌ Erreur création facture:", error);
+
+    if (error.response?.status === 400) {
+      alert(error.response?.data?.message || "❌ Données invalides");
+    } else if (error.response?.status === 403) {
+      alert("❌ Accès refusé");
+    } else if (error.response?.status === 401) {
+      alert("❌ Session expirée. Veuillez vous reconnecter.");
+      window.location.href = "/auth/sign-in";
+    } else if (error.response?.status === 404) {
+      alert("❌ Devis non trouvé");
+    } else {
+      alert("❌ Une erreur est survenue lors de la création de la facture");
+    }
+    
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
@@ -214,7 +336,7 @@ const handleSendDevis = async (devisId: string) => {
                     <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
                       {d.id}
                     </span>
-                    <span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColors[d.status] || 'bg-gray-100 text-gray-800'}`}>
+                    <span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColors[d.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}`}>
                       {d.status?.charAt(0).toUpperCase() + d.status?.slice(1)}
                     </span>
                   </div>
@@ -242,7 +364,7 @@ const handleSendDevis = async (devisId: string) => {
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600 text-sm">Total TTC</span>
                       <span className="text-xl font-bold text-green-600">
-                        {((d.totalTTC || 0) - (d.montantRemise || 0)).toFixed(3)} DT
+                        {(Number(d.totalTTC || 0) - Number(d.montantRemise || 0)).toFixed(3)} DT
                       </span>
                     </div>
                   </div>
@@ -284,6 +406,29 @@ const handleSendDevis = async (devisId: string) => {
     <Mail className="h-4 w-4" />
 
   </button>
+<button
+  onClick={() => {
+    console.log("📦 Objet devis complet:", d);
+    console.log("🆔 devis._id:", d._id);
+    console.log("🆔 devis.id:", d.id);
+    handleCreateFacture(d);
+  }}
+ 
+  disabled={loading}
+  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  {loading ? (
+    <>
+      <Loader className="h-4 w-4 animate-spin" />
+      <span>Traitement...</span>
+    </>
+  ) : (
+    <>
+      <FileText className="h-4 w-4" />
+      <span>Créer Facture</span>
+    </>
+  )}
+</button>
 </div>
                 </div>
               ))}
@@ -340,9 +485,9 @@ const handleSendDevis = async (devisId: string) => {
                         <tr key={index}>
                           <td className="px-4 py-2 text-sm text-gray-900">{service.piece}</td>
                           <td className="px-4 py-2 text-sm text-gray-900">{service.quantity}</td>
-                          <td className="px-4 py-2 text-sm text-gray-900">{(service.unitPrice || 0).toFixed(3)} DT</td>
+                          <td className="px-4 py-2 text-sm text-gray-900">{Number(service.unitPrice || 0).toFixed(3)} DT</td>
                           <td className="px-4 py-2 text-sm font-medium text-gray-900">
-                            {((service.quantity || 0) * (service.unitPrice || 0)).toFixed(3)} DT
+                            {(Number(service.quantity || 0) * Number(service.unitPrice || 0)).toFixed(3)} DT
                           </td>
                         </tr>
                       ))}

@@ -330,5 +330,149 @@ export const sendDevisByMail = async (devisId:string ,garageId: string) => {
 }
 
 
+export const checkActiveFactureExists = async (devisId: string, garageId?: string) => {
+  try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+
+    console.log("📡 Vérification facture active → devisId:", devisId, "garageId:", garageId);
+
+    let url = `http://localhost:5000/api/factureByDevis/${devisId}`;
+
+    if (garageId) {
+      url += `?garageId=${garageId}`;
+    }
+
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    return response.data || null;
+
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      console.log("✅ Aucune facture active trouvée");
+      return null;
+    }
+
+    console.error("❌ Erreur vérification facture:", error);
+    throw error;
+  }
+};
+
+// Dans api.ts - Assure-toi que la fonction est bien exportée
+export const createNewFacture = async (devisId: string, garageId?: string) => {
+  try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+
+    let url = `http://localhost:5000/api/create/${devisId}`;
+    
+    if (garageId) {
+      url += `?garageId=${garageId}`;
+    }
+
+    const response = await axios.post(
+      url,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Erreur création facture:', error);
+    throw error;
+  }
+};
 
 
+
+export const getFactureById = async (factureId: string) => {
+  try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+
+    const response = await axios.get(
+      `http://localhost:5000/api/getFacture/${factureId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
+
+    if (error.response?.status === 404) {
+      return null;
+    }
+
+    console.error('Erreur récupération facture:', error);
+    throw error;
+  }
+};
+
+export const checkIfDevisModified = (devis: any, facture: any) => {
+  if (!devis.updatedAt || !facture.createdAt) return false;
+
+  const devisModifiedDate = new Date(devis.updatedAt);
+  const factureCreatedDate = new Date(facture.createdAt);
+
+  return devisModifiedDate > factureCreatedDate;
+};
+
+export const replaceFactureWithCredit = async (devisId: string, garageId?: string) => {
+  try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
+
+    // ✅ Construire l'URL avec garageId en query param
+    let url = `http://localhost:5000/api/create-with-credit/${devisId}`;
+    
+    if (garageId) {
+      url += `?garageId=${garageId}`;  // ← AJOUTÉ ICI
+    }
+
+    // ✅ Body contient uniquement createCreditNote
+    const body: any = { createCreditNote: true };
+    // ❌ NE PLUS mettre garageId dans le body
+
+    const response = await axios.post(url, body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Erreur remplacement facture:', error);
+    throw error;
+  }
+};

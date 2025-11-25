@@ -1,7 +1,8 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, FileText, DollarSign, Clock, AlertTriangle } from 'lucide-react';
+import { Search, Filter, FileText, DollarSign, Clock, AlertTriangle,X } from 'lucide-react';
 import { getAllGarages, getFacturesByGarage, getStatsByGarage,getFacturesDetails ,payFacture} from './api/facturesApi';
+import axios from 'axios';
 
 export interface Garage {
   _id: string;
@@ -66,17 +67,23 @@ const GestionFacturesSuperAdmin = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 const [factureDetails, setFactureDetails] = useState(null);
 
+const [showCreditNoteModal, setShowCreditNoteModal] = useState(false);
+const [creditNoteDetails, setCreditNoteDetails] = useState(null);
+
+const getAuthToken = () => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
 
   useEffect(() => {
     const header = document.querySelector('header');
     if (!header) return;
 
-    if (factureDetails || selectedFacture ) {
+    if (factureDetails || selectedFacture ||creditNoteDetails ) {
       header.classList.add("hidden");
     } else {
       header.classList.remove("hidden");
     }
-  }, [factureDetails, selectedFacture]);
+  }, [factureDetails, selectedFacture,creditNoteDetails]);
 
   // 1️⃣ Charger tous les garages au montage du composant
   useEffect(() => {
@@ -258,6 +265,44 @@ const handlePayment = async (factureId: string, paymentData: any) => {
   }
 };
 
+const fetchCreditNoteDetails = async (creditNoteId: string) => {
+  try {
+    console.log('🚀 Appel API pour avoir ID:', creditNoteId);
+    
+    if (!selectedGarageId) {
+      alert("Veuillez sélectionner un garage !");
+      return;
+    }
+
+    // ✅ AJOUTER le garageId en query parameter
+    const response = await axios.get(
+      `http://localhost:5000/api/credit-note/${creditNoteId}?garageId=${selectedGarageId}`,
+      {
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      }
+    );
+
+    if (response.data.success) {
+      setCreditNoteDetails(response.data.data);
+      setShowCreditNoteModal(true);
+    }
+  } catch (error: any) {
+    console.error('❌ Erreur détaillée:', {
+      status: error.response?.status,
+      message: error.response?.data?.message,
+      url: error.config?.url,
+      data: error.response?.data
+    });
+
+    if (error.response?.status === 404) {
+      alert('Avoir non trouvé');
+    } else if (error.response?.status === 400) {
+      alert(error.response?.data?.message || 'Erreur de requête');
+    } else {
+      alert('Erreur lors du chargement de l\'avoir');
+    }
+  }
+};
 
 
 
@@ -962,9 +1007,200 @@ const handlePayment = async (factureId: string, paymentData: any) => {
           </div>
         </div>
       )}
+         {showCreditNoteModal && creditNoteDetails && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-5 mx-auto p-6 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6 border-b pb-4">
+              <div>
+                <h3 className="text-2xl font-bold text-red-600">
+                  AVOIR N° {creditNoteDetails.creditNumber}
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Document d'annulation comptable
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCreditNoteModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Informations principales */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <h4 className="font-semibold text-red-800 mb-3">Facture Annulée</h4>
+                <div className="space-y-2 text-sm">
+                  <p><strong>N° Facture:</strong> {creditNoteDetails.originalFactureNumber}</p>
+                  <p><strong>Date d'émission avoir:</strong> {formatDate(creditNoteDetails.creditDate)}</p>
+                  <p><strong>Raison:</strong> {creditNoteDetails.reason}</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-gray-800 mb-3">Client</h4>
+                <div className="space-y-1 text-sm text-gray-700">
+                  <p className="font-medium">{creditNoteDetails.clientInfo.nom}</p>
+                  <p>Tél: {creditNoteDetails.clientId?.telephone || creditNoteDetails.clientInfo.telephone}</p>
+                  <p>Email: {creditNoteDetails.clientId?.email || creditNoteDetails.clientInfo.email}</p>
+                </div>
+
+                <h4 className="font-semibold text-gray-800 mb-2 mt-4">Véhicule</h4>
+                <p className="text-sm text-gray-700">{creditNoteDetails.vehicleInfo}</p>
+              </div>
+            </div>
+
+            {/* Services annulés */}
+            {creditNoteDetails.services && creditNoteDetails.services.length > 0 && (
+              <div className="mb-8">
+                <h4 className="font-semibold text-gray-800 mb-4">Services Annulés</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-300">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold">
+                          Description
+                        </th>
+                        <th className="border border-gray-300 px-4 py-3 text-center text-sm font-semibold">
+                          Qté
+                        </th>
+                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold">
+                          Prix Unit.
+                        </th>
+                        <th className="border border-gray-300 px-4 py-3 text-right text-sm font-semibold">
+                          Total Annulé
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {creditNoteDetails.services.map((service, index) => (
+                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="border border-gray-300 px-4 py-3">{service.piece}</td>
+                          <td className="border border-gray-300 px-4 py-3 text-center">{service.quantity}</td>
+                          <td className="border border-gray-300 px-4 py-3 text-right">
+                            {formatCurrency(service.unitPrice)}
+                          </td>
+                          <td className="border border-gray-300 px-4 py-3 text-right font-medium text-red-600">
+                            -{formatCurrency(service.total)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Total de l'avoir */}
+            <div className="border-t-2 border-red-300 pt-6 mb-6">
+              <div className="flex justify-end">
+                <div className="w-100 bg-red-50 border border-red-200 rounded-lg p-4">
+
+                  <div className="flex justify-end mb-8">
+                    <div className="w-100">
+                      <table className="w-full">
+                        <tbody>
+                          {creditNoteDetails.totalHT && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b">
+                                TOTAL HT:
+                              </td>
+                              <td className="px-4 py-2 text-right border-b">
+                                {formatCurrency(creditNoteDetails.totalHT)}
+                              </td>
+                            </tr>
+                          )}
+                          {creditNoteDetails.totalTVA && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b">
+                                TVA ({creditNoteDetails.tvaRate || 20}%):
+                              </td>
+                              <td className="px-4 py-2 text-right border-b">
+                                {formatCurrency(creditNoteDetails.totalTVA)}
+                              </td>
+                            </tr>
+                          )}
+                          {creditNoteDetails.totalRemise !== undefined && creditNoteDetails.totalRemise !== null && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                                REMISE:
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                                -{formatCurrency(creditNoteDetails.totalRemise)}
+                              </td>
+                            </tr>
+                          )}
+                          <tr className="bg-gray-100">
+                            <td className="px-4 py-3 text-right text-lg font-bold">
+                              TOTAL TTC:
+                            </td>
+                            <td className="px-4 py-3 text-right text-lg font-bold text-red-600">
+                              {formatCurrency(creditNoteDetails.totalTTC)}
+                            </td>
+                          </tr>
+
+
+                          {creditNoteDetails.timbreFiscal && creditNoteDetails.timbreFiscal > 0 && (
+                            <tr>
+                              <td className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                                Timbre fiscal:
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                                {formatCurrency(creditNoteDetails.timbreFiscal)}
+                              </td>
+                            </tr>
+                          )}
+                          <tr className="bg-gray-100">
+                            <td className="px-4 py-3 text-right text-lg font-bold text-gray-800">
+                              TOTAL TTC avec remise :
+                            </td>
+                            <td className="px-4 py-3 text-right text-lg font-bold text-red-600">
+                              {formatCurrency(creditNoteDetails.finalTotalTTC)}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <p className="text-s text-red-500 mt-2 text-center">
+                    Ce montant annulé est de la facture originale
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Note légale */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-yellow-800">
+                <strong>Note:</strong> Cet avoir annule définitivement la facture N° {creditNoteDetails.originalFactureNumber}.
+                Il doit être conservé pour la comptabilité et peut servir de justificatif pour tout remboursement.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Imprimer l'avoir
+              </button>
+              <button
+                onClick={() => setShowCreditNoteModal(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     
   );
 };
 
 export default GestionFacturesSuperAdmin;
+

@@ -8,7 +8,6 @@ export const CreateFacture = async (req, res) => {
   try {
     const { devisId } = req.params;
 
-    // Validation de l'ObjectId
     if (!mongoose.Types.ObjectId.isValid(devisId)) {
       return res.status(400).json({ 
         success: false, 
@@ -16,8 +15,15 @@ export const CreateFacture = async (req, res) => {
       });
     }
 
+    // ⭐ Support SuperAdmin avec ?garageId=xxx ou body.garageId
+    let garageIdToUse = req.user.garageId;
+    
+    if (req.user.isSuperAdmin) {
+      garageIdToUse = req.query.garageId || req.body.garageId || req.user.garageId;
+    }
+
     // 1️⃣ Vérifier si le devis existe et est accepté
-    const devis = await Devis.findOne({_id: devisId, garageId: req.user.garageId });
+    const devis = await Devis.findOne({_id: devisId, garageId: garageIdToUse });
     if (!devis) {
       return res.status(404).json({ success: false, message: 'Devis non trouvé' });
     }
@@ -27,33 +33,38 @@ export const CreateFacture = async (req, res) => {
 
     const ficheClient = await FicheClient.findById(devis.clientId);
 
-    // 2️⃣ Vérifier si une facture existe déjà pour ce devis
-    const existingFacture = await Facture.findOne({ devisId: devis._id , garageId: req.user.garageId  });
+    // 2️⃣ Vérifier si une facture existe déjà
+    const existingFacture = await Facture.findOne({ 
+      devisId: devis._id, 
+      garageId: garageIdToUse  
+    });
+    
     if (existingFacture) {
-      return res.status(400).json({ success: false, message: 'Une facture existe déjà pour ce devis', facture: existingFacture });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Une facture existe déjà pour ce devis', 
+        facture: existingFacture 
+      });
     }
 
-    // 3️⃣ Générer automatiquement le numeroFacture (sécurisé)
+    // 3️⃣ Générer le numéro
     const numeroFacture = await Facture.generateFactureId();
-    console.log('✅ ID généré:', numeroFacture);
-
-
     const timbreFiscal = 1.000;
     const finalTotalTTCAvecTimbre = (devis.finalTotalTTC || 0) + timbreFiscal;
 
-    // 4️⃣ Préparer les données de la facture
+    // 4️⃣ Créer la facture
     const factureData = {
       numeroFacture: numeroFacture,
       devisId: devis._id,
-       clientId: devis.clientId,
-       realClientId: ficheClient?.clientId || null,
-       garageId: req.user.garageId ,  // ← ici
-        clientInfo: {
-          nom: devis.clientName,
-          telephone: devis.clientPhone,
-          email: devis.clientEmail,
-          adresse: devis.clientAddress
-        },
+      clientId: devis.clientId,
+      realClientId: ficheClient?.clientId || null,
+      garageId: garageIdToUse, // ⭐ Utiliser garageIdToUse
+      clientInfo: {
+        nom: devis.clientName,
+        telephone: devis.clientPhone,
+        email: devis.clientEmail,
+        adresse: devis.clientAddress
+      },
       clientName: devis.clientName,
       vehicleInfo: devis.vehicleInfo,
       inspectionDate: devis.inspectionDate,
@@ -76,29 +87,35 @@ export const CreateFacture = async (req, res) => {
       createdBy: req.user?.id
     };
 
-    console.log('FactureData avant save:', factureData);
-
-    // 5️⃣ Créer et sauvegarder la facture
     const facture = new Facture(factureData);
     await facture.save();
 
-    // 6️⃣ Population si nécessaire
     const populatedFacture = await Facture.findById(facture._id)
       .populate('clientId', 'nom email telephone')
       .populate('devisId', 'id status');
 
-    // 7️⃣ Réponse réussie
-    res.status(201).json({ success: true, message: 'Facture générée avec succès', facture: populatedFacture });
+    res.status(201).json({ 
+      success: true, 
+      message: 'Facture générée avec succès', 
+      facture: populatedFacture 
+    });
 
   } catch (error) {
-    console.error('Erreur lors de la génération de facture:', error);
-
-    // Si doublon sur numeroFacture (rare, mais possible en cas de requêtes simultanées)
+    console.error('Erreur:', error);
+    
     if (error.code === 11000 && error.keyPattern?.numeroFacture) {
-      return res.status(409).json({ success: false, message: 'Numéro de facture déjà existant, réessayez', error: error.message });
+      return res.status(409).json({ 
+        success: false, 
+        message: 'Numéro de facture déjà existant', 
+        error: error.message 
+      });
     }
 
-    res.status(500).json({ success: false, message: 'Erreur serveur lors de la génération de facture', error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erreur serveur', 
+      error: error.message 
+    });
   }
 };
 
@@ -375,31 +392,51 @@ export const GetFactureById = async (req, res) => {
 
 export const getFactureByDevis = async (req, res) => {
   try {
-    // ✅ Vérification de sécurité
     if (!req.user || !req.user._id) {
-      return res.status(401).json({ 
-        message: "Utilisateur non authentifié" 
+      return res.status(401).json({
+        message: "Utilisateur non authentifié"
       });
     }
 
-    const facture = await Facture.findOne({ 
-      garageId: req.user.garageId,
+    // 🎯 Déterminer quel garageId utiliser
+    let garageIdToUse = req.user.garageId;
+
+    if (req.user.isSuperAdmin) {
+      if (!req.query.garageId) {
+        return res.status(400).json({
+          message: "garageId est requis pour SuperAdmin"
+        });
+      }
+      garageIdToUse = req.query.garageId;
+    }
+
+    // ⭐ Vérifier que garageIdToUse est défini
+    if (!garageIdToUse) {
+      return res.status(400).json({
+        message: "garageId manquant"
+      });
+    }
+
+    const facture = await Facture.findOne({
+      garageId: garageIdToUse,
       devisId: req.params.devisId,
-      status: 'active'
+      status: "active"
     }).populate("devisId");
-    
+
     if (!facture) {
-      return res.status(404).json({ 
-        message: "Aucune facture active trouvée pour ce devis" 
+      return res.status(404).json({
+        message: "Aucune facture active trouvée pour ce devis"
       });
     }
 
-    res.json(facture);
+    return res.json(facture);
+
   } catch (err) {
-    console.error('Erreur getFactureByDevis:', err);
-    res.status(500).json({ message: err.message });
+    console.error("❌ Erreur getFactureByDevis:", err);
+    return res.status(500).json({ message: err.message });
   }
 };
+
 
 export const MarquerFacturePayed = async (req, res) => {
   try {
@@ -567,6 +604,17 @@ export const DeleteFacture = async (req, res) => {
 
 export const CreateFactureWithCredit = async (req, res) => {
   try {
+    let garageIdToUse = req.user.garageId;
+
+if (req.user.isSuperAdmin) {
+  if (!req.query.garageId) {
+    return res.status(400).json({
+      success: false,
+      message: "garageId est requis pour un SuperAdmin"
+    });
+  }
+  garageIdToUse = req.query.garageId;
+}
     const { devisId } = req.params;
     const { createCreditNote = false } = req.body;
     const timbreFiscal = 1.000;
@@ -582,7 +630,8 @@ export const CreateFactureWithCredit = async (req, res) => {
     // 1. Récupérer le devis avec filtrage garagiste
     const devis = await Devis.findOne({ 
       _id: devisId, 
-      garageId: req.user.garageId
+      garageId: garageIdToUse
+
     });
     if (!devis) {
       return res.status(404).json({ 
@@ -595,7 +644,8 @@ export const CreateFactureWithCredit = async (req, res) => {
     const existingFacture = await Facture.findOne({ 
       devisId: devisId, 
       status: 'active',
-      garageId: req.user.garageId
+      garageId: garageIdToUse
+
     });
 
     let creditNote = null;
@@ -630,7 +680,8 @@ export const CreateFactureWithCredit = async (req, res) => {
         reason: 'Annulation suite à modification du devis',
         creditDate: new Date(),
         createdBy: req.user?.id,
-        garageId: req.user.garageId
+        garageId: garageIdToUse
+
       });
 
       await creditNote.save();
@@ -690,7 +741,8 @@ export const CreateFactureWithCredit = async (req, res) => {
       invoiceDate: new Date(),
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       createdBy: req.user?.id,
-      garageId: req.user.garageId,
+      garageId: garageIdToUse,
+
       status: 'active'
     };
 
@@ -768,9 +820,23 @@ export const CreateFactureWithCredit = async (req, res) => {
 
 export const getCreditNoteById = async (req, res) => {
   try {
+    let garageIdToUse = req.user.garageId;
+
+    // ✅ Gestion SuperAdmin
+    if (req.user.isSuperAdmin) {
+      if (!req.query.garageId) {
+        return res.status(400).json({
+          success: false,
+          message: "garageId est requis pour un SuperAdmin"
+        });
+      }
+      garageIdToUse = req.query.garageId;
+    }
+    
     const { creditNoteId } = req.params;
     console.log('🔍 Recherche avoir ID:', creditNoteId);
     console.log('👤 User ID:', req.user._id);
+    console.log('🏢 Garage ID utilisé:', garageIdToUse);
     
     // Vérifiez d'abord si l'avoir existe (sans filtre garageId)
     const existsCheck = await CreditNote.findById(creditNoteId);
@@ -778,14 +844,14 @@ export const getCreditNoteById = async (req, res) => {
     
     const creditNote = await CreditNote.findOne({
       _id: creditNoteId,
-     garageId: req.user.garageId
+      garageId: garageIdToUse  // ← Utiliser la variable
     })
     .populate('clientId', 'nom email telephone adresse')
     .populate('originalFactureId', 'numeroFacture')
     .populate('services', 'name description');
 
     if (!creditNote) {
-      console.log('❌ Avoir non trouvé pour cet utilisateur');
+      console.log('❌ Avoir non trouvé pour ce garage');
       return res.status(404).json({
         success: false,
         message: 'Avoir non trouvé'
