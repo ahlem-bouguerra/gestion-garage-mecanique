@@ -1,15 +1,21 @@
-// components/garage/GarageEditForm.tsx
-import { Building2, Loader2, ArrowRight, Clock } from 'lucide-react';
+import { Building2, Loader2, ArrowRight, Clock, MapPin } from 'lucide-react';
 import { useState, useEffect } from "react";
+import dynamic from 'next/dynamic';
+
+const MapView = dynamic(() => import('./MapView'), {
+  ssr: false,
+  loading: () => <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">Chargement de la carte...</div>
+});
 
 interface GarageEditFormProps {
   garageData: any;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
   loading: boolean;
+  onLocationChange?: (location: [number, number]) => void;
 }
 
-export default function GarageEditForm({ garageData, onChange, onSubmit, loading }: GarageEditFormProps) {
+export default function GarageEditForm({ garageData, onChange, onSubmit, loading, onLocationChange }: GarageEditFormProps) {
   const [phoneError, setPhoneError] = useState("");
   const [horaires, setHoraires] = useState({
     lundi: { debut: '08:00', fin: '19:00', ferme: false },
@@ -21,14 +27,145 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
     dimanche: { debut: '', fin: '', ferme: true }
   });
 
-  // Initialiser les horaires depuis garageData
+  // États pour gouvernorats et villes
+  const [governoratesList, setGovernoratesList] = useState<any[]>([]);
+  const [citiesList, setCitiesList] = useState<any[]>([]);
+  const [governorateId, setGovernorateId] = useState("");
+  const [cityId, setCityId] = useState("");
+  const [mechanicLocation, setMechanicLocation] = useState<[number, number]>([36.8065, 10.1815]);
+
+  // Initialiser la location depuis garageData
   useEffect(() => {
-    if (garageData.horaires) {
-      // Parser la chaîne existante et mettre à jour l'état
-      // Cette fonction est simplifiée, adapte-la selon ton format exact
-      console.log('Horaires existants:', garageData.horaires);
+    if (garageData.location?.coordinates) {
+      const coords: [number, number] = [
+        garageData.location.coordinates[1], // latitude
+        garageData.location.coordinates[0]  // longitude
+      ];
+      setMechanicLocation(coords);
     }
-  }, [garageData.horaires]);
+  }, [garageData.location]);
+
+  // Récupération Gouvernorats
+  useEffect(() => {
+    const fetchGovernorate = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/governorates");
+        const data = await response.json();
+        setGovernoratesList(data);
+      } catch (err) {
+        console.error("❌ Erreur gouvernorats:", err);
+      }
+    };
+    fetchGovernorate();
+  }, []);
+
+  // Récupération Villes selon gouvernorat
+  useEffect(() => {
+    const fetchCities = async () => {
+      if (!governorateId) {
+        setCitiesList([]);
+        return;
+      }
+      try {
+        const response = await fetch(`http://localhost:5000/api/cities/${governorateId}`);
+        const data = await response.json();
+        setCitiesList(data);
+      } catch (err) {
+        console.error("❌ Erreur villes:", err);
+      }
+    };
+    fetchCities();
+  }, [governorateId]);
+
+  // Géocodage automatique
+  useEffect(() => {
+    const geocodeAddress = async () => {
+      if (!cityId || !garageData.streetAddress?.trim()) return;
+
+      const selectedCity = citiesList.find((c: any) => c._id === cityId);
+      if (!selectedCity) return;
+
+      const fullAddress = `${garageData.streetAddress}, ${selectedCity.name}, Tunisia`;
+      
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(fullAddress)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.length > 0) {
+          const newLocation: [number, number] = [
+            parseFloat(data[0].lat),
+            parseFloat(data[0].lon)
+          ];
+          setMechanicLocation(newLocation);
+          if (onLocationChange) onLocationChange(newLocation);
+        } else {
+          if (selectedCity.location?.coordinates) {
+            const cityCoords: [number, number] = [
+              selectedCity.location.coordinates[1],
+              selectedCity.location.coordinates[0]
+            ];
+            setMechanicLocation(cityCoords);
+            if (onLocationChange) onLocationChange(cityCoords);
+          }
+        }
+      } catch (error) {
+        console.error("Erreur géocodage:", error);
+      }
+    };
+
+    const timer = setTimeout(geocodeAddress, 1000);
+    return () => clearTimeout(timer);
+  }, [cityId, garageData.streetAddress, citiesList, onLocationChange]);
+
+  const handleGovernorateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setGovernorateId(value);
+    setCityId("");
+    
+    const selectedGov = governoratesList.find((g: any) => g._id === value);
+    
+    const syntheticEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        name: 'governorateName',
+        value: selectedGov?.name || ''
+      }
+    } as React.ChangeEvent<HTMLSelectElement>;
+    
+    onChange(syntheticEvent);
+  };
+
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setCityId(value);
+    
+    const selectedCity = citiesList.find((c: any) => c._id === value);
+    
+    if (selectedCity?.location?.coordinates) {
+      const cityCoords: [number, number] = [
+        selectedCity.location.coordinates[1],
+        selectedCity.location.coordinates[0]
+      ];
+      
+      if (!garageData.streetAddress?.trim()) {
+        setMechanicLocation(cityCoords);
+        if (onLocationChange) onLocationChange(cityCoords);
+      }
+    }
+    
+    const syntheticEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        name: 'cityName',
+        value: selectedCity?.name || ''
+      }
+    } as React.ChangeEvent<HTMLSelectElement>;
+    
+    onChange(syntheticEvent);
+  };
 
   const validateTunisianPhone = (phone: string) => {
     const cleaned = phone.replace(/[\s\-+]/g, '');
@@ -139,7 +276,7 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
   ];
 
   return (
-    <div onSubmit={onSubmit} className="space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
         <Building2 className="w-6 h-6 text-blue-600" />
         <h2 className="text-xl font-semibold text-gray-900">Modifier le Garage</h2>
@@ -152,8 +289,8 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
           </label>
           <input
             type="text"
-            name="nom"
-            value={garageData.nom || ''}
+            name="garagenom"
+            value={garageData.garagenom || ''}
             onChange={onChange}
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -201,45 +338,100 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
           <input
             type="text"
             name="matriculeFiscal"
-            value={garageData.matriculeFiscal || ''}
+            value={garageData.matriculefiscal || ''}
             disabled
             className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
           />
           <p className="text-xs text-gray-500 mt-1">Le matricule fiscal ne peut pas être modifié</p>
         </div>
 
+        {/* ✅ SÉLECTEUR GOUVERNORAT */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Gouvernorat</label>
-          <input
-            type="text"
-            name="governorateName"
-            value={garageData.governorateName || ''}
-            onChange={onChange}
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Gouvernorat <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={governorateId}
+            onChange={handleGovernorateChange}
+            required
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
+          >
+            <option value="">Sélectionner un gouvernorat</option>
+            {governoratesList.map((g: any) => (
+              <option key={g._id} value={g._id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
         </div>
 
+        {/* ✅ SÉLECTEUR VILLE */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Ville</label>
-          <input
-            type="text"
-            name="cityName"
-            value={garageData.cityName || ''}
-            onChange={onChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Ville <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={cityId}
+            onChange={handleCityChange}
+            required
+            disabled={!governorateId}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="">Choisir une ville</option>
+            {citiesList.map((c: any) => (
+              <option key={c._id} value={c._id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          {!governorateId && (
+            <p className="text-gray-500 text-xs mt-1">Sélectionnez d'abord un gouvernorat</p>
+          )}
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Adresse / Rue</label>
           <input
             type="text"
             name="streetAddress"
             value={garageData.streetAddress || ''}
             onChange={onChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="Ex: Avenue Habib Bourguiba..."
           />
+          <p className="text-gray-500 text-xs mt-1">💡 Modifiez l'adresse pour mettre à jour la localisation</p>
         </div>
+
+        {/* ✅ CARTE INTERACTIVE */}
+        {mechanicLocation && (
+          <div className="md:col-span-2 border-2 border-blue-300 rounded-lg p-5 bg-blue-50">
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin className="w-5 h-5 text-blue-600" />
+              <h3 className="font-semibold text-blue-900">📍 Localisation du garage</h3>
+            </div>
+            
+            <div className="bg-white rounded-lg p-3 mb-4">
+              <p className="text-sm text-gray-700 mb-2">
+                <strong>Coordonnées GPS:</strong> {mechanicLocation[0].toFixed(6)}, {mechanicLocation[1].toFixed(6)}
+              </p>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p>• Modifiez le gouvernorat/ville pour changer la zone</p>
+                <p>• Ajustez manuellement le marqueur sur la carte</p>
+                <p>• Cette position sera mise à jour pour vos clients</p>
+              </div>
+            </div>
+
+            <div className="rounded-lg overflow-hidden shadow-lg">
+              <MapView 
+                location={mechanicLocation}
+                setLocation={(newLocation: [number, number]) => {
+                  setMechanicLocation(newLocation);
+                  if (onLocationChange) onLocationChange(newLocation);
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
@@ -252,7 +444,7 @@ export default function GarageEditForm({ garageData, onChange, onSubmit, loading
           />
         </div>
 
-        {/* Section Horaires (identique au formulaire de création) */}
+        {/* Section Horaires */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
             <Clock className="w-4 h-4 text-blue-600" />

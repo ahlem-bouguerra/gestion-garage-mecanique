@@ -70,7 +70,16 @@ const garageSchema = new mongoose.Schema({
     telephoneProfessionnel: { 
         type: String, 
         required: true  // Téléphone fixe ou mobile du garage
+    },
+    location: {
+    type: {
+        type: String,
+        enum: ['Point']
+    },
+    coordinates: {
+        type: [Number] // [longitude, latitude]
     }
+}
 
 }, {
     timestamps: true

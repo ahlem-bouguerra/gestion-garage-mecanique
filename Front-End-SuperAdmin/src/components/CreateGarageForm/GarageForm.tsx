@@ -1,14 +1,21 @@
-import { Building2, Loader2, ArrowRight, Clock } from 'lucide-react';
-import { useState } from "react";
+import { Building2, Loader2, ArrowRight, Clock, MapPin } from 'lucide-react';
+import { useState, useEffect } from "react";
+import dynamic from 'next/dynamic';
+
+const MapView = dynamic(() => import('./MapView'), {
+  ssr: false,
+  loading: () => <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">Chargement de la carte...</div>
+});
 
 interface GarageFormProps {
   garageData: any;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
   loading: boolean;
+  onLocationChange?: (location: [number, number]) => void;
 }
 
-export default function GarageForm({ garageData, onChange, onSubmit, loading }: GarageFormProps) {
+export default function GarageForm({ garageData, onChange, onSubmit, loading, onLocationChange }: GarageFormProps) {
   const [phoneError, setPhoneError] = useState("");
   const [horaires, setHoraires] = useState({
     lundi: { debut: '08:00', fin: '19:00', ferme: false },
@@ -20,14 +27,148 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
     dimanche: { debut: '', fin: '', ferme: true }
   });
 
+  // États pour gouvernorats et villes
+  const [governoratesList, setGovernoratesList] = useState<any[]>([]);
+  const [citiesList, setCitiesList] = useState<any[]>([]);
+  const [governorateId, setGovernorateId] = useState("");
+  const [cityId, setCityId] = useState("");
+  const [mechanicLocation, setMechanicLocation] = useState<[number, number]>([36.8065, 10.1815]); // Tunis par défaut
+
+  // --- Récupération Gouvernorats ---
+  useEffect(() => {
+    const fetchGovernorate = async () => {
+      try {
+        console.log('📍 Chargement des gouvernorats...');
+        const response = await fetch("http://localhost:5000/api/governorates");
+        const data = await response.json();
+        setGovernoratesList(data);
+        console.log('✅ Gouvernorats chargés:', data.length);
+      } catch (err) {
+        console.error("❌ Erreur gouvernorats:", err);
+      }
+    };
+    fetchGovernorate();
+  }, []);
+
+  // --- Récupération Villes selon gouvernorat ---
+  useEffect(() => {
+    const fetchCities = async () => {
+      if (!governorateId) {
+        setCitiesList([]);
+        return;
+      }
+      try {
+        console.log('🏙️ Chargement des villes pour gouvernorat:', governorateId);
+        const response = await fetch(`http://localhost:5000/api/cities/${governorateId}`);
+        const data = await response.json();
+        setCitiesList(data);
+        console.log('✅ Villes chargées:', data.length);
+      } catch (err) {
+        console.error("❌ Erreur villes:", err);
+      }
+    };
+    fetchCities();
+  }, [governorateId]);
+
+  // Géocodage automatique quand ville + adresse changent
+  useEffect(() => {
+    const geocodeAddress = async () => {
+      if (!cityId || !garageData.streetAddress?.trim()) return;
+
+      const selectedCity = citiesList.find((c: any) => c._id === cityId);
+      if (!selectedCity) return;
+
+      const fullAddress = `${garageData.streetAddress}, ${selectedCity.name}, Tunisia`;
+      
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(fullAddress)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.length > 0) {
+          const newLocation: [number, number] = [
+            parseFloat(data[0].lat),
+            parseFloat(data[0].lon)
+          ];
+          setMechanicLocation(newLocation);
+          if (onLocationChange) onLocationChange(newLocation);
+        } else {
+          // Fallback sur la position de la ville
+          if (selectedCity.location?.coordinates) {
+            const cityCoords: [number, number] = [
+              selectedCity.location.coordinates[1],
+              selectedCity.location.coordinates[0]
+            ];
+            setMechanicLocation(cityCoords);
+            if (onLocationChange) onLocationChange(cityCoords);
+          }
+        }
+      } catch (error) {
+        console.error("Erreur géocodage:", error);
+      }
+    };
+
+    const timer = setTimeout(geocodeAddress, 1000);
+    return () => clearTimeout(timer);
+  }, [cityId, garageData.streetAddress, citiesList, onLocationChange]);
+
+  // Handler pour changement de gouvernorat
+  const handleGovernorateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setGovernorateId(value);
+    setCityId(""); // Reset ville
+    
+    const selectedGov = governoratesList.find((g: any) => g._id === value);
+    
+    // Créer un événement synthétique pour garder la compatibilité
+    const syntheticEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        name: 'governorateName',
+        value: selectedGov?.name || ''
+      }
+    } as React.ChangeEvent<HTMLSelectElement>;
+    
+    onChange(syntheticEvent);
+  };
+
+  // Handler pour changement de ville
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setCityId(value);
+    
+    const selectedCity = citiesList.find((c: any) => c._id === value);
+    
+    if (selectedCity?.location?.coordinates) {
+      const cityCoords: [number, number] = [
+        selectedCity.location.coordinates[1],
+        selectedCity.location.coordinates[0]
+      ];
+      
+      if (!garageData.streetAddress?.trim()) {
+        setMechanicLocation(cityCoords);
+        if (onLocationChange) onLocationChange(cityCoords);
+      }
+    }
+    
+    // Créer un événement synthétique pour garder la compatibilité
+    const syntheticEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        name: 'cityName',
+        value: selectedCity?.name || ''
+      }
+    } as React.ChangeEvent<HTMLSelectElement>;
+    
+    onChange(syntheticEvent);
+  };
+
   // ✅ Validation téléphone tunisien (8 chiffres)
   const validateTunisianPhone = (phone: string) => {
     const cleaned = phone.replace(/[\s\-+]/g, '');
-    
-    // Enlever le préfixe 216 si présent
     const number = cleaned.startsWith('216') ? cleaned.slice(3) : cleaned;
-    
-    // Vérifier que c'est exactement 8 chiffres et commence par 2, 4, 5, 7, ou 9
     const tunisianPattern = /^[24579]\d{7}$/;
 
     if (!number) return "Numéro requis";
@@ -38,13 +179,9 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
 
   // ✅ Formater le numéro pendant la saisie
   const formatPhoneNumber = (value: string) => {
-    // Enlever tout sauf les chiffres
     const cleaned = value.replace(/\D/g, '');
-    
-    // Limiter à 8 chiffres
     const limited = cleaned.slice(0, 8);
     
-    // Formater: XX XXX XXX
     if (limited.length <= 2) return limited;
     if (limited.length <= 5) return `${limited.slice(0, 2)} ${limited.slice(2)}`;
     return `${limited.slice(0, 2)} ${limited.slice(2, 5)} ${limited.slice(5)}`;
@@ -54,7 +191,6 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhoneNumber(e.target.value);
     
-    // Créer un événement synthétique pour garder la compatibilité
     const syntheticEvent = {
       ...e,
       target: {
@@ -66,7 +202,6 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
     
     onChange(syntheticEvent);
     
-    // Validation
     const error = validateTunisianPhone(formatted);
     setPhoneError(error);
   };
@@ -75,13 +210,8 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
   const generateHorairesString = (horaireData: typeof horaires) => {
     const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
     const joursAbrev: Record<string, string> = {
-      lundi: 'Lun',
-      mardi: 'Mar',
-      mercredi: 'Mer',
-      jeudi: 'Jeu',
-      vendredi: 'Ven',
-      samedi: 'Sam',
-      dimanche: 'Dim'
+      lundi: 'Lun', mardi: 'Mar', mercredi: 'Mer', jeudi: 'Jeu',
+      vendredi: 'Ven', samedi: 'Sam', dimanche: 'Dim'
     };
 
     let result: string[] = [];
@@ -94,22 +224,18 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
         : `${h.debut.replace(':', 'h')}-${h.fin.replace(':', 'h')}`;
 
       if (tempGroup && tempGroup.horaire === horaire) {
-        // Même horaire, ajouter au groupe
         tempGroup.jours.push(joursAbrev[jour]);
       } else {
-        // Horaire différent, finaliser le groupe précédent
         if (tempGroup) {
           const joursStr = tempGroup.jours.length > 1 
             ? `${tempGroup.jours[0]}-${tempGroup.jours[tempGroup.jours.length - 1]}`
             : tempGroup.jours[0];
           result.push(`${joursStr}: ${tempGroup.horaire}`);
         }
-        // Créer un nouveau groupe
         tempGroup = { jours: [joursAbrev[jour]], horaire };
       }
     });
 
-    // Ajouter le dernier groupe
     if (tempGroup) {
       const joursStr = tempGroup.jours.length > 1 
         ? `${tempGroup.jours[0]}-${tempGroup.jours[tempGroup.jours.length - 1]}`
@@ -132,7 +258,6 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
     
     setHoraires(newHoraires);
     
-    // Générer la chaîne et mettre à jour garageData
     const horaireString = generateHorairesString(newHoraires);
     
     const syntheticEvent = {
@@ -232,41 +357,99 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
           />
         </div>
 
+        {/* ✅ SÉLECTEUR GOUVERNORAT */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Gouvernorat</label>
-          <input
-            type="text"
-            name="governorateName"
-            value={garageData.governorateName}
-            onChange={onChange}
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Gouvernorat <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={governorateId}
+            onChange={handleGovernorateChange}
+            required
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Tunis"
-          />
+          >
+            <option value="">Sélectionner un gouvernorat</option>
+            {governoratesList.map((g: any) => (
+              <option key={g._id} value={g._id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
         </div>
 
+        {/* ✅ SÉLECTEUR VILLE */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Ville</label>
-          <input
-            type="text"
-            name="cityName"
-            value={garageData.cityName}
-            onChange={onChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ariana"
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Ville <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={cityId}
+            onChange={handleCityChange}
+            required
+            disabled={!governorateId}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="">Choisir une ville</option>
+            {citiesList.map((c: any) => (
+              <option key={c._id} value={c._id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          {!governorateId && (
+            <p className="text-gray-500 text-xs mt-1">Sélectionnez d'abord un gouvernorat</p>
+          )}
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Adresse / Rue
+          </label>
           <input
             type="text"
             name="streetAddress"
             value={garageData.streetAddress}
             onChange={onChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="123 Avenue de la République"
+            placeholder="Ex: Avenue Habib Bourguiba, Khezema..."
           />
+          <p className="text-gray-500 text-xs mt-1">
+            💡 Plus c'est précis, plus la localisation sera exacte
+          </p>
         </div>
+
+        {/* ✅ APERÇU LOCALISATION */}
+        {mechanicLocation && (
+          <div className="md:col-span-2 border-2 border-blue-300 rounded-lg p-5 bg-blue-50">
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin className="w-5 h-5 text-blue-600" />
+              <h3 className="font-semibold text-blue-900">📍 Localisation de votre garage</h3>
+            </div>
+            
+            <div className="bg-white rounded-lg p-3 mb-4">
+              <p className="text-sm text-gray-700 mb-2">
+                <strong>Coordonnées GPS:</strong> {mechanicLocation[0].toFixed(6)}, {mechanicLocation[1].toFixed(6)}
+              </p>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p>• Sélectionnez d'abord votre gouvernorat et ville</p>
+                <p>• Entrez votre adresse pour une localisation automatique</p>
+                <p>• Ajustez manuellement le marqueur sur la carte si nécessaire</p>
+                <p>• Cette position sera visible par vos clients</p>
+              </div>
+            </div>
+
+            {/* 🗺️ CARTE INTERACTIVE */}
+            <div className="rounded-lg overflow-hidden shadow-lg">
+              <MapView 
+                location={mechanicLocation}
+                setLocation={(newLocation: [number, number]) => {
+                  setMechanicLocation(newLocation);
+                  if (onLocationChange) onLocationChange(newLocation);
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
@@ -280,7 +463,7 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
           />
         </div>
 
-        {/* ✅ SECTION HORAIRES AMÉLIORÉE */}
+        {/* ✅ SECTION HORAIRES */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
             <Clock className="w-4 h-4 text-blue-600" />
@@ -326,7 +509,6 @@ export default function GarageForm({ garageData, onChange, onSubmit, loading }: 
             })}
           </div>
 
-          {/* Aperçu de la chaîne générée */}
           {garageData.horaires && (
             <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-800">

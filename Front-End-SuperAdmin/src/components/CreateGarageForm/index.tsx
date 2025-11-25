@@ -39,6 +39,7 @@ export default function GarageManagement() {
     services: '',
     emailProfessionnel:'',
     telephoneProfessionnel:'',
+    location: null as { type: string; coordinates: [number, number] } | null,
   });
 
   const [garagisteData, setGaragisteData] = useState({
@@ -135,6 +136,8 @@ export default function GarageManagement() {
     }
   };
 
+
+
   // ⭐ FONCTION EDIT - DÉFINIE ICI
   const handleEditGarage = (garage: any) => {
     console.log('🔧 Édition du garage:', garage);
@@ -150,6 +153,7 @@ export default function GarageManagement() {
       description: garage.description || '',
       horaires: garage.horaires || '',
       services: Array.isArray(garage.services) ? garage.services.join(', ') : garage.services || '',
+      location: garage.location || null,
     });
     setView('editGarage');
   };
@@ -171,6 +175,7 @@ export default function GarageManagement() {
         description: garageData.description,
         horaires: garageData.horaires,
         services: garageData.services,
+        location: garageData.location, 
       };
 
       await updateGarage((garageToEdit as any)._id, updateData);
@@ -209,6 +214,7 @@ export default function GarageManagement() {
       services: '',
       emailProfessionnel: '',
       telephoneProfessionnel:'',
+      location: null, 
     });
     setGaragisteData({
       username: '',
