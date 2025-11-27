@@ -50,83 +50,6 @@ export const getUserPermissions = async (garagisteId) => {
 
 
 
-/**
- * Middleware pour vérifier si l'utilisateur a un rôle spécifique
- * @param {...string} allowedRoles - Liste des rôles autorisés
- */
-export const hasRole = (...allowedRoles) => {
-  return async (req, res, next) => {
-    try {
-      // Vérifier si l'utilisateur est authentifié
-      if (!req.user || !req.user.id) {
-        return res.status(401).json({
-          success: false,
-          message: 'Utilisateur non authentifié'
-        });
-      }
-
-      const userId = req.user.id;
-
-      // Vérifier d'abord si c'est un Super Admin dans Users
-      const user = await Users.findById(userId);
-      
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: 'Utilisateur non trouvé'
-        });
-      }
-
-      // Si l'utilisateur est Super Admin via le champ isSuperAdmin
-      if (user.isSuperAdmin) {
-        req.userRole = 'Super Admin';
-        req.isSuperAdmin = true;
-        return next();
-      }
-
-      // Sinon, vérifier le rôle via UserRole
-      const userRole = await UserRole.findOne({ userId }).populate('roleId');
-
-      if (!userRole || !userRole.roleId) {
-        return res.status(403).json({
-          success: false,
-          message: 'Aucun rôle assigné à cet utilisateur'
-        });
-      }
-
-      const roleName = userRole.roleId.name;
-
-      // Super Admin via Role a aussi accès à tout
-      if (roleName === 'Super Admin') {
-        req.userRole = roleName;
-        req.isSuperAdmin = true;
-        return next();
-      }
-
-      // Vérifier si le rôle de l'utilisateur est dans la liste des rôles autorisés
-      if (!allowedRoles.includes(roleName)) {
-        return res.status(403).json({
-          success: false,
-          message: `Accès refusé. Rôle requis: ${allowedRoles.join(' ou ')}`,
-          userRole: roleName
-        });
-      }
-
-      // L'utilisateur a le bon rôle
-      req.userRole = roleName;
-      req.isSuperAdmin = false;
-      next();
-
-    } catch (error) {
-      console.error('Erreur hasRole middleware:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Erreur lors de la vérification du rôle'
-      });
-    }
-  };
-};
-
 export const hasAccess = (...rolesOrPermissions) => {
   return async (req, res, next) => {
     try {
@@ -224,7 +147,7 @@ export const hasAccess = (...rolesOrPermissions) => {
 
       // ✅ 7. Vérifier l'accès
       // Déterminer si ce sont des rôles ou des permissions
-      const systemRoles = ['Super Admin', 'Admin Garage', 'Mécanicien', 'Réceptionniste', 'Admin', 'Manager'];
+      const systemRoles = ['Super Admin', 'Admin Garage', 'Mécanicien', 'Employé Garage', 'Manager','client'];
       const requestedRoles = rolesOrPermissions.filter(item => systemRoles.includes(item));
       const requestedPermissions = rolesOrPermissions.filter(item => !systemRoles.includes(item));
 

@@ -23,7 +23,7 @@ import { getDashboardData ,getChargeMensuelle} from '../controllers/garagiste/Ch
 import { search } from '../controllers/clients/ChercherGarage.js';
 import { getReservations, updateReservation } from '../controllers/garagiste/gererReservation.js';
 import { createEmploye } from "../controllers/garagiste/EmployeController.js";
-import { hasRole ,hasAccess } from "../utils/permissionChecker.js";
+import { hasAccess } from "../utils/permissionChecker.js";
 import { authGaragisteOuSuperAdmin } from "../middlewares/combinedAuth.js"
 import {superAdminMiddleware} from "../middlewares/superAdminAuthMiddleware.js"
 
@@ -295,11 +295,11 @@ router.put('/Devis/:id/status', authGaragisteOuSuperAdmin,hasAccess('Admin Garag
 router.put('/Devis/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage','Super Admin'), updateDevis);
 router.put('/updateId/:id', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),updateFactureId);
 router.delete('/Devis/:id', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),deleteDevis);
-router.delete('/deleteDevis/:id',superAdminMiddleware,hasRole("Super Admin"),deleteDevisForSuperAdmin);
+router.delete('/deleteDevis/:id',superAdminMiddleware,hasAccess("Super Admin"),deleteDevisForSuperAdmin);
 router.get("/devis/:devisId/accept", acceptDevis);
 router.get("/devis/:devisId/refuse", refuseDevis);
 router.post('/devis/:devisId/send-email', authGaragisteOuSuperAdmin,hasAccess('Admin Garage','Super Admin'), sendDevisByEmail);
-router.get('/garage-devis/:garageId',superAdminMiddleware,getAllDevisByGarage);
+router.get('/garage-devis/:garageId',superAdminMiddleware,hasAccess('Super Admin'),getAllDevisByGarage);
 
 // ========== MECANICIENS ==========
 router.post("/createMecanicien", authMiddleware, hasAccess('Admin Garage'),createMecanicien);
@@ -336,7 +336,7 @@ router.get('/statistiques', authGaragisteOuSuperAdmin, getStatistiques);
 router.get('/ordre-travail/by-devis/:devisId', authGaragisteOuSuperAdmin, getOrdresParDevisId);
 router.get("/ordres/status/:status", authGaragisteOuSuperAdmin, getOrdresByStatus);
 router.get('/ordres/status/supprime', authGaragisteOuSuperAdmin, getOrdresSupprimes);
-router.delete('/Delete-definitif/:id',superAdminMiddleware,deleteOrdreTravailDefinitif);
+router.delete('/Delete-definitif/:id',superAdminMiddleware,hasAccess('Super Admin'),deleteOrdreTravailDefinitif);
 router.get("/ordres/atelier/:atelierId", authGaragisteOuSuperAdmin, getOrdresByAtelier);
 
 // ========== FACTURES ==========
