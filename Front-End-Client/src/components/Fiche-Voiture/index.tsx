@@ -237,8 +237,6 @@ class FormValidator {
         return SmartImmatriculationValidator.detectCountryFromImmatriculation(immat);
     }
 
-
-
     // Validation longueur champs texte
     static validateTextLength(text: string, minLength: number, maxLength: number, fieldName: string): FieldValidation {
         const trimmedText = text.trim();

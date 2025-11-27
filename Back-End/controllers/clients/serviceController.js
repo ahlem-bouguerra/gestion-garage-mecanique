@@ -1,37 +1,29 @@
-import Service from '../../models/Service.js';
+import GarageService from '../../models/GarageService.js';
 
-export const getServicesByGarageId = async (req, res) => {
+
+// ✅ CLIENT : Voir les services d'un garage spécifique
+export const getGarageServicesForClient = async (req, res) => {
   try {
-    const { garageId } = req.params;
+    const { garageId } = req.params; // Récupérer depuis l'URL
     
-    console.log("🔍 Recherche services pour garage:", garageId);
-
     if (!garageId) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'ID du garage requis' 
-      });
+      return res.status(400).json({ error: 'Garage ID requis' });
     }
 
-    // Rechercher les services ACTIFS de ce garage
-    const services = await Service.find({
-      garagisteId: garageId,
-      statut: "Actif" // Seulement les services actifs pour les clients
-    });
-
-    console.log(`✅ ${services.length} services trouvés pour le garage ${garageId}`);
+    const garageServices = await GarageService.find({ garageId })
+      .populate('serviceId')
+      .sort({ addedAt: -1 });
     
-    res.json({
-      success: true,
-      services: services,
-      count: services.length
-    });
-
+    // Extraire uniquement les services actifs
+    const services = garageServices
+      .map(gs => gs.serviceId)
+      .filter(service => service && service.statut === 'Actif');
+    
+    console.log(`✅ ${services.length} services pour le garage ${garageId}`);
+    res.json({ success: true, services });
+    
   } catch (error) {
-    console.error("❌ Erreur getServicesByGarageId:", error);
-    res.status(500).json({ 
-      success: false,
-      error: error.message 
-    });
+    console.error("❌ Erreur getGarageServicesForClient:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 };

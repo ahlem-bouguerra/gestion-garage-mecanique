@@ -3,6 +3,7 @@ import  Service  from "../../models/Service.js";
 import  Reservation  from "../../models/Reservation.js";
 import { Client } from "../../models/Client.js";
 import Vehicule from "../../models/Vehicule.js";
+import {Garage} from "../../models/Garage.js";
 
 
 
@@ -33,7 +34,7 @@ export const ClientCreateReservation = async (req, res) => {
 
 
     // Vérifier que le garage existe
-    const garage = await Garagiste.findById(garageId);
+    const garage = await Garage.findById(garageId);
     if (!garage) {
       return res.status(404).json({
         success: false,
@@ -90,7 +91,7 @@ export const ClientCreateReservation = async (req, res) => {
 
     // Peupler les données pour la réponse
     await savedReservation.populate([
-      { path: "garageId", select: "name address city phone email" },
+      { path: "garageId", select: "nom governorateName cityName streetAddress telephoneProfessionnel emailProfessionnel" },
       { path: "serviceId", select: "name description" },
       { path: "clientId", select: "username email phone" },
       { path: "vehiculeId", select: "marque modele immatriculation annee typeCarburant kilometrage" }
@@ -131,7 +132,7 @@ export const ClientGetReservations = async (req, res) => {
     const clientId = req.client._id;  // <- corriger ici
     const reservations = await Reservation.find({ clientId })
       .populate('serviceId', 'name')
-      .populate('garageId', 'username phone')
+      .populate('garageId', 'nom telephoneProfessionnel')
       .populate('vehiculeId', 'immatriculation marque modele annee couleur typeCarburant kilometrage')
 
 

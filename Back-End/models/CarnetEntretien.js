@@ -95,7 +95,7 @@ const carnetEntretienSchema = new mongoose.Schema({
   technicien: {
     type: String
   },
-garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true }
+garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: false }
   
 }, {
   timestamps: true // Ajoute automatiquement createdAt et updatedAt

@@ -17,7 +17,7 @@ export const getReservations = async (req, res) => {
 
     const reservations = await Reservation.find(filter)
       .populate('serviceId', 'name')
-      .populate('garageId', 'username phone')
+      .populate('garageId', 'nom telephoneProfessionnel')
       .populate('vehiculeId', 'immatriculation marque modele annee couleur typeCarburant kilometrage')
       .sort({ createdAt: -1 });
 

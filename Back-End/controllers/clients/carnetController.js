@@ -43,7 +43,7 @@ export const getCarnetByVehiculeIdClient = async (req, res) => {
         select: 'id inspectionDate services totalTTC status'
       })
       .populate({
-        path: 'garagisteId',
+        path: 'garageId',
         select: 'nom prenom telephone adresse' // Info du garage
       })
       .sort({ dateCommencement: -1 });
@@ -106,7 +106,7 @@ export const getCarnetByVehiculeIdClient = async (req, res) => {
           typeEntretien: 'maintenance',
           statut: 'termine',
           totalTTC: totalTTC,
-          garagisteId: ordre.garagisteId, // ID du garage qui a fait l'entretien
+          garageId: ordre.garageId, // ID du garage qui a fait l'entretien
           kilometrageEntretien: null,
           notes: `Créé automatiquement depuis l'ordre ${ordre.numeroOrdre}`,
           services: ordre.taches ? ordre.taches.map(tache => ({
@@ -158,10 +158,10 @@ export const getCarnetByVehiculeIdClient = async (req, res) => {
         } : null,
         services: carnet.services,
         // ✅ NOUVEAU : Info du garage
-        garage: carnet.garagisteId ? {
-          nom: carnet.garagisteId.nom || 'Garage inconnu',
-          telephone: carnet.garagisteId.telephone,
-          adresse: carnet.garagisteId.adresse
+        garage: carnet.garageId ? {
+          nom: carnet.garageId.nom || 'Garage inconnu',
+          telephone: carnet.garageId.telephone,
+          adresse: carnet.garageId.adresse
         } : null,
         source: 'carnet'
       })),

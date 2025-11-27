@@ -10,7 +10,7 @@ import { resetPasswordClient } from "../controllers/clients/ResetPasswordClient.
 import { forgotPasswordClient } from "../controllers/clients/ForgotPasswordClient.js";
 import { getProfile,updateProfile } from "../controllers/clients/profileContoller.js";
 import { getMesVehicules, createVehiculeClient, updateMonVehicule, deleteMonVehicule } from "../controllers/clients/vehiculeController.js";
-import { getServicesByGarageId } from "../controllers/clients/serviceController.js";
+import { getGarageServicesForClient } from "../controllers/clients/serviceController.js";
 import {getClientProfile} from "../controllers/clients/profileController.js";
 import { ClientCreateReservation, ClientGetReservations, ClientUpdateReservation,ClientCancelReservation } from '../controllers/clients/revervationController.js';
 import {getClientDevis, getClientDevisById, getClientDevisStats } from '../controllers/clients/clientDevisController.js';
@@ -100,7 +100,7 @@ router.post('/create-mes-vehicules',clientauthMiddleware, createVehiculeClient);
 router.put('/update-mes-vehicules/:vehiculeId',clientauthMiddleware, updateMonVehicule);
 router.delete('/delete-mes-vehicules/:vehiculeId',clientauthMiddleware, deleteMonVehicule);
 
-router.get('/services/garage/:garageId', getServicesByGarageId);
+router.get('/services/garage/:garageId', getGarageServicesForClient);
 
 router.get("/get-Client-profile",clientauthMiddleware, getClientProfile);
 

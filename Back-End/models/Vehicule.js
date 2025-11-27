@@ -63,8 +63,9 @@ const vehiculeSchema = new mongoose.Schema({
     enum: ['client', 'garagiste'],
     required: true
   },
-  
-garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true },
+
+
+
   paysImmatriculation: {
   type: String,
   enum: ['tunisie', 'autre'],
