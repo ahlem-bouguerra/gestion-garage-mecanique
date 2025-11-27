@@ -246,7 +246,7 @@ const ClientDevisPage = () => {
                           {d.id}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {d.garagisteId?.garagenom || d.garagisteId?.username || 'N/A'}
+                          {d.garageId?.nom || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -311,9 +311,9 @@ const ClientDevisPage = () => {
                 <div>
                   <h3 className="font-medium text-gray-900 mb-3">Informations Garage</h3>
                   <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                    <p><strong>Nom:</strong> {selectedDevis.garagisteId?.garagenom || 'N/A'}</p>
-                    <p><strong>Email:</strong> {selectedDevis.garagisteId?.email || 'N/A'}</p>
-                    <p><strong>Téléphone:</strong> {selectedDevis.garagisteId?.phone || 'N/A'}</p>
+                    <p><strong>Nom:</strong> {selectedDevis.garageId?.nom || 'N/A'}</p>
+                    <p><strong>Email:</strong> {selectedDevis.garageId?.emailProfessionnel || 'N/A'}</p>
+                    <p><strong>Téléphone:</strong> {selectedDevis.garageId?.telephoneProfessionnel || 'N/A'}</p>
                   </div>
                 </div>
 

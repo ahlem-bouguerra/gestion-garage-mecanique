@@ -277,13 +277,13 @@ const filteredReservations = reservations.filter(reservation => {
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4" />
                           <span className="font-medium">
-                            {reservation.garageId?.username || 'Garage non spécifié'}
+                            {reservation.garageId?.nom}
                           </span>
                         </div>
                         
                         <div className="flex items-center gap-2">
                           <Phone className="w-4 h-4" />
-                          <span>{reservation.garageId?.phone || 'N/A'}</span>
+                          <span>{reservation.garageId?.telephoneProfessionnel || 'N/A'}</span>
                         </div>
 
                         <div className="flex items-center gap-2">

@@ -31,7 +31,7 @@ export const getClientDevis = async (req, res) => {
       vehiculeId: { $in: vehiculeIds } 
     })
     .populate('vehiculeId', 'marque modele immatriculation')
-    .populate('garagisteId', 'username garagenom email phone')
+    .populate('garageId', 'nom  emailProfessionnel telephoneProfessionnel')
     .sort({ createdAt: -1 }); // Plus récents en premier
 
     console.log('📋 Devis trouvés:', devis.length);
@@ -86,12 +86,12 @@ export const getClientDevisById = async (req, res) => {
       // ObjectId MongoDB
       devis = await Devis.findById(devisId)
         .populate('vehiculeId')
-        .populate('garagisteId', 'username garagenom email phone');
+        .populate('garageId', 'nom  emailProfessionnel telephoneProfessionnel')
     } else {
       // ID personnalisé (DEV001, etc.)
       devis = await Devis.findOne({ id: devisId })
         .populate('vehiculeId')
-        .populate('garagisteId', 'username garagenom email phone');
+        .populate('garageId', 'nom  emailProfessionnel telephoneProfessionnel')
     }
 
     if (!devis) {

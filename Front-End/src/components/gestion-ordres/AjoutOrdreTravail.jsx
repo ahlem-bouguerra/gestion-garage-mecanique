@@ -87,15 +87,15 @@ const AjoutOrdreTravail = ({
         taches: tachesFromServices
       });
 
-    } catch (error) {
-      if (error.response?.status === 403) {
-      alert("❌ Accès refusé : Vous n'avez pas la permission");
-      }
-      onError(`Erreur lors du chargement du devis: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+} catch (error) {
+  if (error.response?.status === 403) {
+    alert("❌ Accès refusé : Vous n'avez pas la permission");
+  }
+  onError(`Erreur lors du chargement du devis: ${error.message}`); // ⭐ "error", pas "err"
+} finally {
+  setLoading(false);
+}
+};
 
   const assignServiceToTache = (tacheId, serviceId) => {
     const service = services.find(s => s._id === serviceId);
@@ -184,14 +184,14 @@ const AjoutOrdreTravail = ({
 
       onOrdreSaved();
 
-    } catch (error) {
-        if (error.response?.status === 403) {
-      alert("❌ Accès refusé : Vous n'avez pas la permission");
-      }
-      onError(err.message || 'Erreur lors de la sauvegarde');
-    } finally {
-      setLoading(false);
-    }
+} catch (error) {  // ⭐ La variable s'appelle "error"
+  if (error.response?.status === 403) {
+    alert("❌ Accès refusé : Vous n'avez pas la permission");
+  }
+  onError(error.message || 'Erreur lors de la sauvegarde'); // ⭐ Utiliser "error", pas "err"
+} finally {
+  setLoading(false);
+}
   };
 
   const resetForm = () => {

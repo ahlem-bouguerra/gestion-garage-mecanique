@@ -269,7 +269,8 @@ export default function GarageReservationManagement() {
                       <div className="text-gray-600">{selectedReservation.descriptionDepannage}</div>
                     </div>
                   </div>
-                  <div className="text-xs text-gray-400 mt-2">
+                  <div className="text-xs text-gray-800 mt-2">
+                  <div className="font-medium text-gray-700 mb-1">Date d'envoi de demande :</div>
                     {new Date(selectedReservation.createdAt).toLocaleString('fr-FR')}
                   </div>
                 </div>

@@ -22,21 +22,22 @@ const AtelierManager = () => {
     fetchAteliers();
   }, []);
 
-
-    const fetchAteliers = async () => {
-    try {
-      setLoading(true);
-      const token = getAuthToken();
+const fetchAteliers = async () => {
+  try {
+    setLoading(true);
+    const token = getAuthToken();
     if (!token || token === 'null' || token === 'undefined') {
       window.location.href = '/auth/sign-in';
       throw new Error("Token invalide");
     }
-      const response = await axios.get(`${API_BASE_URL}/getAllAteliers`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-      setAteliers(response.data);
-    }  catch (error: any) {
-    // ⭐ AJOUTER la gestion 401/403
+    const response = await axios.get(`${API_BASE_URL}/getAllAteliers`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    // ⭐ CORRECTION : Extraire ateliers de l'objet response
+    setAteliers(response.data.ateliers || []); // Au lieu de response.data
+    
+  } catch (error: any) {
     if (error.response?.status === 403) {
       alert("❌ Accès refusé : Vous n'avez pas la permission");
       throw error;
@@ -46,11 +47,12 @@ const AtelierManager = () => {
       window.location.href = '/auth/sign-in';
       throw error;
     }
-      console.error('Erreur lors du chargement des services:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    console.error('Erreur lors du chargement des ateliers:', error);
+    setAteliers([]); // ⭐ Initialiser à tableau vide en cas d'erreur
+  } finally {
+    setLoading(false);
+  }
+};
 
 // Création d'un atelier
 const createAtelier = async (data) => {

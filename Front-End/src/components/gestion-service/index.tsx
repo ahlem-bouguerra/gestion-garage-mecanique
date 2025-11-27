@@ -8,6 +8,7 @@ import {
   Package,
   AlertCircle
 } from 'lucide-react';
+import axios from 'axios';
 
 interface Service {
   _id: string;
@@ -71,7 +72,7 @@ const GaragisteServicesSelector = () => {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/services/my-garage`, {
+      const response = await axios.get(`${API_BASE_URL}/services/my-garage`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -80,8 +81,7 @@ const GaragisteServicesSelector = () => {
         return;
       }
 
-      const data = await response.json();
-      setMyServices(data);
+       setMyServices(response.data || []);
     } catch (error) {
       console.error("Erreur fetch mes services:", error);
     } finally {

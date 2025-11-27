@@ -291,21 +291,34 @@ async getAteliers() {
   }
 },
 
-  async getMecaniciensByService(serviceId) {
-    try {
-      if (!serviceId) return [];
-      
-      const response = await axios.get(
-        `http://localhost:5000/api/mecaniciens/by-service/${serviceId}`,
-        getAuthHeaders()
-      );
-      return response.data;
-    } catch (error) {
-      console.error('❌ Erreur getMecaniciensByService:', error);
-      throw error;
+// Dans ordresTravailAPI (services/ordresTravailAPI.js)
+
+async getMecaniciensByService(serviceId) {
+  try {
+    if (!serviceId) return [];
+    
+    const response = await axios.get(
+      `http://localhost:5000/api/mecaniciens/by-service/${serviceId}`,
+      getAuthHeaders()
+    );
+    
+    // ⭐ CORRECTION : Extraire le tableau de mécaniciens
+    return response.data.mecaniciens || []; // Au lieu de response.data
+    
+  } catch (error) {
+    console.error('❌ Erreur getMecaniciensByService:', error);
+    
+    // ⭐ Retourner un tableau vide au lieu de throw pour éviter les crashes
+    if (error.response?.status === 404) {
+      console.warn('Aucun mécanicien trouvé pour ce service');
+      return [];
     }
+    
+    throw error;
   }
+}
 };
+
 
 // ========== INTERCEPTEURS AXIOS ==========
 

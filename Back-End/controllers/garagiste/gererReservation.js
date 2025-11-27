@@ -8,7 +8,7 @@ import FicheClientVehicule from "../../models/FicheClientVehicule.js";
 export const getReservations = async (req, res) => {
   try {
     // ✅ Récupérer l'ID du garage depuis le token (sécurisé)
-    const garageId = req.user._id;
+    const garageId = req.user.garage;
 
     console.log('🔍 Récupération réservations pour garage:', garageId);
 
@@ -58,23 +58,72 @@ export const updateReservation = async (req, res) => {
       console.log('reservation.clientName:', reservation.clientName);
       console.log('Type garageId:', typeof reservation.garageId);
 
-      try {
-        let ficheClient = await FicheClient.findOne({
-          telephone: reservation.clientPhone,
-          garagisteId: reservation.garageId
-        });
+// Dans updateReservation, remplacer le bloc try-catch par :
 
-        if (!ficheClient) {
-          ficheClient = await FicheClient.create({
-            nom: reservation.clientName,
-            type: "particulier",
-            telephone: reservation.clientPhone,
-            email: reservation.clientEmail || `${reservation.clientPhone}@default.com`,
-            garagisteId: reservation.garageId,
-            clientId: reservation.clientId
-          });
-        }
+try {
+  console.log('🔍 === DÉBUT CRÉATION FICHE CLIENT ===');
+  
+  let ficheClient = await FicheClient.findOne({
+    telephone: reservation.clientPhone,
+    garageId: reservation.garageId
+  });
 
+  if (!ficheClient) {
+    console.log('🆕 Tentative de création de fiche...');
+    
+    const ficheData = {
+      nom: reservation.clientName,
+      type: "particulier",
+      telephone: reservation.clientPhone,
+      email: reservation.clientEmail || `${reservation.clientPhone}@default.com`,
+      garageId: reservation.garageId,
+      clientId: reservation.clientId
+    };
+    
+    ficheClient = await FicheClient.create(ficheData);
+    console.log('✅ Fiche créée:', ficheClient._id);
+  }
+
+  // Association véhicule
+  if (reservation.vehiculeId && ficheClient) {
+    const existingAssoc = await FicheClientVehicule.findOne({
+      ficheClientId: ficheClient._id,
+      vehiculeId: reservation.vehiculeId
+    });
+
+    if (!existingAssoc) {
+      await FicheClientVehicule.create({
+        ficheClientId: ficheClient._id,
+        vehiculeId: reservation.vehiculeId,
+        garageId: reservation.garageId,
+        notes: `Ajouté via réservation ${reservation._id}`
+      });
+    }
+  }
+
+} catch (ficheErr) {
+  console.error("❌ ERREUR CRÉATION FICHE:");
+  console.error("Code:", ficheErr.code); // ⭐ Affichera 11000 si duplication
+  console.error("Message:", ficheErr.message);
+  
+  // ⭐ Gestion spécifique erreur de duplication (code 11000)
+  if (ficheErr.code === 11000) {
+    console.warn("⚠️ Fiche en doublon détectée - recherche de la fiche existante...");
+    
+    // Récupérer la fiche existante basée sur l'erreur
+    try {
+      const ficheClient = await FicheClient.findOne({
+        $or: [
+          { telephone: reservation.clientPhone, garageId: reservation.garageId },
+          { email: reservation.clientEmail, garageId: reservation.garageId },
+          { nom: reservation.clientName, garageId: reservation.garageId }
+        ]
+      });
+      
+      if (ficheClient) {
+        console.log('✅ Fiche existante récupérée:', ficheClient._id);
+        
+        // Associer le véhicule à la fiche existante
         if (reservation.vehiculeId) {
           const existingAssoc = await FicheClientVehicule.findOne({
             ficheClientId: ficheClient._id,
@@ -88,11 +137,15 @@ export const updateReservation = async (req, res) => {
               garageId: reservation.garageId,
               notes: `Ajouté via réservation ${reservation._id}`
             });
+            console.log('✅ Véhicule associé à la fiche existante');
           }
         }
-      } catch (ficheErr) {
-        console.error("❌ Erreur création fiche:", ficheErr);
       }
+    } catch (findErr) {
+      console.error("❌ Erreur lors de la récupération de la fiche existante:", findErr);
+    }
+  }
+}
             reservation.status = "accepte";
       reservation.messageGarage = message || null;
 

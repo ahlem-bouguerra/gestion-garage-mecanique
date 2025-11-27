@@ -132,7 +132,7 @@ export const ClientGetReservations = async (req, res) => {
     const clientId = req.client._id;  // <- corriger ici
     const reservations = await Reservation.find({ clientId })
       .populate('serviceId', 'name')
-      .populate('garageId', 'nom telephoneProfessionnel')
+      .populate('garageId', 'nom telephoneProfessionnel emailProfessionnel')
       .populate('vehiculeId', 'immatriculation marque modele annee couleur typeCarburant kilometrage')
 
 
