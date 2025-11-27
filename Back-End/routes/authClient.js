@@ -8,10 +8,9 @@ import { loginClient } from "../controllers/clients/loginCLientController.js";
 import { verifEmailCLient } from "../controllers/clients/VerifEmailClientController.js";
 import { resetPasswordClient } from "../controllers/clients/ResetPasswordClient.js";
 import { forgotPasswordClient } from "../controllers/clients/ForgotPasswordClient.js";
-import { getProfile,updateProfile } from "../controllers/clients/profileContoller.js";
+import { getProfile ,updateProfile ,changePassword} from "../controllers/clients/ProfileContoller.js";
 import { getMesVehicules, createVehiculeClient, updateMonVehicule, deleteMonVehicule } from "../controllers/clients/vehiculeController.js";
 import { getGarageServicesForClient } from "../controllers/clients/serviceController.js";
-import {getClientProfile} from "../controllers/clients/profileController.js";
 import { ClientCreateReservation, ClientGetReservations, ClientUpdateReservation,ClientCancelReservation } from '../controllers/clients/revervationController.js';
 import {getClientDevis, getClientDevisById, getClientDevisStats } from '../controllers/clients/clientDevisController.js';
 import { getClientFactures, GetClientFactureById, GetClientFactureStats,getClientCreditNoteById} from '../controllers/clients/clientFactureController.js';
@@ -93,6 +92,7 @@ router.post("/client/reset-password", resetPasswordClient);
 router.post("/client/forgot-password", forgotPasswordClient);
 router.get("/client/profile",clientauthMiddleware,getProfile);
 router.put('/client/update-profile', clientauthMiddleware,updateProfile);
+router.put("/profile/password/client", clientauthMiddleware, changePassword);
 
 
 router.get('/get-all-mes-vehicules',clientauthMiddleware, getMesVehicules);
@@ -102,7 +102,6 @@ router.delete('/delete-mes-vehicules/:vehiculeId',clientauthMiddleware, deleteMo
 
 router.get('/services/garage/:garageId', getGarageServicesForClient);
 
-router.get("/get-Client-profile",clientauthMiddleware, getClientProfile);
 
 router.post('/create-reservation',clientauthMiddleware, ClientCreateReservation);
 router.get('/client-reservations/',clientauthMiddleware, ClientGetReservations);

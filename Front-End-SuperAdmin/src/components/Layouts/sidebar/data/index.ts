@@ -63,16 +63,5 @@ export const NAV_DATA = [
       },
     ],
   },
-  {
-    label: "COMPTE",
-    items: [
-      {
-        title: "Mon Profil",
-        url: "/profil",
-        icon: User,
-        items: [],
-      },
 
-    ],
-  },
 ];

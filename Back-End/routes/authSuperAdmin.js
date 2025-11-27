@@ -68,6 +68,8 @@ import {
   deleteGlobalService
 } from "../controllers/superAdmin/serviceController.js"
 
+import { getProfile ,updateProfile ,changePassword} from "../controllers/superAdmin/profileContoller.js";
+
 const router = express.Router();
 
 // ========== ROUTE /ME (PROTÉGÉE) ==========
@@ -89,6 +91,9 @@ router.post("/auth/register", registerUser);
 router.post("/auth/login", loginUser);
 router.post("/SuperAdmin/reset-password", resetPasswordSuperAdmin);
 router.post("/SuperAdmin/forgot-password", forgotPasswordSuperAdmin);
+router.get("/get-profile-super-admin", superAdminMiddleware, getProfile);
+router.put("/profile/personal/superAdmin", superAdminMiddleware, updateProfile);
+router.put("/profile/password/superAdmin", superAdminMiddleware, changePassword);
 
 // ========== ROUTES PROTÉGÉES - AUTH ==========
 router.post("/auth/logout", superAdminMiddleware, logoutUser);

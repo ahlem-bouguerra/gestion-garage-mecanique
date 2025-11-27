@@ -7,7 +7,7 @@ import { Garagiste } from "../models/Garagiste.js";
 import { forgotPassword } from "../controllers/garagiste/ForgotPassword.js";
 import { resetPassword } from "../controllers/garagiste/ResetPassword.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
-import { completeProfile, getProfile ,updateProfile,updateGarageInfo} from "../controllers/garagiste/ProfileContoller.js";
+import { changePassword, getProfile ,updateProfile} from "../controllers/garagiste/ProfileContoller.js";
 import { enhancedLocationRoutes } from "../apiDataFetcher.js";
 import { createFicheClient, getFicheClients, getFicheClientById, updateFicheClient, deleteFicheClient, getFicheClientNoms, getHistoriqueVisiteByIdClient, getHistoryVisite } from "../controllers/garagiste/FicheClient.js";
 import { getAllVehicules, getVehiculeById, createVehicule, updateVehicule, dissocierVehicule, getVehiculesByProprietaire } from '../controllers/garagiste/vehiculeController.js';
@@ -253,12 +253,13 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
 
-router.post("/complete-profile", authMiddleware, completeProfile);
+//router.post("/complete-profile", authMiddleware, completeProfile);
 router.get("/get-profile", authMiddleware, getProfile);
 // Mettre à jour les infos personnelles du garagiste (nom, téléphone, photo)
 router.put("/profile/personal", authMiddleware, updateProfile);
+router.put("/profile/password", authMiddleware, changePassword);
 // Mettre à jour les infos du garage (localisation, description, etc.)
-router.put("/profile/garage", authMiddleware,hasAccess('Admin Garage'), updateGarageInfo);
+//router.put("/profile/garage", authMiddleware,hasAccess('Admin Garage'), updateGarageInfo);
 
 
 

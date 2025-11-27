@@ -1,21 +1,13 @@
-import { Garagiste } from "../../models/Garagiste.js";
+// controllers/ProfileController.js
+import { Users } from "../../models/Users.js";
 import bcrypt from "bcryptjs";
 
-// ========== GET PROFILE ==========
 export const getProfile = async (req, res) => {
   try {
     console.log('📋 GET Profile - User ID:', req.user._id);
 
     // Récupérer le profil complet avec les relations
-    const profile = await Garagiste.findById(req.user._id)
-      .populate({
-        path: 'garage',
-        select: 'nom matriculeFiscal description governorateName cityName telephoneProfessionnel emailProfessionnel isActive'
-      })
-      .populate({
-        path: 'createdBy',
-        select: 'username email'
-      })
+    const profile = await Users.findById(req.user._id)
       .select('-password -resetPasswordToken')
       .lean();
 
@@ -43,7 +35,7 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// ========== UPDATE PROFILE ==========
+
 export const updateProfile = async (req, res) => {
   try {
     console.log('✏️ UPDATE Profile - User ID:', req.user._id);
@@ -61,7 +53,7 @@ export const updateProfile = async (req, res) => {
 
     // Vérifier si l'email existe déjà (sauf pour l'utilisateur actuel)
     if (email && email !== req.user.email) {
-      const existingUser = await Garagiste.findOne({
+      const existingUser = await Users.findOne({
         email: email.toLowerCase(),
         _id: { $ne: req.user._id }
       });
@@ -92,19 +84,11 @@ export const updateProfile = async (req, res) => {
     }
 
     // Mettre à jour le profil
-    const updatedProfile = await Garagiste.findByIdAndUpdate(
+    const updatedProfile = await Users.findByIdAndUpdate(
       req.user._id,
       { $set: updateData },
       { new: true, runValidators: true }
     )
-      .populate({
-        path: 'garage',
-        select: 'nom matriculeFiscal adresse governorateName cityName phone email isActive'
-      })
-      .populate({
-        path: 'createdBy',
-        select: 'username email'
-      })
       .select('-password -resetPasswordToken')
       .lean();
 
@@ -144,7 +128,9 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// ========== CHANGE PASSWORD ==========
+
+
+
 export const changePassword = async (req, res) => {
   try {
     console.log('🔐 CHANGE Password - User ID:', req.user._id);
@@ -182,7 +168,7 @@ export const changePassword = async (req, res) => {
     }
 
     // Récupérer l'utilisateur avec le mot de passe
-    const user = await Garagiste.findById(req.user._id).select('+password');
+    const user = await Users.findById(req.user._id).select('+password');
 
     if (!user) {
       return res.status(404).json({

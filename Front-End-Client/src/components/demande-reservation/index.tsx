@@ -61,7 +61,7 @@ const ReservationForm = () => {
             if (!token) return;
 
             try {
-                const response = await axios.get("http://localhost:5000/api/get-Client-profile", {
+                const response = await axios.get("http://localhost:5000/api/client/profile", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setCurrentUser(response.data);

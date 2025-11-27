@@ -1,21 +1,14 @@
-import { Garagiste } from "../../models/Garagiste.js";
+import { Client } from "../../models/Client.js";
 import bcrypt from "bcryptjs";
 
 // ========== GET PROFILE ==========
 export const getProfile = async (req, res) => {
   try {
-    console.log('📋 GET Profile - User ID:', req.user._id);
+    console.log('📋 GET Profile - User ID:', req.client._id);
 
     // Récupérer le profil complet avec les relations
-    const profile = await Garagiste.findById(req.user._id)
-      .populate({
-        path: 'garage',
-        select: 'nom matriculeFiscal description governorateName cityName telephoneProfessionnel emailProfessionnel isActive'
-      })
-      .populate({
-        path: 'createdBy',
-        select: 'username email'
-      })
+    const profile = await Client.findById(req.client._id)
+
       .select('-password -resetPasswordToken')
       .lean();
 
@@ -46,7 +39,7 @@ export const getProfile = async (req, res) => {
 // ========== UPDATE PROFILE ==========
 export const updateProfile = async (req, res) => {
   try {
-    console.log('✏️ UPDATE Profile - User ID:', req.user._id);
+    console.log('✏️ UPDATE Profile - User ID:', req.client._id);
     console.log('📝 Données reçues:', req.body);
 
     const { username, email, phone } = req.body;
@@ -60,10 +53,10 @@ export const updateProfile = async (req, res) => {
     }
 
     // Vérifier si l'email existe déjà (sauf pour l'utilisateur actuel)
-    if (email && email !== req.user.email) {
-      const existingUser = await Garagiste.findOne({
+    if (email && email !== req.client.email) {
+      const existingUser = await Client.findOne({
         email: email.toLowerCase(),
-        _id: { $ne: req.user._id }
+        _id: { $ne: req.client._id }
       });
 
       if (existingUser) {
@@ -80,7 +73,7 @@ export const updateProfile = async (req, res) => {
     };
 
     // Ajouter email uniquement s'il est fourni et différent
-    if (email && email !== req.user.email) {
+    if (email && email !== req.client.email) {
       updateData.email = email.toLowerCase().trim();
       // Si l'email change, demander une nouvelle vérification
       updateData.isVerified = false;
@@ -92,19 +85,12 @@ export const updateProfile = async (req, res) => {
     }
 
     // Mettre à jour le profil
-    const updatedProfile = await Garagiste.findByIdAndUpdate(
-      req.user._id,
+    const updatedProfile = await Client.findByIdAndUpdate(
+      req.client._id,
       { $set: updateData },
       { new: true, runValidators: true }
     )
-      .populate({
-        path: 'garage',
-        select: 'nom matriculeFiscal adresse governorateName cityName phone email isActive'
-      })
-      .populate({
-        path: 'createdBy',
-        select: 'username email'
-      })
+
       .select('-password -resetPasswordToken')
       .lean();
 
@@ -147,7 +133,7 @@ export const updateProfile = async (req, res) => {
 // ========== CHANGE PASSWORD ==========
 export const changePassword = async (req, res) => {
   try {
-    console.log('🔐 CHANGE Password - User ID:', req.user._id);
+    console.log('🔐 CHANGE Password - User ID:', req.client._id);
 
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
@@ -182,9 +168,9 @@ export const changePassword = async (req, res) => {
     }
 
     // Récupérer l'utilisateur avec le mot de passe
-    const user = await Garagiste.findById(req.user._id).select('+password');
+    const client = await Client.findById(req.client._id).select('+password');
 
-    if (!user) {
+    if (!client) {
       return res.status(404).json({
         success: false,
         message: "Utilisateur non trouvé"
@@ -192,7 +178,7 @@ export const changePassword = async (req, res) => {
     }
 
     // Vérifier si l'utilisateur a un mot de passe (pas Google Auth uniquement)
-    if (!user.password) {
+    if (!client.password) {
       return res.status(400).json({
         success: false,
         message: "Ce compte utilise Google. Impossible de changer le mot de passe."
@@ -200,7 +186,7 @@ export const changePassword = async (req, res) => {
     }
 
     // Vérifier le mot de passe actuel
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isPasswordValid = await bcrypt.compare(currentPassword, client.password);
 
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -213,15 +199,15 @@ export const changePassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Mettre à jour le mot de passe
-    user.password = hashedPassword;
+    client.password = hashedPassword;
     
     // Supprimer les tokens de réinitialisation s'ils existent
-    user.resetPasswordToken = null;
-    user.resetPasswordExpires = null;
+    client.resetPasswordToken = null;
+    client.resetPasswordExpires = null;
     
-    await user.save();
+    await client.save();
 
-    console.log('✅ Mot de passe changé pour:', user.email);
+    console.log('✅ Mot de passe changé pour:', client.email);
 
     res.status(200).json({
       success: true,
