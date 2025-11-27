@@ -328,7 +328,7 @@ useEffect(() => {
                         ? 'bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg scale-110' 
                         : 'bg-gradient-to-br from-gray-400 to-gray-500'
                     }`}>
-                      {reservation.garageId?.username.charAt(0) || 'G'}
+                      {reservation.garageId?.username || 'G'}
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -382,7 +382,7 @@ useEffect(() => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                    {selectedReservation.garageId?.username.charAt(0) || 'G'}
+                    {selectedReservation.garageId?.username|| 'G'}
                   </div>
                   <div>
                     <h2 className="font-bold text-xl text-gray-900">{selectedReservation.garageId?.username || 'Garage'}</h2>
