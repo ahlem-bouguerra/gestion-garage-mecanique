@@ -532,6 +532,33 @@ const vehicules = [
     "createdAt": "2025-11-20T20:25:12.330Z",
     "updatedAt": "2025-11-20T20:25:12.330Z",
     "__v": 0
+  },
+  {
+    "_id": "692da677083a7057c997e20d",
+    "proprietaireId": "6911cb63ccd145adc6354d98",
+    "proprietaireModel": "Client",
+    "marque": "bys",
+    "modele": "20",
+    "immatriculation": "15TUN45",
+    "typeCarburant": "essence",
+    "kilometrage": 12350,
+    "statut": "actif",
+    "creePar": "client",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [],
+    "carteGrise": {
+      "numeroCG": "SDFBGBV",
+      "numeroChassis": "DFGB VC",
+      "dateMiseCirculation": "2025-12-01T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-12-01T00:00:00.000Z",
+      "dateProchaineVisite": "2026-02-01T00:00:00.000Z"
+    },
+    "createdAt": "2025-12-01T14:30:15.751Z",
+    "updatedAt": "2025-12-01T14:30:15.751Z",
+    "__v": 0
   }
 ];
 
@@ -4127,6 +4154,28 @@ const reservations = [
     "clientId": "6911cb63ccd145adc6354d98",
     "createdAt": "2025-11-10T12:36:11.814Z",
     "updatedAt": "2025-11-10T12:36:24.452Z",
+    "__v": 0
+  },
+  {
+    "_id": "692dae959e1e3c78642e4890",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "clientName": "magher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-10T00:00:00.000Z",
+      "heureDebut": "15:30"
+    },
+    "creneauPropose": {},
+    "descriptionDepannage": "azerty",
+    "status": "en_attente",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-01T15:04:53.804Z",
+    "updatedAt": "2025-12-01T15:04:53.804Z",
     "__v": 0
   }
 ];

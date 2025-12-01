@@ -199,5 +199,32 @@
     "createdAt": "2025-11-20T20:25:12.330Z",
     "updatedAt": "2025-11-20T20:25:12.330Z",
     "__v": 0
+  },
+  {
+    "_id": "692da677083a7057c997e20d",
+    "proprietaireId": "6911cb63ccd145adc6354d98",
+    "proprietaireModel": "Client",
+    "marque": "bys",
+    "modele": "20",
+    "immatriculation": "15TUN45",
+    "typeCarburant": "essence",
+    "kilometrage": 12350,
+    "statut": "actif",
+    "creePar": "client",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [],
+    "carteGrise": {
+      "numeroCG": "SDFBGBV",
+      "numeroChassis": "DFGB VC",
+      "dateMiseCirculation": "2025-12-01T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-12-01T00:00:00.000Z",
+      "dateProchaineVisite": "2026-02-01T00:00:00.000Z"
+    },
+    "createdAt": "2025-12-01T14:30:15.751Z",
+    "updatedAt": "2025-12-01T14:30:15.751Z",
+    "__v": 0
   }
 ]

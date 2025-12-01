@@ -23,7 +23,7 @@ const ReservationForm = () => {
     const [submitting, setSubmitting] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [formData, setFormData] = useState({
-        clientID:'',
+        clientId:'',
         vehiculeId:'',
         clientName: '',
         clientPhone: '',
@@ -53,25 +53,41 @@ const ReservationForm = () => {
             });
         }
     }, [searchParams]);
+useEffect(() => {
+    const fetchUserWithLocation = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.log("Pas de token, utilisateur non connecté");
+            return;
+        }
 
+        try {
+            const response = await axios.get("http://localhost:5000/api/client/profile", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-    useEffect(() => {
-        const fetchUserWithLocation = async () => {
-            const token = localStorage.getItem("token");
-            if (!token) return;
+            // C'ÉTAIT ÇA LE BUG DEPUIS LE DÉBUT !!!
+            const user = response.data.data;  // ← .data.data, pas .data !
 
-            try {
-                const response = await axios.get("http://localhost:5000/api/client/profile", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                setCurrentUser(response.data);
-            } catch (error) {
-                console.error("Erreur:", error);
-            }
-        };
+            console.log("Profil chargé avec succès :", user);
 
-        fetchUserWithLocation();
-    }, []);
+            setCurrentUser(user);
+
+            setFormData(prev => ({
+                ...prev,
+                clientId: user._id,
+                clientName: user.username || '',
+                clientPhone: user.phone || '',
+                clientEmail: user.email || '',
+            }));
+
+        } catch (error: any) {
+            console.error("Erreur chargement profil:", error.response?.data || error.message);
+        }
+    };
+
+    fetchUserWithLocation();
+}, []);
 
       useEffect(() => {
     const fetchVoitures = async () => {
@@ -160,58 +176,86 @@ useEffect(() => {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-
-    useEffect(() => {
-    if (!currentUser) return;
-    setFormData((prev) => ({
-        ...prev,
-        clientName: currentUser.username || '',
-        clientPhone: currentUser.phone || '',
-        clientEmail: currentUser.email || '',
-    }));
-}, [currentUser]);
-
+;
 
 const handleSubmit = async () => {
     console.log("Button cliqué !");
-    if (!validateForm()) return;
+
+    if (!validateForm()) {
+        console.log("Validation échouée", errors);
+        return;
+    }
+
+    if (!formData.clientId) {
+        console.error("clientId manquant !", formData);
+        setErrors({ submit: "Utilisateur non connecté" });
+        return;
+    }
 
     setSubmitting(true);
     setErrors({});
 
-    try {
-        const reservationData = {
-            garageId: garageData.id,
-            clientId: currentUser?._id,
-            vehiculeId: formData.vehiculeId,
-            clientName: formData.clientName.trim(),
-            clientPhone: formData.clientPhone.trim(),
-            clientEmail: formData.clientEmail.trim() || null,
-            serviceId: formData.serviceId,
-            creneauDemande: {
-                date: formData.date,
-                heureDebut: formData.heureDebut,
-            },
-            descriptionDepannage: formData.descriptionDepannage.trim(),
-        };
+    const token = getAuthToken();
+console.log("Token utilisé :", token ? "Présent" : "ABSENT");
 
-        // 🔹 Appel API POST réel
+const reservationData = {
+    garageId: garageData.id,
+    clientId: formData.clientId,
+    vehiculeId: formData.vehiculeId || null,
+    clientName: formData.clientName.trim(),
+    clientPhone: formData.clientPhone.trim(),
+    clientEmail: formData.clientEmail.trim() || null,
+    serviceId: formData.serviceId,
+    creneauDemande: {
+        date: formData.date,
+        heureDebut: formData.heureDebut,
+    },
+    descriptionDepannage: formData.descriptionDepannage.trim(),
+};
+
+console.log("Données envoyées :", reservationData);
+
+    try {
         const response = await axios.post(
             'http://localhost:5000/api/create-reservation',
-            reservationData,{
-      headers: { Authorization: `Bearer ${getAuthToken()}` }
-    }
+            {
+                garageId: garageData.id,
+                clientId: formData.clientId,
+                vehiculeId: formData.vehiculeId || null,
+                clientName: formData.clientName.trim(),
+                clientPhone: formData.clientPhone.trim(),
+                clientEmail: formData.clientEmail.trim() || null,
+                serviceId: formData.serviceId,
+                creneauDemande: {
+                    date: formData.date,
+                    heureDebut: formData.heureDebut,
+                },
+                descriptionDepannage: formData.descriptionDepannage.trim(),
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
         );
+
+        console.log("Réponse serveur :", response.data);
 
         if (response.data.success) {
             setSuccess(true);
         } else {
-            setErrors({ submit: 'Erreur lors de la création de la réservation.' });
+            setErrors({ submit: response.data.message || 'Erreur serveur' });
         }
 
     } catch (error: any) {
-        console.error('Erreur:', error.response?.data || error.message);
-        setErrors({ submit: 'Erreur de connexion. Veuillez réessayer.' });
+        console.error("ERREUR COMPLÈTE :", error);
+        console.error("Response data:", error.response?.data);
+        console.error("Status:", error.response?.status);
+
+        setErrors({ 
+            submit: error.response?.data?.message || 'Erreur réseau ou serveur' 
+        });
     } finally {
         setSubmitting(false);
     }

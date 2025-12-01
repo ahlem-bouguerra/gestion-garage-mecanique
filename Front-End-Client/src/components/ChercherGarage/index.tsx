@@ -34,6 +34,10 @@ const GarageSearch = () => {
 
   const router = useRouter();
 
+  const getAuthToken = () => {
+      return localStorage.getItem('token') || sessionStorage.getItem('token');
+  };
+
 
   // Cacher le header quand le modal de chat est ouvert
 useEffect(() => {
@@ -182,7 +186,15 @@ useEffect(() => {
     setSelectedGarage(garage);
 
     try {
-      const res = await axios.get(`http://localhost:5000/api/services/garage/${garageId}`);
+          const token = getAuthToken();
+    
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      return;
+    }
+      const res = await axios.get(`http://localhost:5000/api/services/garage/${garageId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
       setServices(Array.isArray(res.data) ? res.data : res.data.services || []);
     } catch (error) {
       console.error('Erreur chargement services:', error);
@@ -207,7 +219,11 @@ useEffect(() => {
 
   const checkUnreadMessages = async () => {
   try {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      return;
+    }
     const res = await axios.get("http://localhost:5000/api/client-reservations/", {
       headers: { Authorization: `Bearer ${token}` }
     });
