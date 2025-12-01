@@ -642,5 +642,50 @@
     "replacedByFactureId": "69258217bc90c33f84d87e34",
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "__v": 0
+  },
+  {
+    "_id": "692d9f1a02da10b41441c4ef",
+    "numeroFacture": "FAC-030",
+    "devisId": "691f793d163a17aa79fb6a66",
+    "clientId": "691f78f8163a17aa79fb6995",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "helmi"
+    },
+    "vehicleInfo": "ppp p1 - 52TUN77",
+    "inspectionDate": "2025-11-20T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "aaaa",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "692d9f1a02da10b41441c4f0"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalRemise": 0,
+    "totalTTC": 240,
+    "finalTotalTTC": 241,
+    "timbreFiscal": 1,
+    "paymentStatus": "en_attente",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-12-01T13:58:50.109Z",
+    "dueDate": "2025-12-31T13:58:50.110Z",
+    "createdAt": "2025-12-01T13:58:50.110Z",
+    "updatedAt": "2025-12-01T13:58:50.110Z",
+    "__v": 0
   }
 ]
