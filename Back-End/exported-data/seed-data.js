@@ -80,6 +80,30 @@ const carnetentretiens = [
     "createdAt": "2025-11-19T10:54:46.177Z",
     "updatedAt": "2025-11-19T10:54:46.177Z",
     "__v": 0
+  },
+  {
+    "_id": "692da28ea0fc63153254aba6",
+    "vehiculeId": "691f7928163a17aa79fb6a0c",
+    "devisId": "691f793d163a17aa79fb6a66",
+    "dateCommencement": "2025-11-23T12:05:00.000Z",
+    "dateFinCompletion": "2025-11-23T12:06:41.829Z",
+    "statut": "termine",
+    "totalTTC": 240,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0006",
+    "services": [
+      {
+        "nom": "aaaa",
+        "description": "Entretien et révision",
+        "quantite": 1,
+        "_id": "692da28ea0fc63153254aba7"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-01T14:13:34.601Z",
+    "updatedAt": "2025-12-01T14:13:34.601Z",
+    "__v": 0
   }
 ];
 
@@ -706,11 +730,11 @@ const garages = [
     "_id": "69147725cb1b9aa1eaa81e3f",
     "nom": "Garage Elite Motors Premium",
     "matriculeFiscal": "987654321777",
-    "governorateId": null,
-    "governorateName": "sousse",
-    "cityId": null,
-    "cityName": "sousse",
-    "streetAddress": "15 Avenue Habib Bourguiba, Ariana Centre",
+    "governorateId": "689de78ebbd7f699052feeaf",
+    "governorateName": "SOUSSE",
+    "cityId": "689de78ebbd7f699052ff017",
+    "cityName": "SOUSSE VILLE (Sousse)",
+    "streetAddress": "",
     "garagisteAdmins": [
       "6917342f9b5729f0dbd904e0"
     ],
@@ -722,23 +746,23 @@ const garages = [
     "location": {
       "type": "Point",
       "coordinates": [
-        10.196,
-        36.863
+        10.63,
+        35.8269
       ]
     },
     "createdAt": "2025-11-12T12:01:41.005Z",
-    "updatedAt": "2025-11-21T21:32:44.892Z",
+    "updatedAt": "2025-12-01T14:19:42.577Z",
     "__v": 0
   },
   {
     "_id": "6916fb6416edea752b1f81b3",
     "nom": "garage plus",
     "matriculeFiscal": "874593",
-    "governorateId": null,
-    "governorateName": "sousse",
-    "cityId": null,
-    "cityName": "sousse",
-    "streetAddress": "sousse",
+    "governorateId": "689de78dbbd7f699052fe483",
+    "governorateName": "MONASTIR",
+    "cityId": "689de78dbbd7f699052fe595",
+    "cityName": "MONASTIR (Monastir)",
+    "streetAddress": "",
     "garagisteAdmins": [],
     "description": "ffffff",
     "horaires": "lundi-samedi : 08:00-17:00",
@@ -746,18 +770,25 @@ const garages = [
     "emailProfessionnel": "auto0@gamil.com",
     "telephoneProfessionnel": "45 001 987",
     "createdAt": "2025-11-14T09:50:28.440Z",
-    "updatedAt": "2025-11-16T19:34:17.089Z",
-    "__v": 0
+    "updatedAt": "2025-12-01T14:19:24.015Z",
+    "__v": 0,
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        10.8,
+        35.7644
+      ]
+    }
   },
   {
     "_id": "691733369b5729f0dbd904a1",
     "nom": "bassem garage",
     "matriculeFiscal": "15rsksd9842f",
-    "governorateId": null,
-    "governorateName": "sousse",
-    "cityId": null,
-    "cityName": "sidi bou ali",
-    "streetAddress": "en face de pharmacie de nuit",
+    "governorateId": "689de78ebbd7f699052feeaf",
+    "governorateName": "SOUSSE",
+    "cityId": "689de78ebbd7f699052feeb5",
+    "cityName": "BOU FICHA (Bou Ficha)",
+    "streetAddress": "",
     "garagisteAdmins": [
       "691733589b5729f0dbd904a7",
       "69173a1a094cf4f8355c0458"
@@ -768,18 +799,25 @@ const garages = [
     "emailProfessionnel": "auto2@gamil.com",
     "telephoneProfessionnel": "45 222 987",
     "createdAt": "2025-11-14T13:48:38.567Z",
-    "updatedAt": "2025-11-18T18:44:40.194Z",
-    "__v": 0
+    "updatedAt": "2025-12-01T14:19:04.574Z",
+    "__v": 0,
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        10.3997,
+        36.2933
+      ]
+    }
   },
   {
     "_id": "6920cb4f69f0734e2ffd2296",
     "nom": "garage bmw",
     "matriculeFiscal": "15rsksd9842f88",
-    "governorateId": null,
-    "governorateName": "sousse",
-    "cityId": null,
-    "cityName": "sousse",
-    "streetAddress": "sousse",
+    "governorateId": "689de78ebbd7f699052feeaf",
+    "governorateName": "SOUSSE",
+    "cityId": "689de78ebbd7f699052fefcd",
+    "cityName": "AKOUDA (Akouda)",
+    "streetAddress": "",
     "garagisteAdmins": [],
     "description": "ssssssss",
     "horaires": "Lun-Mar: 08h00-17h00, Mer: 09h00-17h00, Jeu-Sam: 08h00-17h00, Dim: Fermé",
@@ -787,8 +825,15 @@ const garages = [
     "emailProfessionnel": "auto3@gamil.com",
     "telephoneProfessionnel": "45 333 987",
     "createdAt": "2025-11-21T20:27:59.329Z",
-    "updatedAt": "2025-11-21T20:27:59.329Z",
-    "__v": 0
+    "updatedAt": "2025-12-01T14:18:45.508Z",
+    "__v": 0,
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        10.5667,
+        35.8667
+      ]
+    }
   }
 ];
 
@@ -2877,10 +2922,10 @@ const factures = [
     "totalTTC": 240,
     "finalTotalTTC": 241,
     "timbreFiscal": 1,
-    "paymentStatus": "partiellement_paye",
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "virement",
-    "paymentAmount": 50,
+    "paymentStatus": "paye",
+    "paymentDate": "2025-12-01T00:00:00.000Z",
+    "paymentMethod": "especes",
+    "paymentAmount": 241,
     "estimatedTime": {
       "days": 1,
       "hours": 0,
@@ -2888,7 +2933,7 @@ const factures = [
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
     "createdAt": "2025-11-24T14:02:51.174Z",
-    "updatedAt": "2025-11-24T14:03:08.405Z",
+    "updatedAt": "2025-12-01T14:06:05.536Z",
     "status": "active",
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "__v": 0

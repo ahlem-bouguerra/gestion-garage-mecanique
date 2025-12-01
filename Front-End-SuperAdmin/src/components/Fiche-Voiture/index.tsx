@@ -560,9 +560,15 @@ export default function VehiculeManagement() {
 
     const fetchVehicules = async () => {
         try {
+                const token = getAuthToken();
+    
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      return;
+    }
             setError("");
             const response = await axios.get(`${API_BASE_URL}/get-all-mes-vehicules`, {
-                headers: { Authorization: `Bearer ${getAuthToken()}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
             setVehicules(response.data);
         } catch (error: any) {
@@ -694,6 +700,12 @@ export default function VehiculeManagement() {
     };
 
     const handleVehiculeSubmit = async (e: React.FormEvent) => {
+            const token = getAuthToken();
+    
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      return;
+    }
         e.preventDefault();
 
         // ✅ VALIDATION FINALE AVANT SOUMISSION
@@ -731,12 +743,12 @@ export default function VehiculeManagement() {
             if (modalType === "add") {
                 submitData.proprietaireId = vehiculeForm.proprietaireId;
                 await axios.post(`${API_BASE_URL}/create-mes-vehicules`, submitData, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
+                    headers: { Authorization: `Bearer ${token}` }
                 });
                 showSuccess("Véhicule ajouté avec succès!");
             } else if (modalType === "edit" && selectedVehicule) {
                 await axios.put(`${API_BASE_URL}/update-mes-vehicules/${selectedVehicule._id}`, submitData, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
+                    headers: { Authorization: `Bearer ${token}` }
                 });
                 showSuccess("Véhicule modifié avec succès!");
             }
@@ -755,8 +767,14 @@ export default function VehiculeManagement() {
     const deleteVehicule = async (vehicule: Vehicule) => {
         if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ?`)) {
             try {
+                    const token = getAuthToken();
+    
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      return;
+    }
                 await axios.delete(`${API_BASE_URL}/delete-mes-vehicules/${vehicule._id}`, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
+                    headers: { Authorization: `Bearer ${token}` }
                 });;
                 fetchVehicules();
                 showSuccess("Véhicule supprimé avec succès!");

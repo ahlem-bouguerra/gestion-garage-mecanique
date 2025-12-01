@@ -67,5 +67,29 @@
     "createdAt": "2025-11-19T10:54:46.177Z",
     "updatedAt": "2025-11-19T10:54:46.177Z",
     "__v": 0
+  },
+  {
+    "_id": "692da28ea0fc63153254aba6",
+    "vehiculeId": "691f7928163a17aa79fb6a0c",
+    "devisId": "691f793d163a17aa79fb6a66",
+    "dateCommencement": "2025-11-23T12:05:00.000Z",
+    "dateFinCompletion": "2025-11-23T12:06:41.829Z",
+    "statut": "termine",
+    "totalTTC": 240,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0006",
+    "services": [
+      {
+        "nom": "aaaa",
+        "description": "Entretien et révision",
+        "quantite": 1,
+        "_id": "692da28ea0fc63153254aba7"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-01T14:13:34.601Z",
+    "updatedAt": "2025-12-01T14:13:34.601Z",
+    "__v": 0
   }
 ]

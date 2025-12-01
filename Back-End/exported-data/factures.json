@@ -364,10 +364,10 @@
     "totalTTC": 240,
     "finalTotalTTC": 241,
     "timbreFiscal": 1,
-    "paymentStatus": "partiellement_paye",
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "virement",
-    "paymentAmount": 50,
+    "paymentStatus": "paye",
+    "paymentDate": "2025-12-01T00:00:00.000Z",
+    "paymentMethod": "especes",
+    "paymentAmount": 241,
     "estimatedTime": {
       "days": 1,
       "hours": 0,
@@ -375,7 +375,7 @@
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
     "createdAt": "2025-11-24T14:02:51.174Z",
-    "updatedAt": "2025-11-24T14:03:08.405Z",
+    "updatedAt": "2025-12-01T14:06:05.536Z",
     "status": "active",
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "__v": 0
