@@ -69,7 +69,7 @@ import {
 } from "../controllers/superAdmin/serviceController.js"
 
 import { getProfile ,updateProfile ,changePassword} from "../controllers/superAdmin/profileContoller.js";
-
+import { authGaragisteOuSuperAdmin } from "../middlewares/combinedAuth.js"
 const router = express.Router();
 
 // ========== ROUTE /ME (PROTÉGÉE) ==========
@@ -129,7 +129,7 @@ router.delete("/garagiste/permission/:id", superAdminMiddleware, hasAccess("Supe
 
 // ========== GESTION DES RÔLES ==========
 router.post("/creeRole", superAdminMiddleware, hasAccess("Super Admin"), createRole);
-router.get("/getAllRoles", superAdminMiddleware, hasAccess("Super Admin"), getAllRoles);
+router.get("/getAllRoles", authGaragisteOuSuperAdmin, getAllRoles);
 router.get("/getOneRole/:id", superAdminMiddleware, hasAccess("Super Admin"), getRoleById);
 router.put("/updateRole/:id", superAdminMiddleware, hasAccess("Super Admin"), updateRole);
 router.delete("/deleteRole/:id", superAdminMiddleware, hasAccess("Super Admin"), deleteRole);

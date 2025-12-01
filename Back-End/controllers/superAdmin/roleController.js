@@ -28,7 +28,9 @@ export const createRole = async (req, res) => {
 // ========== OBTENIR TOUS LES RÔLES DISPONIBLES ==========
 export const getAllRoles = async (req, res) => {
   try {
-    const roles = await Role.find().select('_id name description');
+    const roles = await Role.find({ 
+      name: { $ne: "Super Admin" } 
+    }).select('_id name description');
     res.json(roles );
   } catch (error) {
     console.error("❌ Erreur getAllRoles:", error);

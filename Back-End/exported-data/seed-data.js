@@ -3,58 +3,6 @@ const mongoose = require("mongoose");
 
 const ateliers = [
   {
-    "_id": "68ac5a14ae962ee12f761954",
-    "name": "Atelier Mécanique Générale",
-    "localisation": "Zone A",
-    "__v": 0
-  },
-  {
-    "_id": "68ac5e7ccb004d62040cc79e",
-    "name": "Atelier Carrosserie",
-    "localisation": "Zone B",
-    "__v": 0
-  },
-  {
-    "_id": "68ac5ebacb004d62040cc7a0",
-    "name": "Atelier Électricité Auto",
-    "localisation": "Zone C",
-    "__v": 0
-  },
-  {
-    "_id": "68ac5ecccb004d62040cc7a2",
-    "name": "Atelier Pneumatiques",
-    "localisation": "Zone D",
-    "__v": 0
-  },
-  {
-    "_id": "68d52d53a85f287118ca7e2b",
-    "name": "ateleir 1 ",
-    "localisation": "zone 1",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "__v": 0
-  },
-  {
-    "_id": "6900a032fbf9f9e8be1f9468",
-    "name": "a",
-    "localisation": "b",
-    "garagisteId": "69009a2172d66cd84cdabd21",
-    "__v": 0
-  },
-  {
-    "_id": "6901e5f984b16346b6d9e9d3",
-    "name": "a",
-    "localisation": "b",
-    "garagisteId": "68c880c20cb349894f35be59",
-    "__v": 0
-  },
-  {
-    "_id": "6911db77227f68139eab73c9",
-    "name": "ateler1",
-    "localisation": "zone b",
-    "garagisteId": "6911cc17ccd145adc6354db7",
-    "__v": 0
-  },
-  {
     "_id": "691b0336f15086b702a468c5",
     "name": "atelier A",
     "localisation": "zobe 2",
@@ -64,1347 +12,6 @@ const ateliers = [
 ];
 
 const carnetentretiens = [
-  {
-    "_id": "6900998272d66cd84cdabc22",
-    "vehiculeId": "69007fed671272b7adb957ac",
-    "devisId": "690098ee72d66cd84cdabb4e",
-    "dateCommencement": "2025-10-28T10:20:00.000Z",
-    "dateFinCompletion": "2025-10-28T10:21:03.139Z",
-    "statut": "termine",
-    "totalTTC": 60,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0027",
-    "services": [
-      {
-        "nom": "dddddd",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6900998272d66cd84cdabc23"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T10:22:58.362Z",
-    "updatedAt": "2025-10-28T10:22:58.362Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900998272d66cd84cdabc25",
-    "vehiculeId": "69007fed671272b7adb957ac",
-    "devisId": "69008300671272b7adb95a68",
-    "dateCommencement": "2025-10-28T08:48:00.000Z",
-    "dateFinCompletion": "2025-10-28T08:48:57.525Z",
-    "statut": "termine",
-    "totalTTC": 108,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0024",
-    "services": [
-      {
-        "nom": "join",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6900998272d66cd84cdabc26"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T10:22:58.366Z",
-    "updatedAt": "2025-10-28T10:22:58.366Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900998772d66cd84cdabc4d",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": "6900920ca89e350307892115",
-    "dateCommencement": "2025-10-28T09:51:00.000Z",
-    "dateFinCompletion": "2025-10-28T09:51:44.505Z",
-    "statut": "termine",
-    "totalTTC": 119.988,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0025",
-    "services": [
-      {
-        "nom": "kkk",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6900998772d66cd84cdabc4e"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T10:23:03.372Z",
-    "updatedAt": "2025-10-28T10:23:03.372Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900998772d66cd84cdabc50",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": "68ff49950f282da499e7ac72",
-    "dateCommencement": "2025-10-27T15:07:00.000Z",
-    "dateFinCompletion": "2025-10-27T15:07:29.981Z",
-    "statut": "termine",
-    "totalTTC": 3000,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0023",
-    "services": [
-      {
-        "nom": "c",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6900998772d66cd84cdabc51"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T10:23:03.374Z",
-    "updatedAt": "2025-10-28T10:23:03.374Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900998772d66cd84cdabc53",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": "68e4d8cc5bda69f634dce177",
-    "dateCommencement": "2025-10-07T10:10:00.000Z",
-    "dateFinCompletion": "2025-10-07T09:10:52.663Z",
-    "statut": "termine",
-    "totalTTC": 288,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0019",
-    "services": [
-      {
-        "nom": "fff",
-        "description": "entretien",
-        "quantite": 2,
-        "_id": "6900998772d66cd84cdabc54"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T10:23:03.377Z",
-    "updatedAt": "2025-10-28T10:23:03.377Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900998772d66cd84cdabc56",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": "68fe2bed1cf6c4cdd5b15051",
-    "dateCommencement": "2025-10-26T14:13:00.000Z",
-    "dateFinCompletion": "2025-10-26T14:14:54.474Z",
-    "statut": "termine",
-    "totalTTC": 240,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0022",
-    "services": [
-      {
-        "nom": "phare",
-        "description": "entretien",
-        "quantite": 3,
-        "_id": "6900998772d66cd84cdabc57"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T10:23:03.378Z",
-    "updatedAt": "2025-10-28T10:23:03.378Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900998772d66cd84cdabc59",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": "68e4eaa15f2221af0c2e6208",
-    "dateCommencement": "2025-10-07T11:41:00.000Z",
-    "dateFinCompletion": "2025-10-07T11:41:39.570Z",
-    "statut": "termine",
-    "totalTTC": 252,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0021",
-    "services": [
-      {
-        "nom": "pompe",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6900998772d66cd84cdabc5a"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T10:23:03.380Z",
-    "updatedAt": "2025-10-28T10:23:03.380Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900999e72d66cd84cdabcfa",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": "6900936429d84ebbdc6e15f2",
-    "dateCommencement": "2025-10-28T09:57:00.000Z",
-    "dateFinCompletion": "2025-10-28T09:57:27.871Z",
-    "statut": "termine",
-    "totalTTC": 93.6,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0026",
-    "services": [
-      {
-        "nom": "pppppppppppppppppppppppppppppppppp",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6900999e72d66cd84cdabcfb"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T10:23:26.835Z",
-    "updatedAt": "2025-10-28T10:23:26.835Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900999e72d66cd84cdabcfd",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": "68e4dcdfe6ea6cbcebe73703",
-    "dateCommencement": "2025-10-07T09:27:00.000Z",
-    "dateFinCompletion": "2025-10-07T09:27:43.812Z",
-    "statut": "termine",
-    "totalTTC": 252,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0020",
-    "services": [
-      {
-        "nom": "xx",
-        "description": "entretien",
-        "quantite": 3,
-        "_id": "6900999e72d66cd84cdabcfe"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T10:23:26.837Z",
-    "updatedAt": "2025-10-28T10:23:26.837Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900b5844b98ce0dcd0a3b48",
-    "vehiculeId": "6900ac1b4b98ce0dcd0a3570",
-    "devisId": "6900b5404b98ce0dcd0a3a87",
-    "dateCommencement": "2025-10-28T16:52:00.000Z",
-    "dateFinCompletion": "2025-10-28T12:22:22.144Z",
-    "statut": "termine",
-    "totalTTC": 660,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0028",
-    "services": [
-      {
-        "nom": "phare",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6900b5844b98ce0dcd0a3b49"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T12:22:28.992Z",
-    "updatedAt": "2025-10-28T12:22:28.992Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900b5844b98ce0dcd0a3b4e",
-    "vehiculeId": "6900ac1b4b98ce0dcd0a3570",
-    "devisId": "6900b5404b98ce0dcd0a3a87",
-    "dateCommencement": "2025-10-28T16:52:00.000Z",
-    "dateFinCompletion": "2025-10-28T12:22:22.144Z",
-    "statut": "termine",
-    "totalTTC": 660,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0028",
-    "services": [
-      {
-        "nom": "phare",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6900b5844b98ce0dcd0a3b4f"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T12:22:28.997Z",
-    "updatedAt": "2025-10-28T12:22:28.997Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900d71a176b07145afc5b94",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "dateCommencement": "2025-10-28T00:00:00.000Z",
-    "dateFinCompletion": "2025-10-28T00:00:00.000Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "notes": "Ajouté manuellement",
-    "services": [
-      {
-        "nom": "yyyyyy",
-        "description": "entretien",
-        "quantite": 1,
-        "prix": 0,
-        "_id": "6900d71a176b07145afc5b95"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-28T14:45:46.614Z",
-    "updatedAt": "2025-10-28T14:45:46.614Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901e4a784b16346b6d9e862",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": "6900d918176b07145afc5cb3",
-    "dateCommencement": "2025-10-28T15:09:00.000Z",
-    "dateFinCompletion": "2025-10-28T15:10:10.649Z",
-    "statut": "termine",
-    "totalTTC": 420,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0029",
-    "services": [
-      {
-        "nom": "phare",
-        "description": "entretien",
-        "quantite": 2,
-        "_id": "6901e4a784b16346b6d9e863"
-      },
-      {
-        "nom": "rrrr",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6901e4a784b16346b6d9e864"
-      }
-    ],
-    "garagisteId": "68c880c20cb349894f35be59",
-    "pieces": [],
-    "createdAt": "2025-10-29T09:55:51.496Z",
-    "updatedAt": "2025-10-29T09:55:51.496Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901e4a784b16346b6d9e86a",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": "6900d918176b07145afc5cb3",
-    "dateCommencement": "2025-10-28T15:09:00.000Z",
-    "dateFinCompletion": "2025-10-28T15:10:10.649Z",
-    "statut": "termine",
-    "totalTTC": 420,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0029",
-    "services": [
-      {
-        "nom": "phare",
-        "description": "entretien",
-        "quantite": 2,
-        "_id": "6901e4a784b16346b6d9e86b"
-      },
-      {
-        "nom": "rrrr",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6901e4a784b16346b6d9e86c"
-      }
-    ],
-    "garagisteId": "68c880c20cb349894f35be59",
-    "pieces": [],
-    "createdAt": "2025-10-29T09:55:51.504Z",
-    "updatedAt": "2025-10-29T09:55:51.504Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901e4c284b16346b6d9e89b",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": "6901e46484b16346b6d9e75e",
-    "dateCommencement": "2025-10-29T09:55:00.000Z",
-    "dateFinCompletion": "2025-10-29T09:55:33.257Z",
-    "statut": "termine",
-    "totalTTC": 36,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0030",
-    "services": [
-      {
-        "nom": "x",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6901e4c284b16346b6d9e89c"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-10-29T09:56:18.114Z",
-    "updatedAt": "2025-10-29T09:56:18.114Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901e62284b16346b6d9ea59",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": "6901e5bc84b16346b6d9e990",
-    "dateCommencement": "2025-10-29T14:00:00.000Z",
-    "dateFinCompletion": "2025-10-29T10:02:02.860Z",
-    "statut": "termine",
-    "totalTTC": 24,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0031",
-    "services": [
-      {
-        "nom": "g",
-        "description": "moteur",
-        "quantite": 1,
-        "_id": "6901e62284b16346b6d9ea5a"
-      }
-    ],
-    "garagisteId": "68c880c20cb349894f35be59",
-    "pieces": [],
-    "createdAt": "2025-10-29T10:02:10.934Z",
-    "updatedAt": "2025-10-29T10:02:10.934Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901e62284b16346b6d9ea5c",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": "6901e5bc84b16346b6d9e990",
-    "dateCommencement": "2025-10-29T14:00:00.000Z",
-    "dateFinCompletion": "2025-10-29T10:02:02.860Z",
-    "statut": "termine",
-    "totalTTC": 24,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0031",
-    "services": [
-      {
-        "nom": "g",
-        "description": "moteur",
-        "quantite": 1,
-        "_id": "6901e62284b16346b6d9ea5d"
-      }
-    ],
-    "garagisteId": "68c880c20cb349894f35be59",
-    "pieces": [],
-    "createdAt": "2025-10-29T10:02:10.936Z",
-    "updatedAt": "2025-10-29T10:02:10.936Z",
-    "__v": 0
-  },
-  {
-    "_id": "690531f5fa49bf4af0dae111",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "dateCommencement": "2025-10-31T00:00:00.000Z",
-    "dateFinCompletion": "2025-10-31T00:00:00.000Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Ajouté manuellement par le client",
-    "services": [
-      {
-        "nom": "ffff",
-        "description": "ffff",
-        "quantite": 1,
-        "prix": 0,
-        "_id": "690531f5fa49bf4af0dae112"
-      }
-    ],
-    "garagisteId": "68da66768ca933b9592da19b",
-    "pieces": [],
-    "createdAt": "2025-10-31T22:02:29.438Z",
-    "updatedAt": "2025-10-31T22:02:29.438Z",
-    "__v": 0
-  },
-  {
-    "_id": "69053247fa49bf4af0dae18c",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "dateCommencement": "2025-10-31T00:00:00.000Z",
-    "dateFinCompletion": "2025-10-31T00:00:00.000Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Ajouté manuellement par le client",
-    "services": [
-      {
-        "nom": "a",
-        "description": "a",
-        "quantite": 1,
-        "prix": 0,
-        "_id": "69053247fa49bf4af0dae18d"
-      }
-    ],
-    "garagisteId": "68da66768ca933b9592da19b",
-    "pieces": [],
-    "createdAt": "2025-10-31T22:03:51.527Z",
-    "updatedAt": "2025-10-31T22:03:51.527Z",
-    "__v": 0
-  },
-  {
-    "_id": "690532b2fa49bf4af0dae1a0",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "dateCommencement": "2025-10-31T00:00:00.000Z",
-    "dateFinCompletion": "2025-10-31T00:00:00.000Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Ajouté manuellement par le client",
-    "services": [
-      {
-        "nom": "'r",
-        "description": "'r",
-        "quantite": 1,
-        "prix": 0,
-        "_id": "690532b2fa49bf4af0dae1a1"
-      }
-    ],
-    "garagisteId": "68da66768ca933b9592da19b",
-    "pieces": [],
-    "createdAt": "2025-10-31T22:05:38.670Z",
-    "updatedAt": "2025-10-31T22:05:38.670Z",
-    "__v": 0
-  },
-  {
-    "_id": "690532fdc9136ce034bb9308",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "dateCommencement": "2025-10-31T00:00:00.000Z",
-    "dateFinCompletion": "2025-10-31T00:00:00.000Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Ajouté manuellement par le client",
-    "services": [
-      {
-        "nom": "dz",
-        "description": "dz",
-        "quantite": 1,
-        "prix": 0,
-        "_id": "690532fdc9136ce034bb9309"
-      }
-    ],
-    "garagisteId": "68da66768ca933b9592da19b",
-    "pieces": [],
-    "createdAt": "2025-10-31T22:06:53.990Z",
-    "updatedAt": "2025-10-31T22:06:53.990Z",
-    "__v": 0
-  },
-  {
-    "_id": "6905333c934953a70e6e46b1",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "dateCommencement": "2025-10-31T00:00:00.000Z",
-    "dateFinCompletion": "2025-10-31T00:00:00.000Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Ajouté manuellement par le client",
-    "services": [
-      {
-        "nom": "d",
-        "description": "d",
-        "quantite": 1,
-        "prix": 0,
-        "_id": "6905333c934953a70e6e46b2"
-      }
-    ],
-    "pieces": [],
-    "createdAt": "2025-10-31T22:07:56.685Z",
-    "updatedAt": "2025-10-31T22:07:56.685Z",
-    "__v": 0
-  },
-  {
-    "_id": "69053346934953a70e6e46c8",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "dateCommencement": "2025-10-31T00:00:00.000Z",
-    "dateFinCompletion": "2025-10-31T00:00:00.000Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Ajouté manuellement par le client",
-    "services": [
-      {
-        "nom": "dzl",
-        "description": "dzl",
-        "quantite": 1,
-        "prix": 0,
-        "_id": "69053346934953a70e6e46c9"
-      }
-    ],
-    "pieces": [],
-    "createdAt": "2025-10-31T22:08:06.610Z",
-    "updatedAt": "2025-10-31T22:08:06.610Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2acea9b",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-07T11:41:00.000Z",
-    "dateFinCompletion": "2025-10-07T11:41:39.570Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0021",
-    "services": [
-      {
-        "nom": "pompe",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e01c277b147dc2acea9c"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.870Z",
-    "updatedAt": "2025-11-04T11:14:36.870Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2acea9e",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-27T15:07:00.000Z",
-    "dateFinCompletion": "2025-10-27T15:07:29.981Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0023",
-    "services": [
-      {
-        "nom": "c",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e01c277b147dc2acea9f"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.876Z",
-    "updatedAt": "2025-11-04T11:14:36.876Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2aceaa1",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-26T14:13:00.000Z",
-    "dateFinCompletion": "2025-10-26T14:14:54.474Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0022",
-    "services": [
-      {
-        "nom": "phare",
-        "description": "entretien",
-        "quantite": 3,
-        "_id": "6909e01c277b147dc2aceaa2"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.880Z",
-    "updatedAt": "2025-11-04T11:14:36.880Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2aceaa4",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-28T09:51:00.000Z",
-    "dateFinCompletion": "2025-10-28T09:51:44.505Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0025",
-    "services": [
-      {
-        "nom": "kkk",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e01c277b147dc2aceaa5"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.885Z",
-    "updatedAt": "2025-11-04T11:14:36.885Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2aceaa7",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-07T10:10:00.000Z",
-    "dateFinCompletion": "2025-10-07T09:10:52.663Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0019",
-    "services": [
-      {
-        "nom": "fff",
-        "description": "entretien",
-        "quantite": 2,
-        "_id": "6909e01c277b147dc2aceaa8"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.888Z",
-    "updatedAt": "2025-11-04T11:14:36.888Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2aceaaa",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-29T09:55:00.000Z",
-    "dateFinCompletion": "2025-10-29T09:55:33.257Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0030",
-    "services": [
-      {
-        "nom": "x",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e01c277b147dc2aceaab"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.894Z",
-    "updatedAt": "2025-11-04T11:14:36.894Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2acead2",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-29T09:55:00.000Z",
-    "dateFinCompletion": "2025-10-29T09:55:33.257Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0030",
-    "services": [
-      {
-        "nom": "x",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e01c277b147dc2acead3"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.948Z",
-    "updatedAt": "2025-11-04T11:14:36.948Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2acead5",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-26T14:13:00.000Z",
-    "dateFinCompletion": "2025-10-26T14:14:54.474Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0022",
-    "services": [
-      {
-        "nom": "phare",
-        "description": "entretien",
-        "quantite": 3,
-        "_id": "6909e01c277b147dc2acead6"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.953Z",
-    "updatedAt": "2025-11-04T11:14:36.953Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2acead8",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-28T09:51:00.000Z",
-    "dateFinCompletion": "2025-10-28T09:51:44.505Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0025",
-    "services": [
-      {
-        "nom": "kkk",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e01c277b147dc2acead9"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.956Z",
-    "updatedAt": "2025-11-04T11:14:36.956Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2aceadb",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-07T11:41:00.000Z",
-    "dateFinCompletion": "2025-10-07T11:41:39.570Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0021",
-    "services": [
-      {
-        "nom": "pompe",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e01c277b147dc2aceadc"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.959Z",
-    "updatedAt": "2025-11-04T11:14:36.959Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2aceade",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-07T10:10:00.000Z",
-    "dateFinCompletion": "2025-10-07T09:10:52.663Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0019",
-    "services": [
-      {
-        "nom": "fff",
-        "description": "entretien",
-        "quantite": 2,
-        "_id": "6909e01c277b147dc2aceadf"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.962Z",
-    "updatedAt": "2025-11-04T11:14:36.962Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e01c277b147dc2aceae1",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-27T15:07:00.000Z",
-    "dateFinCompletion": "2025-10-27T15:07:29.981Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0023",
-    "services": [
-      {
-        "nom": "c",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e01c277b147dc2aceae2"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:36.966Z",
-    "updatedAt": "2025-11-04T11:14:36.966Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb13",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-29T09:55:00.000Z",
-    "dateFinCompletion": "2025-10-29T09:55:33.257Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0030",
-    "services": [
-      {
-        "nom": "x",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e032277b147dc2aceb14"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.063Z",
-    "updatedAt": "2025-11-04T11:14:58.063Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb16",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-28T09:51:00.000Z",
-    "dateFinCompletion": "2025-10-28T09:51:44.505Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0025",
-    "services": [
-      {
-        "nom": "kkk",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e032277b147dc2aceb17"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.066Z",
-    "updatedAt": "2025-11-04T11:14:58.066Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb19",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-07T11:41:00.000Z",
-    "dateFinCompletion": "2025-10-07T11:41:39.570Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0021",
-    "services": [
-      {
-        "nom": "pompe",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e032277b147dc2aceb1a"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.069Z",
-    "updatedAt": "2025-11-04T11:14:58.069Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb1c",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-27T15:07:00.000Z",
-    "dateFinCompletion": "2025-10-27T15:07:29.981Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0023",
-    "services": [
-      {
-        "nom": "c",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e032277b147dc2aceb1d"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.073Z",
-    "updatedAt": "2025-11-04T11:14:58.073Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb1f",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-26T14:13:00.000Z",
-    "dateFinCompletion": "2025-10-26T14:14:54.474Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0022",
-    "services": [
-      {
-        "nom": "phare",
-        "description": "entretien",
-        "quantite": 3,
-        "_id": "6909e032277b147dc2aceb20"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.075Z",
-    "updatedAt": "2025-11-04T11:14:58.075Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb22",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-07T10:10:00.000Z",
-    "dateFinCompletion": "2025-10-07T09:10:52.663Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0019",
-    "services": [
-      {
-        "nom": "fff",
-        "description": "entretien",
-        "quantite": 2,
-        "_id": "6909e032277b147dc2aceb23"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.078Z",
-    "updatedAt": "2025-11-04T11:14:58.078Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb56",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-29T09:55:00.000Z",
-    "dateFinCompletion": "2025-10-29T09:55:33.257Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0030",
-    "services": [
-      {
-        "nom": "x",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e032277b147dc2aceb57"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.122Z",
-    "updatedAt": "2025-11-04T11:14:58.122Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb59",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-27T15:07:00.000Z",
-    "dateFinCompletion": "2025-10-27T15:07:29.981Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0023",
-    "services": [
-      {
-        "nom": "c",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e032277b147dc2aceb5a"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.131Z",
-    "updatedAt": "2025-11-04T11:14:58.131Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb5c",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-26T14:13:00.000Z",
-    "dateFinCompletion": "2025-10-26T14:14:54.474Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0022",
-    "services": [
-      {
-        "nom": "phare",
-        "description": "entretien",
-        "quantite": 3,
-        "_id": "6909e032277b147dc2aceb5d"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.137Z",
-    "updatedAt": "2025-11-04T11:14:58.137Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb5f",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-07T11:41:00.000Z",
-    "dateFinCompletion": "2025-10-07T11:41:39.570Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0021",
-    "services": [
-      {
-        "nom": "pompe",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e032277b147dc2aceb60"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.140Z",
-    "updatedAt": "2025-11-04T11:14:58.140Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb62",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-28T09:51:00.000Z",
-    "dateFinCompletion": "2025-10-28T09:51:44.505Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0025",
-    "services": [
-      {
-        "nom": "kkk",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e032277b147dc2aceb63"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.142Z",
-    "updatedAt": "2025-11-04T11:14:58.142Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e032277b147dc2aceb65",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "devisId": null,
-    "dateCommencement": "2025-10-07T10:10:00.000Z",
-    "dateFinCompletion": "2025-10-07T09:10:52.663Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0019",
-    "services": [
-      {
-        "nom": "fff",
-        "description": "entretien",
-        "quantite": 2,
-        "_id": "6909e032277b147dc2aceb66"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:14:58.146Z",
-    "updatedAt": "2025-11-04T11:14:58.146Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e03d277b147dc2aceb85",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": null,
-    "dateCommencement": "2025-10-07T09:27:00.000Z",
-    "dateFinCompletion": "2025-10-07T09:27:43.812Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0020",
-    "services": [
-      {
-        "nom": "xx",
-        "description": "entretien",
-        "quantite": 3,
-        "_id": "6909e03d277b147dc2aceb86"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:15:09.695Z",
-    "updatedAt": "2025-11-04T11:15:09.695Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e03d277b147dc2aceb88",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": null,
-    "dateCommencement": "2025-10-29T14:00:00.000Z",
-    "dateFinCompletion": "2025-10-29T10:02:02.860Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0031",
-    "services": [
-      {
-        "nom": "g",
-        "description": "moteur",
-        "quantite": 1,
-        "_id": "6909e03d277b147dc2aceb89"
-      }
-    ],
-    "garagisteId": "68c880c20cb349894f35be59",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:15:09.707Z",
-    "updatedAt": "2025-11-04T11:15:09.707Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e03d277b147dc2aceb8b",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": null,
-    "dateCommencement": "2025-10-28T15:09:00.000Z",
-    "dateFinCompletion": "2025-10-28T15:10:10.649Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0029",
-    "services": [
-      {
-        "nom": "phare",
-        "description": "entretien",
-        "quantite": 2,
-        "_id": "6909e03d277b147dc2aceb8c"
-      },
-      {
-        "nom": "rrrr",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e03d277b147dc2aceb8d"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:15:09.711Z",
-    "updatedAt": "2025-11-04T11:15:09.711Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e03d277b147dc2aceb8f",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": null,
-    "dateCommencement": "2025-10-28T09:57:00.000Z",
-    "dateFinCompletion": "2025-10-28T09:57:27.871Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0026",
-    "services": [
-      {
-        "nom": "pppppppppppppppppppppppppppppppppp",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e03d277b147dc2aceb90"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:15:09.717Z",
-    "updatedAt": "2025-11-04T11:15:09.717Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e03d277b147dc2acebb0",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": null,
-    "dateCommencement": "2025-10-29T14:00:00.000Z",
-    "dateFinCompletion": "2025-10-29T10:02:02.860Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0031",
-    "services": [
-      {
-        "nom": "g",
-        "description": "moteur",
-        "quantite": 1,
-        "_id": "6909e03d277b147dc2acebb1"
-      }
-    ],
-    "garagisteId": "68c880c20cb349894f35be59",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:15:09.766Z",
-    "updatedAt": "2025-11-04T11:15:09.766Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e03d277b147dc2acebb3",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": null,
-    "dateCommencement": "2025-10-28T15:09:00.000Z",
-    "dateFinCompletion": "2025-10-28T15:10:10.649Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0029",
-    "services": [
-      {
-        "nom": "phare",
-        "description": "entretien",
-        "quantite": 2,
-        "_id": "6909e03d277b147dc2acebb4"
-      },
-      {
-        "nom": "rrrr",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e03d277b147dc2acebb5"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:15:09.768Z",
-    "updatedAt": "2025-11-04T11:15:09.768Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e03d277b147dc2acebb7",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": null,
-    "dateCommencement": "2025-10-28T09:57:00.000Z",
-    "dateFinCompletion": "2025-10-28T09:57:27.871Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0026",
-    "services": [
-      {
-        "nom": "pppppppppppppppppppppppppppppppppp",
-        "description": "entretien",
-        "quantite": 1,
-        "_id": "6909e03d277b147dc2acebb8"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:15:09.771Z",
-    "updatedAt": "2025-11-04T11:15:09.771Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909e03d277b147dc2acebba",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "devisId": null,
-    "dateCommencement": "2025-10-07T09:27:00.000Z",
-    "dateFinCompletion": "2025-10-07T09:27:43.812Z",
-    "statut": "termine",
-    "totalTTC": 0,
-    "kilometrageEntretien": null,
-    "notes": "Créé automatiquement depuis l'ordre ORD-0020",
-    "services": [
-      {
-        "nom": "xx",
-        "description": "entretien",
-        "quantite": 3,
-        "_id": "6909e03d277b147dc2acebbb"
-      }
-    ],
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "pieces": [],
-    "createdAt": "2025-11-04T11:15:09.775Z",
-    "updatedAt": "2025-11-04T11:15:09.775Z",
-    "__v": 0
-  },
   {
     "_id": "691afc2b1ca98faecdaa1ede",
     "vehiculeId": "691af8fca7dcfc06162ccd16",
@@ -1422,8 +29,8 @@ const carnetentretiens = [
         "_id": "691afc2b1ca98faecdaa1edf"
       }
     ],
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "pieces": [],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-17T10:42:51.736Z",
     "updatedAt": "2025-11-17T10:42:51.736Z",
     "__v": 0
@@ -1445,8 +52,8 @@ const carnetentretiens = [
         "_id": "691b2b8a2d3cd1656888bb20"
       }
     ],
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "pieces": [],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-17T14:04:58.683Z",
     "updatedAt": "2025-11-17T14:04:58.683Z",
     "__v": 0
@@ -1468,8 +75,8 @@ const carnetentretiens = [
         "_id": "691da1f6807a8aa37603d8a8"
       }
     ],
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "pieces": [],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-19T10:54:46.177Z",
     "updatedAt": "2025-11-19T10:54:46.177Z",
     "__v": 0
@@ -1494,111 +101,6 @@ const clients = [
 ];
 
 const creditnotes = [
-  {
-    "_id": "6909c5ae7cfbdf374a23bd8c",
-    "creditNumber": "AV-2025-000001",
-    "originalFactureId": "6909c5847cfbdf374a23bd31",
-    "originalFactureNumber": "FAC-002",
-    "clientId": "6901de3475deb6fa0aae40bc",
-    "clientInfo": {
-      "nom": "maher maher"
-    },
-    "vehicleInfo": "citroen c15 - 25TUN789",
-    "inspectionDate": "2025-11-07T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "moteur",
-        "quantity": 1,
-        "unitPrice": 900,
-        "total": 900,
-        "_id": "6909c5847cfbdf374a23bd32"
-      }
-    ],
-    "maindoeuvre": 398,
-    "tvaRate": 20,
-    "totalHT": 1298,
-    "totalTVA": 259.6,
-    "totalTTC": 1557.6,
-    "totalRemise": 155.76,
-    "finalTotalTTC": 1480.7199999999998,
-    "reason": "Annulation suite à modification du devis",
-    "creditDate": "2025-11-04T09:21:50.348Z",
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-04T09:21:50.350Z",
-    "updatedAt": "2025-11-04T09:21:50.350Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909d0f6cbe617b6d2922c55",
-    "creditNumber": "AV-2025-000002",
-    "originalFactureId": "6909c8fd27181d193b184d5e",
-    "originalFactureNumber": "FAC-003",
-    "clientId": "6901de3475deb6fa0aae40bc",
-    "clientInfo": {
-      "nom": "maher maher"
-    },
-    "vehicleInfo": "citroen c15 - 25TUN789",
-    "inspectionDate": "2025-11-04T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "ppppppppp",
-        "quantity": 1,
-        "unitPrice": 90,
-        "total": 90,
-        "_id": "6909c8fd27181d193b184d5f"
-      }
-    ],
-    "maindoeuvre": 50,
-    "tvaRate": 20,
-    "totalHT": 140,
-    "totalTVA": 28,
-    "totalTTC": 168,
-    "totalRemise": 8.4,
-    "finalTotalTTC": 29.485750000000003,
-    "reason": "Annulation suite à modification du devis",
-    "creditDate": "2025-11-04T10:09:58.890Z",
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-04T10:09:58.906Z",
-    "updatedAt": "2025-11-04T10:09:58.906Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909d2779adde6f05aefd14e",
-    "creditNumber": "AV-2025-000003",
-    "originalFactureId": "6909d0f6cbe617b6d2922c61",
-    "originalFactureNumber": "FAC-004",
-    "clientId": "6901de3475deb6fa0aae40bc",
-    "clientInfo": {
-      "nom": "maher maher"
-    },
-    "vehicleInfo": "citroen c15 - 25TUN789",
-    "inspectionDate": "2025-11-04T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "ppppppppp",
-        "quantity": 1,
-        "unitPrice": 9.99,
-        "total": 9.99,
-        "_id": "6909d0f6cbe617b6d2922c62"
-      }
-    ],
-    "maindoeuvre": 10,
-    "tvaRate": 50,
-    "totalHT": 19.990000000000002,
-    "totalTVA": 9.995000000000001,
-    "totalTTC": 29.985000000000003,
-    "totalRemise": 1.4992500000000002,
-    "finalTotalTTC": 28.485750000000003,
-    "reason": "Annulation suite à modification du devis",
-    "creditDate": "2025-11-04T10:16:23.194Z",
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-04T10:16:23.206Z",
-    "updatedAt": "2025-11-04T10:16:23.206Z",
-    "__v": 0
-  },
   {
     "_id": "691dc992f059c09f59b104e9",
     "creditNumber": "AV-2025-000004",
@@ -1763,11 +265,11 @@ const ficheclients = [
     "telephone": "21939800",
     "email": "ahlembouguerra12@gmail.com",
     "garageId": "69147725cb1b9aa1eaa81e3f",
-    "__v": 0,
-    "adresseSociete": "",
-    "emailSociete": "",
     "nomSociete": "",
-    "telephoneSociete": ""
+    "telephoneSociete": "",
+    "emailSociete": "",
+    "adresseSociete": "",
+    "__v": 0
   },
   {
     "_id": "691af6f2143c7678f8f10755",
@@ -1807,34 +309,6 @@ const ficheclients = [
 
 const vehicules = [
   {
-    "_id": "6911dc23227f68139eab73f4",
-    "proprietaireId": "6911cb63ccd145adc6354d98",
-    "proprietaireModel": "Client",
-    "marque": "byd",
-    "modele": "20",
-    "immatriculation": "25TUN123",
-    "annee": 2020,
-    "typeCarburant": "essence",
-    "kilometrage": 123000,
-    "statut": "actif",
-    "creePar": "client",
-    "paysImmatriculation": "tunisie",
-    "historique_garages": [],
-    "carteGrise": {
-      "numeroCG": "568523",
-      "numeroChassis": "4444444",
-      "dateMiseCirculation": "2024-07-10T00:00:00.000Z",
-      "puissanceFiscale": 7,
-      "genre": "VP",
-      "nombrePlaces": 5,
-      "dateVisite": "2025-11-10T00:00:00.000Z",
-      "dateProchaineVisite": "2026-11-10T00:00:00.000Z"
-    },
-    "createdAt": "2025-11-10T12:35:47.430Z",
-    "updatedAt": "2025-11-10T12:35:47.430Z",
-    "__v": 0
-  },
-  {
     "_id": "691ae987b3a8dd8c3875e866",
     "proprietaireId": "691ae952b3a8dd8c3875e817",
     "proprietaireModel": "FicheClient",
@@ -1846,7 +320,6 @@ const vehicules = [
     "kilometrage": 2123,
     "statut": "actif",
     "creePar": "garagiste",
-    "garagisteId": "69147724cb1b9aa1eaa81e3d",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {
@@ -1881,7 +354,6 @@ const vehicules = [
     "kilometrage": 12311,
     "statut": "actif",
     "creePar": "garagiste",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {
@@ -1915,7 +387,6 @@ const vehicules = [
     "kilometrage": 1230,
     "statut": "actif",
     "creePar": "garagiste",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {
@@ -1949,7 +420,6 @@ const vehicules = [
     "kilometrage": 123456,
     "statut": "actif",
     "creePar": "garagiste",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {
@@ -1984,7 +454,6 @@ const vehicules = [
     "kilometrage": 11110,
     "statut": "actif",
     "creePar": "garagiste",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {
@@ -2018,7 +487,6 @@ const vehicules = [
     "kilometrage": 12300,
     "statut": "actif",
     "creePar": "garagiste",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {
@@ -2048,8 +516,8 @@ const ficheclientvehicules = [
     "_id": "68de76fee0d6b66b8eb486c8",
     "ficheClientId": "68cc2210b9fdea44215cb759",
     "vehiculeId": "68de76fee0d6b66b8eb486c5",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
     "dateAssociation": "2025-10-02T12:58:38.375Z",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
     "createdAt": "2025-10-02T12:58:38.376Z",
     "updatedAt": "2025-10-02T12:58:38.376Z",
     "__v": 0
@@ -2058,9 +526,9 @@ const ficheclientvehicules = [
     "_id": "68fb8360bbb9ec0d536de990",
     "ficheClientId": "68fb8360bbb9ec0d536de989",
     "vehiculeId": "68de6263ed300bc79d2310e4",
+    "dateAssociation": "2025-10-24T13:47:12.780Z",
     "notes": "Ajouté via réservation 68fb8355bbb9ec0d536de970",
     "garageId": "68c2e02037f8b7ccf6c813bc",
-    "dateAssociation": "2025-10-24T13:47:12.780Z",
     "createdAt": "2025-10-24T13:47:12.781Z",
     "updatedAt": "2025-10-24T13:47:12.781Z",
     "__v": 0
@@ -2069,9 +537,9 @@ const ficheclientvehicules = [
     "_id": "68fe2b5b1cf6c4cdd5b14fb6",
     "ficheClientId": "68fb8360bbb9ec0d536de989",
     "vehiculeId": "68de5f140cdf932e549d7173",
+    "dateAssociation": "2025-10-26T14:08:27.890Z",
     "notes": "Ajouté via réservation 68fe2b511cf6c4cdd5b14f9b",
     "garageId": "68c2e02037f8b7ccf6c813bc",
-    "dateAssociation": "2025-10-26T14:08:27.890Z",
     "createdAt": "2025-10-26T14:08:27.890Z",
     "updatedAt": "2025-10-26T14:08:27.890Z",
     "__v": 0
@@ -2080,8 +548,8 @@ const ficheclientvehicules = [
     "_id": "68ff46f20f282da499e7a4be",
     "ficheClientId": "68d3b1fff361d30191e1a0af",
     "vehiculeId": "68ff46f20f282da499e7a4bb",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
     "dateAssociation": "2025-10-27T10:18:26.345Z",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
     "createdAt": "2025-10-27T10:18:26.345Z",
     "updatedAt": "2025-10-27T10:18:26.345Z",
     "__v": 0
@@ -2090,8 +558,8 @@ const ficheclientvehicules = [
     "_id": "69007fed671272b7adb957af",
     "ficheClientId": "68ee73b66c88c6be130d9bea",
     "vehiculeId": "69007fed671272b7adb957ac",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
     "dateAssociation": "2025-10-28T08:33:49.429Z",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
     "createdAt": "2025-10-28T08:33:49.430Z",
     "updatedAt": "2025-10-28T08:33:49.430Z",
     "__v": 0
@@ -2100,9 +568,9 @@ const ficheclientvehicules = [
     "_id": "6900ad694b98ce0dcd0a3617",
     "ficheClientId": "6900ad694b98ce0dcd0a3612",
     "vehiculeId": "6900ac1b4b98ce0dcd0a3570",
+    "dateAssociation": "2025-10-28T11:47:53.373Z",
     "notes": "Ajouté via réservation 6900ac304b98ce0dcd0a358f",
     "garageId": "68c2e02037f8b7ccf6c813bc",
-    "dateAssociation": "2025-10-28T11:47:53.373Z",
     "createdAt": "2025-10-28T11:47:53.373Z",
     "updatedAt": "2025-10-28T11:47:53.373Z",
     "__v": 0
@@ -2111,9 +579,9 @@ const ficheclientvehicules = [
     "_id": "6901de3475deb6fa0aae40bf",
     "ficheClientId": "6901de3475deb6fa0aae40bc",
     "vehiculeId": "68de6263ed300bc79d2310e4",
+    "dateAssociation": "2025-10-29T09:28:20.302Z",
     "notes": "Ajouté via réservation 6901dd6275deb6fa0aae3fe1",
     "garageId": "68c2e02037f8b7ccf6c813bc",
-    "dateAssociation": "2025-10-29T09:28:20.302Z",
     "createdAt": "2025-10-29T09:28:20.302Z",
     "updatedAt": "2025-10-29T09:28:20.302Z",
     "__v": 0
@@ -2122,9 +590,9 @@ const ficheclientvehicules = [
     "_id": "6901e0f784b16346b6d9e698",
     "ficheClientId": "6901e0f784b16346b6d9e695",
     "vehiculeId": "68de5f140cdf932e549d7173",
+    "dateAssociation": "2025-10-29T09:40:07.776Z",
     "notes": "Ajouté via réservation 6901e09384b16346b6d9e678",
     "garageId": "68c880c20cb349894f35be59",
-    "dateAssociation": "2025-10-29T09:40:07.776Z",
     "createdAt": "2025-10-29T09:40:07.776Z",
     "updatedAt": "2025-10-29T09:40:07.776Z",
     "__v": 0
@@ -2133,9 +601,9 @@ const ficheclientvehicules = [
     "_id": "6901e51c84b16346b6d9e930",
     "ficheClientId": "6901e0f784b16346b6d9e695",
     "vehiculeId": "68de6263ed300bc79d2310e4",
+    "dateAssociation": "2025-10-29T09:57:48.732Z",
     "notes": "Ajouté via réservation 6901e50f84b16346b6d9e912",
     "garageId": "68c880c20cb349894f35be59",
-    "dateAssociation": "2025-10-29T09:57:48.732Z",
     "createdAt": "2025-10-29T09:57:48.733Z",
     "updatedAt": "2025-10-29T09:57:48.733Z",
     "__v": 0
@@ -2144,8 +612,8 @@ const ficheclientvehicules = [
     "_id": "690494e7d16fb86d8607db08",
     "ficheClientId": "690494bdd16fb86d8607dacb",
     "vehiculeId": "690494e7d16fb86d8607db05",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
     "dateAssociation": "2025-10-31T10:52:23.569Z",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
     "createdAt": "2025-10-31T10:52:23.569Z",
     "updatedAt": "2025-10-31T10:52:23.569Z",
     "__v": 0
@@ -2154,8 +622,8 @@ const ficheclientvehicules = [
     "_id": "6904cd77a12633edfbe5b201",
     "ficheClientId": "68cc2210b9fdea44215cb759",
     "vehiculeId": "68d3b225f361d30191e1a0cb",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
     "dateAssociation": "2025-10-31T14:53:43.423Z",
+    "garageId": "68c2e02037f8b7ccf6c813bc",
     "createdAt": "2025-10-31T14:53:43.427Z",
     "updatedAt": "2025-10-31T14:53:43.427Z",
     "__v": 0
@@ -2164,9 +632,9 @@ const ficheclientvehicules = [
     "_id": "6911dc48227f68139eab7431",
     "ficheClientId": "6911dc48227f68139eab742e",
     "vehiculeId": "6911dc23227f68139eab73f4",
+    "dateAssociation": "2025-11-10T12:36:24.449Z",
     "notes": "Ajouté via réservation 6911dc3b227f68139eab7411",
     "garageId": "6911cc17ccd145adc6354db7",
-    "dateAssociation": "2025-11-10T12:36:24.449Z",
     "createdAt": "2025-11-10T12:36:24.449Z",
     "updatedAt": "2025-11-10T12:36:24.449Z",
     "__v": 0
@@ -2175,8 +643,8 @@ const ficheclientvehicules = [
     "_id": "691ae987b3a8dd8c3875e869",
     "ficheClientId": "691ae952b3a8dd8c3875e817",
     "vehiculeId": "691ae987b3a8dd8c3875e866",
-    "garageId": "69147724cb1b9aa1eaa81e3d",
     "dateAssociation": "2025-11-17T09:23:19.913Z",
+    "garageId": "69147724cb1b9aa1eaa81e3d",
     "createdAt": "2025-11-17T09:23:19.913Z",
     "updatedAt": "2025-11-17T09:23:19.913Z",
     "__v": 0
@@ -2185,8 +653,8 @@ const ficheclientvehicules = [
     "_id": "691af813397350c205d81a73",
     "ficheClientId": "691af6f2143c7678f8f10755",
     "vehiculeId": "691af813397350c205d81a70",
-    "garageId": "69147724cb1b9aa1eaa81e3d",
     "dateAssociation": "2025-11-17T10:25:23.340Z",
+    "garageId": "69147724cb1b9aa1eaa81e3d",
     "createdAt": "2025-11-17T10:25:23.340Z",
     "updatedAt": "2025-11-17T10:25:23.340Z",
     "__v": 0
@@ -2195,8 +663,8 @@ const ficheclientvehicules = [
     "_id": "691af8fca7dcfc06162ccd19",
     "ficheClientId": "691af6f2143c7678f8f10755",
     "vehiculeId": "691af8fca7dcfc06162ccd16",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "dateAssociation": "2025-11-17T10:29:16.150Z",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-17T10:29:16.150Z",
     "updatedAt": "2025-11-17T10:29:16.150Z",
     "__v": 0
@@ -2205,8 +673,8 @@ const ficheclientvehicules = [
     "_id": "691b3a6269fbb0ac63fcc497",
     "ficheClientId": "691af6c0143c7678f8f10730",
     "vehiculeId": "691b3a6269fbb0ac63fcc494",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "dateAssociation": "2025-11-17T15:08:18.273Z",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-17T15:08:18.273Z",
     "updatedAt": "2025-11-17T15:08:18.273Z",
     "__v": 0
@@ -2215,8 +683,8 @@ const ficheclientvehicules = [
     "_id": "691d9545807a8aa37603d04b",
     "ficheClientId": "691af6c0143c7678f8f10730",
     "vehiculeId": "691d9545807a8aa37603d048",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "dateAssociation": "2025-11-19T10:00:37.035Z",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-19T10:00:37.035Z",
     "updatedAt": "2025-11-19T10:00:37.035Z",
     "__v": 0
@@ -2225,8 +693,8 @@ const ficheclientvehicules = [
     "_id": "691f7928163a17aa79fb6a0f",
     "ficheClientId": "691f78f8163a17aa79fb6995",
     "vehiculeId": "691f7928163a17aa79fb6a0c",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "dateAssociation": "2025-11-20T20:25:12.334Z",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-20T20:25:12.335Z",
     "updatedAt": "2025-11-20T20:25:12.335Z",
     "__v": 0
@@ -2243,21 +711,14 @@ const garages = [
     "cityId": null,
     "cityName": "sousse",
     "streetAddress": "15 Avenue Habib Bourguiba, Ariana Centre",
-    "garagisteAdmin": "69172c691fd203ef3d3f1c38",
-    "description": "Garage spécialisé en réparation automobile de luxe et sport",
-    "logo": "https://example.com/logo-premium.png",
-    "horaires": "Lun-Ven: 8h-19h, Sam: 8h-17h, Dim: Fermé",
-    "services": [
-      "Mécanique générale",
-      "Carrosserie",
-      "Peinture",
-      "Climatisation",
-      "Diagnostic électronique"
+    "garagisteAdmins": [
+      "6917342f9b5729f0dbd904e0"
     ],
+    "description": "Garage spécialisé en réparation automobile de luxe et sport",
+    "horaires": "Lun-Ven: 8h-19h, Sam: 8h-17h, Dim: Fermé",
     "isActive": true,
-    "createdAt": "2025-11-12T12:01:41.005Z",
-    "updatedAt": "2025-11-21T21:32:44.892Z",
-    "__v": 1,
+    "emailProfessionnel": "auto@gamil.com",
+    "telephoneProfessionnel": "45 123 987",
     "location": {
       "type": "Point",
       "coordinates": [
@@ -2265,11 +726,9 @@ const garages = [
         36.863
       ]
     },
-    "garagisteAdmins": [
-      "6917342f9b5729f0dbd904e0"
-    ],
-    "emailProfessionnel": "auto@gamil.com",
-    "telephoneProfessionnel": "45 123 987"
+    "createdAt": "2025-11-12T12:01:41.005Z",
+    "updatedAt": "2025-11-21T21:32:44.892Z",
+    "__v": 0
   },
   {
     "_id": "6916fb6416edea752b1f81b3",
@@ -2280,18 +739,15 @@ const garages = [
     "cityId": null,
     "cityName": "sousse",
     "streetAddress": "sousse",
-    "garagisteAdmin": "69170787bbb04ea7ba9caf22",
+    "garagisteAdmins": [],
     "description": "ffffff",
-    "logo": "https:efdsf.com",
     "horaires": "lundi-samedi : 08:00-17:00",
-    "services": [
-      "dd"
-    ],
     "isActive": false,
+    "emailProfessionnel": "auto0@gamil.com",
+    "telephoneProfessionnel": "45 001 987",
     "createdAt": "2025-11-14T09:50:28.440Z",
     "updatedAt": "2025-11-16T19:34:17.089Z",
-    "__v": 1,
-    "garagisteAdmins": []
+    "__v": 0
   },
   {
     "_id": "691733369b5729f0dbd904a1",
@@ -2308,13 +764,12 @@ const garages = [
     ],
     "description": "réparation des climatiseurs voitures",
     "horaires": "lundi-samedi : 08:00-17:00",
-    "services": [
-      "electicité"
-    ],
     "isActive": true,
+    "emailProfessionnel": "auto2@gamil.com",
+    "telephoneProfessionnel": "45 222 987",
     "createdAt": "2025-11-14T13:48:38.567Z",
     "updatedAt": "2025-11-18T18:44:40.194Z",
-    "__v": 3
+    "__v": 0
   },
   {
     "_id": "6920cb4f69f0734e2ffd2296",
@@ -2328,10 +783,9 @@ const garages = [
     "garagisteAdmins": [],
     "description": "ssssssss",
     "horaires": "Lun-Mar: 08h00-17h00, Mer: 09h00-17h00, Jeu-Sam: 08h00-17h00, Dim: Fermé",
-    "services": [
-      "ss"
-    ],
     "isActive": true,
+    "emailProfessionnel": "auto3@gamil.com",
+    "telephoneProfessionnel": "45 333 987",
     "createdAt": "2025-11-21T20:27:59.329Z",
     "updatedAt": "2025-11-21T20:27:59.329Z",
     "__v": 0
@@ -2340,39 +794,21 @@ const garages = [
 
 const garageservices = [
   {
-    "_id": "6921e46e9690045b7d5f64ae",
+    "_id": "692d98d8a835394876348872",
     "garageId": "69147725cb1b9aa1eaa81e3f",
-    "serviceId": "6911db6a227f68139eab73bf",
-    "addedAt": "2025-11-22T16:27:26.265Z",
-    "createdAt": "2025-11-22T16:27:26.269Z",
-    "updatedAt": "2025-11-22T16:27:26.269Z",
+    "serviceId": "692d988fa8353948763487cf",
+    "addedAt": "2025-12-01T13:32:08.270Z",
+    "createdAt": "2025-12-01T13:32:08.271Z",
+    "updatedAt": "2025-12-01T13:32:08.271Z",
     "__v": 0
   },
   {
-    "_id": "6921e4739690045b7d5f64c8",
+    "_id": "692d98dea83539487634888c",
     "garageId": "69147725cb1b9aa1eaa81e3f",
-    "serviceId": "691b0347f15086b702a468d0",
-    "addedAt": "2025-11-22T16:27:31.315Z",
-    "createdAt": "2025-11-22T16:27:31.316Z",
-    "updatedAt": "2025-11-22T16:27:31.316Z",
-    "__v": 0
-  },
-  {
-    "_id": "6921e5806acb85459f5bc31f",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "serviceId": "691cd9fab41d0eb4e4469726",
-    "addedAt": "2025-11-22T16:32:00.949Z",
-    "createdAt": "2025-11-22T16:32:00.952Z",
-    "updatedAt": "2025-11-22T16:32:00.952Z",
-    "__v": 0
-  },
-  {
-    "_id": "6921ecb7805e0617286bba99",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "serviceId": "6921ea5de9338b8d1ea0ba1a",
-    "addedAt": "2025-11-22T17:02:47.389Z",
-    "createdAt": "2025-11-22T17:02:47.389Z",
-    "updatedAt": "2025-11-22T17:02:47.389Z",
+    "serviceId": "692d98a1a8353948763487db",
+    "addedAt": "2025-12-01T13:32:14.127Z",
+    "createdAt": "2025-12-01T13:32:14.127Z",
+    "updatedAt": "2025-12-01T13:32:14.127Z",
     "__v": 0
   }
 ];
@@ -2388,7 +824,12 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "6913a4f97e5136d4d9e06ca9",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-11T21:04:57.825Z",
     "updatedAt": "2025-11-11T21:04:57.841Z",
     "__v": 0
@@ -2403,7 +844,12 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": true,
     "garage": "6913a53f7e5136d4d9e06cb1",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-11T21:06:07.589Z",
     "updatedAt": "2025-11-12T11:02:29.400Z",
     "__v": 0
@@ -2418,7 +864,12 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "691471f2a2104f13503bf7a5",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-12T11:39:30.903Z",
     "updatedAt": "2025-11-12T11:39:30.911Z",
     "__v": 0
@@ -2433,11 +884,15 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": true,
     "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": true,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-12T12:01:40.999Z",
     "updatedAt": "2025-11-16T13:29:56.823Z",
-    "__v": 0,
-    "isActive": true
+    "__v": 0
   },
   {
     "_id": "6916fb7916edea752b1f81b9",
@@ -2449,7 +904,12 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "6916fb6416edea752b1f81b3",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T09:50:49.294Z",
     "updatedAt": "2025-11-14T09:50:49.294Z",
     "__v": 0
@@ -2464,7 +924,12 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "6916fb6416edea752b1f81b3",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T10:40:06.938Z",
     "updatedAt": "2025-11-14T10:40:06.938Z",
     "__v": 0
@@ -2479,7 +944,12 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "6916fb6416edea752b1f81b3",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T10:41:50.752Z",
     "updatedAt": "2025-11-14T10:41:50.752Z",
     "__v": 0
@@ -2494,11 +964,15 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "6916fb6416edea752b1f81b3",
+    "isActive": true,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T10:42:15.220Z",
     "updatedAt": "2025-11-16T19:34:25.478Z",
-    "__v": 0,
-    "isActive": true
+    "__v": 0
   },
   {
     "_id": "69172c691fd203ef3d3f1c38",
@@ -2510,9 +984,26 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": [
+        {
+          "serviceId": "692d98a1a8353948763487db",
+          "name": "entretien",
+          "_id": "692d98fba83539487634891b"
+        }
+      ],
+      "dateEmbauche": null,
+      "dateNaissance": null,
+      "experience": "",
+      "permisConduire": "B",
+      "poste": "Mécanicien",
+      "typeContrat": "CDI"
+    },
     "createdAt": "2025-11-14T13:19:37.954Z",
-    "updatedAt": "2025-11-14T13:19:37.954Z",
+    "updatedAt": "2025-12-01T13:32:43.585Z",
     "__v": 0
   },
   {
@@ -2525,7 +1016,12 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "691733369b5729f0dbd904a1",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T13:49:12.805Z",
     "updatedAt": "2025-11-14T13:49:12.805Z",
     "__v": 0
@@ -2540,7 +1036,12 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T13:52:47.706Z",
     "updatedAt": "2025-11-14T13:52:47.706Z",
     "__v": 0
@@ -2555,7 +1056,12 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "691733369b5729f0dbd904a1",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T14:05:46.562Z",
     "updatedAt": "2025-11-14T14:05:46.562Z",
     "__v": 0
@@ -2570,7 +1076,12 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "691733369b5729f0dbd904a1",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T14:16:04.580Z",
     "updatedAt": "2025-11-14T14:16:04.580Z",
     "__v": 0
@@ -2585,7 +1096,12 @@ const garagistes = [
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "691733369b5729f0dbd904a1",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T14:18:02.887Z",
     "updatedAt": "2025-11-14T14:18:02.887Z",
     "__v": 0
@@ -2602,6 +1118,10 @@ const garagistes = [
     "garage": "691733369b5729f0dbd904a1",
     "isActive": true,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-16T12:17:59.106Z",
     "updatedAt": "2025-11-18T18:44:48.784Z",
     "__v": 0
@@ -2618,8 +1138,24 @@ const garagistes = [
     "garage": "69147725cb1b9aa1eaa81e3f",
     "isActive": true,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": [
+        {
+          "serviceId": "692d98a1a8353948763487db",
+          "name": "entretien",
+          "_id": "692d98f5a8353948763488f6"
+        }
+      ],
+      "dateEmbauche": null,
+      "dateNaissance": null,
+      "experience": "",
+      "permisConduire": "B",
+      "poste": "Mécanicien",
+      "typeContrat": "CDI"
+    },
     "createdAt": "2025-11-17T09:29:18.809Z",
-    "updatedAt": "2025-11-17T09:30:41.383Z",
+    "updatedAt": "2025-12-01T13:32:37.464Z",
     "__v": 0
   },
   {
@@ -2634,6 +1170,10 @@ const garagistes = [
     "garage": "691733369b5729f0dbd904a1",
     "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-18T19:58:14.478Z",
     "updatedAt": "2025-11-18T19:58:14.478Z",
     "__v": 0
@@ -2650,6 +1190,10 @@ const garagistes = [
     "garage": "6920cb4f69f0734e2ffd2296",
     "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-21T20:33:04.229Z",
     "updatedAt": "2025-11-21T20:33:04.229Z",
     "__v": 0
@@ -2666,39 +1210,50 @@ const garagistes = [
     "garage": "6920cb4f69f0734e2ffd2296",
     "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-21T21:14:46.379Z",
     "updatedAt": "2025-11-21T21:14:46.379Z",
+    "__v": 0
+  },
+  {
+    "_id": "692d981539a56cf2278c3c3a",
+    "username": "test",
+    "email": "testbg@gmail.com",
+    "password": "temp1764595733058",
+    "phone": "45321789",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": true,
+    "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": true,
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "mecanicienData": {
+      "dateNaissance": "2001-01-01T00:00:00.000Z",
+      "poste": "Mécanicien",
+      "dateEmbauche": "2025-12-01T00:00:00.000Z",
+      "typeContrat": "CDI",
+      "statut": "Actif",
+      "services": [
+        {
+          "serviceId": "692d988fa8353948763487cf",
+          "name": "climatisation",
+          "_id": "692d98e8a8353948763488d2"
+        }
+      ],
+      "experience": "ez",
+      "permisConduire": "B",
+      "matricule": "MEC-1764595733058"
+    },
+    "createdAt": "2025-12-01T13:28:53.064Z",
+    "updatedAt": "2025-12-01T13:32:24.043Z",
     "__v": 0
   }
 ];
 
 const mecaniciens = [
-  {
-    "_id": "6911dbac227f68139eab73d8",
-    "nom": "ahmed ben ali",
-    "dateNaissance": "2003-08-05T00:00:00.000Z",
-    "telephone": "26456987",
-    "email": "ali@exemple.com",
-    "matricule": "EMP001",
-    "poste": "Mécanicien",
-    "dateEmbauche": "2025-11-10T00:00:00.000Z",
-    "typeContrat": "CDI",
-    "statut": "Actif",
-    "salaire": 200,
-    "services": [
-      {
-        "serviceId": "6911db6a227f68139eab73bf",
-        "name": "Entretien et révision",
-        "_id": "6911dbac227f68139eab73d9"
-      }
-    ],
-    "experience": "0 experience",
-    "permisConduire": "B",
-    "garagisteId": "6911cc17ccd145adc6354db7",
-    "createdAt": "2025-11-10T12:33:48.917Z",
-    "updatedAt": "2025-11-10T12:33:48.917Z",
-    "__v": 0
-  },
   {
     "_id": "691b039cf15086b702a46920",
     "nom": "ali meca",
@@ -2713,9 +1268,9 @@ const mecaniciens = [
     "salaire": 200,
     "services": [
       {
-        "serviceId": "691b0347f15086b702a468d0",
-        "name": "Pneumatiques et suspension",
-        "_id": "691b039cf15086b702a46921"
+        "serviceId": "6921ea5de9338b8d1ea0ba1a",
+        "name": "climatisation",
+        "_id": "6925a0fe4a4e57acd84015e8"
       },
       {
         "serviceId": "6911db6a227f68139eab73bf",
@@ -2859,14 +1414,6 @@ const garagisteroles = [
     "__v": 0
   },
   {
-    "_id": "69172c691fd203ef3d3f1c3b",
-    "garagisteId": "69172c691fd203ef3d3f1c38",
-    "roleId": "691cc0c8f2242d62ea689974",
-    "createdAt": "2025-11-14T13:19:37.963Z",
-    "updatedAt": "2025-11-14T13:19:37.963Z",
-    "__v": 0
-  },
-  {
     "_id": "691733589b5729f0dbd904aa",
     "garagisteId": "691733589b5729f0dbd904a7",
     "roleId": "691cc0c8f2242d62ea689974",
@@ -2915,14 +1462,6 @@ const garagisteroles = [
     "__v": 0
   },
   {
-    "_id": "691aeaeeb3a8dd8c3875e976",
-    "garagisteId": "691aeaeeb3a8dd8c3875e974",
-    "roleId": "691cc0c8f2242d62ea689974",
-    "createdAt": "2025-11-17T09:29:18.811Z",
-    "updatedAt": "2025-11-17T09:29:18.811Z",
-    "__v": 0
-  },
-  {
     "_id": "691ccfd6f3dc52eef330ac7a",
     "garagisteId": "691ccfd6f3dc52eef330ac78",
     "roleId": "691cc0c8f2242d62ea689974",
@@ -2937,59 +1476,37 @@ const garagisteroles = [
     "createdAt": "2025-11-21T21:14:46.387Z",
     "updatedAt": "2025-11-21T21:14:46.387Z",
     "__v": 0
+  },
+  {
+    "_id": "692d98e8a8353948763488d7",
+    "garagisteId": "692d981539a56cf2278c3c3a",
+    "roleId": "691cc0c8f2242d62ea689975",
+    "createdAt": "2025-12-01T13:32:24.067Z",
+    "updatedAt": "2025-12-01T13:32:24.067Z",
+    "__v": 0
+  },
+  {
+    "_id": "692d98f5a8353948763488fb",
+    "garagisteId": "691aeaeeb3a8dd8c3875e974",
+    "roleId": "691cc0c8f2242d62ea689974",
+    "createdAt": "2025-12-01T13:32:37.474Z",
+    "updatedAt": "2025-12-01T13:32:37.474Z",
+    "__v": 0
+  },
+  {
+    "_id": "692d98fba835394876348920",
+    "garagisteId": "69172c691fd203ef3d3f1c38",
+    "roleId": "691cc0c8f2242d62ea689974",
+    "createdAt": "2025-12-01T13:32:43.595Z",
+    "updatedAt": "2025-12-01T13:32:43.595Z",
+    "__v": 0
   }
 ];
 
 const ordretravails = [
   {
-    "_id": "6911dcc5227f68139eab74ff",
-    "devisId": "DEV012",
-    "clientInfo": {
-      "nom": "magher",
-      "ClientId": "6911dc48227f68139eab742e"
-    },
-    "vehiculedetails": {
-      "nom": "byd 20 - 25TUN123",
-      "vehiculeId": "6911dc23227f68139eab73f4"
-    },
-    "dateCommence": "2025-11-10T12:44:00.000Z",
-    "dateFinPrevue": "2025-11-10T13:44:00.000Z",
-    "atelierId": "6911db77227f68139eab73c9",
-    "atelierNom": "ateler1",
-    "priorite": "normale",
-    "status": "en_attente",
-    "description": "Ordre de travail généré depuis le devis DEV012",
-    "taches": [
-      {
-        "description": "i",
-        "quantite": 1,
-        "serviceId": "6911db6a227f68139eab73bf",
-        "serviceNom": "Entretien et révision",
-        "mecanicienId": "6911dbac227f68139eab73d8",
-        "mecanicienNom": "ahmed ben ali",
-        "estimationHeures": 1,
-        "heuresReelles": 0,
-        "notes": "",
-        "status": "assignee",
-        "_id": "6911dcc5227f68139eab7500",
-        "createdAt": "2025-11-10T12:38:29.166Z",
-        "updatedAt": "2025-11-10T12:38:29.166Z"
-      }
-    ],
-    "createdBy": "6911cc17ccd145adc6354db7",
-    "totalHeuresEstimees": 1,
-    "totalHeuresReelles": 0,
-    "nombreTaches": 1,
-    "nombreTachesTerminees": 0,
-    "garagisteId": "6911cc17ccd145adc6354db7",
-    "notes": [],
-    "createdAt": "2025-11-10T12:38:29.167Z",
-    "updatedAt": "2025-11-10T12:38:29.167Z",
-    "numeroOrdre": "ORD-0001",
-    "__v": 0
-  },
-  {
     "_id": "691b03aff15086b702a4695e",
+    "numeroOrdre": "ORD-0002",
     "devisId": "DEV014",
     "clientInfo": {
       "nom": "test",
@@ -3001,6 +1518,7 @@ const ordretravails = [
     },
     "dateCommence": "2025-11-17T11:15:00.000Z",
     "dateFinPrevue": "2025-11-17T12:15:00.000Z",
+    "dateFinReelle": "2025-11-23T10:02:51.454Z",
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
@@ -3031,12 +1549,11 @@ const ordretravails = [
     "notes": [],
     "createdAt": "2025-11-17T11:14:55.313Z",
     "updatedAt": "2025-11-23T12:06:33.932Z",
-    "numeroOrdre": "ORD-0002",
-    "__v": 0,
-    "dateFinReelle": "2025-11-23T10:02:51.454Z"
+    "__v": 0
   },
   {
     "_id": "691d89c54e4c9efa40807097",
+    "numeroOrdre": "ORD-0003",
     "devisId": "DEV015",
     "clientInfo": {
       "nom": "ahlem bouguerra",
@@ -3048,6 +1565,7 @@ const ordretravails = [
     },
     "dateCommence": "2025-11-19T09:11:00.000Z",
     "dateFinPrevue": "2025-11-19T10:11:00.000Z",
+    "dateFinReelle": "2025-11-23T12:14:26.183Z",
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
@@ -3070,6 +1588,7 @@ const ordretravails = [
         "updatedAt": "2025-11-19T09:11:33.873Z"
       }
     ],
+    "updatedBy": "69147724cb1b9aa1eaa81e3d",
     "totalHeuresEstimees": 1,
     "totalHeuresReelles": 0,
     "nombreTaches": 1,
@@ -3078,13 +1597,11 @@ const ordretravails = [
     "notes": [],
     "createdAt": "2025-11-19T09:11:33.873Z",
     "updatedAt": "2025-11-23T12:14:51.577Z",
-    "numeroOrdre": "ORD-0003",
-    "__v": 0,
-    "dateFinReelle": "2025-11-23T12:14:26.183Z",
-    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+    "__v": 0
   },
   {
     "_id": "691dbdbe807a8aa37603e700",
+    "numeroOrdre": "ORD-0004",
     "devisId": "DEV016",
     "clientInfo": {
       "nom": "test",
@@ -3096,6 +1613,7 @@ const ordretravails = [
     },
     "dateCommence": "2025-11-23T12:53:00.000Z",
     "dateFinPrevue": "2025-11-23T13:53:00.000Z",
+    "dateFinReelle": "2025-11-23T12:14:23.337Z",
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
@@ -3126,12 +1644,11 @@ const ordretravails = [
     "notes": [],
     "createdAt": "2025-11-19T12:53:18.268Z",
     "updatedAt": "2025-11-23T12:14:23.339Z",
-    "numeroOrdre": "ORD-0004",
-    "__v": 0,
-    "dateFinReelle": "2025-11-23T12:14:23.337Z"
+    "__v": 0
   },
   {
     "_id": "6922db237b31481af93643a8",
+    "numeroOrdre": "ORD-0005",
     "devisId": "DEV020",
     "clientInfo": {
       "nom": "ahlem bouguerra",
@@ -3180,6 +1697,7 @@ const ordretravails = [
         "updatedAt": "2025-11-23T12:14:31.990Z"
       }
     ],
+    "updatedBy": "69147724cb1b9aa1eaa81e3d",
     "totalHeuresEstimees": 2,
     "totalHeuresReelles": 0,
     "nombreTaches": 2,
@@ -3188,12 +1706,11 @@ const ordretravails = [
     "notes": [],
     "createdAt": "2025-11-23T10:00:03.373Z",
     "updatedAt": "2025-11-23T12:14:40.036Z",
-    "numeroOrdre": "ORD-0005",
-    "__v": 2,
-    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+    "__v": 0
   },
   {
     "_id": "6922f8ad71f90cf76a16f702",
+    "numeroOrdre": "ORD-0006",
     "devisId": "DEV019",
     "clientInfo": {
       "nom": "helmi",
@@ -3205,6 +1722,7 @@ const ordretravails = [
     },
     "dateCommence": "2025-11-23T12:05:00.000Z",
     "dateFinPrevue": "2025-11-23T13:05:00.000Z",
+    "dateFinReelle": "2025-11-23T12:06:41.829Z",
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
@@ -3235,12 +1753,11 @@ const ordretravails = [
     "notes": [],
     "createdAt": "2025-11-23T12:06:05.925Z",
     "updatedAt": "2025-11-23T12:06:41.830Z",
-    "numeroOrdre": "ORD-0006",
-    "__v": 0,
-    "dateFinReelle": "2025-11-23T12:06:41.829Z"
+    "__v": 0
   },
   {
     "_id": "6922faf1dd9115eea286b1bf",
+    "numeroOrdre": "ORD-0007",
     "devisId": "DEV021",
     "clientInfo": {
       "nom": "ahlem bouguerra",
@@ -3283,11 +1800,11 @@ const ordretravails = [
     "notes": [],
     "createdAt": "2025-11-23T12:15:45.011Z",
     "updatedAt": "2025-11-23T13:10:41.034Z",
-    "numeroOrdre": "ORD-0007",
     "__v": 0
   },
   {
     "_id": "6923127809a5989674a26dc1",
+    "numeroOrdre": "ORD-0008",
     "devisId": "DEV018",
     "clientInfo": {
       "nom": "ahlem bouguerra",
@@ -3329,11 +1846,11 @@ const ordretravails = [
     "notes": [],
     "createdAt": "2025-11-23T13:56:08.581Z",
     "updatedAt": "2025-11-23T13:56:08.581Z",
-    "numeroOrdre": "ORD-0008",
     "__v": 0
   },
   {
     "_id": "692312aa09a5989674a26e73",
+    "numeroOrdre": "ORD-0009",
     "devisId": "DEV017",
     "clientInfo": {
       "nom": "ahlem bouguerra",
@@ -3375,11 +1892,11 @@ const ordretravails = [
     "notes": [],
     "createdAt": "2025-11-23T13:56:58.334Z",
     "updatedAt": "2025-11-23T13:56:58.334Z",
-    "numeroOrdre": "ORD-0009",
     "__v": 0
   },
   {
     "_id": "6923278e0a8695033342b845",
+    "numeroOrdre": "ORD-0010",
     "devisId": "DEV022",
     "clientInfo": {
       "nom": "helmi",
@@ -3422,11 +1939,11 @@ const ordretravails = [
     "notes": [],
     "createdAt": "2025-11-23T15:26:06.853Z",
     "updatedAt": "2025-11-23T15:27:26.181Z",
-    "numeroOrdre": "ORD-0010",
     "__v": 0
   },
   {
     "_id": "692341034fa998e88a52c733",
+    "numeroOrdre": "ORD-0011",
     "devisId": "DEV023",
     "clientInfo": {
       "nom": "test",
@@ -3469,505 +1986,73 @@ const ordretravails = [
     "notes": [],
     "createdAt": "2025-11-23T17:14:43.234Z",
     "updatedAt": "2025-11-23T17:14:43.234Z",
-    "numeroOrdre": "ORD-0011",
+    "__v": 0
+  },
+  {
+    "_id": "692d992ea8353948763489f5",
+    "devisId": "DEV025",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "cc 10 - 11TUN12",
+      "vehiculeId": "691d9545807a8aa37603d048"
+    },
+    "dateCommence": "2025-12-01T13:33:00.000Z",
+    "dateFinPrevue": "2025-12-01T15:33:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_attente",
+    "description": "Ordre de travail généré depuis le devis DEV025",
+    "taches": [
+      {
+        "description": "aa",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "692d992ea8353948763489f6",
+        "createdAt": "2025-12-01T13:33:34.032Z",
+        "updatedAt": "2025-12-01T13:33:34.032Z"
+      },
+      {
+        "description": "bb",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "692d992ea8353948763489f7",
+        "createdAt": "2025-12-01T13:33:34.032Z",
+        "updatedAt": "2025-12-01T13:33:34.032Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 2,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 2,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-12-01T13:33:34.033Z",
+    "updatedAt": "2025-12-01T13:33:34.033Z",
+    "numeroOrdre": "ORD-0012",
     "__v": 0
   }
 ];
 
 const devis = [
-  {
-    "_id": "6909b36f862f937527d5c959",
-    "id": "DEV001",
-    "clientId": "6901de3475deb6fa0aae40bc",
-    "clientName": "maher maher",
-    "vehicleInfo": "citroen c15 - 25TUN789",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "factureId": null,
-    "inspectionDate": "2025-11-04",
-    "services": [
-      {
-        "piece": "phare",
-        "quantity": 2,
-        "unitPrice": 50,
-        "total": 100
-      }
-    ],
-    "totalHT": 150,
-    "totalServicesHT": 100,
-    "totalTTC": 180,
-    "finalTotalTTC": 171,
-    "tvaRate": 20,
-    "remiseRate": 5,
-    "montantTVA": 30,
-    "montantRemise": 9,
-    "maindoeuvre": 50,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 2,
-      "minutes": 0
-    },
-    "status": "accepte",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-04T08:03:59.109Z",
-    "updatedAt": "2025-11-04T08:03:59.109Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909c283f819c2d76da2fa9b",
-    "id": "DEV002",
-    "clientId": "6901de3475deb6fa0aae40bc",
-    "clientName": "maher maher",
-    "vehicleInfo": "citroen c15 - 25TUN789",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "factureId": "6909c302f819c2d76da2fb30",
-    "inspectionDate": "2025-11-07",
-    "services": [
-      {
-        "piece": "moteur",
-        "quantity": 1,
-        "unitPrice": 900,
-        "total": 900
-      }
-    ],
-    "totalHT": 1298,
-    "totalServicesHT": 900,
-    "totalTTC": 1557.6,
-    "finalTotalTTC": 1479.7199999999998,
-    "tvaRate": 20,
-    "remiseRate": 5,
-    "montantTVA": 259.6,
-    "montantRemise": 77.88,
-    "maindoeuvre": 398,
-    "estimatedTime": {
-      "days": 2,
-      "hours": 0,
-      "minutes": 0
-    },
-    "status": "accepte",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-04T09:08:19.231Z",
-    "updatedAt": "2025-11-04T09:21:34.619Z",
-    "__v": 0
-  },
-  {
-    "_id": "6909c8ee27181d193b184d40",
-    "id": "DEV003",
-    "clientId": "6901de3475deb6fa0aae40bc",
-    "clientName": "maher maher",
-    "vehicleInfo": "citroen c15 - 25TUN789",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "factureId": "6909d2779adde6f05aefd15a",
-    "inspectionDate": "2025-11-04",
-    "services": [
-      {
-        "piece": "ppppppppp",
-        "quantity": 1,
-        "unitPrice": 10,
-        "total": 10
-      }
-    ],
-    "totalHT": 20,
-    "totalServicesHT": 10,
-    "totalTTC": 30,
-    "finalTotalTTC": 28.5,
-    "tvaRate": 50,
-    "remiseRate": 5,
-    "montantTVA": 10,
-    "montantRemise": 1.5,
-    "maindoeuvre": 10,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 2,
-      "minutes": 0
-    },
-    "status": "accepte",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-04T09:35:42.803Z",
-    "updatedAt": "2025-11-04T10:16:23.241Z",
-    "__v": 0
-  },
-  {
-    "_id": "690a0457f8fbe8711d617c99",
-    "id": "DEV004",
-    "clientId": "68d3b1fff361d30191e1a0af",
-    "clientName": "ahmed",
-    "vehicleInfo": "kia 5 - 45TUN78",
-    "vehiculeId": "68ff46f20f282da499e7a4bb",
-    "factureId": null,
-    "inspectionDate": "2025-11-04",
-    "services": [
-      {
-        "piece": "ww",
-        "quantity": 1,
-        "unitPrice": 19.99,
-        "total": 19.99
-      }
-    ],
-    "totalHT": 29.99,
-    "totalServicesHT": 19.99,
-    "totalTTC": 35.988,
-    "finalTotalTTC": 32.3892,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "montantTVA": 5.998,
-    "montantRemise": 3.5988,
-    "maindoeuvre": 10,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 1,
-      "minutes": 0
-    },
-    "status": "accepte",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-04T13:49:11.477Z",
-    "updatedAt": "2025-11-04T13:49:11.477Z",
-    "__v": 0
-  },
-  {
-    "_id": "690a08f615b4692c8ad57c18",
-    "id": "DEV005",
-    "clientId": "68cc2210b9fdea44215cb759",
-    "clientName": "ahlem bouguerra",
-    "vehicleInfo": "peugeot 200 - TUN256",
-    "vehiculeId": "68de76fee0d6b66b8eb486c5",
-    "factureId": null,
-    "inspectionDate": "2025-11-04",
-    "services": [
-      {
-        "piece": "tfyghk",
-        "quantity": 1,
-        "unitPrice": 5199.99,
-        "total": 5199.99
-      }
-    ],
-    "totalHT": 5699.99,
-    "totalServicesHT": 5199.99,
-    "totalTTC": 6839.987999999999,
-    "finalTotalTTC": 6155.989199999999,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "montantTVA": 1139.998,
-    "montantRemise": 683.9988,
-    "maindoeuvre": 500,
-    "estimatedTime": {
-      "days": 2,
-      "hours": 0,
-      "minutes": 0
-    },
-    "status": "accepte",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-04T14:08:54.541Z",
-    "updatedAt": "2025-11-04T14:09:09.509Z",
-    "__v": 0
-  },
-  {
-    "_id": "690b330a0a0342e632425de3",
-    "id": "DEV006",
-    "clientId": "68d3b1fff361d30191e1a0af",
-    "clientName": "ahmed",
-    "vehicleInfo": "kia 5 - 45TUN78",
-    "vehiculeId": "68ff46f20f282da499e7a4bb",
-    "factureId": null,
-    "inspectionDate": "2025-11-05",
-    "services": [
-      {
-        "piece": "ioklm",
-        "quantity": 1,
-        "unitPrice": 10,
-        "total": 10
-      }
-    ],
-    "totalHT": 20,
-    "totalServicesHT": 10,
-    "totalTTC": 24,
-    "finalTotalTTC": 24,
-    "tvaRate": 20,
-    "remiseRate": 0,
-    "montantTVA": 4,
-    "montantRemise": 0,
-    "maindoeuvre": 10,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 2,
-      "minutes": 0
-    },
-    "status": "accepte",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-05T11:20:42.308Z",
-    "updatedAt": "2025-11-05T11:20:42.308Z",
-    "__v": 0
-  },
-  {
-    "_id": "690da85f186fd8c339c398e2",
-    "id": "DEV007",
-    "clientId": "68cc2210b9fdea44215cb759",
-    "clientName": "ahlem bouguerra",
-    "vehicleInfo": "peugeot 200 - TUN256",
-    "vehiculeId": "68de76fee0d6b66b8eb486c5",
-    "factureId": null,
-    "inspectionDate": "2025-11-07",
-    "services": [
-      {
-        "piece": "aa",
-        "quantity": 1,
-        "unitPrice": 49.99,
-        "total": 49.99
-      }
-    ],
-    "totalHT": 51.99,
-    "totalServicesHT": 49.99,
-    "totalTTC": 62.388000000000005,
-    "finalTotalTTC": 60.516360000000006,
-    "tvaRate": 20,
-    "remiseRate": 3,
-    "montantTVA": 10.398000000000001,
-    "montantRemise": 1.8716400000000002,
-    "maindoeuvre": 2,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 3,
-      "minutes": 0
-    },
-    "status": "accepte",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-07T08:05:51.946Z",
-    "updatedAt": "2025-11-07T08:05:51.946Z",
-    "__v": 0
-  },
-  {
-    "_id": "690dc66359c1a11836bc7fde",
-    "id": "DEV008",
-    "clientId": "68d3b1fff361d30191e1a0af",
-    "clientName": "ahmed",
-    "vehicleInfo": "kia 5 - 45TUN78",
-    "vehiculeId": "68ff46f20f282da499e7a4bb",
-    "factureId": null,
-    "inspectionDate": "2025-11-07",
-    "services": [
-      {
-        "piece": "aa",
-        "quantity": 1,
-        "unitPrice": 50,
-        "total": 50
-      },
-      {
-        "piece": "bb",
-        "quantity": 1,
-        "unitPrice": 60,
-        "total": 60
-      },
-      {
-        "piece": "cc",
-        "quantity": 1,
-        "unitPrice": 70,
-        "total": 70
-      }
-    ],
-    "totalHT": 380,
-    "totalServicesHT": 180,
-    "totalTTC": 456,
-    "finalTotalTTC": 410.4,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "montantTVA": 76,
-    "montantRemise": 45.6,
-    "maindoeuvre": 200,
-    "estimatedTime": {
-      "days": 1,
-      "hours": 0,
-      "minutes": 0
-    },
-    "status": "accepte",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-07T10:13:55.674Z",
-    "updatedAt": "2025-11-07T10:13:55.674Z",
-    "__v": 0
-  },
-  {
-    "_id": "690e51921c9bc176182c0610",
-    "id": "DEV009",
-    "clientId": "68cc2210b9fdea44215cb759",
-    "clientName": "ahlem bouguerra",
-    "vehicleInfo": "peugeot 200 - TUN256",
-    "vehiculeId": "68de76fee0d6b66b8eb486c5",
-    "factureId": null,
-    "inspectionDate": "2025-11-07",
-    "services": [
-      {
-        "piece": "cxv",
-        "quantity": 1,
-        "unitPrice": 20,
-        "total": 20
-      }
-    ],
-    "totalHT": 140,
-    "totalServicesHT": 20,
-    "totalTTC": 168,
-    "finalTotalTTC": 151.2,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "montantTVA": 28,
-    "montantRemise": 16.8,
-    "maindoeuvre": 120,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 2,
-      "minutes": 0
-    },
-    "status": "envoye",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-07T20:07:46.837Z",
-    "updatedAt": "2025-11-07T20:09:35.556Z",
-    "__v": 0
-  },
-  {
-    "_id": "6911a6b480ccc2cbabceb1b0",
-    "id": "DEV010",
-    "clientId": "68ee73b66c88c6be130d9bea",
-    "clientName": "hassen bg",
-    "vehicleInfo": "cc 11 - 15TUN45",
-    "vehiculeId": "69007fed671272b7adb957ac",
-    "factureId": null,
-    "inspectionDate": "2025-11-10",
-    "services": [
-      {
-        "piece": "climatiseur",
-        "quantity": 1,
-        "unitPrice": 500,
-        "total": 500
-      }
-    ],
-    "totalHT": 700,
-    "totalServicesHT": 500,
-    "totalTTC": 840,
-    "finalTotalTTC": 756,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "montantTVA": 140,
-    "montantRemise": 84,
-    "maindoeuvre": 200,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 5,
-      "minutes": 0
-    },
-    "status": "accepte",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-10T08:47:48.516Z",
-    "updatedAt": "2025-11-10T08:47:48.516Z",
-    "__v": 0
-  },
-  {
-    "_id": "6911a72c80ccc2cbabceb269",
-    "id": "DEV011",
-    "clientId": "68d3b1fff361d30191e1a0af",
-    "clientName": "ahmed",
-    "vehicleInfo": "kia 5 - 45TUN78",
-    "vehiculeId": "68ff46f20f282da499e7a4bb",
-    "factureId": null,
-    "inspectionDate": "2025-11-10",
-    "services": [
-      {
-        "piece": "clim",
-        "quantity": 1,
-        "unitPrice": 800,
-        "total": 800
-      }
-    ],
-    "totalHT": 1000,
-    "totalServicesHT": 800,
-    "totalTTC": 1200,
-    "finalTotalTTC": 1080,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "montantTVA": 200,
-    "montantRemise": 120,
-    "maindoeuvre": 200,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 5,
-      "minutes": 0
-    },
-    "status": "accepte",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-10T08:49:48.803Z",
-    "updatedAt": "2025-11-10T08:49:48.803Z",
-    "__v": 0
-  },
-  {
-    "_id": "6911dca8227f68139eab74c7",
-    "id": "DEV012",
-    "clientId": "6911dc48227f68139eab742e",
-    "clientName": "magher",
-    "vehicleInfo": "byd 20 - 25TUN123",
-    "vehiculeId": "6911dc23227f68139eab73f4",
-    "factureId": null,
-    "inspectionDate": "2025-11-10",
-    "services": [
-      {
-        "piece": "i",
-        "quantity": 1,
-        "unitPrice": 20,
-        "total": 20
-      }
-    ],
-    "totalHT": 40,
-    "totalServicesHT": 20,
-    "totalTTC": 48,
-    "finalTotalTTC": 48,
-    "tvaRate": 20,
-    "remiseRate": 0,
-    "montantTVA": 8,
-    "montantRemise": 0,
-    "maindoeuvre": 20,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 3,
-      "minutes": 0
-    },
-    "status": "accepte",
-    "garagisteId": "6911cc17ccd145adc6354db7",
-    "createdAt": "2025-11-10T12:38:00.586Z",
-    "updatedAt": "2025-11-10T12:38:00.586Z",
-    "__v": 0
-  },
-  {
-    "_id": "691ae9a9b3a8dd8c3875e8b8",
-    "id": "DEV013",
-    "clientId": "691ae952b3a8dd8c3875e817",
-    "clientName": "ahlem bouguerra",
-    "vehicleInfo": "byd 202 - TUN123",
-    "vehiculeId": "691ae987b3a8dd8c3875e866",
-    "factureId": null,
-    "inspectionDate": "2025-11-17",
-    "services": [
-      {
-        "piece": "p",
-        "quantity": 2,
-        "unitPrice": 110,
-        "total": 220
-      }
-    ],
-    "totalHT": 270,
-    "totalServicesHT": 220,
-    "totalTTC": 324,
-    "finalTotalTTC": 311.04,
-    "tvaRate": 20,
-    "remiseRate": 4,
-    "montantTVA": 54,
-    "montantRemise": 12.96,
-    "maindoeuvre": 50,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 3,
-      "minutes": 0
-    },
-    "status": "brouillon",
-    "garagisteId": "69147724cb1b9aa1eaa81e3d",
-    "createdAt": "2025-11-17T09:23:53.186Z",
-    "updatedAt": "2025-11-19T13:44:30.032Z",
-    "__v": 0
-  },
   {
     "_id": "691afd3c1ca98faecdaa1f96",
     "id": "DEV014",
@@ -4428,668 +2513,6 @@ const devis = [
 
 const factures = [
   {
-    "_id": "6909b384862f937527d5c971",
-    "numeroFacture": "FAC-001",
-    "devisId": "6909b36f862f937527d5c959",
-    "clientId": "6901de3475deb6fa0aae40bc",
-    "realClientId": "68da66768ca933b9592da19b",
-    "clientInfo": {
-      "nom": "maher maher"
-    },
-    "vehicleInfo": "citroen c15 - 25TUN789",
-    "inspectionDate": "2025-11-04T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "phare",
-        "quantity": 2,
-        "unitPrice": 50,
-        "total": 100,
-        "_id": "6909b384862f937527d5c972"
-      }
-    ],
-    "maindoeuvre": 50,
-    "tvaRate": 20,
-    "remiseRate": 5,
-    "totalHT": 150,
-    "totalTVA": 30,
-    "totalRemise": 9,
-    "totalTTC": 180,
-    "finalTotalTTC": 172,
-    "timbreFiscal": 1,
-    "paymentStatus": "paye",
-    "paymentAmount": 172,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 2,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "active",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "invoiceDate": "2025-11-02T08:04:20.259Z",
-    "dueDate": "2025-12-04T08:04:20.259Z",
-    "createdAt": "2025-11-04T08:04:20.259Z",
-    "updatedAt": "2025-11-04T09:07:24.463Z",
-    "__v": 0,
-    "paymentDate": "2025-11-04T00:00:00.000Z",
-    "paymentMethod": "cheque"
-  },
-  {
-    "_id": "6909c5847cfbdf374a23bd31",
-    "numeroFacture": "FAC-002",
-    "devisId": "6909c283f819c2d76da2fa9b",
-    "clientId": "6901de3475deb6fa0aae40bc",
-    "realClientId": "68da66768ca933b9592da19b",
-    "clientInfo": {
-      "nom": "maher maher"
-    },
-    "vehicleInfo": "citroen c15 - 25TUN789",
-    "inspectionDate": "2025-11-07T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "moteur",
-        "quantity": 1,
-        "unitPrice": 900,
-        "total": 900,
-        "_id": "6909c5847cfbdf374a23bd32"
-      }
-    ],
-    "maindoeuvre": 398,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "totalHT": 1298,
-    "totalTVA": 259.6,
-    "totalRemise": 155.76,
-    "totalTTC": 1557.6,
-    "finalTotalTTC": 1402.84,
-    "timbreFiscal": 1,
-    "paymentStatus": "annule",
-    "paymentAmount": 0,
-    "estimatedTime": {
-      "days": 2,
-      "hours": 0,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "cancelled",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "invoiceDate": "2025-11-07T09:21:08.738Z",
-    "dueDate": "2025-12-04T09:21:08.738Z",
-    "createdAt": "2025-11-04T09:21:08.738Z",
-    "updatedAt": "2025-11-04T09:21:50.354Z",
-    "__v": 0,
-    "cancelledAt": "2025-11-04T09:21:50.353Z",
-    "creditNoteId": "6909c5ae7cfbdf374a23bd8c"
-  },
-  {
-    "_id": "6909c8fd27181d193b184d5e",
-    "numeroFacture": "FAC-003",
-    "devisId": "6909c8ee27181d193b184d40",
-    "clientId": "6901de3475deb6fa0aae40bc",
-    "realClientId": "68da66768ca933b9592da19b",
-    "clientInfo": {
-      "nom": "maher maher"
-    },
-    "vehicleInfo": "citroen c15 - 25TUN789",
-    "inspectionDate": "2025-11-04T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "ppppppppp",
-        "quantity": 1,
-        "unitPrice": 90,
-        "total": 90,
-        "_id": "6909c8fd27181d193b184d5f"
-      }
-    ],
-    "maindoeuvre": 50,
-    "tvaRate": 20,
-    "remiseRate": 5,
-    "totalHT": 140,
-    "totalTVA": 28,
-    "totalRemise": 8.4,
-    "totalTTC": 168,
-    "finalTotalTTC": 160.6,
-    "timbreFiscal": 1,
-    "paymentStatus": "annule",
-    "paymentAmount": 0,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 2,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "cancelled",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "invoiceDate": "2025-11-04T09:35:57.976Z",
-    "dueDate": "2025-12-04T09:35:57.976Z",
-    "createdAt": "2025-11-04T09:35:57.976Z",
-    "updatedAt": "2025-11-04T10:09:58.941Z",
-    "__v": 0,
-    "cancelledAt": "2025-11-04T10:09:58.912Z",
-    "creditNoteId": "6909d0f6cbe617b6d2922c55",
-    "replacedByFactureId": "6909d0f6cbe617b6d2922c61"
-  },
-  {
-    "_id": "6909d0f6cbe617b6d2922c61",
-    "numeroFacture": "FAC-004",
-    "devisId": "6909c8ee27181d193b184d40",
-    "clientId": "6901de3475deb6fa0aae40bc",
-    "realClientId": "68da66768ca933b9592da19b",
-    "clientInfo": {
-      "nom": "maher maher"
-    },
-    "vehicleInfo": "citroen c15 - 25TUN789",
-    "invoiceDate": "2025-11-04T10:09:58.925Z",
-    "dueDate": "2025-12-04T10:09:58.925Z",
-    "inspectionDate": "2025-11-04T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "ppppppppp",
-        "quantity": 1,
-        "unitPrice": 9.99,
-        "total": 9.99,
-        "_id": "6909d0f6cbe617b6d2922c62"
-      }
-    ],
-    "maindoeuvre": 10,
-    "tvaRate": 50,
-    "remiseRate": 5,
-    "totalHT": 19.990000000000002,
-    "totalTVA": 9.995000000000001,
-    "totalRemise": 1.4992500000000002,
-    "totalTTC": 29.985000000000003,
-    "finalTotalTTC": 28.485750000000003,
-    "timbreFiscal": 1,
-    "paymentStatus": "annule",
-    "paymentAmount": 0,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 2,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "cancelled",
-    "replacedByFactureId": "6909d2779adde6f05aefd15a",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-04T10:09:58.933Z",
-    "updatedAt": "2025-11-04T10:16:23.234Z",
-    "__v": 0,
-    "cancelledAt": "2025-11-04T10:16:23.213Z",
-    "creditNoteId": "6909d2779adde6f05aefd14e"
-  },
-  {
-    "_id": "6909d2779adde6f05aefd15a",
-    "numeroFacture": "FAC-005",
-    "devisId": "6909c8ee27181d193b184d40",
-    "clientId": "6901de3475deb6fa0aae40bc",
-    "realClientId": "68da66768ca933b9592da19b",
-    "clientInfo": {
-      "nom": "maher maher"
-    },
-    "vehicleInfo": "citroen c15 - 25TUN789",
-    "invoiceDate": "2025-11-04T10:16:23.224Z",
-    "dueDate": "2025-12-04T10:16:23.224Z",
-    "inspectionDate": "2025-11-04T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "ppppppppp",
-        "quantity": 1,
-        "unitPrice": 10,
-        "total": 10,
-        "_id": "6909d2779adde6f05aefd15b"
-      }
-    ],
-    "maindoeuvre": 10,
-    "tvaRate": 50,
-    "remiseRate": 5,
-    "totalHT": 20,
-    "totalTVA": 10,
-    "totalRemise": 1.5,
-    "totalTTC": 30,
-    "finalTotalTTC": 29.5,
-    "timbreFiscal": 1,
-    "paymentStatus": "paye",
-    "paymentAmount": 29.5,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 2,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "active",
-    "replacedByFactureId": "6909d0f6cbe617b6d2922c61",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "createdAt": "2025-11-04T10:16:23.231Z",
-    "updatedAt": "2025-11-05T20:11:21.859Z",
-    "__v": 0,
-    "paymentDate": "2025-11-05T00:00:00.000Z",
-    "paymentMethod": "cheque"
-  },
-  {
-    "_id": "690a0468f8fbe8711d617cc3",
-    "numeroFacture": "FAC-006",
-    "devisId": "690a0457f8fbe8711d617c99",
-    "clientId": "68d3b1fff361d30191e1a0af",
-    "realClientId": null,
-    "clientInfo": {
-      "nom": "ahmed"
-    },
-    "vehicleInfo": "kia 5 - 45TUN78",
-    "inspectionDate": "2025-11-04T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "ww",
-        "quantity": 1,
-        "unitPrice": 19.99,
-        "total": 19.99,
-        "_id": "690a0468f8fbe8711d617cc4"
-      }
-    ],
-    "maindoeuvre": 10,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "totalHT": 29.99,
-    "totalTVA": 5.998,
-    "totalRemise": 3.5988,
-    "totalTTC": 35.988,
-    "finalTotalTTC": 33.3892,
-    "timbreFiscal": 1,
-    "paymentStatus": "partiellement_paye",
-    "paymentAmount": 20,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 1,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "active",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "invoiceDate": "2025-11-07T13:49:28.917Z",
-    "dueDate": "2025-12-04T13:49:28.917Z",
-    "createdAt": "2025-11-04T13:49:28.917Z",
-    "updatedAt": "2025-11-05T19:11:40.698Z",
-    "__v": 0,
-    "paymentDate": "2025-11-05T00:00:00.000Z",
-    "paymentMethod": "especes"
-  },
-  {
-    "_id": "690b9d77b56ed8b7432c16eb",
-    "numeroFacture": "FAC-008",
-    "devisId": "690b330a0a0342e632425de3",
-    "clientId": "68d3b1fff361d30191e1a0af",
-    "realClientId": null,
-    "clientInfo": {
-      "nom": "ahmed"
-    },
-    "vehicleInfo": "kia 5 - 45TUN78",
-    "inspectionDate": "2025-11-05T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "ioklm",
-        "quantity": 1,
-        "unitPrice": 10,
-        "total": 10,
-        "_id": "690b9d77b56ed8b7432c16ec"
-      }
-    ],
-    "maindoeuvre": 10,
-    "tvaRate": 20,
-    "remiseRate": 0,
-    "totalHT": 20,
-    "totalTVA": 4,
-    "totalRemise": 0,
-    "totalTTC": 24,
-    "finalTotalTTC": 25,
-    "timbreFiscal": 1,
-    "paymentStatus": "partiellement_paye",
-    "paymentAmount": 10,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 2,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "active",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "invoiceDate": "2025-11-05T18:54:47.674Z",
-    "dueDate": "2025-12-05T18:54:47.674Z",
-    "createdAt": "2025-11-05T18:54:47.674Z",
-    "updatedAt": "2025-11-05T18:55:51.087Z",
-    "__v": 0,
-    "paymentDate": "2025-11-05T00:00:00.000Z",
-    "paymentMethod": "especes"
-  },
-  {
-    "_id": "690daa7459c1a11836bc7d45",
-    "numeroFacture": "FAC-009",
-    "devisId": "690da85f186fd8c339c398e2",
-    "clientId": "68cc2210b9fdea44215cb759",
-    "realClientId": null,
-    "clientInfo": {
-      "nom": "ahlem bouguerra"
-    },
-    "vehicleInfo": "peugeot 200 - TUN256",
-    "inspectionDate": "2025-11-07T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "aa",
-        "quantity": 1,
-        "unitPrice": 49.99,
-        "total": 49.99,
-        "_id": "690daa7459c1a11836bc7d46"
-      }
-    ],
-    "maindoeuvre": 2,
-    "tvaRate": 20,
-    "remiseRate": 3,
-    "totalHT": 51.99,
-    "totalTVA": 10.398000000000001,
-    "totalRemise": 1.8716400000000002,
-    "totalTTC": 62.388000000000005,
-    "finalTotalTTC": 61.516360000000006,
-    "timbreFiscal": 1,
-    "paymentStatus": "en_attente",
-    "paymentAmount": 0,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 3,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "active",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "invoiceDate": "2025-11-07T08:14:44.154Z",
-    "dueDate": "2025-12-07T08:14:44.154Z",
-    "createdAt": "2025-11-07T08:14:44.154Z",
-    "updatedAt": "2025-11-07T08:14:44.154Z",
-    "__v": 0
-  },
-  {
-    "_id": "690dc6b059c1a11836bc8018",
-    "numeroFacture": "FAC-010",
-    "devisId": "690dc66359c1a11836bc7fde",
-    "clientId": "68d3b1fff361d30191e1a0af",
-    "realClientId": null,
-    "clientInfo": {
-      "nom": "ahmed"
-    },
-    "vehicleInfo": "kia 5 - 45TUN78",
-    "inspectionDate": "2025-11-07T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "aa",
-        "quantity": 1,
-        "unitPrice": 50,
-        "total": 50,
-        "_id": "690dc6b059c1a11836bc8019"
-      },
-      {
-        "piece": "bb",
-        "quantity": 1,
-        "unitPrice": 60,
-        "total": 60,
-        "_id": "690dc6b059c1a11836bc801a"
-      },
-      {
-        "piece": "cc",
-        "quantity": 1,
-        "unitPrice": 70,
-        "total": 70,
-        "_id": "690dc6b059c1a11836bc801b"
-      }
-    ],
-    "maindoeuvre": 200,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "totalHT": 380,
-    "totalTVA": 76,
-    "totalRemise": 45.6,
-    "totalTTC": 456,
-    "finalTotalTTC": 411.4,
-    "timbreFiscal": 1,
-    "paymentStatus": "en_attente",
-    "paymentAmount": 0,
-    "estimatedTime": {
-      "days": 1,
-      "hours": 0,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "active",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "invoiceDate": "2025-11-07T10:15:12.854Z",
-    "dueDate": "2025-12-07T10:15:12.854Z",
-    "createdAt": "2025-11-07T10:15:12.854Z",
-    "updatedAt": "2025-11-07T10:15:12.854Z",
-    "__v": 0
-  },
-  {
-    "_id": "690e51c81c9bc176182c0656",
-    "numeroFacture": "FAC-011",
-    "devisId": "690e51921c9bc176182c0610",
-    "clientId": "68cc2210b9fdea44215cb759",
-    "realClientId": null,
-    "clientInfo": {
-      "nom": "ahlem bouguerra"
-    },
-    "vehicleInfo": "peugeot 200 - TUN256",
-    "inspectionDate": "2025-11-07T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "cxv",
-        "quantity": 1,
-        "unitPrice": 20,
-        "total": 20,
-        "_id": "690e51c81c9bc176182c0657"
-      }
-    ],
-    "maindoeuvre": 120,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "totalHT": 140,
-    "totalTVA": 28,
-    "totalRemise": 16.8,
-    "totalTTC": 168,
-    "finalTotalTTC": 152.2,
-    "timbreFiscal": 1,
-    "paymentStatus": "en_attente",
-    "paymentAmount": 0,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 2,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "active",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "invoiceDate": "2025-11-07T20:08:40.214Z",
-    "dueDate": "2025-12-07T20:08:40.214Z",
-    "createdAt": "2025-11-07T20:08:40.214Z",
-    "updatedAt": "2025-11-07T20:08:40.214Z",
-    "__v": 0
-  },
-  {
-    "_id": "6911a6d380ccc2cbabceb1ee",
-    "numeroFacture": "FAC-012",
-    "devisId": "6911a6b480ccc2cbabceb1b0",
-    "clientId": "68ee73b66c88c6be130d9bea",
-    "realClientId": "68ee71e4362ee18e192619a1",
-    "clientInfo": {
-      "nom": "hassen bg"
-    },
-    "vehicleInfo": "cc 11 - 15TUN45",
-    "inspectionDate": "2025-11-10T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "climatiseur",
-        "quantity": 1,
-        "unitPrice": 500,
-        "total": 500,
-        "_id": "6911a6d380ccc2cbabceb1ef"
-      }
-    ],
-    "maindoeuvre": 200,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "totalHT": 700,
-    "totalTVA": 140,
-    "totalRemise": 84,
-    "totalTTC": 840,
-    "finalTotalTTC": 757,
-    "timbreFiscal": 1,
-    "paymentStatus": "en_attente",
-    "paymentAmount": 0,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 5,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "active",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "invoiceDate": "2025-11-10T08:48:19.358Z",
-    "dueDate": "2025-12-10T08:48:19.358Z",
-    "createdAt": "2025-11-10T08:48:19.358Z",
-    "updatedAt": "2025-11-10T08:48:19.358Z",
-    "__v": 0
-  },
-  {
-    "_id": "6911a74080ccc2cbabceb2a6",
-    "numeroFacture": "FAC-013",
-    "devisId": "6911a72c80ccc2cbabceb269",
-    "clientId": "68d3b1fff361d30191e1a0af",
-    "realClientId": null,
-    "clientInfo": {
-      "nom": "ahmed"
-    },
-    "vehicleInfo": "kia 5 - 45TUN78",
-    "inspectionDate": "2025-11-10T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "clim",
-        "quantity": 1,
-        "unitPrice": 800,
-        "total": 800,
-        "_id": "6911a74080ccc2cbabceb2a7"
-      }
-    ],
-    "maindoeuvre": 200,
-    "tvaRate": 20,
-    "remiseRate": 10,
-    "totalHT": 1000,
-    "totalTVA": 200,
-    "totalRemise": 120,
-    "totalTTC": 1200,
-    "finalTotalTTC": 1081,
-    "timbreFiscal": 1,
-    "paymentStatus": "en_attente",
-    "paymentAmount": 0,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 5,
-      "minutes": 0
-    },
-    "createdBy": "68c2e02037f8b7ccf6c813bc",
-    "status": "active",
-    "garagisteId": "68c2e02037f8b7ccf6c813bc",
-    "invoiceDate": "2025-11-10T08:50:08.288Z",
-    "dueDate": "2025-12-10T08:50:08.288Z",
-    "createdAt": "2025-11-10T08:50:08.288Z",
-    "updatedAt": "2025-11-10T08:50:08.288Z",
-    "__v": 0
-  },
-  {
-    "_id": "6911dcb8227f68139eab74e0",
-    "numeroFacture": "FAC-014",
-    "devisId": "6911dca8227f68139eab74c7",
-    "clientId": "6911dc48227f68139eab742e",
-    "realClientId": "6911cb63ccd145adc6354d98",
-    "clientInfo": {
-      "nom": "magher"
-    },
-    "vehicleInfo": "byd 20 - 25TUN123",
-    "inspectionDate": "2025-11-10T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "i",
-        "quantity": 1,
-        "unitPrice": 20,
-        "total": 20,
-        "_id": "6911dcb8227f68139eab74e1"
-      }
-    ],
-    "maindoeuvre": 20,
-    "tvaRate": 20,
-    "remiseRate": 0,
-    "totalHT": 40,
-    "totalTVA": 8,
-    "totalRemise": 0,
-    "totalTTC": 48,
-    "finalTotalTTC": 49,
-    "timbreFiscal": 1,
-    "paymentStatus": "en_attente",
-    "paymentAmount": 0,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 3,
-      "minutes": 0
-    },
-    "createdBy": "6911cc17ccd145adc6354db7",
-    "status": "active",
-    "garagisteId": "6911cc17ccd145adc6354db7",
-    "invoiceDate": "2025-11-10T12:38:16.488Z",
-    "dueDate": "2025-12-10T12:38:16.488Z",
-    "createdAt": "2025-11-10T12:38:16.488Z",
-    "updatedAt": "2025-11-10T12:38:16.488Z",
-    "__v": 0
-  },
-  {
-    "_id": "691ae9beb3a8dd8c3875e8f8",
-    "numeroFacture": "FAC-015",
-    "devisId": "691ae9a9b3a8dd8c3875e8b8",
-    "clientId": "691ae952b3a8dd8c3875e817",
-    "realClientId": null,
-    "clientInfo": {
-      "nom": "ahlem bouguerra"
-    },
-    "vehicleInfo": "byd 202 - TUN123",
-    "inspectionDate": "2025-11-17T00:00:00.000Z",
-    "services": [
-      {
-        "piece": "p",
-        "quantity": 1,
-        "unitPrice": 110,
-        "total": 110,
-        "_id": "691ae9beb3a8dd8c3875e8f9"
-      }
-    ],
-    "maindoeuvre": 50,
-    "tvaRate": 20,
-    "remiseRate": 4,
-    "totalHT": 160,
-    "totalTVA": 32,
-    "totalRemise": 7.68,
-    "totalTTC": 192,
-    "finalTotalTTC": 185.32,
-    "timbreFiscal": 1,
-    "paymentStatus": "partiellement_paye",
-    "paymentAmount": 20,
-    "estimatedTime": {
-      "days": 0,
-      "hours": 3,
-      "minutes": 0
-    },
-    "status": "active",
-    "garagisteId": "69147724cb1b9aa1eaa81e3d",
-    "invoiceDate": "2025-11-17T09:24:14.392Z",
-    "dueDate": "2025-12-17T09:24:14.392Z",
-    "createdAt": "2025-11-17T09:24:14.392Z",
-    "updatedAt": "2025-11-17T09:24:42.785Z",
-    "__v": 0,
-    "paymentDate": "2025-11-17T00:00:00.000Z",
-    "paymentMethod": "especes"
-  },
-  {
     "_id": "691afea3c7a462a0c9196c8d",
     "numeroFacture": "FAC-016",
     "devisId": "691afd3c1ca98faecdaa1f96",
@@ -5099,6 +2522,8 @@ const factures = [
       "nom": "test"
     },
     "vehicleInfo": "azer 123 - 123TUN12",
+    "invoiceDate": "2025-11-17T10:53:23.741Z",
+    "dueDate": "2025-12-17T10:53:23.741Z",
     "inspectionDate": "2025-11-17T00:00:00.000Z",
     "services": [
       {
@@ -5119,21 +2544,19 @@ const factures = [
     "finalTotalTTC": 325,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-17T00:00:00.000Z",
+    "paymentMethod": "especes",
     "paymentAmount": 325,
     "estimatedTime": {
       "days": 0,
       "hours": 3,
       "minutes": 0
     },
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-17T10:53:23.741Z",
-    "dueDate": "2025-12-17T10:53:23.741Z",
     "createdAt": "2025-11-17T10:53:23.741Z",
     "updatedAt": "2025-11-17T14:10:00.422Z",
-    "__v": 0,
-    "paymentDate": "2025-11-17T00:00:00.000Z",
-    "paymentMethod": "especes"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "691dadd8807a8aa37603dd6c",
@@ -5145,6 +2568,8 @@ const factures = [
       "nom": "ahlem bouguerra"
     },
     "vehicleInfo": "citroen 201 - TUN789",
+    "invoiceDate": "2025-11-19T11:45:28.398Z",
+    "dueDate": "2025-12-19T11:45:28.398Z",
     "inspectionDate": "2025-11-19T00:00:00.000Z",
     "services": [
       {
@@ -5165,21 +2590,19 @@ const factures = [
     "finalTotalTTC": 253,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque",
     "paymentAmount": 253,
     "estimatedTime": {
       "days": 0,
       "hours": 3,
       "minutes": 0
     },
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-19T11:45:28.398Z",
-    "dueDate": "2025-12-19T11:45:28.398Z",
     "createdAt": "2025-11-19T11:45:28.398Z",
     "updatedAt": "2025-11-24T13:58:30.209Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "cheque"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "691db529807a8aa37603e19b",
@@ -5191,6 +2614,8 @@ const factures = [
       "nom": "test"
     },
     "vehicleInfo": "azer 123 - 123TUN12",
+    "invoiceDate": "2025-11-19T12:16:41.181Z",
+    "dueDate": "2025-12-19T12:16:41.181Z",
     "inspectionDate": "2025-11-19T00:00:00.000Z",
     "services": [
       {
@@ -5211,24 +2636,22 @@ const factures = [
     "finalTotalTTC": 121.12,
     "timbreFiscal": 1,
     "paymentStatus": "annule",
+    "paymentDate": "2025-11-19T00:00:00.000Z",
+    "paymentMethod": "especes",
     "paymentAmount": 20,
     "estimatedTime": {
       "days": 0,
       "hours": 3,
       "minutes": 0
     },
-    "status": "cancelled",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-19T12:16:41.181Z",
-    "dueDate": "2025-12-19T12:16:41.181Z",
     "createdAt": "2025-11-19T12:16:41.181Z",
     "updatedAt": "2025-11-19T13:43:46.213Z",
-    "__v": 0,
-    "paymentDate": "2025-11-19T00:00:00.000Z",
-    "paymentMethod": "especes",
-    "cancelledAt": "2025-11-19T13:43:46.195Z",
+    "status": "cancelled",
     "creditNoteId": "691dc992f059c09f59b104e9",
-    "replacedByFactureId": "691dc992f059c09f59b104f5"
+    "replacedByFactureId": "691dc992f059c09f59b104f5",
+    "cancelledAt": "2025-11-19T13:43:46.195Z",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "691dc992f059c09f59b104f5",
@@ -5262,20 +2685,20 @@ const factures = [
     "finalTotalTTC": 230.32,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque",
     "paymentAmount": 230.32,
     "estimatedTime": {
       "days": 0,
       "hours": 3,
       "minutes": 0
     },
+    "createdAt": "2025-11-19T13:43:46.209Z",
+    "updatedAt": "2025-11-24T13:57:35.288Z",
     "status": "active",
     "replacedByFactureId": "691db529807a8aa37603e19b",
     "garageId": "69147725cb1b9aa1eaa81e3f",
-    "createdAt": "2025-11-19T13:43:46.209Z",
-    "updatedAt": "2025-11-24T13:57:35.288Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "cheque"
+    "__v": 0
   },
   {
     "_id": "69234330d2083783f08e7397",
@@ -5287,6 +2710,8 @@ const factures = [
       "nom": "test"
     },
     "vehicleInfo": "azer 123 - 123TUN12",
+    "invoiceDate": "2025-11-23T17:24:00.472Z",
+    "dueDate": "2025-12-23T17:24:00.472Z",
     "inspectionDate": "2025-11-23T00:00:00.000Z",
     "services": [
       {
@@ -5307,21 +2732,19 @@ const factures = [
     "finalTotalTTC": 238.6,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque",
     "paymentAmount": 238.6,
     "estimatedTime": {
       "days": 0,
       "hours": 2,
       "minutes": 0
     },
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-23T17:24:00.472Z",
-    "dueDate": "2025-12-23T17:24:00.472Z",
     "createdAt": "2025-11-23T17:24:00.472Z",
     "updatedAt": "2025-11-24T13:55:35.673Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "cheque"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "69234332d2083783f08e73bb",
@@ -5333,6 +2756,8 @@ const factures = [
       "nom": "ahlem bouguerra"
     },
     "vehicleInfo": "cc 10 (11TUN12)",
+    "invoiceDate": "2025-11-23T17:24:02.782Z",
+    "dueDate": "2025-12-23T17:24:02.782Z",
     "inspectionDate": "2025-11-21T00:00:00.000Z",
     "services": [
       {
@@ -5360,21 +2785,19 @@ const factures = [
     "finalTotalTTC": 1369.5,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque",
     "paymentAmount": 1369.5,
     "estimatedTime": {
       "days": 0,
       "hours": 4,
       "minutes": 0
     },
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-23T17:24:02.782Z",
-    "dueDate": "2025-12-23T17:24:02.782Z",
     "createdAt": "2025-11-23T17:24:02.782Z",
     "updatedAt": "2025-11-24T13:42:00.922Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "cheque"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "692447012daf12b0aa73d467",
@@ -5386,6 +2809,8 @@ const factures = [
       "nom": "helmi"
     },
     "vehicleInfo": "ppp p1 - 52TUN77",
+    "invoiceDate": "2025-11-24T11:52:33.929Z",
+    "dueDate": "2025-12-24T11:52:33.929Z",
     "inspectionDate": "2025-11-23T00:00:00.000Z",
     "services": [
       {
@@ -5406,6 +2831,8 @@ const factures = [
     "finalTotalTTC": 925,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "especes",
     "paymentAmount": 925,
     "estimatedTime": {
       "days": 0,
@@ -5413,15 +2840,11 @@ const factures = [
       "minutes": 0
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-24T11:52:33.929Z",
-    "dueDate": "2025-12-24T11:52:33.929Z",
     "createdAt": "2025-11-24T11:52:33.929Z",
     "updatedAt": "2025-11-24T13:31:57.177Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "especes"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "6924658b0b51ea277f8e9d84",
@@ -5433,6 +2856,8 @@ const factures = [
       "nom": "test"
     },
     "vehicleInfo": "azer 123 - 123TUN12",
+    "invoiceDate": "2025-11-24T14:02:51.174Z",
+    "dueDate": "2025-12-24T14:02:51.174Z",
     "inspectionDate": "2025-11-23T00:00:00.000Z",
     "services": [
       {
@@ -5453,6 +2878,8 @@ const factures = [
     "finalTotalTTC": 241,
     "timbreFiscal": 1,
     "paymentStatus": "partiellement_paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "virement",
     "paymentAmount": 50,
     "estimatedTime": {
       "days": 1,
@@ -5460,15 +2887,11 @@ const factures = [
       "minutes": 0
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-24T14:02:51.174Z",
-    "dueDate": "2025-12-24T14:02:51.174Z",
     "createdAt": "2025-11-24T14:02:51.174Z",
     "updatedAt": "2025-11-24T14:03:08.405Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "virement"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "69256f2bd929346ef89b68dd",
@@ -5480,6 +2903,8 @@ const factures = [
       "nom": "ahlem bouguerra"
     },
     "vehicleInfo": "cc 10 - 11TUN12",
+    "invoiceDate": "2025-11-25T08:56:11.078Z",
+    "dueDate": "2025-12-25T08:56:11.078Z",
     "inspectionDate": "2025-11-25T00:00:00.000Z",
     "services": [
       {
@@ -5514,16 +2939,14 @@ const factures = [
       "minutes": 0
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
-    "status": "cancelled",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-25T08:56:11.078Z",
-    "dueDate": "2025-12-25T08:56:11.078Z",
     "createdAt": "2025-11-25T08:56:11.078Z",
     "updatedAt": "2025-11-25T10:16:55.467Z",
-    "__v": 0,
-    "cancelledAt": "2025-11-25T10:16:55.453Z",
+    "status": "cancelled",
     "creditNoteId": "69258217bc90c33f84d87e25",
-    "replacedByFactureId": "69258217bc90c33f84d87e34"
+    "replacedByFactureId": "69258217bc90c33f84d87e34",
+    "cancelledAt": "2025-11-25T10:16:55.453Z",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "692579f2dcd8dc9aca73e57a",
@@ -5535,6 +2958,8 @@ const factures = [
       "nom": "helmi"
     },
     "vehicleInfo": "ppp p1 - 52TUN77",
+    "invoiceDate": "2025-11-25T09:42:10.673Z",
+    "dueDate": "2025-12-25T09:42:10.673Z",
     "inspectionDate": "2025-11-23T00:00:00.000Z",
     "services": [
       {
@@ -5555,6 +2980,8 @@ const factures = [
     "finalTotalTTC": 241,
     "timbreFiscal": 1,
     "paymentStatus": "annule",
+    "paymentDate": "2025-11-25T00:00:00.000Z",
+    "paymentMethod": "cheque",
     "paymentAmount": 40,
     "estimatedTime": {
       "days": 0,
@@ -5562,18 +2989,14 @@ const factures = [
       "minutes": 0
     },
     "createdBy": "691398cf7412d3ea832a4af6",
-    "status": "cancelled",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-25T09:42:10.673Z",
-    "dueDate": "2025-12-25T09:42:10.673Z",
     "createdAt": "2025-11-25T09:42:10.673Z",
     "updatedAt": "2025-11-25T10:17:30.115Z",
-    "__v": 0,
-    "paymentDate": "2025-11-25T00:00:00.000Z",
-    "paymentMethod": "cheque",
-    "cancelledAt": "2025-11-25T10:17:30.098Z",
+    "status": "cancelled",
     "creditNoteId": "6925823abc90c33f84d87f06",
-    "replacedByFactureId": "6925823abc90c33f84d87f13"
+    "replacedByFactureId": "6925823abc90c33f84d87f13",
+    "cancelledAt": "2025-11-25T10:17:30.098Z",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "69258217bc90c33f84d87e34",
@@ -5621,14 +3044,14 @@ const factures = [
       "minutes": 0
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
-    "status": "cancelled",
-    "replacedByFactureId": "692582f3bc90c33f84d87fc8",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-25T10:16:55.465Z",
     "updatedAt": "2025-11-25T10:20:35.361Z",
-    "__v": 0,
+    "status": "cancelled",
+    "creditNoteId": "692582f3bc90c33f84d87fb9",
+    "replacedByFactureId": "692582f3bc90c33f84d87fc8",
     "cancelledAt": "2025-11-25T10:20:35.348Z",
-    "creditNoteId": "692582f3bc90c33f84d87fb9"
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "6925823abc90c33f84d87f13",
@@ -5662,6 +3085,8 @@ const factures = [
     "finalTotalTTC": 241,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-25T00:00:00.000Z",
+    "paymentMethod": "especes",
     "paymentAmount": 241,
     "estimatedTime": {
       "days": 0,
@@ -5669,14 +3094,12 @@ const factures = [
       "minutes": 0
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "createdAt": "2025-11-25T10:17:30.112Z",
+    "updatedAt": "2025-11-25T10:38:48.643Z",
     "status": "active",
     "replacedByFactureId": "692579f2dcd8dc9aca73e57a",
     "garageId": "69147725cb1b9aa1eaa81e3f",
-    "createdAt": "2025-11-25T10:17:30.112Z",
-    "updatedAt": "2025-11-25T10:38:48.643Z",
-    "__v": 0,
-    "paymentDate": "2025-11-25T00:00:00.000Z",
-    "paymentMethod": "especes"
+    "__v": 0
   },
   {
     "_id": "692582f3bc90c33f84d87fc8",
@@ -5717,6 +3140,8 @@ const factures = [
     "finalTotalTTC": 1333,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-25T00:00:00.000Z",
+    "paymentMethod": "virement",
     "paymentAmount": 1333,
     "estimatedTime": {
       "days": 1,
@@ -5724,14 +3149,12 @@ const factures = [
       "minutes": 0
     },
     "createdBy": "691398cf7412d3ea832a4af6",
+    "createdAt": "2025-11-25T10:20:35.358Z",
+    "updatedAt": "2025-11-25T10:21:02.110Z",
     "status": "active",
     "replacedByFactureId": "69258217bc90c33f84d87e34",
     "garageId": "69147725cb1b9aa1eaa81e3f",
-    "createdAt": "2025-11-25T10:20:35.358Z",
-    "updatedAt": "2025-11-25T10:21:02.110Z",
-    "__v": 0,
-    "paymentDate": "2025-11-25T00:00:00.000Z",
-    "paymentMethod": "virement"
+    "__v": 0
   }
 ];
 
@@ -5739,6 +3162,7 @@ const reservations = [
   {
     "_id": "68e38a78594f6616ce82a755",
     "garageId": "68c2e02037f8b7ccf6c813bc",
+    "vehiculeId": null,
     "clientName": "maher maher",
     "clientPhone": "26541789",
     "clientEmail": "ahlembouguerra@outlook.fr",
@@ -5747,6 +3171,7 @@ const reservations = [
       "date": "2025-10-07T00:00:00.000Z",
       "heureDebut": "10:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "lorsque je demarre voiture elle ne peut pas demarrer",
     "status": "accepte",
     "messageGarage": "Nouveau créneau proposé",
@@ -5759,6 +3184,7 @@ const reservations = [
   {
     "_id": "68e390e5594f6616ce82a7ba",
     "garageId": "68c2e02037f8b7ccf6c813bc",
+    "vehiculeId": null,
     "clientName": "maher maher",
     "clientPhone": "26541789",
     "clientEmail": "ahlembouguerra@outlook.fr",
@@ -5780,6 +3206,7 @@ const reservations = [
   {
     "_id": "68e3930a65cf64e7402e47ee",
     "garageId": "68c2e02037f8b7ccf6c813bc",
+    "vehiculeId": null,
     "clientName": "maher maher",
     "clientPhone": "26541789",
     "clientEmail": "ahlembouguerra@outlook.fr",
@@ -5801,6 +3228,7 @@ const reservations = [
   {
     "_id": "68e39f6b65cf64e7402e486e",
     "garageId": "68c2e02037f8b7ccf6c813bc",
+    "vehiculeId": null,
     "clientName": "maher maher",
     "clientPhone": "26541789",
     "clientEmail": "ahlembouguerra@outlook.fr",
@@ -5809,6 +3237,7 @@ const reservations = [
       "date": "2025-11-06T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "h",
     "status": "accepte",
     "messageGarage": "Nouveau créneau proposé",
@@ -5821,6 +3250,7 @@ const reservations = [
   {
     "_id": "68e3b01f65cf64e7402e48a4",
     "garageId": "68c2e02037f8b7ccf6c813bc",
+    "vehiculeId": null,
     "clientName": "maher maher",
     "clientPhone": "26541789",
     "clientEmail": "ahlembouguerra@outlook.fr",
@@ -5829,6 +3259,7 @@ const reservations = [
       "date": "2025-10-08T00:00:00.000Z",
       "heureDebut": "16:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "fffffff",
     "status": "accepte",
     "messageGarage": "Nouveau créneau proposé",
@@ -5841,6 +3272,7 @@ const reservations = [
   {
     "_id": "68e3bfad65cf64e7402e4c9d",
     "garageId": "68c2e02037f8b7ccf6c813bc",
+    "vehiculeId": null,
     "clientName": "maher maher",
     "clientPhone": "26541789",
     "clientEmail": "ahlembouguerra@outlook.fr",
@@ -5849,6 +3281,7 @@ const reservations = [
       "date": "2025-10-30T00:00:00.000Z",
       "heureDebut": "09:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "yyyyyy",
     "status": "accepte",
     "messageGarage": null,
@@ -5861,6 +3294,7 @@ const reservations = [
   {
     "_id": "68e3cbe465cf64e7402e5043",
     "garageId": "68c2e02037f8b7ccf6c813bc",
+    "vehiculeId": null,
     "clientName": "maher maher",
     "clientPhone": "26541789",
     "clientEmail": "ahlembouguerra@outlook.fr",
@@ -5869,6 +3303,7 @@ const reservations = [
       "date": "2025-10-06T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "jjjjjjj",
     "status": "accepte",
     "messageGarage": null,
@@ -5890,6 +3325,7 @@ const reservations = [
       "date": "2025-10-06T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "gggg",
     "status": "accepte",
     "messageGarage": "Nouveau créneau proposé",
@@ -5911,6 +3347,7 @@ const reservations = [
       "date": "2025-10-06T00:00:00.000Z",
       "heureDebut": "17:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "xw",
     "status": "accepte",
     "messageGarage": null,
@@ -5932,6 +3369,7 @@ const reservations = [
       "date": "2025-10-29T00:00:00.000Z",
       "heureDebut": "16:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "ddddddd",
     "status": "accepte",
     "messageGarage": null,
@@ -5953,6 +3391,7 @@ const reservations = [
       "date": "2025-10-06T00:00:00.000Z",
       "heureDebut": "17:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "ddf",
     "status": "accepte",
     "messageGarage": null,
@@ -5974,6 +3413,7 @@ const reservations = [
       "date": "2025-10-06T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "ddddddd",
     "status": "accepte",
     "messageGarage": null,
@@ -5995,6 +3435,7 @@ const reservations = [
       "date": "2025-10-24T00:00:00.000Z",
       "heureDebut": "16:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "hhh",
     "status": "accepte",
     "messageGarage": null,
@@ -6016,6 +3457,7 @@ const reservations = [
       "date": "2025-10-14T00:00:00.000Z",
       "heureDebut": "17:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "ffffffffffffff",
     "status": "accepte",
     "messageGarage": null,
@@ -6059,6 +3501,7 @@ const reservations = [
       "date": "2025-10-24T00:00:00.000Z",
       "heureDebut": "09:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "ddd",
     "status": "accepte",
     "messageGarage": "Nouveau créneau proposé",
@@ -6080,6 +3523,7 @@ const reservations = [
       "date": "2025-10-24T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "bbbbbb",
     "status": "accepte",
     "messageGarage": null,
@@ -6101,6 +3545,7 @@ const reservations = [
       "date": "2025-10-24T00:00:00.000Z",
       "heureDebut": "17:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "bbbbbb",
     "status": "accepte",
     "messageGarage": null,
@@ -6122,6 +3567,7 @@ const reservations = [
       "date": "2025-10-26T00:00:00.000Z",
       "heureDebut": "15:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "perte d'huile",
     "status": "accepte",
     "messageGarage": "dfghredfggfd",
@@ -6143,6 +3589,7 @@ const reservations = [
       "date": "2025-10-26T00:00:00.000Z",
       "heureDebut": "16:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "dddd",
     "status": "accepte",
     "messageGarage": null,
@@ -6164,6 +3611,7 @@ const reservations = [
       "date": "2025-10-27T00:00:00.000Z",
       "heureDebut": "18:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "u",
     "status": "accepte",
     "messageGarage": "Nouveau créneau proposé",
@@ -6185,6 +3633,7 @@ const reservations = [
       "date": "2025-10-28T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "ffff",
     "status": "accepte",
     "messageGarage": null,
@@ -6206,6 +3655,7 @@ const reservations = [
       "date": "2025-11-07T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "jj",
     "status": "accepte",
     "messageGarage": null,
@@ -6227,6 +3677,7 @@ const reservations = [
       "date": "2025-10-28T00:00:00.000Z",
       "heureDebut": "18:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "lll",
     "status": "accepte",
     "messageGarage": null,
@@ -6248,6 +3699,7 @@ const reservations = [
       "date": "2025-10-28T00:00:00.000Z",
       "heureDebut": "13:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "pppppp",
     "status": "accepte",
     "messageGarage": "Nouveau créneau proposé",
@@ -6269,6 +3721,7 @@ const reservations = [
       "date": "2025-10-28T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "kkkkk",
     "status": "accepte",
     "messageGarage": null,
@@ -6290,6 +3743,7 @@ const reservations = [
       "date": "2025-10-28T00:00:00.000Z",
       "heureDebut": "16:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "gg",
     "status": "accepte",
     "messageGarage": "Nouveau créneau proposé",
@@ -6311,6 +3765,7 @@ const reservations = [
       "date": "2025-11-06T00:00:00.000Z",
       "heureDebut": "17:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "nnn",
     "status": "accepte",
     "messageGarage": null,
@@ -6332,6 +3787,7 @@ const reservations = [
       "date": "2025-10-28T00:00:00.000Z",
       "heureDebut": "16:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "kkk",
     "status": "accepte",
     "messageGarage": null,
@@ -6353,6 +3809,7 @@ const reservations = [
       "date": "2025-10-28T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "vvvvvv",
     "status": "accepte",
     "messageGarage": "Nouveau créneau proposé",
@@ -6374,6 +3831,7 @@ const reservations = [
       "date": "2025-10-28T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "kkkkk",
     "status": "accepte",
     "messageGarage": null,
@@ -6395,6 +3853,7 @@ const reservations = [
       "date": "2025-10-29T00:00:00.000Z",
       "heureDebut": "17:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "bb",
     "status": "accepte",
     "messageGarage": null,
@@ -6416,6 +3875,7 @@ const reservations = [
       "date": "2025-10-29T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "xxx",
     "status": "accepte",
     "messageGarage": null,
@@ -6437,6 +3897,7 @@ const reservations = [
       "date": "2025-10-29T00:00:00.000Z",
       "heureDebut": "15:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "pp",
     "status": "accepte",
     "messageGarage": null,
@@ -6458,6 +3919,7 @@ const reservations = [
       "date": "2025-10-29T00:00:00.000Z",
       "heureDebut": "15:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "c",
     "status": "accepte",
     "messageGarage": null,
@@ -6479,6 +3941,7 @@ const reservations = [
       "date": "2025-10-29T00:00:00.000Z",
       "heureDebut": "16:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "o",
     "status": "accepte",
     "messageGarage": null,
@@ -6500,6 +3963,7 @@ const reservations = [
       "date": "2025-10-29T00:00:00.000Z",
       "heureDebut": "15:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "<<<<<",
     "status": "accepte",
     "messageGarage": null,
@@ -6521,6 +3985,7 @@ const reservations = [
       "date": "2025-10-29T00:00:00.000Z",
       "heureDebut": "15:00"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "v",
     "status": "accepte",
     "messageGarage": null,
@@ -6564,6 +4029,7 @@ const reservations = [
       "date": "2025-11-10T00:00:00.000Z",
       "heureDebut": "15:30"
     },
+    "creneauPropose": {},
     "descriptionDepannage": "yyyyy",
     "status": "accepte",
     "messageGarage": null,
@@ -6577,53 +4043,25 @@ const reservations = [
 
 const services = [
   {
-    "_id": "6911db6a227f68139eab73bf",
+    "_id": "692d988fa8353948763487cf",
     "id": "SERV001",
-    "name": "Entretien et révision",
-    "description": "ce service permet de ....",
-    "statut": "Actif",
-    "garagisteId": "6911cc17ccd145adc6354db7",
-    "__v": 0,
-    "updatedAt": "2025-11-22T16:52:24.331Z"
-  },
-  {
-    "_id": "691b0347f15086b702a468d0",
-    "id": "SERV002",
-    "name": "Pneumatiques et suspension",
+    "name": "climatisation",
     "description": "ce service permet de .....",
     "statut": "Actif",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "createdAt": "2025-12-01T13:30:55.536Z",
+    "updatedAt": "2025-12-01T13:30:55.536Z",
     "__v": 0
   },
   {
-    "_id": "691cd9fab41d0eb4e4469726",
-    "id": "SERV003",
-    "name": "Électricité et électronique",
-    "description": "ze",
-    "statut": "Actif",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "__v": 0
-  },
-  {
-    "_id": "6921ea5de9338b8d1ea0ba1a",
-    "id": "SERV004",
-    "name": "climatisation",
-    "description": "ce service permet de ..........",
+    "_id": "692d98a1a8353948763487db",
+    "id": "SERV002",
+    "name": "entretien",
+    "description": "ce service permet de .......\n",
     "statut": "Actif",
     "createdBy": "691398cf7412d3ea832a4af6",
-    "createdAt": "2025-11-22T16:52:45.648Z",
-    "updatedAt": "2025-11-22T17:01:21.629Z",
-    "__v": 0
-  },
-  {
-    "_id": "6923222153b84ce050ea5208",
-    "id": "SERV005",
-    "name": "SWDX",
-    "description": "SDF",
-    "statut": "Actif",
-    "createdBy": "691398cf7412d3ea832a4af6",
-    "createdAt": "2025-11-23T15:02:57.700Z",
-    "updatedAt": "2025-11-23T15:02:57.700Z",
+    "createdAt": "2025-12-01T13:31:13.279Z",
+    "updatedAt": "2025-12-01T13:31:13.279Z",
     "__v": 0
   }
 ];

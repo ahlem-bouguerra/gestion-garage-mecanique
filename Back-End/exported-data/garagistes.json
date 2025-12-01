@@ -9,7 +9,12 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "6913a4f97e5136d4d9e06ca9",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-11T21:04:57.825Z",
     "updatedAt": "2025-11-11T21:04:57.841Z",
     "__v": 0
@@ -24,7 +29,12 @@
     "resetPasswordExpires": null,
     "isVerified": true,
     "garage": "6913a53f7e5136d4d9e06cb1",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-11T21:06:07.589Z",
     "updatedAt": "2025-11-12T11:02:29.400Z",
     "__v": 0
@@ -39,7 +49,12 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "691471f2a2104f13503bf7a5",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-12T11:39:30.903Z",
     "updatedAt": "2025-11-12T11:39:30.911Z",
     "__v": 0
@@ -54,11 +69,15 @@
     "resetPasswordExpires": null,
     "isVerified": true,
     "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": true,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-12T12:01:40.999Z",
     "updatedAt": "2025-11-16T13:29:56.823Z",
-    "__v": 0,
-    "isActive": true
+    "__v": 0
   },
   {
     "_id": "6916fb7916edea752b1f81b9",
@@ -70,7 +89,12 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "6916fb6416edea752b1f81b3",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T09:50:49.294Z",
     "updatedAt": "2025-11-14T09:50:49.294Z",
     "__v": 0
@@ -85,7 +109,12 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "6916fb6416edea752b1f81b3",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T10:40:06.938Z",
     "updatedAt": "2025-11-14T10:40:06.938Z",
     "__v": 0
@@ -100,7 +129,12 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "6916fb6416edea752b1f81b3",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T10:41:50.752Z",
     "updatedAt": "2025-11-14T10:41:50.752Z",
     "__v": 0
@@ -115,11 +149,15 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "6916fb6416edea752b1f81b3",
+    "isActive": true,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T10:42:15.220Z",
     "updatedAt": "2025-11-16T19:34:25.478Z",
-    "__v": 0,
-    "isActive": true
+    "__v": 0
   },
   {
     "_id": "69172c691fd203ef3d3f1c38",
@@ -131,9 +169,26 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": [
+        {
+          "serviceId": "692d98a1a8353948763487db",
+          "name": "entretien",
+          "_id": "692d98fba83539487634891b"
+        }
+      ],
+      "dateEmbauche": null,
+      "dateNaissance": null,
+      "experience": "",
+      "permisConduire": "B",
+      "poste": "Mécanicien",
+      "typeContrat": "CDI"
+    },
     "createdAt": "2025-11-14T13:19:37.954Z",
-    "updatedAt": "2025-11-14T13:19:37.954Z",
+    "updatedAt": "2025-12-01T13:32:43.585Z",
     "__v": 0
   },
   {
@@ -146,7 +201,12 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "691733369b5729f0dbd904a1",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T13:49:12.805Z",
     "updatedAt": "2025-11-14T13:49:12.805Z",
     "__v": 0
@@ -161,7 +221,12 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T13:52:47.706Z",
     "updatedAt": "2025-11-14T13:52:47.706Z",
     "__v": 0
@@ -176,7 +241,12 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "691733369b5729f0dbd904a1",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T14:05:46.562Z",
     "updatedAt": "2025-11-14T14:05:46.562Z",
     "__v": 0
@@ -191,7 +261,12 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "691733369b5729f0dbd904a1",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T14:16:04.580Z",
     "updatedAt": "2025-11-14T14:16:04.580Z",
     "__v": 0
@@ -206,7 +281,12 @@
     "resetPasswordExpires": null,
     "isVerified": false,
     "garage": "691733369b5729f0dbd904a1",
+    "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-14T14:18:02.887Z",
     "updatedAt": "2025-11-14T14:18:02.887Z",
     "__v": 0
@@ -223,6 +303,10 @@
     "garage": "691733369b5729f0dbd904a1",
     "isActive": true,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-16T12:17:59.106Z",
     "updatedAt": "2025-11-18T18:44:48.784Z",
     "__v": 0
@@ -239,8 +323,24 @@
     "garage": "69147725cb1b9aa1eaa81e3f",
     "isActive": true,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": [
+        {
+          "serviceId": "692d98a1a8353948763487db",
+          "name": "entretien",
+          "_id": "692d98f5a8353948763488f6"
+        }
+      ],
+      "dateEmbauche": null,
+      "dateNaissance": null,
+      "experience": "",
+      "permisConduire": "B",
+      "poste": "Mécanicien",
+      "typeContrat": "CDI"
+    },
     "createdAt": "2025-11-17T09:29:18.809Z",
-    "updatedAt": "2025-11-17T09:30:41.383Z",
+    "updatedAt": "2025-12-01T13:32:37.464Z",
     "__v": 0
   },
   {
@@ -255,6 +355,10 @@
     "garage": "691733369b5729f0dbd904a1",
     "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-18T19:58:14.478Z",
     "updatedAt": "2025-11-18T19:58:14.478Z",
     "__v": 0
@@ -271,6 +375,10 @@
     "garage": "6920cb4f69f0734e2ffd2296",
     "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-21T20:33:04.229Z",
     "updatedAt": "2025-11-21T20:33:04.229Z",
     "__v": 0
@@ -287,8 +395,45 @@
     "garage": "6920cb4f69f0734e2ffd2296",
     "isActive": false,
     "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
     "createdAt": "2025-11-21T21:14:46.379Z",
     "updatedAt": "2025-11-21T21:14:46.379Z",
+    "__v": 0
+  },
+  {
+    "_id": "692d981539a56cf2278c3c3a",
+    "username": "test",
+    "email": "testbg@gmail.com",
+    "password": "temp1764595733058",
+    "phone": "45321789",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": true,
+    "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": true,
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "mecanicienData": {
+      "dateNaissance": "2001-01-01T00:00:00.000Z",
+      "poste": "Mécanicien",
+      "dateEmbauche": "2025-12-01T00:00:00.000Z",
+      "typeContrat": "CDI",
+      "statut": "Actif",
+      "services": [
+        {
+          "serviceId": "692d988fa8353948763487cf",
+          "name": "climatisation",
+          "_id": "692d98e8a8353948763488d2"
+        }
+      ],
+      "experience": "ez",
+      "permisConduire": "B",
+      "matricule": "MEC-1764595733058"
+    },
+    "createdAt": "2025-12-01T13:28:53.064Z",
+    "updatedAt": "2025-12-01T13:32:24.043Z",
     "__v": 0
   }
 ]

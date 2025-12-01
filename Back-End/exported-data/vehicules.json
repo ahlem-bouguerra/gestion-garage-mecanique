@@ -1,5 +1,4 @@
 [
-
   {
     "_id": "691ae987b3a8dd8c3875e866",
     "proprietaireId": "691ae952b3a8dd8c3875e817",
@@ -12,7 +11,6 @@
     "kilometrage": 2123,
     "statut": "actif",
     "creePar": "garagiste",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {
@@ -47,7 +45,6 @@
     "kilometrage": 12311,
     "statut": "actif",
     "creePar": "garagiste",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {
@@ -81,7 +78,6 @@
     "kilometrage": 1230,
     "statut": "actif",
     "creePar": "garagiste",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {
@@ -115,7 +111,6 @@
     "kilometrage": 123456,
     "statut": "actif",
     "creePar": "garagiste",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {
@@ -150,7 +145,6 @@
     "kilometrage": 11110,
     "statut": "actif",
     "creePar": "garagiste",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {
@@ -184,7 +178,6 @@
     "kilometrage": 12300,
     "statut": "actif",
     "creePar": "garagiste",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "paysImmatriculation": "tunisie",
     "historique_garages": [
       {

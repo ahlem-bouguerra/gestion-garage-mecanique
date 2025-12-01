@@ -2,8 +2,8 @@ import OrdreTravail from '../../models/Ordre.js';
 import Devis from '../../models/Devis.js';
 import Atelier from '../../models/Atelier.js';
 import Service from '../../models/Service.js';
-import Mecanicien from '../../models/Mecanicien.js';
 import mongoose from 'mongoose';
+import { Garagiste } from '../../models/Garagiste.js';
 
 export const createOrdreTravail = async (req, res) => {
   try {
@@ -87,10 +87,10 @@ export const createOrdreTravail = async (req, res) => {
         });
       }
 
-      const mecanicien = await Mecanicien.findOne({
-        _id: tache.mecanicienId,
-        garageId: targetGarageId
-      });
+const mecanicien = await Garagiste.findOne({
+  _id: tache.mecanicienId,
+  garage: targetGarageId  // Correspond au schéma
+});
 
       if (!mecanicien) {
         return res.status(404).json({
@@ -105,7 +105,7 @@ export const createOrdreTravail = async (req, res) => {
         serviceId: tache.serviceId,
         serviceNom: service.name,
         mecanicienId: mecanicien._id,
-        mecanicienNom: mecanicien.nom,
+        mecanicienNom: mecanicien.username,
         estimationHeures: tache.estimationHeures || 1,
         notes: tache.notes || '',
         status: 'assignee'
@@ -149,7 +149,7 @@ export const createOrdreTravail = async (req, res) => {
       { path: 'devisId', select: 'id clientName vehicleInfo vehiculeId' },
       { path: 'atelierId', select: 'name localisation' },
       { path: 'taches.serviceId', select: 'name' },
-      { path: 'taches.mecanicienId', select: 'nom' }
+      { path: 'taches.mecanicienId', select: 'username email phone' }
     ]);
 
     return res.status(201).json({
@@ -222,7 +222,7 @@ export const getOrdresTravail = async (req, res) => {
       .populate('devisId', 'id clientName vehicleInfo')
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name')
-      .populate('taches.mecanicienId', 'nom')
+      .populate('taches.mecanicienId', 'username email phone')
       .sort(sortOptions)
       .skip(skip)
       .limit(limitNum)
@@ -272,9 +272,9 @@ export const getOrdreTravailById = async (req, res) => {
       .populate('devisId', 'id clientName vehicleInfo inspectionDate services')
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name description')
-      .populate('taches.mecanicienId', 'nom telephone email')
-      .populate('createdBy', 'nom email')
-      .populate('updatedBy', 'nom email');
+.populate('taches.mecanicienId', 'username phone email')
+.populate('createdBy', 'username email')
+.populate('updatedBy', 'username email');
 
     if (!ordre) {
       console.log('Ordre non trouvé pour ID:', id);
@@ -545,7 +545,7 @@ export const getOrdresByStatus = async (req, res) => {
       .populate('devisId', 'id clientName vehicleInfo')
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name')
-      .populate('taches.mecanicienId', 'nom')
+      .populate('taches.mecanicienId', 'username email phone')
       .sort(options.sort)
       .skip(options.skip)
       .limit(options.limit)
@@ -595,7 +595,7 @@ export const getOrdresByAtelier = async (req, res) => {
       .populate('devisId', 'id clientName vehicleInfo')
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name')
-      .populate('taches.mecanicienId', 'nom')
+      .populate('taches.mecanicienId', 'username email phone')
       .sort(options.sort)
       .skip(options.skip)
       .limit(options.limit)
@@ -732,7 +732,7 @@ export const updateOrdreTravail = async (req, res) => {
         }
 
         const service = await Service.findById(tache.serviceId);
-        const mecanicien = await Mecanicien.findById(tache.mecanicienId)
+        const mecanicien = await Garagiste.findById(tache.mecanicienId)
 
         if (!service) {
           return res.status(404).json({
@@ -755,7 +755,7 @@ export const updateOrdreTravail = async (req, res) => {
           serviceId: tache.serviceId,
           serviceNom: service.name,
           mecanicienId: tache.mecanicienId,
-          mecanicienNom: mecanicien.nom,
+          mecanicienNom: mecanicien.username,
           estimationHeures: tache.estimationHeures || 1,
           notes: tache.notes || '',
           status: tache.status || 'assignee',
@@ -790,7 +790,7 @@ export const updateOrdreTravail = async (req, res) => {
     await ordreSauve.populate([
       { path: 'atelierId', select: 'name localisation' },
       { path: 'taches.serviceId', select: 'name' },
-      { path: 'taches.mecanicienId', select: 'nom email telephone' }
+      { path: 'taches.mecanicienId', select: 'username email telephone' }
     ]);
 
     console.log('Ordre modifié avec succès:', ordreSauve.numeroOrdre);
@@ -840,7 +840,7 @@ export const getOrdresSupprimes = async (req, res) => {
         },
         { 
           path: 'taches.mecanicienId', 
-          select: 'nom prenom' 
+          select: 'username email phone' 
         }
       ])
       .sort({ updatedAt: -1 }) // Trier par dernière modification (suppression)

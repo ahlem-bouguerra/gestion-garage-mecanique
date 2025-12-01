@@ -36,14 +36,11 @@ const garagisteSchema = new mongoose.Schema({
     default: false
   },
 
-
-
   garage: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Garage",
     default: null,
   },
-
 
    isActive: {
     type: Boolean,
@@ -56,6 +53,34 @@ const garagisteSchema = new mongoose.Schema({
     ref: "Garagiste",
     default: null,
   },
+  mecanicienData: {
+  dateNaissance: { type: Date },
+  poste: {
+    type: String,
+    enum: ["Mécanicien", "Électricien Auto", "Carrossier", "Chef d'équipe", "Apprenti"]
+  },
+  dateEmbauche: { type: Date },
+  typeContrat: {
+    type: String,
+    enum: ["CDI", "CDD", "Stage", "Apprentissage"]
+  },
+  statut: {
+    type: String,
+    enum: ["Actif", "Congé", "Arrêt maladie", "Suspendu", "Démissionné"],
+    default: "Actif"
+  },
+  salaire: { type: Number },
+  services: [{
+    serviceId: { type: mongoose.Schema.Types.ObjectId, ref: "Service" },
+    name: { type: String }
+  }],
+  experience: { type: String },
+  permisConduire: {
+    type: String,
+    enum: ["A", "B", "C", "D", "E"]
+  },
+  matricule: { type: String, unique: true, sparse: true } // sparse permet NULL
+}
 
 }, {
   timestamps: true

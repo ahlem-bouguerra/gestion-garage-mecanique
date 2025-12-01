@@ -13,7 +13,7 @@ import { createFicheClient, getFicheClients, getFicheClientById, updateFicheClie
 import { getAllVehicules, getVehiculeById, createVehicule, updateVehicule, dissocierVehicule, getVehiculesByProprietaire } from '../controllers/garagiste/vehiculeController.js';
 import { createDevis, getAllDevis, getDevisById, getDevisByNum, updateDevisStatus, updateDevis, deleteDevis,getAllDevisByGarage, acceptDevis, refuseDevis, updateFactureId ,deleteDevisForSuperAdmin } from '../controllers/garagiste/devisController.js';
 import { sendDevisByEmail } from '../utils/sendDevis.js';
-import { createMecanicien, updateMecanicien, deleteMecanicien, getAllMecaniciens, getMecanicienById, getMecaniciensByService } from "../controllers/garagiste/mecanicienController.js";
+import { createMecanicien, updateMecanicien, deleteMecanicien, getAllMecaniciens, getMecanicienById, getMecaniciensByService ,getAllRoles} from "../controllers/garagiste/mecanicienController.js";
 import { getAllAteliers, getAtelierById, createAtelier, updateAtelier, deleteAtelier } from '../controllers/garagiste/atelierController.js';
 import {getAvailableServices,getMyGarageServices,addServiceToGarage,removeServiceFromGarage,getServicesForMechanics} from '../controllers/garagiste/serviceController.js';
 import { createOrdreTravail, getOrdresTravail, getOrdreTravailById, /*updateStatusOrdreTravail,*/ demarrerOrdre, terminerOrdre, getStatistiques, supprimerOrdreTravail, getOrdresParDevisId, getOrdresByStatus, getOrdresSupprimes, getOrdresByAtelier, updateOrdreTravail,deleteOrdreTravailDefinitif } from '../controllers/garagiste/ordreController.js';
@@ -309,6 +309,7 @@ router.get("/getMecanicienById/:id", authMiddleware, getMecanicienById);
 router.put("/updateMecanicien/:id", authMiddleware,hasAccess('Admin Garage'), updateMecanicien);
 router.delete("/deleteMecanicien/:id", authMiddleware,hasAccess('Admin Garage'), deleteMecanicien);
 router.get('/mecaniciens/by-service/:serviceId', authGaragisteOuSuperAdmin, getMecaniciensByService);
+router.get("/getAllRoles/for/admin", authGaragisteOuSuperAdmin, getAllRoles);
 
 // ========== ATELIERS ==========
 router.get('/getAllAteliers', authGaragisteOuSuperAdmin, getAllAteliers);

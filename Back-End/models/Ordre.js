@@ -24,7 +24,7 @@ const TacheSchema = new Schema({
   },
   mecanicienId: {
     type: Schema.Types.ObjectId,
-    ref: 'Mecanicien',
+    ref: 'Garagiste',
     required: true
   },
   mecanicienNom: {

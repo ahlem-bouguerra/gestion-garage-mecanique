@@ -1,5 +1,4 @@
 [
-
   {
     "_id": "691afea3c7a462a0c9196c8d",
     "numeroFacture": "FAC-016",
@@ -10,6 +9,8 @@
       "nom": "test"
     },
     "vehicleInfo": "azer 123 - 123TUN12",
+    "invoiceDate": "2025-11-17T10:53:23.741Z",
+    "dueDate": "2025-12-17T10:53:23.741Z",
     "inspectionDate": "2025-11-17T00:00:00.000Z",
     "services": [
       {
@@ -30,21 +31,19 @@
     "finalTotalTTC": 325,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-17T00:00:00.000Z",
+    "paymentMethod": "especes",
     "paymentAmount": 325,
     "estimatedTime": {
       "days": 0,
       "hours": 3,
       "minutes": 0
     },
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-17T10:53:23.741Z",
-    "dueDate": "2025-12-17T10:53:23.741Z",
     "createdAt": "2025-11-17T10:53:23.741Z",
     "updatedAt": "2025-11-17T14:10:00.422Z",
-    "__v": 0,
-    "paymentDate": "2025-11-17T00:00:00.000Z",
-    "paymentMethod": "especes"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "691dadd8807a8aa37603dd6c",
@@ -56,6 +55,8 @@
       "nom": "ahlem bouguerra"
     },
     "vehicleInfo": "citroen 201 - TUN789",
+    "invoiceDate": "2025-11-19T11:45:28.398Z",
+    "dueDate": "2025-12-19T11:45:28.398Z",
     "inspectionDate": "2025-11-19T00:00:00.000Z",
     "services": [
       {
@@ -76,21 +77,19 @@
     "finalTotalTTC": 253,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque",
     "paymentAmount": 253,
     "estimatedTime": {
       "days": 0,
       "hours": 3,
       "minutes": 0
     },
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-19T11:45:28.398Z",
-    "dueDate": "2025-12-19T11:45:28.398Z",
     "createdAt": "2025-11-19T11:45:28.398Z",
     "updatedAt": "2025-11-24T13:58:30.209Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "cheque"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "691db529807a8aa37603e19b",
@@ -102,6 +101,8 @@
       "nom": "test"
     },
     "vehicleInfo": "azer 123 - 123TUN12",
+    "invoiceDate": "2025-11-19T12:16:41.181Z",
+    "dueDate": "2025-12-19T12:16:41.181Z",
     "inspectionDate": "2025-11-19T00:00:00.000Z",
     "services": [
       {
@@ -122,24 +123,22 @@
     "finalTotalTTC": 121.12,
     "timbreFiscal": 1,
     "paymentStatus": "annule",
+    "paymentDate": "2025-11-19T00:00:00.000Z",
+    "paymentMethod": "especes",
     "paymentAmount": 20,
     "estimatedTime": {
       "days": 0,
       "hours": 3,
       "minutes": 0
     },
-    "status": "cancelled",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-19T12:16:41.181Z",
-    "dueDate": "2025-12-19T12:16:41.181Z",
     "createdAt": "2025-11-19T12:16:41.181Z",
     "updatedAt": "2025-11-19T13:43:46.213Z",
-    "__v": 0,
-    "paymentDate": "2025-11-19T00:00:00.000Z",
-    "paymentMethod": "especes",
-    "cancelledAt": "2025-11-19T13:43:46.195Z",
+    "status": "cancelled",
     "creditNoteId": "691dc992f059c09f59b104e9",
-    "replacedByFactureId": "691dc992f059c09f59b104f5"
+    "replacedByFactureId": "691dc992f059c09f59b104f5",
+    "cancelledAt": "2025-11-19T13:43:46.195Z",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "691dc992f059c09f59b104f5",
@@ -173,20 +172,20 @@
     "finalTotalTTC": 230.32,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque",
     "paymentAmount": 230.32,
     "estimatedTime": {
       "days": 0,
       "hours": 3,
       "minutes": 0
     },
+    "createdAt": "2025-11-19T13:43:46.209Z",
+    "updatedAt": "2025-11-24T13:57:35.288Z",
     "status": "active",
     "replacedByFactureId": "691db529807a8aa37603e19b",
     "garageId": "69147725cb1b9aa1eaa81e3f",
-    "createdAt": "2025-11-19T13:43:46.209Z",
-    "updatedAt": "2025-11-24T13:57:35.288Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "cheque"
+    "__v": 0
   },
   {
     "_id": "69234330d2083783f08e7397",
@@ -198,6 +197,8 @@
       "nom": "test"
     },
     "vehicleInfo": "azer 123 - 123TUN12",
+    "invoiceDate": "2025-11-23T17:24:00.472Z",
+    "dueDate": "2025-12-23T17:24:00.472Z",
     "inspectionDate": "2025-11-23T00:00:00.000Z",
     "services": [
       {
@@ -218,21 +219,19 @@
     "finalTotalTTC": 238.6,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque",
     "paymentAmount": 238.6,
     "estimatedTime": {
       "days": 0,
       "hours": 2,
       "minutes": 0
     },
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-23T17:24:00.472Z",
-    "dueDate": "2025-12-23T17:24:00.472Z",
     "createdAt": "2025-11-23T17:24:00.472Z",
     "updatedAt": "2025-11-24T13:55:35.673Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "cheque"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "69234332d2083783f08e73bb",
@@ -244,6 +243,8 @@
       "nom": "ahlem bouguerra"
     },
     "vehicleInfo": "cc 10 (11TUN12)",
+    "invoiceDate": "2025-11-23T17:24:02.782Z",
+    "dueDate": "2025-12-23T17:24:02.782Z",
     "inspectionDate": "2025-11-21T00:00:00.000Z",
     "services": [
       {
@@ -271,21 +272,19 @@
     "finalTotalTTC": 1369.5,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "cheque",
     "paymentAmount": 1369.5,
     "estimatedTime": {
       "days": 0,
       "hours": 4,
       "minutes": 0
     },
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-23T17:24:02.782Z",
-    "dueDate": "2025-12-23T17:24:02.782Z",
     "createdAt": "2025-11-23T17:24:02.782Z",
     "updatedAt": "2025-11-24T13:42:00.922Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "cheque"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "692447012daf12b0aa73d467",
@@ -297,6 +296,8 @@
       "nom": "helmi"
     },
     "vehicleInfo": "ppp p1 - 52TUN77",
+    "invoiceDate": "2025-11-24T11:52:33.929Z",
+    "dueDate": "2025-12-24T11:52:33.929Z",
     "inspectionDate": "2025-11-23T00:00:00.000Z",
     "services": [
       {
@@ -317,6 +318,8 @@
     "finalTotalTTC": 925,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "especes",
     "paymentAmount": 925,
     "estimatedTime": {
       "days": 0,
@@ -324,15 +327,11 @@
       "minutes": 0
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-24T11:52:33.929Z",
-    "dueDate": "2025-12-24T11:52:33.929Z",
     "createdAt": "2025-11-24T11:52:33.929Z",
     "updatedAt": "2025-11-24T13:31:57.177Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "especes"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "6924658b0b51ea277f8e9d84",
@@ -344,6 +343,8 @@
       "nom": "test"
     },
     "vehicleInfo": "azer 123 - 123TUN12",
+    "invoiceDate": "2025-11-24T14:02:51.174Z",
+    "dueDate": "2025-12-24T14:02:51.174Z",
     "inspectionDate": "2025-11-23T00:00:00.000Z",
     "services": [
       {
@@ -364,6 +365,8 @@
     "finalTotalTTC": 241,
     "timbreFiscal": 1,
     "paymentStatus": "partiellement_paye",
+    "paymentDate": "2025-11-24T00:00:00.000Z",
+    "paymentMethod": "virement",
     "paymentAmount": 50,
     "estimatedTime": {
       "days": 1,
@@ -371,15 +374,11 @@
       "minutes": 0
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
-    "status": "active",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-24T14:02:51.174Z",
-    "dueDate": "2025-12-24T14:02:51.174Z",
     "createdAt": "2025-11-24T14:02:51.174Z",
     "updatedAt": "2025-11-24T14:03:08.405Z",
-    "__v": 0,
-    "paymentDate": "2025-11-24T00:00:00.000Z",
-    "paymentMethod": "virement"
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "69256f2bd929346ef89b68dd",
@@ -391,6 +390,8 @@
       "nom": "ahlem bouguerra"
     },
     "vehicleInfo": "cc 10 - 11TUN12",
+    "invoiceDate": "2025-11-25T08:56:11.078Z",
+    "dueDate": "2025-12-25T08:56:11.078Z",
     "inspectionDate": "2025-11-25T00:00:00.000Z",
     "services": [
       {
@@ -425,16 +426,14 @@
       "minutes": 0
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
-    "status": "cancelled",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-25T08:56:11.078Z",
-    "dueDate": "2025-12-25T08:56:11.078Z",
     "createdAt": "2025-11-25T08:56:11.078Z",
     "updatedAt": "2025-11-25T10:16:55.467Z",
-    "__v": 0,
-    "cancelledAt": "2025-11-25T10:16:55.453Z",
+    "status": "cancelled",
     "creditNoteId": "69258217bc90c33f84d87e25",
-    "replacedByFactureId": "69258217bc90c33f84d87e34"
+    "replacedByFactureId": "69258217bc90c33f84d87e34",
+    "cancelledAt": "2025-11-25T10:16:55.453Z",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "692579f2dcd8dc9aca73e57a",
@@ -446,6 +445,8 @@
       "nom": "helmi"
     },
     "vehicleInfo": "ppp p1 - 52TUN77",
+    "invoiceDate": "2025-11-25T09:42:10.673Z",
+    "dueDate": "2025-12-25T09:42:10.673Z",
     "inspectionDate": "2025-11-23T00:00:00.000Z",
     "services": [
       {
@@ -466,6 +467,8 @@
     "finalTotalTTC": 241,
     "timbreFiscal": 1,
     "paymentStatus": "annule",
+    "paymentDate": "2025-11-25T00:00:00.000Z",
+    "paymentMethod": "cheque",
     "paymentAmount": 40,
     "estimatedTime": {
       "days": 0,
@@ -473,18 +476,14 @@
       "minutes": 0
     },
     "createdBy": "691398cf7412d3ea832a4af6",
-    "status": "cancelled",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "invoiceDate": "2025-11-25T09:42:10.673Z",
-    "dueDate": "2025-12-25T09:42:10.673Z",
     "createdAt": "2025-11-25T09:42:10.673Z",
     "updatedAt": "2025-11-25T10:17:30.115Z",
-    "__v": 0,
-    "paymentDate": "2025-11-25T00:00:00.000Z",
-    "paymentMethod": "cheque",
-    "cancelledAt": "2025-11-25T10:17:30.098Z",
+    "status": "cancelled",
     "creditNoteId": "6925823abc90c33f84d87f06",
-    "replacedByFactureId": "6925823abc90c33f84d87f13"
+    "replacedByFactureId": "6925823abc90c33f84d87f13",
+    "cancelledAt": "2025-11-25T10:17:30.098Z",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "69258217bc90c33f84d87e34",
@@ -532,14 +531,14 @@
       "minutes": 0
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
-    "status": "cancelled",
-    "replacedByFactureId": "692582f3bc90c33f84d87fc8",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-25T10:16:55.465Z",
     "updatedAt": "2025-11-25T10:20:35.361Z",
-    "__v": 0,
+    "status": "cancelled",
+    "creditNoteId": "692582f3bc90c33f84d87fb9",
+    "replacedByFactureId": "692582f3bc90c33f84d87fc8",
     "cancelledAt": "2025-11-25T10:20:35.348Z",
-    "creditNoteId": "692582f3bc90c33f84d87fb9"
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
   },
   {
     "_id": "6925823abc90c33f84d87f13",
@@ -573,6 +572,8 @@
     "finalTotalTTC": 241,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-25T00:00:00.000Z",
+    "paymentMethod": "especes",
     "paymentAmount": 241,
     "estimatedTime": {
       "days": 0,
@@ -580,14 +581,12 @@
       "minutes": 0
     },
     "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "createdAt": "2025-11-25T10:17:30.112Z",
+    "updatedAt": "2025-11-25T10:38:48.643Z",
     "status": "active",
     "replacedByFactureId": "692579f2dcd8dc9aca73e57a",
     "garageId": "69147725cb1b9aa1eaa81e3f",
-    "createdAt": "2025-11-25T10:17:30.112Z",
-    "updatedAt": "2025-11-25T10:38:48.643Z",
-    "__v": 0,
-    "paymentDate": "2025-11-25T00:00:00.000Z",
-    "paymentMethod": "especes"
+    "__v": 0
   },
   {
     "_id": "692582f3bc90c33f84d87fc8",
@@ -628,6 +627,8 @@
     "finalTotalTTC": 1333,
     "timbreFiscal": 1,
     "paymentStatus": "paye",
+    "paymentDate": "2025-11-25T00:00:00.000Z",
+    "paymentMethod": "virement",
     "paymentAmount": 1333,
     "estimatedTime": {
       "days": 1,
@@ -635,13 +636,11 @@
       "minutes": 0
     },
     "createdBy": "691398cf7412d3ea832a4af6",
+    "createdAt": "2025-11-25T10:20:35.358Z",
+    "updatedAt": "2025-11-25T10:21:02.110Z",
     "status": "active",
     "replacedByFactureId": "69258217bc90c33f84d87e34",
     "garageId": "69147725cb1b9aa1eaa81e3f",
-    "createdAt": "2025-11-25T10:20:35.358Z",
-    "updatedAt": "2025-11-25T10:21:02.110Z",
-    "__v": 0,
-    "paymentDate": "2025-11-25T00:00:00.000Z",
-    "paymentMethod": "virement"
+    "__v": 0
   }
 ]

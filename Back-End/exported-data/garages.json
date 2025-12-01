@@ -8,21 +8,14 @@
     "cityId": null,
     "cityName": "sousse",
     "streetAddress": "15 Avenue Habib Bourguiba, Ariana Centre",
-    "garagisteAdmin": "69172c691fd203ef3d3f1c38",
-    "description": "Garage spécialisé en réparation automobile de luxe et sport",
-    "logo": "https://example.com/logo-premium.png",
-    "horaires": "Lun-Ven: 8h-19h, Sam: 8h-17h, Dim: Fermé",
-    "services": [
-      "Mécanique générale",
-      "Carrosserie",
-      "Peinture",
-      "Climatisation",
-      "Diagnostic électronique"
+    "garagisteAdmins": [
+      "6917342f9b5729f0dbd904e0"
     ],
+    "description": "Garage spécialisé en réparation automobile de luxe et sport",
+    "horaires": "Lun-Ven: 8h-19h, Sam: 8h-17h, Dim: Fermé",
     "isActive": true,
-    "createdAt": "2025-11-12T12:01:41.005Z",
-    "updatedAt": "2025-11-21T21:32:44.892Z",
-    "__v": 1,
+    "emailProfessionnel": "auto@gamil.com",
+    "telephoneProfessionnel": "45 123 987",
     "location": {
       "type": "Point",
       "coordinates": [
@@ -30,11 +23,9 @@
         36.863
       ]
     },
-    "garagisteAdmins": [
-      "6917342f9b5729f0dbd904e0"
-    ],
-    "emailProfessionnel": "auto@gamil.com",
-    "telephoneProfessionnel": "45 123 987"
+    "createdAt": "2025-11-12T12:01:41.005Z",
+    "updatedAt": "2025-11-21T21:32:44.892Z",
+    "__v": 0
   },
   {
     "_id": "6916fb6416edea752b1f81b3",
@@ -45,20 +36,15 @@
     "cityId": null,
     "cityName": "sousse",
     "streetAddress": "sousse",
-    "garagisteAdmin": "69170787bbb04ea7ba9caf22",
+    "garagisteAdmins": [],
     "description": "ffffff",
-    "logo": "https:efdsf.com",
     "horaires": "lundi-samedi : 08:00-17:00",
-    "services": [
-      "dd"
-    ],
     "isActive": false,
+    "emailProfessionnel": "auto0@gamil.com",
+    "telephoneProfessionnel": "45 001 987",
     "createdAt": "2025-11-14T09:50:28.440Z",
     "updatedAt": "2025-11-16T19:34:17.089Z",
-    "__v": 1,
-    "garagisteAdmins": [],
-    "emailProfessionnel": "auto0@gamil.com",
-    "telephoneProfessionnel": "45 001 987"
+    "__v": 0
   },
   {
     "_id": "691733369b5729f0dbd904a1",
@@ -73,17 +59,14 @@
       "691733589b5729f0dbd904a7",
       "69173a1a094cf4f8355c0458"
     ],
-        "emailProfessionnel": "auto2@gamil.com",
-    "telephoneProfessionnel": "45 222 987",
     "description": "réparation des climatiseurs voitures",
     "horaires": "lundi-samedi : 08:00-17:00",
-    "services": [
-      "electicité"
-    ],
     "isActive": true,
+    "emailProfessionnel": "auto2@gamil.com",
+    "telephoneProfessionnel": "45 222 987",
     "createdAt": "2025-11-14T13:48:38.567Z",
     "updatedAt": "2025-11-18T18:44:40.194Z",
-    "__v": 3
+    "__v": 0
   },
   {
     "_id": "6920cb4f69f0734e2ffd2296",
@@ -95,14 +78,11 @@
     "cityName": "sousse",
     "streetAddress": "sousse",
     "garagisteAdmins": [],
-        "emailProfessionnel": "auto3@gamil.com",
-    "telephoneProfessionnel": "45 333 987",
     "description": "ssssssss",
     "horaires": "Lun-Mar: 08h00-17h00, Mer: 09h00-17h00, Jeu-Sam: 08h00-17h00, Dim: Fermé",
-    "services": [
-      "ss"
-    ],
     "isActive": true,
+    "emailProfessionnel": "auto3@gamil.com",
+    "telephoneProfessionnel": "45 333 987",
     "createdAt": "2025-11-21T20:27:59.329Z",
     "updatedAt": "2025-11-21T20:27:59.329Z",
     "__v": 0
