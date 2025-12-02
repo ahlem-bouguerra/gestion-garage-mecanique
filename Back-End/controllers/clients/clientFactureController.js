@@ -43,8 +43,8 @@ export const getClientFactures = async (req, res) => {
 
     // ✅ Récupérer les factures directement
     const factures = await Facture.find(query)
-      .select('numeroFacture clientInfo vehicleInfo totalTTC finalTotalTTC paymentAmount paymentStatus invoiceDate creditNoteId dueDate garagisteId devisId')
-      .populate('garagisteId', 'username email phone streetAddress cityName governorateName')
+      .select('numeroFacture clientInfo vehicleInfo totalTTC finalTotalTTC paymentAmount paymentStatus invoiceDate creditNoteId dueDate garageId devisId')
+      .populate('garageId', 'nom emailProfessionnel telephoneProfessionnel streetAddress cityName governorateName')
       .populate('devisId', '_id status createdAt')
       .populate('realClientId', 'email phone')
       .sort(sortOptions)
@@ -95,7 +95,7 @@ export const GetClientFactureById = async (req, res) => {
       realClientId: req.client._id,
       status: { $in: ['active', 'cancelled'] }
     })
-      .populate('garagisteId', 'username email phone streetAddress cityName governorateName')
+      .populate('garageId', 'nom emailProfessionnel telephoneProfessionnel streetAddress cityName governorateName')
       .populate('devisId', '_id status createdAt')
       .populate('realClientId', 'email phone');
 

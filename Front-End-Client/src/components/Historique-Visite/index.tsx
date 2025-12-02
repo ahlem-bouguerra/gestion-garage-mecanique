@@ -20,9 +20,15 @@ const ReservationsHistory = () => {
   const fetchReservations = async () => {
     try {
       setLoading(true);
+
+      const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       
       const response = await axios.get('http://localhost:5000/api/client-reservations/', {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -44,10 +50,16 @@ const ReservationsHistory = () => {
   }
   
   try {
+
+      const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return;
+      }
     const response = await axios.put(
       `http://localhost:5000/api/cancel-reservation/${reservationId}`,
       {},
-      { headers: { Authorization: `Bearer ${getAuthToken()}` } }
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     
     if (response.data.success) {

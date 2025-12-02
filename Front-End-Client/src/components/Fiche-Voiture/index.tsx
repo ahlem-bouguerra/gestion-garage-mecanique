@@ -453,7 +453,8 @@ export default function VehiculeManagement() {
 
         const termesRecherche = rechercheGlobale.toLowerCase().trim();
 
-        const vehiculesFiltrés = vehicules.filter(v => {isVehiculeFormValid
+        const vehiculesFiltrés = vehicules.filter(v => {
+            isVehiculeFormValid
             // Recherche dans l'immatriculation
             const matchImmat = v.immatriculation.toLowerCase().includes(termesRecherche);
 
@@ -468,7 +469,7 @@ export default function VehiculeManagement() {
             const matchCouleur = v.couleur ? v.couleur.toLowerCase().includes(termesRecherche) : false;
 
             // Retourner true si au moins un critère correspond
-            return matchImmat || matchMarque || matchModele  || matchCouleur;
+            return matchImmat || matchMarque || matchModele || matchCouleur;
         });
 
         setVehiculesFiltres(vehiculesFiltrés);
@@ -558,12 +559,12 @@ export default function VehiculeManagement() {
 
     const fetchVehicules = async () => {
         try {
-                                      const token = getAuthToken();
-    
-    if (!token || token === 'null' || token === 'undefined') {
-      window.location.href = '/auth/sign-in';
-      return;
-    }
+            const token = getAuthToken();
+
+            if (!token || token === 'null' || token === 'undefined') {
+                window.location.href = '/auth/sign-in';
+                return;
+            }
             setError("");
             const response = await axios.get(`${API_BASE_URL}/get-all-mes-vehicules`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -719,38 +720,38 @@ export default function VehiculeManagement() {
                 typeCarburant: vehiculeForm.typeCarburant,
                 kilometrage: vehiculeForm.kilometrage ? parseInt(vehiculeForm.kilometrage.replace(/\s/g, '')) : undefined,
                 carteGrise: vehiculeForm.carteGrise?.numeroCG || vehiculeForm.carteGrise?.numeroChassis ? {
-                numeroCG: vehiculeForm.carteGrise.numeroCG?.trim() || undefined,
-                numeroChassis: vehiculeForm.carteGrise.numeroChassis?.trim() || undefined,
-                dateMiseCirculation: vehiculeForm.carteGrise.dateMiseCirculation || undefined,
-                puissanceFiscale: vehiculeForm.carteGrise.puissanceFiscale ? parseInt(vehiculeForm.carteGrise.puissanceFiscale) : undefined,
-                genre: vehiculeForm.carteGrise.genre || undefined,
-                nombrePlaces: vehiculeForm.carteGrise.nombrePlaces ? parseInt(vehiculeForm.carteGrise.nombrePlaces) : undefined,
-                dateVisite: vehiculeForm.carteGrise.dateVisite || undefined,
-                dateProchaineVisite: vehiculeForm.carteGrise.dateProchaineVisite || undefined
-            } : undefined
+                    numeroCG: vehiculeForm.carteGrise.numeroCG?.trim() || undefined,
+                    numeroChassis: vehiculeForm.carteGrise.numeroChassis?.trim() || undefined,
+                    dateMiseCirculation: vehiculeForm.carteGrise.dateMiseCirculation || undefined,
+                    puissanceFiscale: vehiculeForm.carteGrise.puissanceFiscale ? parseInt(vehiculeForm.carteGrise.puissanceFiscale) : undefined,
+                    genre: vehiculeForm.carteGrise.genre || undefined,
+                    nombrePlaces: vehiculeForm.carteGrise.nombrePlaces ? parseInt(vehiculeForm.carteGrise.nombrePlaces) : undefined,
+                    dateVisite: vehiculeForm.carteGrise.dateVisite || undefined,
+                    dateProchaineVisite: vehiculeForm.carteGrise.dateProchaineVisite || undefined
+                } : undefined
             };
 
             console.log("📤 Données à envoyer:", submitData);
 
             if (modalType === "add") {
-                                          const token = getAuthToken();
-    
-    if (!token || token === 'null' || token === 'undefined') {
-      window.location.href = '/auth/sign-in';
-      return;
-    }
+                const token = getAuthToken();
+
+                if (!token || token === 'null' || token === 'undefined') {
+                    window.location.href = '/auth/sign-in';
+                    return;
+                }
                 submitData.proprietaireId = vehiculeForm.proprietaireId;
                 await axios.post(`${API_BASE_URL}/create-mes-vehicules`, submitData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 showSuccess("Véhicule ajouté avec succès!");
             } else if (modalType === "edit" && selectedVehicule) {
-                                          const token = getAuthToken();
-    
-    if (!token || token === 'null' || token === 'undefined') {
-      window.location.href = '/auth/sign-in';
-      return;
-    }
+                const token = getAuthToken();
+
+                if (!token || token === 'null' || token === 'undefined') {
+                    window.location.href = '/auth/sign-in';
+                    return;
+                }
                 await axios.put(`${API_BASE_URL}/update-mes-vehicules/${selectedVehicule._id}`, submitData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -771,12 +772,12 @@ export default function VehiculeManagement() {
     const deleteVehicule = async (vehicule: Vehicule) => {
         if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ?`)) {
             try {
-                                          const token = getAuthToken();
-    
-    if (!token || token === 'null' || token === 'undefined') {
-      window.location.href = '/auth/sign-in';
-      return;
-    }
+                const token = getAuthToken();
+
+                if (!token || token === 'null' || token === 'undefined') {
+                    window.location.href = '/auth/sign-in';
+                    return;
+                }
                 await axios.delete(`${API_BASE_URL}/delete-mes-vehicules/${vehicule._id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });;
@@ -937,7 +938,7 @@ export default function VehiculeManagement() {
                                         </div>
                                     </div>
 
-                               
+
 
                                     {/* Détails du véhicule */}
                                     <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-4">
@@ -1027,7 +1028,7 @@ export default function VehiculeManagement() {
 
                                 <form onSubmit={handleVehiculeSubmit}>
                                     <div className="space-y-6">
-                                     
+
 
                                         {/* Pays d'immatriculation */}
                                         <div className="mb-4">

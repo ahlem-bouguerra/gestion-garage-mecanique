@@ -86,12 +86,12 @@ export const getClientDevisById = async (req, res) => {
       // ObjectId MongoDB
       devis = await Devis.findById(devisId)
         .populate('vehiculeId')
-        .populate('garageId', 'nom  emailProfessionnel telephoneProfessionnel')
+        .populate('garageId', 'nom emailProfessionnel telephoneProfessionnel');
     } else {
       // ID personnalisé (DEV001, etc.)
       devis = await Devis.findOne({ id: devisId })
         .populate('vehiculeId')
-        .populate('garageId', 'nom  emailProfessionnel telephoneProfessionnel')
+        .populate('garageId', 'nom emailProfessionnel telephoneProfessionnel');
     }
 
     if (!devis) {
@@ -111,20 +111,21 @@ export const getClientDevisById = async (req, res) => {
       });
     }
 
-    // 3️⃣ Calculer les totaux
-    const totalServicesHT = devis.services.reduce((sum, service) => {
-      return sum + (service.quantity * service.unitPrice);
-    }, 0);
-
-    const totalHT = totalServicesHT + (devis.maindoeuvre || 0);
-    const totalTTC = totalHT * (1 + (devis.tvaRate || 20) / 100);
-
+    // 3️⃣ Retourner le devis tel quel (valeurs de la BD)
     res.json({
       success: true,
       data: {
         ...devis.toObject(),
-        totalHT: totalServicesHT,
-        totalTTC: totalTTC
+        // Les champs suivants viennent directement de la BD :
+        // - totalHT
+        // - totalServicesHT
+        // - totalTTC
+        // - finalTotalTTC
+        // - montantTVA
+        // - montantRemise
+        // - maindoeuvre
+        // - tvaRate
+        // - remiseRate
       }
     });
 
