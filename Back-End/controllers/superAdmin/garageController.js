@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { Garagiste } from "../../models/Garagiste.js";
 import { Garage } from "../../models/Garage.js";
@@ -25,7 +26,7 @@ export const createGarage = async (req, res) => {
       location,
       description,
       horaires,
-      services
+     
     } = req.body;
 
     // Validation
@@ -42,15 +43,14 @@ export const createGarage = async (req, res) => {
       emailProfessionnel,
       telephoneProfessionnel,
       matriculeFiscal: matriculefiscal,
-      governorateId: mongoose.Types.ObjectId(governorateId), // 🔥 ID
+      governorateId:new mongoose.Types.ObjectId(governorateId), // 🔥 ID
       governorateName,                                         // 🔥 Nom
-      cityId: mongoose.Types.ObjectId(cityId),                // 🔥 ID
+      cityId: new mongoose.Types.ObjectId(cityId),                // 🔥 ID
       cityName,                                                // 🔥 Nom
       streetAddress,
       location,
       description,
       horaires,
-      services: services?.split(',').map(s => s.trim()),
       garagisteAdmins: [req.user._id]
     });
 
@@ -286,7 +286,6 @@ export const updateGarage = async (req, res) => {
       location,
       description,
       horaires,
-      services
     } = req.body;
 
     console.log('📝 Mise à jour garage:', id);
@@ -312,7 +311,6 @@ export const updateGarage = async (req, res) => {
       telephoneProfessionnel,
       description,
       horaires,
-      services
     };
 
     // 🔥 Ajouter les IDs seulement s'ils sont valides
@@ -819,4 +817,3 @@ export const deactivateGaragiste = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
-

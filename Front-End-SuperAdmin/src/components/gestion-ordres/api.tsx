@@ -76,7 +76,13 @@ export const getAllGarages = async () => {
     });
 
     console.log('✅ Garages récupérés:', response.data);
-    return response.data.garages;
+    // ✅ Gérer les deux formats possibles
+const garages = Array.isArray(response.data) 
+  ? response.data 
+  : (response.data.garages || []);
+
+console.log('📦 Garages à retourner:', garages);
+return garages;
 
   } catch (error: any) {
     console.error('❌ Erreur getAllGarages:', error.response?.data || error.message);

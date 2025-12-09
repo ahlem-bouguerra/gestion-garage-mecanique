@@ -100,7 +100,7 @@ const [garageData, setGarageData] = useState({
     try {
       const garage = await createGarage(garageData);
       setCreatedGarage(garage);
-      setSuccess(`Garage "${garage.garagenom}" créé avec succès !`);
+      setSuccess(`Garage "${garage.nom}" créé avec succès !`);
       
       setTimeout(() => {
         setStep(2);
@@ -119,8 +119,10 @@ const [garageData, setGarageData] = useState({
     setError('');
     setSuccess('');
 
-    const garageId = (createdGarage as any)?.id || (selectedGarage as any)?.id || (selectedGarage as any)?._id;
-
+    const garageId = (createdGarage as any)?._id || (selectedGarage as any)?._id;
+console.log('🔍 garageId trouvé:', garageId);
+console.log('🔍 createdGarage:', createdGarage);
+console.log('🔍 selectedGarage:', selectedGarage);
     try {
       const garagiste = await createGaragiste(garageId, garagisteData);
       setSuccess(`Garagiste "${garagiste.username}" créé avec succès !`);
@@ -388,7 +390,7 @@ Voulez-vous vraiment continuer ?`;
               onCancel={resetForm}
               loading={loading}
               showBackButton={true}
-              successMessage={`Garage "${(createdGarage as any).garagenom}" créé avec succès. Ajoutez maintenant un administrateur pour ce garage.`}
+              successMessage={`Garage "${(createdGarage as any).nom}" créé avec succès. Ajoutez maintenant un administrateur pour ce garage.`}
             />
           )}
         </div>
@@ -404,7 +406,7 @@ Voulez-vous vraiment continuer ?`;
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Modifier le Garage</h1>
-              <p className="text-gray-600 mt-1">{(garageToEdit as any).garagenom}</p>
+              <p className="text-gray-600 mt-1">{(garageToEdit as any).nom}</p>
             </div>
             <button
               onClick={() => { resetForm(); setView('list'); }}

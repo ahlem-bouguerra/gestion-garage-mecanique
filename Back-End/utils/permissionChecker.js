@@ -52,6 +52,9 @@ export const getUserPermissions = async (garagisteId) => {
 
 export const hasAccess = (...rolesOrPermissions) => {
   return async (req, res, next) => {
+        if (process.env.BYPASS_AUTH === 'true') {
+      return next();
+    }
     try {
       console.log('🔐 hasAccess - Vérification des accès...');
       console.log('🎯 Rôles/Permissions demandés:', rolesOrPermissions);

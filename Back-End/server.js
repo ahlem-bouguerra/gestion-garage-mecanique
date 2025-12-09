@@ -50,6 +50,8 @@ app.use("/api", authGarageRoutes);
 app.use("/api", authClientRoutes);
 app.use("/api", authSuperAdminRoutes);
 
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Serveur lancé sur http://localhost:${PORT}`);

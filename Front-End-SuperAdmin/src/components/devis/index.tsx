@@ -36,6 +36,7 @@ export default function DevisSuperAdminPage() {
   const [loading, setLoading] = useState(false);
   const [selectedDevis, setSelectedDevis] = useState<Devis | null>(null);
   const [loadingDevisId, setLoadingDevisId] = useState<string | null>(null);
+  const [garagesLoading, setGaragesLoading] = useState(true); // ✅ Ajout
   
   const statusColors = {
     brouillon: 'bg-gray-100 text-gray-800',
@@ -46,13 +47,11 @@ export default function DevisSuperAdminPage() {
   
   const router = useRouter();
   
-  // ✅ Correction : passer le garageId dans l'URL
   const handleRedirectToCreate = () => {
     if (!selectedGarage) {
       alert("⚠️ Veuillez d'abord sélectionner un garage");
       return;
     }
-        // Adaptation selon votre structure de dossiers
     router.push(`/create-devis-alone?garageId=${selectedGarage}`);
   };
 
@@ -73,14 +72,34 @@ export default function DevisSuperAdminPage() {
 
   const loadGarages = async () => {
     try {
+      console.log('🔄 Début chargement garages...');
+      setGaragesLoading(true);
+      
       const data = await getAllGarages();
-      setGarages(data || []);
+      
+      console.log('📦 Data reçue dans loadGarages:', data);
+      console.log('📊 Type de data:', typeof data);
+      console.log('📏 Longueur:', Array.isArray(data) ? data.length : 'pas un tableau');
+      
+      if (Array.isArray(data) && data.length > 0) {
+        console.log('✅ Garages trouvés:', data.length);
+        setGarages(data);
+      } else {
+        console.warn('⚠️ Aucun garage reçu ou format incorrect');
+        setGarages([]);
+      }
+      
     } catch (error) {
-      console.error("Erreur chargement garages:", error);
+      console.error("❌ Erreur chargement garages:", error);
+      setGarages([]);
+    } finally {
+      setGaragesLoading(false);
+      console.log('✅ Chargement garages terminé');
     }
   };
 
   const handleGarageChange = async (garageId: string) => {
+    console.log('🔄 Changement garage:', garageId);
     setSelectedGarage(garageId);
     setDevis([]);
     setLoading(true);
@@ -88,9 +107,11 @@ export default function DevisSuperAdminPage() {
     if (garageId) {
       try {
         const devisList = await getDevisByGarage(garageId);
+        console.log('📦 Devis reçus:', devisList);
         setDevis(devisList || []);
       } catch (error) {
-        console.error("Erreur chargement devis:", error);
+        console.error("❌ Erreur chargement devis:", error);
+        setDevis([]);
       }
     }
     setLoading(false);
@@ -108,166 +129,150 @@ export default function DevisSuperAdminPage() {
   };
 
   const handleDeleteDevis = async (devisId: string) => {
-  if (!confirm("⚠️ Êtes-vous sûr de vouloir supprimer ce devis ?")) {
-    return;
-  }
+    if (!confirm("⚠️ Êtes-vous sûr de vouloir supprimer ce devis ?")) {
+      return;
+    }
 
-  try {
-    await deleteDevis(devisId);
-    alert("✅ Devis supprimé avec succès");
-    // Recharger la liste des devis
-    handleGarageChange(selectedGarage);
-  } catch (error) {
-    console.error("Erreur suppression:", error);
-    alert("❌ Erreur lors de la suppression du devis");
-  }
+    try {
+      await deleteDevis(devisId);
+      alert("✅ Devis supprimé avec succès");
+      handleGarageChange(selectedGarage);
+    } catch (error) {
+      console.error("Erreur suppression:", error);
+      alert("❌ Erreur lors de la suppression du devis");
+    }
   };
 
-const handleSendDevis = async (devisId: string) => {
-  console.log('🚀 handleSendDevis appelé');
-  console.log('📋 devisId:', devisId);
-  console.log('🏢 selectedGarage:', selectedGarage);
-  
-  if (!selectedGarage) {
-    alert("⚠️ Aucun garage sélectionné !");
-    return;
-  }
-  
-  if (!confirm("⚠️ Êtes-vous sûr d'envoyer ce devis par mail ?")) {
-    return;
-  }
-
-  try {
-    await sendDevisByMail(devisId, selectedGarage);
-    alert("✅ Devis envoyé avec succès");
-    handleGarageChange(selectedGarage);
-  } catch (error) {
-    console.error("Erreur envoi:", error);
-    alert("❌ Erreur lors de l'envoi du devis");
-  }
-};
-
-const handleCreateFacture = async (devis: any) => {
-  try {
-    setLoading(true);
-
-    const garageId = devis.garageId;
-
-    console.log("🔍 Étape 1 : Vérification facture existante pour devis:", devis._id);
-
-    // 1️⃣ Vérifier si une facture active existe
-    const existingFacture = await checkActiveFactureExists(devis._id, garageId);
-
-    // ==========================================
-    // 🚀 CAS 1 : Aucune facture n'existe
-    // ==========================================
-    if (!existingFacture) {
-      console.log("✅ Aucune facture existante → Création directe");
-
-      const result = await createNewFacture(devis._id, garageId);
-
-      if (result?.success) {
-        alert(`✅ Facture N°${result.facture.numeroFacture} créée avec succès !`);
-        // Recharger la liste si nécessaire
-        // await fetchDevis();
-        return;
-      } else {
-        alert("❌ Impossible de créer la facture");
-        return;
-      }
-    }
-
-    // ==========================================
-    // 🚀 CAS 2 : Une facture existe déjà
-    // ==========================================
-    console.log("⚠️ Facture existante trouvée:", existingFacture.numeroFacture);
-
-    // 2️⃣ Vérifier si le devis a été modifié APRÈS la création de la facture
-    const isDevisModified = checkIfDevisModified(devis, existingFacture);
-
-    console.log("📊 Devis modifié ?", isDevisModified);
-    console.log("   - Devis updatedAt:", devis.updatedAt);
-    console.log("   - Facture createdAt:", existingFacture.createdAt);
-
-    // ==========================================
-    // 🚀 CAS 2A : Devis NON modifié
-    // ==========================================
-    if (!isDevisModified) {
-      alert(
-        `⚠️ Une facture active existe déjà pour ce devis !\n\n` +
-        `📄 Numéro : ${existingFacture.numeroFacture}\n` +
-        `📅 Date : ${new Date(existingFacture.createdAt).toLocaleDateString()}\n\n` +
-        `Le devis n'a pas été modifié depuis la création de cette facture.`
-      );
+  const handleSendDevis = async (devisId: string) => {
+    console.log('🚀 handleSendDevis appelé');
+    console.log('📋 devisId:', devisId);
+    console.log('🏢 selectedGarage:', selectedGarage);
+    
+    if (!selectedGarage) {
+      alert("⚠️ Aucun garage sélectionné !");
       return;
-    }
-
-    // ==========================================
-    // 🚀 CAS 2B : Devis MODIFIÉ → Demander confirmation
-    // ==========================================
-    const userConfirmed = window.confirm(
-      `⚠️ Le devis a été modifié après la création de la facture !\n\n` +
-      `📄 Facture existante : ${existingFacture.numeroFacture}\n` +
-      `📅 Date facture : ${new Date(existingFacture.createdAt).toLocaleDateString()}\n` +
-      `🔄 Dernière modification devis : ${new Date(devis.updatedAt).toLocaleDateString()}\n\n` +
-      `Voulez-vous :\n` +
-      `✅ Créer un AVOIR pour annuler l'ancienne facture\n` +
-      `✅ Générer une NOUVELLE facture avec les données actuelles\n\n` +
-      `Confirmer cette action ?`
-    );
-
-    if (!userConfirmed) {
-      console.log("❌ Opération annulée par l'utilisateur");
-      return;
-    }
-
-    // 3️⃣ Créer l'avoir + nouvelle facture
-    console.log("🔄 Création avoir + nouvelle facture...");
-
-    const result = await replaceFactureWithCredit(devis._id, garageId);
-
-    if (result?.success) {
-      let message = `✅ Opération réussie !\n\n`;
-
-      if (result.creditNote) {
-        message += `📝 Avoir créé : ${result.creditNote.creditNumber}\n`;
-        message += `   (Annule la facture ${existingFacture.numeroFacture})\n\n`;
-      }
-
-      if (result.facture) {
-        message += `📄 Nouvelle facture : ${result.facture.numeroFacture}\n`;
-        message += `💰 Montant TTC : ${result.facture.finalTotalTTC?.toFixed(3)} DT`;
-      }
-
-      alert(message);
-
-      // Recharger la liste
-      // await fetchDevis();
-    } else {
-      alert("❌ Erreur lors de la création de l'avoir et de la nouvelle facture");
-    }
-
-  } catch (error: any) {
-    console.error("❌ Erreur création facture:", error);
-
-    if (error.response?.status === 400) {
-      alert(error.response?.data?.message || "❌ Données invalides");
-    } else if (error.response?.status === 403) {
-      alert("❌ Accès refusé");
-    } else if (error.response?.status === 401) {
-      alert("❌ Session expirée. Veuillez vous reconnecter.");
-      window.location.href = "/auth/sign-in";
-    } else if (error.response?.status === 404) {
-      alert("❌ Devis non trouvé");
-    } else {
-      alert("❌ Une erreur est survenue lors de la création de la facture");
     }
     
-  } finally {
-    setLoading(false);
-  }
-};
+    if (!confirm("⚠️ Êtes-vous sûr d'envoyer ce devis par mail ?")) {
+      return;
+    }
 
+    try {
+      await sendDevisByMail(devisId, selectedGarage);
+      alert("✅ Devis envoyé avec succès");
+      handleGarageChange(selectedGarage);
+    } catch (error) {
+      console.error("Erreur envoi:", error);
+      alert("❌ Erreur lors de l'envoi du devis");
+    }
+  };
+
+  const handleCreateFacture = async (devis: any) => {
+    try {
+      setLoading(true);
+
+      const garageId = devis.garageId;
+
+      console.log("🔍 Étape 1 : Vérification facture existante pour devis:", devis._id);
+
+      const existingFacture = await checkActiveFactureExists(devis._id, garageId);
+
+      if (!existingFacture) {
+        console.log("✅ Aucune facture existante → Création directe");
+
+        const result = await createNewFacture(devis._id, garageId);
+
+        if (result?.success) {
+          alert(`✅ Facture N°${result.facture.numeroFacture} créée avec succès !`);
+          return;
+        } else {
+          alert("❌ Impossible de créer la facture");
+          return;
+        }
+      }
+
+      console.log("⚠️ Facture existante trouvée:", existingFacture.numeroFacture);
+
+      const isDevisModified = checkIfDevisModified(devis, existingFacture);
+
+      console.log("📊 Devis modifié ?", isDevisModified);
+
+      if (!isDevisModified) {
+        alert(
+          `⚠️ Une facture active existe déjà pour ce devis !\n\n` +
+          `📄 Numéro : ${existingFacture.numeroFacture}\n` +
+          `📅 Date : ${new Date(existingFacture.createdAt).toLocaleDateString()}\n\n` +
+          `Le devis n'a pas été modifié depuis la création de cette facture.`
+        );
+        return;
+      }
+
+      const userConfirmed = window.confirm(
+        `⚠️ Le devis a été modifié après la création de la facture !\n\n` +
+        `📄 Facture existante : ${existingFacture.numeroFacture}\n` +
+        `📅 Date facture : ${new Date(existingFacture.createdAt).toLocaleDateString()}\n` +
+        `🔄 Dernière modification devis : ${new Date(devis.updatedAt).toLocaleDateString()}\n\n` +
+        `Voulez-vous :\n` +
+        `✅ Créer un AVOIR pour annuler l'ancienne facture\n` +
+        `✅ Générer une NOUVELLE facture avec les données actuelles\n\n` +
+        `Confirmer cette action ?`
+      );
+
+      if (!userConfirmed) {
+        console.log("❌ Opération annulée par l'utilisateur");
+        return;
+      }
+
+      console.log("🔄 Création avoir + nouvelle facture...");
+
+      const result = await replaceFactureWithCredit(devis._id, garageId);
+
+      if (result?.success) {
+        let message = `✅ Opération réussie !\n\n`;
+
+        if (result.creditNote) {
+          message += `📝 Avoir créé : ${result.creditNote.creditNumber}\n`;
+          message += `   (Annule la facture ${existingFacture.numeroFacture})\n\n`;
+        }
+
+        if (result.facture) {
+          message += `📄 Nouvelle facture : ${result.facture.numeroFacture}\n`;
+          message += `💰 Montant TTC : ${result.facture.finalTotalTTC?.toFixed(3)} DT`;
+        }
+
+        alert(message);
+      } else {
+        alert("❌ Erreur lors de la création de l'avoir et de la nouvelle facture");
+      }
+
+    } catch (error: any) {
+      console.error("❌ Erreur création facture:", error);
+
+      if (error.response?.status === 400) {
+        alert(error.response?.data?.message || "❌ Données invalides");
+      } else if (error.response?.status === 403) {
+        alert("❌ Accès refusé");
+      } else if (error.response?.status === 401) {
+        alert("❌ Session expirée. Veuillez vous reconnecter.");
+        window.location.href = "/auth/sign-in";
+      } else if (error.response?.status === 404) {
+        alert("❌ Devis non trouvé");
+      } else {
+        alert("❌ Une erreur est survenue lors de la création de la facture");
+      }
+      
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Debug: Afficher l'état actuel
+  console.log('🎨 Render - État actuel:', {
+    garagesCount: garages.length,
+    garagesLoading,
+    selectedGarage,
+    devisCount: devis.length
+  });
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -284,20 +289,35 @@ const handleCreateFacture = async (devis: any) => {
           <Car className="h-5 w-5 text-blue-600" />
           Sélectionner un garage
         </label>
-        <select
-          onChange={(e) => handleGarageChange(e.target.value)}
-          value={selectedGarage}
-          className="w-full p-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold shadow-lg outline-none transition-all cursor-pointer hover:from-blue-600 hover:to-blue-700 focus:ring-4 focus:ring-blue-300"
-        >
-          <option value="" className="bg-white text-gray-800">
-            -- Choisissez un garage --
-          </option>
-          {garages.map((g: any) => (
-            <option key={g._id} value={g._id} className="bg-white text-gray-800">
-              {g.nom}
+        
+        {/* ✅ Afficher un loader pendant le chargement */}
+        {garagesLoading ? (
+          <div className="text-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-gray-600 mt-2">Chargement des garages...</p>
+          </div>
+        ) : garages.length === 0 ? (
+          <div className="text-center py-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <AlertCircle className="h-12 w-12 text-yellow-600 mx-auto mb-2" />
+            <p className="text-yellow-800 font-medium">Aucun garage disponible</p>
+            <p className="text-yellow-600 text-sm mt-1">Veuillez créer un garage d'abord</p>
+          </div>
+        ) : (
+          <select
+            onChange={(e) => handleGarageChange(e.target.value)}
+            value={selectedGarage}
+            className="w-full p-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold shadow-lg outline-none transition-all cursor-pointer hover:from-blue-600 hover:to-blue-700 focus:ring-4 focus:ring-blue-300"
+          >
+            <option value="" className="bg-white text-gray-800">
+              -- Choisissez un garage ({garages.length} disponible{garages.length > 1 ? 's' : ''}) --
             </option>
-          ))}
-        </select>
+            {garages.map((g: any) => (
+              <option key={g._id} value={g._id} className="bg-white text-gray-800">
+                {g.nom || g.name || 'Garage sans nom'}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {selectedGarage && (
@@ -368,68 +388,62 @@ const handleCreateFacture = async (devis: any) => {
                       </span>
                     </div>
                   </div>
-<div className="flex gap-2">
-  <button
-    onClick={() => handleVoirDetails(d._id)}
-    disabled={loadingDevisId === d._id}
-    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
-  >
-    {loadingDevisId === d._id ? (
-      <>
-        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-        Chargement...
-      </>
-    ) : (
-      <>
-        <Eye className="h-4 w-4" />
-      </>
-    )}
-  </button>
 
-  <button
-    onClick={() => router.push(`/update-devis-alone?garageId=${selectedGarage}&devisId=${d._id}`)}
-    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-yellow-700"
-  >
-    <Edit2 className="h-4 w-4" />
-  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleVoirDetails(d._id)}
+                      disabled={loadingDevisId === d._id}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+                    >
+                      {loadingDevisId === d._id ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Chargement...
+                        </>
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
 
-  <button
-    onClick={() => handleDeleteDevis(d._id)}
-    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-red-700"
-  >
-    <Trash2 className="h-4 w-4" />
-  </button>
-   <button
-    onClick={() => handleSendDevis(d._id)}
-    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-red-700"
-  >
-    <Mail className="h-4 w-4" />
+                    <button
+                      onClick={() => router.push(`/update-devis-alone?garageId=${selectedGarage}&devisId=${d._id}`)}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-yellow-700"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </button>
 
-  </button>
-<button
-  onClick={() => {
-    console.log("📦 Objet devis complet:", d);
-    console.log("🆔 devis._id:", d._id);
-    console.log("🆔 devis.id:", d.id);
-    handleCreateFacture(d);
-  }}
- 
-  disabled={loading}
-  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
->
-  {loading ? (
-    <>
-      <Loader className="h-4 w-4 animate-spin" />
-      <span>Traitement...</span>
-    </>
-  ) : (
-    <>
-      <FileText className="h-4 w-4" />
-      <span>Créer Facture</span>
-    </>
-  )}
-</button>
-</div>
+                    <button
+                      onClick={() => handleDeleteDevis(d._id)}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+
+                    <button
+                      onClick={() => handleSendDevis(d._id)}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-red-700"
+                    >
+                      <Mail className="h-4 w-4" />
+                    </button>
+
+                    <button
+                      onClick={() => handleCreateFacture(d)}
+                      disabled={loading}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader className="h-4 w-4 animate-spin" />
+                          <span>Traitement...</span>
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="h-4 w-4" />
+                          <span>Créer Facture</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
