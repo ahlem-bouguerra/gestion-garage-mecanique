@@ -151,5 +151,75 @@
     "createdAt": "2025-11-25T10:20:35.347Z",
     "updatedAt": "2025-11-25T10:20:35.347Z",
     "__v": 0
+  },
+  {
+    "_id": "693879cae82dd096f2e3c624",
+    "creditNumber": "AV-2025-000008",
+    "originalFactureId": "692ebac769fc6f782e0c7dd4",
+    "originalFactureNumber": "FAC-031",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "w",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "692ebac769fc6f782e0c7dd5"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalTTC": 1440,
+    "totalRemise": 0,
+    "finalTotalTTC": 1441,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-09T19:34:34.300Z",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-09T19:34:34.305Z",
+    "updatedAt": "2025-12-09T19:34:34.305Z",
+    "__v": 0
+  },
+  {
+    "_id": "69394be691d04a21450b23fb",
+    "creditNumber": "AV-2025-000009",
+    "originalFactureId": "693879cae82dd096f2e3c630",
+    "originalFactureNumber": "FAC-032",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "wc",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "693879cae82dd096f2e3c631"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalTTC": 1440,
+    "totalRemise": 0,
+    "finalTotalTTC": 1441,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-10T10:31:02.166Z",
+    "createdBy": "69392f0608a82f11cc52393e",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-10T10:31:02.186Z",
+    "updatedAt": "2025-12-10T10:31:02.186Z",
+    "__v": 0
   }
 ]

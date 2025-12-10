@@ -277,6 +277,76 @@ const creditnotes = [
     "createdAt": "2025-11-25T10:20:35.347Z",
     "updatedAt": "2025-11-25T10:20:35.347Z",
     "__v": 0
+  },
+  {
+    "_id": "693879cae82dd096f2e3c624",
+    "creditNumber": "AV-2025-000008",
+    "originalFactureId": "692ebac769fc6f782e0c7dd4",
+    "originalFactureNumber": "FAC-031",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "w",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "692ebac769fc6f782e0c7dd5"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalTTC": 1440,
+    "totalRemise": 0,
+    "finalTotalTTC": 1441,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-09T19:34:34.300Z",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-09T19:34:34.305Z",
+    "updatedAt": "2025-12-09T19:34:34.305Z",
+    "__v": 0
+  },
+  {
+    "_id": "69394be691d04a21450b23fb",
+    "creditNumber": "AV-2025-000009",
+    "originalFactureId": "693879cae82dd096f2e3c630",
+    "originalFactureNumber": "FAC-032",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "wc",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "693879cae82dd096f2e3c631"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalTTC": 1440,
+    "totalRemise": 0,
+    "finalTotalTTC": 1441,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-10T10:31:02.166Z",
+    "createdBy": "69392f0608a82f11cc52393e",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-10T10:31:02.186Z",
+    "updatedAt": "2025-12-10T10:31:02.186Z",
+    "__v": 0
   }
 ];
 
@@ -310,16 +380,6 @@ const ficheclients = [
     "__v": 0
   },
   {
-    "_id": "691cd7bb3d6e4797132ff5f3",
-    "nom": "teesdt2",
-    "type": "particulier",
-    "adresse": "testtt2",
-    "telephone": "21111111",
-    "email": "tesr2@gamil.com",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "__v": 0
-  },
-  {
     "_id": "691f78f8163a17aa79fb6995",
     "nom": "helmi",
     "type": "particulier",
@@ -327,6 +387,16 @@ const ficheclients = [
     "telephone": "20000000",
     "email": "ahlembouguerra25@gmail.com",
     "garageId": "69147725cb1b9aa1eaa81e3f",
+    "__v": 0
+  },
+  {
+    "_id": "692eb4ed3158d0bba107e02c",
+    "nom": "magher",
+    "type": "particulier",
+    "telephone": "26541236",
+    "email": "ahlembouguerra@outlook.fr",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "clientId": "6911cb63ccd145adc6354d98",
     "__v": 0
   }
 ];
@@ -559,6 +629,33 @@ const vehicules = [
     "createdAt": "2025-12-01T14:30:15.751Z",
     "updatedAt": "2025-12-01T14:30:15.751Z",
     "__v": 0
+  },
+  {
+    "_id": "692eb55a3158d0bba107e1e7",
+    "proprietaireId": "6911cb63ccd145adc6354d98",
+    "proprietaireModel": "Client",
+    "marque": "woles",
+    "modele": "20",
+    "immatriculation": "8TUN78",
+    "typeCarburant": "essence",
+    "kilometrage": 120,
+    "statut": "actif",
+    "creePar": "client",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [],
+    "carteGrise": {
+      "numeroCG": "SEDRTYGH",
+      "numeroChassis": "8754JK",
+      "dateMiseCirculation": "2025-12-02T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-12-02T00:00:00.000Z",
+      "dateProchaineVisite": "2027-11-04T00:00:00.000Z"
+    },
+    "createdAt": "2025-12-02T09:46:02.479Z",
+    "updatedAt": "2025-12-02T09:46:02.479Z",
+    "__v": 0
   }
 ];
 
@@ -749,6 +846,28 @@ const ficheclientvehicules = [
     "createdAt": "2025-11-20T20:25:12.335Z",
     "updatedAt": "2025-11-20T20:25:12.335Z",
     "__v": 0
+  },
+  {
+    "_id": "692eb4ed3158d0bba107e02f",
+    "ficheClientId": "692eb4ed3158d0bba107e02c",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "notes": "Ajouté via réservation 692dae959e1e3c78642e4890",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "dateAssociation": "2025-12-02T09:44:13.124Z",
+    "createdAt": "2025-12-02T09:44:13.124Z",
+    "updatedAt": "2025-12-02T09:44:13.124Z",
+    "__v": 0
+  },
+  {
+    "_id": "692eb7c0c25290e4bb7fbdb0",
+    "ficheClientId": "692eb4ed3158d0bba107e02c",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "notes": "Ajouté via réservation 692eb79ec25290e4bb7fbd4d (acceptation client)",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "dateAssociation": "2025-12-02T09:56:16.049Z",
+    "createdAt": "2025-12-02T09:56:16.049Z",
+    "updatedAt": "2025-12-02T09:56:16.049Z",
+    "__v": 0
   }
 ];
 
@@ -797,7 +916,7 @@ const garages = [
     "emailProfessionnel": "auto0@gamil.com",
     "telephoneProfessionnel": "45 001 987",
     "createdAt": "2025-11-14T09:50:28.440Z",
-    "updatedAt": "2025-12-01T14:19:24.015Z",
+    "updatedAt": "2025-12-09T19:37:35.794Z",
     "__v": 0,
     "location": {
       "type": "Point",
@@ -1214,9 +1333,14 @@ const garagistes = [
       "statut": "Actif",
       "services": [
         {
+          "serviceId": "692d988fa8353948763487cf",
+          "name": "climatisation",
+          "_id": "69392b105b53b8561865ea92"
+        },
+        {
           "serviceId": "692d98a1a8353948763487db",
           "name": "entretien",
-          "_id": "692d98f5a8353948763488f6"
+          "_id": "69392b1b5b53b8561865eab9"
         }
       ],
       "dateEmbauche": null,
@@ -1227,7 +1351,7 @@ const garagistes = [
       "typeContrat": "CDI"
     },
     "createdAt": "2025-11-17T09:29:18.809Z",
-    "updatedAt": "2025-12-01T13:32:37.464Z",
+    "updatedAt": "2025-12-10T08:11:07.706Z",
     "__v": 0
   },
   {
@@ -1321,6 +1445,60 @@ const garagistes = [
     },
     "createdAt": "2025-12-01T13:28:53.064Z",
     "updatedAt": "2025-12-01T13:32:24.043Z",
+    "__v": 0
+  },
+  {
+    "_id": "69369ebeda23168f8ea75bad",
+    "username": "test",
+    "email": "aal54@gmail.com",
+    "password": "$2b$10$qMGYiC1bj8xUU5asFIljo.rFgpbtqjRjVvR0orfNMnXmBsKeqEW9.",
+    "phone": "78456321",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": false,
+    "garage": "6920cb4f69f0734e2ffd2296",
+    "isActive": false,
+    "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
+    "createdAt": "2025-12-08T09:47:42.284Z",
+    "updatedAt": "2025-12-08T09:47:42.284Z",
+    "__v": 0
+  },
+  {
+    "_id": "69392f0608a82f11cc52393e",
+    "username": "testeur",
+    "email": "ahlembouguerra@gmail.com",
+    "password": "$2b$10$YhVJkiTCulWZIvFN16R.H.TyYZ2IaG2MpUoD4xtuwltObwHE6M2tG",
+    "phone": "56321789",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": true,
+    "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": true,
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "mecanicienData": {
+      "dateNaissance": null,
+      "poste": "Apprenti",
+      "dateEmbauche": "2025-12-10T00:00:00.000Z",
+      "typeContrat": "CDI",
+      "statut": "Actif",
+      "salaire": 1200,
+      "services": [
+        {
+          "serviceId": "692d98a1a8353948763487db",
+          "name": "entretien",
+          "_id": "69392f0608a82f11cc52393f"
+        }
+      ],
+      "experience": "rr",
+      "permisConduire": "B",
+      "matricule": "MEC-1765355270465"
+    },
+    "createdAt": "2025-12-10T08:27:50.600Z",
+    "updatedAt": "2025-12-10T08:27:50.600Z",
     "__v": 0
   }
 ];
@@ -1558,19 +1736,35 @@ const garagisteroles = [
     "__v": 0
   },
   {
-    "_id": "692d98f5a8353948763488fb",
-    "garagisteId": "691aeaeeb3a8dd8c3875e974",
-    "roleId": "691cc0c8f2242d62ea689974",
-    "createdAt": "2025-12-01T13:32:37.474Z",
-    "updatedAt": "2025-12-01T13:32:37.474Z",
-    "__v": 0
-  },
-  {
     "_id": "692d98fba835394876348920",
     "garagisteId": "69172c691fd203ef3d3f1c38",
     "roleId": "691cc0c8f2242d62ea689974",
     "createdAt": "2025-12-01T13:32:43.595Z",
     "updatedAt": "2025-12-01T13:32:43.595Z",
+    "__v": 0
+  },
+  {
+    "_id": "69369ebeda23168f8ea75baf",
+    "garagisteId": "69369ebeda23168f8ea75bad",
+    "roleId": "691cc0c8f2242d62ea689974",
+    "createdAt": "2025-12-08T09:47:42.291Z",
+    "updatedAt": "2025-12-08T09:47:42.291Z",
+    "__v": 0
+  },
+  {
+    "_id": "69392b1b5b53b8561865eabf",
+    "garagisteId": "691aeaeeb3a8dd8c3875e974",
+    "roleId": "691cc0c8f2242d62ea689974",
+    "createdAt": "2025-12-10T08:11:07.713Z",
+    "updatedAt": "2025-12-10T08:11:07.713Z",
+    "__v": 0
+  },
+  {
+    "_id": "69392f0608a82f11cc523941",
+    "garagisteId": "69392f0608a82f11cc52393e",
+    "roleId": "691cc0c8f2242d62ea689974",
+    "createdAt": "2025-12-10T08:27:50.610Z",
+    "updatedAt": "2025-12-10T08:27:50.610Z",
     "__v": 0
   }
 ];
@@ -2071,12 +2265,12 @@ const ordretravails = [
       "nom": "cc 10 - 11TUN12",
       "vehiculeId": "691d9545807a8aa37603d048"
     },
-    "dateCommence": "2025-12-01T13:33:00.000Z",
-    "dateFinPrevue": "2025-12-01T15:33:00.000Z",
+    "dateCommence": "2025-12-01T12:33:00.000Z",
+    "dateFinPrevue": "2025-12-01T14:33:00.000Z",
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
-    "status": "en_attente",
+    "status": "en_cours",
     "description": "Ordre de travail généré depuis le devis DEV025",
     "taches": [
       {
@@ -2090,13 +2284,15 @@ const ordretravails = [
         "heuresReelles": 0,
         "notes": "",
         "status": "assignee",
+        "dateDebut": null,
+        "dateFin": null,
         "_id": "692d992ea8353948763489f6",
-        "createdAt": "2025-12-01T13:33:34.032Z",
-        "updatedAt": "2025-12-01T13:33:34.032Z"
+        "createdAt": "2025-12-09T19:42:45.864Z",
+        "updatedAt": "2025-12-09T19:42:45.864Z"
       },
       {
         "description": "bb",
-        "quantite": 1,
+        "quantite": 2,
         "serviceId": "692d988fa8353948763487cf",
         "serviceNom": "climatisation",
         "mecanicienId": "692d981539a56cf2278c3c3a",
@@ -2105,9 +2301,11 @@ const ordretravails = [
         "heuresReelles": 0,
         "notes": "",
         "status": "assignee",
+        "dateDebut": null,
+        "dateFin": null,
         "_id": "692d992ea8353948763489f7",
-        "createdAt": "2025-12-01T13:33:34.032Z",
-        "updatedAt": "2025-12-01T13:33:34.032Z"
+        "createdAt": "2025-12-09T19:42:45.864Z",
+        "updatedAt": "2025-12-09T19:42:45.864Z"
       }
     ],
     "createdBy": "69147724cb1b9aa1eaa81e3d",
@@ -2118,9 +2316,10 @@ const ordretravails = [
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "notes": [],
     "createdAt": "2025-12-01T13:33:34.033Z",
-    "updatedAt": "2025-12-01T13:33:34.033Z",
+    "updatedAt": "2025-12-10T10:31:09.683Z",
     "numeroOrdre": "ORD-0012",
-    "__v": 0
+    "__v": 1,
+    "updatedBy": "691398cf7412d3ea832a4af6"
   }
 ];
 
@@ -2579,6 +2778,43 @@ const devis = [
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-25T08:50:52.217Z",
     "updatedAt": "2025-11-25T10:20:35.364Z",
+    "__v": 0
+  },
+  {
+    "_id": "692eb51c3158d0bba107e1af",
+    "id": "DEV026",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientName": "magher",
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "factureId": "69394be691d04a21450b2407",
+    "inspectionDate": "2025-12-02",
+    "services": [
+      {
+        "piece": "wc",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000
+      }
+    ],
+    "totalHT": 1200,
+    "totalServicesHT": 1000,
+    "totalTTC": 1440,
+    "finalTotalTTC": 1440,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 240,
+    "montantRemise": 0,
+    "maindoeuvre": 200,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "brouillon",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-02T09:45:00.948Z",
+    "updatedAt": "2025-12-10T10:32:56.663Z",
     "__v": 0
   }
 ];
@@ -3272,913 +3508,152 @@ const factures = [
     "createdAt": "2025-12-01T13:58:50.110Z",
     "updatedAt": "2025-12-01T13:58:50.110Z",
     "__v": 0
+  },
+  {
+    "_id": "692ebac769fc6f782e0c7dd4",
+    "numeroFacture": "FAC-031",
+    "devisId": "692eb51c3158d0bba107e1af",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "realClientId": "6911cb63ccd145adc6354d98",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "w",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "692ebac769fc6f782e0c7dd5"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalRemise": 0,
+    "totalTTC": 1440,
+    "finalTotalTTC": 1441,
+    "timbreFiscal": 1,
+    "paymentStatus": "annule",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "cancelled",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-12-02T10:09:11.871Z",
+    "dueDate": "2026-01-01T10:09:11.871Z",
+    "createdAt": "2025-12-02T10:09:11.871Z",
+    "updatedAt": "2025-12-09T19:34:34.329Z",
+    "__v": 0,
+    "cancelledAt": "2025-12-09T19:34:34.311Z",
+    "creditNoteId": "693879cae82dd096f2e3c624",
+    "replacedByFactureId": "693879cae82dd096f2e3c630"
+  },
+  {
+    "_id": "693879cae82dd096f2e3c630",
+    "numeroFacture": "FAC-032",
+    "devisId": "692eb51c3158d0bba107e1af",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "realClientId": "6911cb63ccd145adc6354d98",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "invoiceDate": "2025-12-09T19:34:34.318Z",
+    "dueDate": "2026-01-08T19:34:34.318Z",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "wc",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "693879cae82dd096f2e3c631"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalRemise": 0,
+    "totalTTC": 1440,
+    "finalTotalTTC": 1441,
+    "timbreFiscal": 1,
+    "paymentStatus": "annule",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "status": "cancelled",
+    "replacedByFactureId": "69394be691d04a21450b2407",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-09T19:34:34.323Z",
+    "updatedAt": "2025-12-10T10:31:02.232Z",
+    "__v": 0,
+    "cancelledAt": "2025-12-10T10:31:02.199Z",
+    "creditNoteId": "69394be691d04a21450b23fb"
+  },
+  {
+    "_id": "69394be691d04a21450b2407",
+    "numeroFacture": "FAC-033",
+    "devisId": "692eb51c3158d0bba107e1af",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "realClientId": "6911cb63ccd145adc6354d98",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "invoiceDate": "2025-12-10T10:31:02.216Z",
+    "dueDate": "2026-01-09T10:31:02.216Z",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "wc",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "69394be691d04a21450b2408"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalRemise": 0,
+    "totalTTC": 1440,
+    "finalTotalTTC": 1441,
+    "timbreFiscal": 1,
+    "paymentStatus": "en_attente",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "createdBy": "69392f0608a82f11cc52393e",
+    "status": "active",
+    "replacedByFactureId": "693879cae82dd096f2e3c630",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-10T10:31:02.226Z",
+    "updatedAt": "2025-12-10T10:31:02.226Z",
+    "__v": 0
   }
 ];
 
-const reservations = [
-  {
-    "_id": "68e38a78594f6616ce82a755",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": null,
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-07T00:00:00.000Z",
-      "heureDebut": "10:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "lorsque je demarre voiture elle ne peut pas demarrer",
-    "status": "accepte",
-    "messageGarage": "Nouveau créneau proposé",
-    "messageClient": "Contre-proposition acceptée",
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T09:23:04.245Z",
-    "updatedAt": "2025-10-06T09:25:19.526Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e390e5594f6616ce82a7ba",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": null,
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-06T00:00:00.000Z",
-      "heureDebut": "10:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "clim ne marche pas",
-    "status": "annule",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T09:50:29.300Z",
-    "updatedAt": "2025-10-06T09:58:45.654Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e3930a65cf64e7402e47ee",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": null,
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-12T00:00:00.000Z",
-      "heureDebut": "15:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "bbbb",
-    "status": "refuse",
-    "messageGarage": "Demande refusée",
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T09:59:38.804Z",
-    "updatedAt": "2025-10-06T10:09:17.807Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e39f6b65cf64e7402e486e",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": null,
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-11-06T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "h",
-    "status": "accepte",
-    "messageGarage": "Nouveau créneau proposé",
-    "messageClient": "Contre-proposition acceptée",
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T10:52:27.955Z",
-    "updatedAt": "2025-10-06T12:39:36.451Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e3b01f65cf64e7402e48a4",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": null,
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-08T00:00:00.000Z",
-      "heureDebut": "16:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "fffffff",
-    "status": "accepte",
-    "messageGarage": "Nouveau créneau proposé",
-    "messageClient": "Contre-proposition acceptée",
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T12:03:43.428Z",
-    "updatedAt": "2025-10-06T12:31:17.753Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e3bfad65cf64e7402e4c9d",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": null,
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-30T00:00:00.000Z",
-      "heureDebut": "09:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "yyyyyy",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": "j'ai pas de temps",
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T13:10:05.677Z",
-    "updatedAt": "2025-10-06T13:10:51.678Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e3cbe465cf64e7402e5043",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": null,
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-06T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "jjjjjjj",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T14:02:12.393Z",
-    "updatedAt": "2025-10-06T14:53:24.456Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e3cdf94db7ec7dcf4da04c",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-06T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "gggg",
-    "status": "accepte",
-    "messageGarage": "Nouveau créneau proposé",
-    "messageClient": "Contre-proposition acceptée",
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T14:11:05.446Z",
-    "updatedAt": "2025-10-07T09:08:08.103Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e3d34f90802ab433869c7f",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-06T00:00:00.000Z",
-      "heureDebut": "17:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "xw",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T14:33:51.317Z",
-    "updatedAt": "2025-10-06T14:52:01.057Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e3d87b8e0058305725ff03",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-29T00:00:00.000Z",
-      "heureDebut": "16:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "ddddddd",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T14:55:55.907Z",
-    "updatedAt": "2025-10-06T14:56:05.324Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e3daaffa5c917a8f54ce7a",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-06T00:00:00.000Z",
-      "heureDebut": "17:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "ddf",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T15:05:19.532Z",
-    "updatedAt": "2025-10-06T15:05:31.289Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e3db03fa5c917a8f54cf46",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-06T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "ddddddd",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T15:06:43.805Z",
-    "updatedAt": "2025-10-06T15:06:49.698Z",
-    "__v": 0
-  },
-  {
-    "_id": "68e3df71ca56bb5c290ba090",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-24T00:00:00.000Z",
-      "heureDebut": "16:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "hhh",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-06T15:25:37.165Z",
-    "updatedAt": "2025-10-06T15:25:48.167Z",
-    "__v": 0
-  },
-  {
-    "_id": "68ee72f16c88c6be130d9bd5",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68ee72c86c88c6be130d9bb7",
-    "clientName": "hassen bg",
-    "clientPhone": "56987123",
-    "clientEmail": "ahlembouguerra20@gmail.com",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-14T00:00:00.000Z",
-      "heureDebut": "17:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "ffffffffffffff",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68ee71e4362ee18e192619a1",
-    "createdAt": "2025-10-14T15:57:37.880Z",
-    "updatedAt": "2025-10-14T16:00:54.398Z",
-    "__v": 0
-  },
-  {
-    "_id": "68f8a7dfe9dd2f07b1e9447c",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-22T00:00:00.000Z",
-      "heureDebut": "11:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "panne",
-    "status": "annule",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-22T09:46:07.901Z",
-    "updatedAt": "2025-10-22T09:47:14.119Z",
-    "__v": 0
-  },
-  {
-    "_id": "68f8a8abe9dd2f07b1e944f5",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-24T00:00:00.000Z",
-      "heureDebut": "09:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "ddd",
-    "status": "accepte",
-    "messageGarage": "Nouveau créneau proposé",
-    "messageClient": "Contre-proposition acceptée",
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-22T09:49:31.776Z",
-    "updatedAt": "2025-10-22T09:51:56.001Z",
-    "__v": 0
-  },
-  {
-    "_id": "68fb809a10e1da25e9b3b429",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-24T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "bbbbbb",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-24T13:35:22.112Z",
-    "updatedAt": "2025-10-24T13:35:36.427Z",
-    "__v": 0
-  },
-  {
-    "_id": "68fb8355bbb9ec0d536de970",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-24T00:00:00.000Z",
-      "heureDebut": "17:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "bbbbbb",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-24T13:47:01.805Z",
-    "updatedAt": "2025-10-24T13:47:12.752Z",
-    "__v": 0
-  },
-  {
-    "_id": "68fe29b71cf6c4cdd5b14e6b",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-26T00:00:00.000Z",
-      "heureDebut": "15:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "perte d'huile",
-    "status": "accepte",
-    "messageGarage": "dfghredfggfd",
-    "messageClient": "Contre-proposition acceptée",
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-26T14:01:27.695Z",
-    "updatedAt": "2025-10-26T14:06:09.102Z",
-    "__v": 0
-  },
-  {
-    "_id": "68fe2b511cf6c4cdd5b14f9b",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-26T00:00:00.000Z",
-      "heureDebut": "16:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "dddd",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-26T14:08:17.969Z",
-    "updatedAt": "2025-10-26T14:08:27.871Z",
-    "__v": 0
-  },
-  {
-    "_id": "68ff8165b0309b39f9db0d99",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-27T00:00:00.000Z",
-      "heureDebut": "18:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "u",
-    "status": "accepte",
-    "messageGarage": "Nouveau créneau proposé",
-    "messageClient": "Contre-proposition acceptée",
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-27T14:27:49.861Z",
-    "updatedAt": "2025-10-27T14:59:14.029Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900a046fbf9f9e8be1f9483",
-    "garageId": "69009a2172d66cd84cdabd21",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "6900a02bfbf9f9e8be1f9459",
-    "creneauDemande": {
-      "date": "2025-10-28T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "ffff",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-28T10:51:50.254Z",
-    "updatedAt": "2025-10-28T10:53:13.009Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900a6344b98ce0dcd0a3454",
-    "garageId": "69009a2172d66cd84cdabd21",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "6900a02bfbf9f9e8be1f9459",
-    "creneauDemande": {
-      "date": "2025-11-07T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "jj",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-28T11:17:08.983Z",
-    "updatedAt": "2025-10-28T12:36:14.599Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900ac304b98ce0dcd0a358f",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "6900ac1b4b98ce0dcd0a3570",
-    "clientName": "ahlem",
-    "clientPhone": "56321789",
-    "clientEmail": "ahlembouguerra25@gmail.com",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-28T00:00:00.000Z",
-      "heureDebut": "18:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "lll",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": "Nouvelle proposition de créneau",
-    "clientId": "6900abcd4b98ce0dcd0a3548",
-    "createdAt": "2025-10-28T11:42:40.494Z",
-    "updatedAt": "2025-10-28T11:47:53.348Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900b6e22f14f8a179d19ce3",
-    "garageId": "69009a2172d66cd84cdabd21",
-    "vehiculeId": "6900ac1b4b98ce0dcd0a3570",
-    "clientName": "ahlem",
-    "clientPhone": "56321789",
-    "clientEmail": "ahlembouguerra25@gmail.com",
-    "serviceId": "6900a02bfbf9f9e8be1f9459",
-    "creneauDemande": {
-      "date": "2025-10-28T00:00:00.000Z",
-      "heureDebut": "13:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "pppppp",
-    "status": "accepte",
-    "messageGarage": "Nouveau créneau proposé",
-    "messageClient": "Contre-proposition acceptée",
-    "clientId": "6900abcd4b98ce0dcd0a3548",
-    "createdAt": "2025-10-28T12:28:18.750Z",
-    "updatedAt": "2025-10-28T12:29:42.425Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900b996fc89340563b49e75",
-    "garageId": "69009a2172d66cd84cdabd21",
-    "vehiculeId": "6900ac1b4b98ce0dcd0a3570",
-    "clientName": "ahlem",
-    "clientPhone": "56321789",
-    "clientEmail": "ahlembouguerra25@gmail.com",
-    "serviceId": "6900a02bfbf9f9e8be1f9459",
-    "creneauDemande": {
-      "date": "2025-10-28T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "kkkkk",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "6900abcd4b98ce0dcd0a3548",
-    "createdAt": "2025-10-28T12:39:50.845Z",
-    "updatedAt": "2025-10-28T12:39:59.939Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900bc12dca08e86df463088",
-    "garageId": "69009a2172d66cd84cdabd21",
-    "vehiculeId": "6900ac1b4b98ce0dcd0a3570",
-    "clientName": "ahlem",
-    "clientPhone": "56321789",
-    "clientEmail": "ahlembouguerra25@gmail.com",
-    "serviceId": "6900a02bfbf9f9e8be1f9459",
-    "creneauDemande": {
-      "date": "2025-10-28T00:00:00.000Z",
-      "heureDebut": "16:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "gg",
-    "status": "accepte",
-    "messageGarage": "Nouveau créneau proposé",
-    "messageClient": "Contre-proposition acceptée",
-    "clientId": "6900abcd4b98ce0dcd0a3548",
-    "createdAt": "2025-10-28T12:50:26.552Z",
-    "updatedAt": "2025-10-28T12:50:48.443Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900be6adca08e86df463150",
-    "garageId": "69009a2172d66cd84cdabd21",
-    "vehiculeId": "6900ac1b4b98ce0dcd0a3570",
-    "clientName": "ahlem",
-    "clientPhone": "56321789",
-    "clientEmail": "ahlembouguerra25@gmail.com",
-    "serviceId": "6900a02bfbf9f9e8be1f9459",
-    "creneauDemande": {
-      "date": "2025-11-06T00:00:00.000Z",
-      "heureDebut": "17:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "nnn",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "6900abcd4b98ce0dcd0a3548",
-    "createdAt": "2025-10-28T13:00:26.875Z",
-    "updatedAt": "2025-10-28T13:00:36.766Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900be9bdca08e86df4631ca",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "6900ac1b4b98ce0dcd0a3570",
-    "clientName": "ahlem",
-    "clientPhone": "56321789",
-    "clientEmail": "ahlembouguerra25@gmail.com",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-28T00:00:00.000Z",
-      "heureDebut": "16:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "kkk",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "6900abcd4b98ce0dcd0a3548",
-    "createdAt": "2025-10-28T13:01:15.638Z",
-    "updatedAt": "2025-10-28T13:01:27.505Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900c8abdca08e86df463313",
-    "garageId": "6900c813dca08e86df4632ce",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "6900c890dca08e86df4632ee",
-    "creneauDemande": {
-      "date": "2025-10-28T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "vvvvvv",
-    "status": "accepte",
-    "messageGarage": "Nouveau créneau proposé",
-    "messageClient": "Contre-proposition acceptée",
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-28T13:44:11.105Z",
-    "updatedAt": "2025-10-28T13:44:48.702Z",
-    "__v": 0
-  },
-  {
-    "_id": "6900c90b8f632576eda53c23",
-    "garageId": "6900c813dca08e86df4632ce",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "6900c890dca08e86df4632ee",
-    "creneauDemande": {
-      "date": "2025-10-28T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "kkkkk",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-28T13:45:47.957Z",
-    "updatedAt": "2025-10-28T13:45:56.627Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901dd6275deb6fa0aae3fe1",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-10-29T00:00:00.000Z",
-      "heureDebut": "17:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "bb",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-29T09:24:50.484Z",
-    "updatedAt": "2025-10-29T09:28:20.305Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901de0975deb6fa0aae4055",
-    "garageId": "68c880c20cb349894f35be59",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "6901dda575deb6fa0aae401a",
-    "creneauDemande": {
-      "date": "2025-10-29T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "xxx",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-29T09:27:37.447Z",
-    "updatedAt": "2025-10-29T09:28:54.088Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901ded6b2589a34d21ca61c",
-    "garageId": "68c880c20cb349894f35be59",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "6901dda575deb6fa0aae401a",
-    "creneauDemande": {
-      "date": "2025-10-29T00:00:00.000Z",
-      "heureDebut": "15:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "pp",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-29T09:31:02.596Z",
-    "updatedAt": "2025-10-29T09:31:12.921Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901df60b2589a34d21ca678",
-    "garageId": "68c880c20cb349894f35be59",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "6901dda575deb6fa0aae401a",
-    "creneauDemande": {
-      "date": "2025-10-29T00:00:00.000Z",
-      "heureDebut": "15:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "c",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-29T09:33:20.318Z",
-    "updatedAt": "2025-10-29T09:33:42.441Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901e034818fdfc044919c86",
-    "garageId": "68c880c20cb349894f35be59",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "6901dda575deb6fa0aae401a",
-    "creneauDemande": {
-      "date": "2025-10-29T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "o",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-29T09:36:52.515Z",
-    "updatedAt": "2025-10-29T09:37:00.747Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901e09384b16346b6d9e678",
-    "garageId": "68c880c20cb349894f35be59",
-    "vehiculeId": "68de5f140cdf932e549d7173",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "6901dda575deb6fa0aae401a",
-    "creneauDemande": {
-      "date": "2025-10-29T00:00:00.000Z",
-      "heureDebut": "15:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "<<<<<",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-29T09:38:27.328Z",
-    "updatedAt": "2025-10-29T09:40:07.780Z",
-    "__v": 0
-  },
-  {
-    "_id": "6901e50f84b16346b6d9e912",
-    "garageId": "68c880c20cb349894f35be59",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "6901dda575deb6fa0aae401a",
-    "creneauDemande": {
-      "date": "2025-10-29T00:00:00.000Z",
-      "heureDebut": "15:00"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "v",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-10-29T09:57:35.222Z",
-    "updatedAt": "2025-10-29T09:57:48.735Z",
-    "__v": 0
-  },
-  {
-    "_id": "6911a8de80ccc2cbabceb40b",
-    "garageId": "68c2e02037f8b7ccf6c813bc",
-    "vehiculeId": "68de6263ed300bc79d2310e4",
-    "clientName": "maher maher",
-    "clientPhone": "26541789",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "68d52c2ca85f287118ca7e0a",
-    "creneauDemande": {
-      "date": "2025-11-10T00:00:00.000Z",
-      "heureDebut": "16:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "fuite huile",
-    "status": "en_attente",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "68da66768ca933b9592da19b",
-    "createdAt": "2025-11-10T08:57:02.462Z",
-    "updatedAt": "2025-11-10T08:57:02.462Z",
-    "__v": 0
-  },
-  {
-    "_id": "6911dc3b227f68139eab7411",
-    "garageId": "6911cc17ccd145adc6354db7",
-    "vehiculeId": "6911dc23227f68139eab73f4",
-    "clientName": "magher",
-    "clientPhone": "26541236",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "6911db6a227f68139eab73bf",
-    "creneauDemande": {
-      "date": "2025-11-10T00:00:00.000Z",
-      "heureDebut": "15:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "yyyyy",
-    "status": "accepte",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "6911cb63ccd145adc6354d98",
-    "createdAt": "2025-11-10T12:36:11.814Z",
-    "updatedAt": "2025-11-10T12:36:24.452Z",
-    "__v": 0
-  },
-  {
-    "_id": "692dae959e1e3c78642e4890",
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "vehiculeId": "692da677083a7057c997e20d",
-    "clientName": "magher",
-    "clientPhone": "26541236",
-    "clientEmail": "ahlembouguerra@outlook.fr",
-    "serviceId": "692d98a1a8353948763487db",
-    "creneauDemande": {
-      "date": "2025-12-10T00:00:00.000Z",
-      "heureDebut": "15:30"
-    },
-    "creneauPropose": {},
-    "descriptionDepannage": "azerty",
-    "status": "en_attente",
-    "messageGarage": null,
-    "messageClient": null,
-    "clientId": "6911cb63ccd145adc6354d98",
-    "createdAt": "2025-12-01T15:04:53.804Z",
-    "updatedAt": "2025-12-01T15:04:53.804Z",
-    "__v": 0
-  }
-];
+const reservations = [];
 
 const services = [
   {
@@ -4224,11 +3699,11 @@ const users = [
     "password": "$2b$10$Mo3FxQX.WzRH5qgodjxoYe7gQGwsL.qpRJkSE1cNr7dOu8rY.MKLK",
     "phone": "26541236",
     "isVerified": true,
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
+    "resetPasswordToken": "$2b$10$Pf6soGy0wKqML6eonuq/HOExlBbyrUfhJ1SsL3Z3bpvmlvSD0Pirq",
+    "resetPasswordExpires": "2025-12-09T21:25:12.812Z",
     "isSuperAdmin": true,
     "createdAt": "2025-11-11T20:13:03.802Z",
-    "updatedAt": "2025-11-16T10:04:35.803Z",
+    "updatedAt": "2025-12-09T20:25:12.813Z",
     "__v": 0
   },
   {

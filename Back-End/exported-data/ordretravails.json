@@ -494,12 +494,12 @@
       "nom": "cc 10 - 11TUN12",
       "vehiculeId": "691d9545807a8aa37603d048"
     },
-    "dateCommence": "2025-12-01T13:33:00.000Z",
-    "dateFinPrevue": "2025-12-01T15:33:00.000Z",
+    "dateCommence": "2025-12-01T12:33:00.000Z",
+    "dateFinPrevue": "2025-12-01T14:33:00.000Z",
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
-    "status": "en_attente",
+    "status": "en_cours",
     "description": "Ordre de travail généré depuis le devis DEV025",
     "taches": [
       {
@@ -513,13 +513,15 @@
         "heuresReelles": 0,
         "notes": "",
         "status": "assignee",
+        "dateDebut": null,
+        "dateFin": null,
         "_id": "692d992ea8353948763489f6",
-        "createdAt": "2025-12-01T13:33:34.032Z",
-        "updatedAt": "2025-12-01T13:33:34.032Z"
+        "createdAt": "2025-12-09T19:42:45.864Z",
+        "updatedAt": "2025-12-09T19:42:45.864Z"
       },
       {
         "description": "bb",
-        "quantite": 1,
+        "quantite": 2,
         "serviceId": "692d988fa8353948763487cf",
         "serviceNom": "climatisation",
         "mecanicienId": "692d981539a56cf2278c3c3a",
@@ -528,9 +530,11 @@
         "heuresReelles": 0,
         "notes": "",
         "status": "assignee",
+        "dateDebut": null,
+        "dateFin": null,
         "_id": "692d992ea8353948763489f7",
-        "createdAt": "2025-12-01T13:33:34.032Z",
-        "updatedAt": "2025-12-01T13:33:34.032Z"
+        "createdAt": "2025-12-09T19:42:45.864Z",
+        "updatedAt": "2025-12-09T19:42:45.864Z"
       }
     ],
     "createdBy": "69147724cb1b9aa1eaa81e3d",
@@ -541,8 +545,9 @@
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "notes": [],
     "createdAt": "2025-12-01T13:33:34.033Z",
-    "updatedAt": "2025-12-01T13:33:34.033Z",
+    "updatedAt": "2025-12-10T10:31:09.683Z",
     "numeroOrdre": "ORD-0012",
-    "__v": 0
+    "__v": 1,
+    "updatedBy": "691398cf7412d3ea832a4af6"
   }
 ]

@@ -6,11 +6,11 @@
     "password": "$2b$10$Mo3FxQX.WzRH5qgodjxoYe7gQGwsL.qpRJkSE1cNr7dOu8rY.MKLK",
     "phone": "26541236",
     "isVerified": true,
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
+    "resetPasswordToken": "$2b$10$Pf6soGy0wKqML6eonuq/HOExlBbyrUfhJ1SsL3Z3bpvmlvSD0Pirq",
+    "resetPasswordExpires": "2025-12-09T21:25:12.812Z",
     "isSuperAdmin": true,
     "createdAt": "2025-11-11T20:13:03.802Z",
-    "updatedAt": "2025-11-16T10:04:35.803Z",
+    "updatedAt": "2025-12-09T20:25:12.813Z",
     "__v": 0
   },
   {

@@ -687,5 +687,147 @@
     "createdAt": "2025-12-01T13:58:50.110Z",
     "updatedAt": "2025-12-01T13:58:50.110Z",
     "__v": 0
+  },
+  {
+    "_id": "692ebac769fc6f782e0c7dd4",
+    "numeroFacture": "FAC-031",
+    "devisId": "692eb51c3158d0bba107e1af",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "realClientId": "6911cb63ccd145adc6354d98",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "w",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "692ebac769fc6f782e0c7dd5"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalRemise": 0,
+    "totalTTC": 1440,
+    "finalTotalTTC": 1441,
+    "timbreFiscal": 1,
+    "paymentStatus": "annule",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "cancelled",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-12-02T10:09:11.871Z",
+    "dueDate": "2026-01-01T10:09:11.871Z",
+    "createdAt": "2025-12-02T10:09:11.871Z",
+    "updatedAt": "2025-12-09T19:34:34.329Z",
+    "__v": 0,
+    "cancelledAt": "2025-12-09T19:34:34.311Z",
+    "creditNoteId": "693879cae82dd096f2e3c624",
+    "replacedByFactureId": "693879cae82dd096f2e3c630"
+  },
+  {
+    "_id": "693879cae82dd096f2e3c630",
+    "numeroFacture": "FAC-032",
+    "devisId": "692eb51c3158d0bba107e1af",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "realClientId": "6911cb63ccd145adc6354d98",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "invoiceDate": "2025-12-09T19:34:34.318Z",
+    "dueDate": "2026-01-08T19:34:34.318Z",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "wc",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "693879cae82dd096f2e3c631"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalRemise": 0,
+    "totalTTC": 1440,
+    "finalTotalTTC": 1441,
+    "timbreFiscal": 1,
+    "paymentStatus": "annule",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "status": "cancelled",
+    "replacedByFactureId": "69394be691d04a21450b2407",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-09T19:34:34.323Z",
+    "updatedAt": "2025-12-10T10:31:02.232Z",
+    "__v": 0,
+    "cancelledAt": "2025-12-10T10:31:02.199Z",
+    "creditNoteId": "69394be691d04a21450b23fb"
+  },
+  {
+    "_id": "69394be691d04a21450b2407",
+    "numeroFacture": "FAC-033",
+    "devisId": "692eb51c3158d0bba107e1af",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "realClientId": "6911cb63ccd145adc6354d98",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "invoiceDate": "2025-12-10T10:31:02.216Z",
+    "dueDate": "2026-01-09T10:31:02.216Z",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "wc",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "69394be691d04a21450b2408"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalRemise": 0,
+    "totalTTC": 1440,
+    "finalTotalTTC": 1441,
+    "timbreFiscal": 1,
+    "paymentStatus": "en_attente",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "createdBy": "69392f0608a82f11cc52393e",
+    "status": "active",
+    "replacedByFactureId": "693879cae82dd096f2e3c630",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-10T10:31:02.226Z",
+    "updatedAt": "2025-12-10T10:31:02.226Z",
+    "__v": 0
   }
 ]

@@ -327,9 +327,14 @@
       "statut": "Actif",
       "services": [
         {
+          "serviceId": "692d988fa8353948763487cf",
+          "name": "climatisation",
+          "_id": "69392b105b53b8561865ea92"
+        },
+        {
           "serviceId": "692d98a1a8353948763487db",
           "name": "entretien",
-          "_id": "692d98f5a8353948763488f6"
+          "_id": "69392b1b5b53b8561865eab9"
         }
       ],
       "dateEmbauche": null,
@@ -340,7 +345,7 @@
       "typeContrat": "CDI"
     },
     "createdAt": "2025-11-17T09:29:18.809Z",
-    "updatedAt": "2025-12-01T13:32:37.464Z",
+    "updatedAt": "2025-12-10T08:11:07.706Z",
     "__v": 0
   },
   {
@@ -434,6 +439,60 @@
     },
     "createdAt": "2025-12-01T13:28:53.064Z",
     "updatedAt": "2025-12-01T13:32:24.043Z",
+    "__v": 0
+  },
+  {
+    "_id": "69369ebeda23168f8ea75bad",
+    "username": "test",
+    "email": "aal54@gmail.com",
+    "password": "$2b$10$qMGYiC1bj8xUU5asFIljo.rFgpbtqjRjVvR0orfNMnXmBsKeqEW9.",
+    "phone": "78456321",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": false,
+    "garage": "6920cb4f69f0734e2ffd2296",
+    "isActive": false,
+    "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
+    "createdAt": "2025-12-08T09:47:42.284Z",
+    "updatedAt": "2025-12-08T09:47:42.284Z",
+    "__v": 0
+  },
+  {
+    "_id": "69392f0608a82f11cc52393e",
+    "username": "testeur",
+    "email": "ahlembouguerra@gmail.com",
+    "password": "$2b$10$YhVJkiTCulWZIvFN16R.H.TyYZ2IaG2MpUoD4xtuwltObwHE6M2tG",
+    "phone": "56321789",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": true,
+    "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": true,
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "mecanicienData": {
+      "dateNaissance": null,
+      "poste": "Apprenti",
+      "dateEmbauche": "2025-12-10T00:00:00.000Z",
+      "typeContrat": "CDI",
+      "statut": "Actif",
+      "salaire": 1200,
+      "services": [
+        {
+          "serviceId": "692d98a1a8353948763487db",
+          "name": "entretien",
+          "_id": "69392f0608a82f11cc52393f"
+        }
+      ],
+      "experience": "rr",
+      "permisConduire": "B",
+      "matricule": "MEC-1765355270465"
+    },
+    "createdAt": "2025-12-10T08:27:50.600Z",
+    "updatedAt": "2025-12-10T08:27:50.600Z",
     "__v": 0
   }
 ]

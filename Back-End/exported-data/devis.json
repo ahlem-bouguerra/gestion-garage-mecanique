@@ -454,5 +454,42 @@
     "createdAt": "2025-11-25T08:50:52.217Z",
     "updatedAt": "2025-11-25T10:20:35.364Z",
     "__v": 0
+  },
+  {
+    "_id": "692eb51c3158d0bba107e1af",
+    "id": "DEV026",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientName": "magher",
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "factureId": "69394be691d04a21450b2407",
+    "inspectionDate": "2025-12-02",
+    "services": [
+      {
+        "piece": "wc",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000
+      }
+    ],
+    "totalHT": 1200,
+    "totalServicesHT": 1000,
+    "totalTTC": 1440,
+    "finalTotalTTC": 1440,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 240,
+    "montantRemise": 0,
+    "maindoeuvre": 200,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "brouillon",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-02T09:45:00.948Z",
+    "updatedAt": "2025-12-10T10:32:56.663Z",
+    "__v": 0
   }
 ]

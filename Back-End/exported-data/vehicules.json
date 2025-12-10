@@ -226,5 +226,32 @@
     "createdAt": "2025-12-01T14:30:15.751Z",
     "updatedAt": "2025-12-01T14:30:15.751Z",
     "__v": 0
+  },
+  {
+    "_id": "692eb55a3158d0bba107e1e7",
+    "proprietaireId": "6911cb63ccd145adc6354d98",
+    "proprietaireModel": "Client",
+    "marque": "woles",
+    "modele": "20",
+    "immatriculation": "8TUN78",
+    "typeCarburant": "essence",
+    "kilometrage": 120,
+    "statut": "actif",
+    "creePar": "client",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [],
+    "carteGrise": {
+      "numeroCG": "SEDRTYGH",
+      "numeroChassis": "8754JK",
+      "dateMiseCirculation": "2025-12-02T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-12-02T00:00:00.000Z",
+      "dateProchaineVisite": "2027-11-04T00:00:00.000Z"
+    },
+    "createdAt": "2025-12-02T09:46:02.479Z",
+    "updatedAt": "2025-12-02T09:46:02.479Z",
+    "__v": 0
   }
 ]

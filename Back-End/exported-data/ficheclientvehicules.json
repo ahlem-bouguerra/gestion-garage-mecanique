@@ -185,5 +185,27 @@
     "createdAt": "2025-11-20T20:25:12.335Z",
     "updatedAt": "2025-11-20T20:25:12.335Z",
     "__v": 0
+  },
+  {
+    "_id": "692eb4ed3158d0bba107e02f",
+    "ficheClientId": "692eb4ed3158d0bba107e02c",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "notes": "Ajouté via réservation 692dae959e1e3c78642e4890",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "dateAssociation": "2025-12-02T09:44:13.124Z",
+    "createdAt": "2025-12-02T09:44:13.124Z",
+    "updatedAt": "2025-12-02T09:44:13.124Z",
+    "__v": 0
+  },
+  {
+    "_id": "692eb7c0c25290e4bb7fbdb0",
+    "ficheClientId": "692eb4ed3158d0bba107e02c",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "notes": "Ajouté via réservation 692eb79ec25290e4bb7fbd4d (acceptation client)",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "dateAssociation": "2025-12-02T09:56:16.049Z",
+    "createdAt": "2025-12-02T09:56:16.049Z",
+    "updatedAt": "2025-12-02T09:56:16.049Z",
+    "__v": 0
   }
 ]
