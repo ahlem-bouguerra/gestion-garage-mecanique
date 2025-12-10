@@ -167,7 +167,16 @@ export const hasAny = ({ roles = [], permissions = [] }) => {
       // ✅ 7. Fonction de normalisation pour comparaison robuste
       const normalize = (str) => str.trim().toLowerCase();
 
-      // ✅ 8. Vérifier l'accès : RÔLE OU PERMISSION (vérification séparée)
+      // ✅ 8. Vérifier qu'il y a au moins une exigence (rôle ou permission)
+      if (roles.length === 0 && permissions.length === 0) {
+        console.log('⚠️ Aucune restriction définie - accès refusé par sécurité');
+        return res.status(403).json({
+          success: false,
+          message: 'Configuration incorrecte : aucun rôle ou permission requis'
+        });
+      }
+
+      // ✅ 9. Vérifier l'accès : RÔLE OU PERMISSION (vérification séparée)
       let hasRequiredRole = false;
       let hasRequiredPermission = false;
       let accessGrantedBy = [];
@@ -182,9 +191,6 @@ export const hasAny = ({ roles = [], permissions = [] }) => {
           console.log('✅ Rôle correspondant:', roleName);
           accessGrantedBy.push(`role:${matchedRole}`);
         }
-      } else {
-        // Si aucun rôle n'est requis, on considère cette condition comme satisfaite
-        hasRequiredRole = true;
       }
 
       // 🔹 Vérifier les PERMISSIONS (si des permissions sont requises)
@@ -203,12 +209,9 @@ export const hasAny = ({ roles = [], permissions = [] }) => {
           console.log('✅ Permission correspondante:', grantedPermission);
           accessGrantedBy.push(`permission:${grantedPermission}`);
         }
-      } else {
-        // Si aucune permission n'est requise, on considère cette condition comme satisfaite
-        hasRequiredPermission = true;
       }
 
-      // ✅ 9. Décision finale : accès accordé si RÔLE OU PERMISSION
+      // ✅ 10. Décision finale : accès accordé si RÔLE OU PERMISSION
       const hasAccess = hasRequiredRole || hasRequiredPermission;
 
       if (!hasAccess) {
@@ -231,7 +234,7 @@ export const hasAny = ({ roles = [], permissions = [] }) => {
         });
       }
 
-      // ✅ 10. Accès accordé - Enrichir req pour les prochains middlewares
+      // ✅ 11. Accès accordé - Enrichir req pour les prochains middlewares
       console.log('✅ Accès accordé via:', accessGrantedBy.join(', '));
       req.userRole = roleName;
       req.isSuperAdmin = false;

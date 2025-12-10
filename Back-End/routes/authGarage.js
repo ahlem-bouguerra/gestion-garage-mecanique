@@ -318,7 +318,8 @@ router.put('/updateId/:id', authGaragisteOuSuperAdmin,hasAny({
     roles: ['Admin Garage']
   }),updateFactureId);
 router.delete('/Devis/:id', authGaragisteOuSuperAdmin,hasAny({
-    roles: ['Admin Garage']
+    roles: ['Admin Garage'],
+    permissions: ['delete_devis'],
   }),deleteDevis);
 router.delete('/deleteDevis/:id',superAdminMiddleware,hasAny({
     roles: ['Super Admin']
