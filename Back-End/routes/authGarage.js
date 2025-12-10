@@ -23,7 +23,7 @@ import { getDashboardData ,getChargeMensuelle} from '../controllers/garagiste/Ch
 import { search } from '../controllers/clients/ChercherGarage.js';
 import { getReservations, updateReservation } from '../controllers/garagiste/gererReservation.js';
 import { createEmploye } from "../controllers/garagiste/EmployeController.js";
-import { hasAccess } from "../utils/permissionChecker.js";
+import { hasAny } from "../utils/permissionChecker.js";
 import { authGaragisteOuSuperAdmin } from "../middlewares/combinedAuth.js"
 import {superAdminMiddleware} from "../middlewares/superAdminAuthMiddleware.js"
 
@@ -270,11 +270,19 @@ router.get('/locations/search/:query', enhancedLocationRoutes.searchLocations);
 router.get('/locations/autocomplete', enhancedLocationRoutes.autocomplete);
 
 // ========== CLIENTS ==========
-router.post("/Creation", authMiddleware,hasAccess('Admin Garage'), createFicheClient);
+router.post("/Creation", authMiddleware,  hasAny({
+    roles: ['Admin Garage'],
+    permissions: ['create_client'],
+  }), createFicheClient);
 router.get("/GetAll", authGaragisteOuSuperAdmin, getFicheClients);
 router.get("/GetOne/:_id", authMiddleware, getFicheClientById);
-router.put("/updateOne/:_id", authMiddleware,hasAccess('Admin Garage'), updateFicheClient);
-router.delete("/deleteOne/:_id", authMiddleware,hasAccess('Admin Garage'), deleteFicheClient);
+router.put("/updateOne/:_id", authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),updateFicheClient);
+router.delete("/deleteOne/:_id", authMiddleware,hasAny({
+    roles: ['Admin Garage'],
+    permissions: ['delete_client'],
+  }), deleteFicheClient);
 router.get("/clients/noms", authMiddleware, getFicheClientNoms);
 router.get('/clients/:clientId/historique', authMiddleware, getHistoriqueVisiteByIdClient);
 router.get('/clients/:clientId/visites-resume', authMiddleware, getHistoryVisite);
@@ -282,89 +290,165 @@ router.get('/clients/:clientId/visites-resume', authMiddleware, getHistoryVisite
 // ========== VEHICULES ==========
 router.get('/vehicules', authMiddleware, getAllVehicules);
 router.get('/vehicules/:id', authMiddleware, getVehiculeById);
-router.post('/vehicules', authMiddleware, hasAccess('Admin Garage'),createVehicule);
-router.put('/vehicules/:id', authMiddleware,hasAccess('Admin Garage'), updateVehicule);
-router.delete('/vehicules/:id', authMiddleware, hasAccess('Admin Garage'),dissocierVehicule);
+router.post('/vehicules', authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),createVehicule);
+router.put('/vehicules/:id', authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }), updateVehicule);
+router.delete('/vehicules/:id', authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),dissocierVehicule);
 router.get('/vehicules/proprietaire/:clientId', authGaragisteOuSuperAdmin, getVehiculesByProprietaire);
 
 // ========== DEVIS ==========
-router.post('/createdevis', authGaragisteOuSuperAdmin,hasAccess('Admin Garage','Super Admin'),createDevis);
+router.post('/createdevis', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage','Super Admin']
+  }),createDevis);
 router.get('/Devis', authGaragisteOuSuperAdmin, getAllDevis);
 router.get('/devis/:id', authGaragisteOuSuperAdmin, getDevisById);
 router.get('/devis/code/:id', authGaragisteOuSuperAdmin, getDevisByNum);
-router.put('/Devis/:id/status', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), updateDevisStatus);
-router.put('/Devis/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage','Super Admin'), updateDevis);
-router.put('/updateId/:id', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),updateFactureId);
-router.delete('/Devis/:id', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),deleteDevis);
-router.delete('/deleteDevis/:id',superAdminMiddleware,hasAccess("Super Admin"),deleteDevisForSuperAdmin);
+router.put('/Devis/:id/status', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }), updateDevisStatus);
+router.put('/Devis/:id', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage','Super Admin']
+  }), updateDevis);
+router.put('/updateId/:id', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }),updateFactureId);
+router.delete('/Devis/:id', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }),deleteDevis);
+router.delete('/deleteDevis/:id',superAdminMiddleware,hasAny({
+    roles: ['Super Admin']
+  }),deleteDevisForSuperAdmin);
 router.get("/devis/:devisId/accept", acceptDevis);
 router.get("/devis/:devisId/refuse", refuseDevis);
-router.post('/devis/:devisId/send-email', authGaragisteOuSuperAdmin,hasAccess('Admin Garage','Super Admin'), sendDevisByEmail);
-router.get('/garage-devis/:garageId',superAdminMiddleware,hasAccess('Super Admin'),getAllDevisByGarage);
+router.post('/devis/:devisId/send-email', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage','Super Admin']
+  }), sendDevisByEmail);
+router.get('/garage-devis/:garageId',superAdminMiddleware,hasAny({
+    roles: ['Super Admin']
+  }),getAllDevisByGarage);
 
 // ========== MECANICIENS ==========
-router.post("/createMecanicien", authMiddleware, hasAccess('Admin Garage'),createMecanicien);
+router.post("/createMecanicien", authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),createMecanicien);
 router.get("/getAllMecaniciens", authMiddleware, getAllMecaniciens);
 router.get("/getMecanicienById/:id", authMiddleware, getMecanicienById);
-router.put("/updateMecanicien/:id", authMiddleware,hasAccess('Admin Garage'), updateMecanicien);
-router.delete("/deleteMecanicien/:id", authMiddleware,hasAccess('Admin Garage'), deleteMecanicien);
+router.put("/updateMecanicien/:id", authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }), updateMecanicien);
+router.delete("/deleteMecanicien/:id", authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),deleteMecanicien);
 router.get('/mecaniciens/by-service/:serviceId', authGaragisteOuSuperAdmin, getMecaniciensByService);
 router.get("/getAllRoles/for/admin", authGaragisteOuSuperAdmin, getAllRoles);
 
 // ========== ATELIERS ==========
 router.get('/getAllAteliers', authGaragisteOuSuperAdmin, getAllAteliers);
 router.get('/getAtelierById/:id', authMiddleware, getAtelierById);
-router.post('/createAtelier', authMiddleware,hasAccess('Admin Garage'), createAtelier);
-router.put('/updateAtelier/:id', authMiddleware, hasAccess('Admin Garage'),updateAtelier);
-router.delete('/deleteAtelier/:id', authMiddleware, hasAccess('Admin Garage'),deleteAtelier);
+router.post('/createAtelier', authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }), createAtelier);
+router.put('/updateAtelier/:id', authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),updateAtelier);
+router.delete('/deleteAtelier/:id', authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),deleteAtelier);
 
 // ========== SERVICES ==========
-router.get('/services/available', authMiddleware, hasAccess('Admin Garage'),getAvailableServices);
+router.get('/services/available', authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),getAvailableServices);
 router.get('/services/my-garage', authMiddleware,getMyGarageServices);
-router.post('/services/add', authMiddleware, hasAccess('Admin Garage'),addServiceToGarage);
-router.delete('/services/:id/remove', authMiddleware,hasAccess('Admin Garage'), removeServiceFromGarage);
+router.post('/services/add', authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),addServiceToGarage);
+router.delete('/services/:id/remove', authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }), removeServiceFromGarage);
 router.get('/services/available-for-mechanics',authGaragisteOuSuperAdmin,getServicesForMechanics)
 
 // ========== ORDRES DE TRAVAIL ==========
-router.post('/createOrdre', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), createOrdreTravail);
+router.post('/createOrdre', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }), createOrdreTravail);
 router.get('/', authGaragisteOuSuperAdmin, getOrdresTravail);
 router.get('/getOrdreTravailById/:id', authGaragisteOuSuperAdmin, getOrdreTravailById);
 /*router.put('/:id/status', authMiddleware, updateStatusOrdreTravail);*/
-router.put('/ordre-travail/:id/demarrer', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), demarrerOrdre);
-router.put('/ordre-travail/:id/terminer', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), terminerOrdre);
-router.delete('/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), supprimerOrdreTravail);
-router.put('/modifier/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), updateOrdreTravail);
+router.put('/ordre-travail/:id/demarrer', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }), demarrerOrdre);
+router.put('/ordre-travail/:id/terminer', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }),terminerOrdre);
+router.delete('/:id', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }), supprimerOrdreTravail);
+router.put('/modifier/:id', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }), updateOrdreTravail);
 router.get('/statistiques', authGaragisteOuSuperAdmin, getStatistiques);
 router.get('/ordre-travail/by-devis/:devisId', authGaragisteOuSuperAdmin, getOrdresParDevisId);
 router.get("/ordres/status/:status", authGaragisteOuSuperAdmin, getOrdresByStatus);
 router.get('/ordres/status/supprime', authGaragisteOuSuperAdmin, getOrdresSupprimes);
-router.delete('/Delete-definitif/:id',superAdminMiddleware,hasAccess('Super Admin'),deleteOrdreTravailDefinitif);
+router.delete('/Delete-definitif/:id',superAdminMiddleware,hasAny({
+    roles: ['Super Admin']
+  }),deleteOrdreTravailDefinitif);
 router.get("/ordres/atelier/:atelierId", authGaragisteOuSuperAdmin, getOrdresByAtelier);
 
 // ========== FACTURES ==========
-router.post('/create/:devisId', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), CreateFacture);
-router.post('/create-with-credit/:devisId', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), CreateFactureWithCredit);
+router.post('/create/:devisId', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }), CreateFacture);
+router.post('/create-with-credit/:devisId', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }), CreateFactureWithCredit);
 router.get('/getFactures', authGaragisteOuSuperAdmin, GetAllFactures);
 router.get('/getFacture/:id', authGaragisteOuSuperAdmin, GetFactureById);
 router.get('/factureByDevis/:devisId',authGaragisteOuSuperAdmin, getFactureByDevis);
-router.put('/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), UpdateFacture);
-router.put('/:id/payment', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),MarquerFacturePayed);
-router.delete('/:id', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), DeleteFacture);
+router.put('/:id', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }),UpdateFacture);
+router.put('/:id/payment', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }),MarquerFacturePayed);
+router.delete('/:id', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }), DeleteFacture);
 router.get('/stats/summary', authGaragisteOuSuperAdmin, StaticFacture);
 
-router.get('/credit-note/:creditNoteId', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), getCreditNoteById);
-router.get('/factures/charts/payments-overview', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), GetPaymentsOverviewData);
-router.get('/factures/charts/weeks-profit', authGaragisteOuSuperAdmin, hasAccess('Admin Garage'),GetWeeksProfitData);
-router.get('/factures/charts/devices-used', authGaragisteOuSuperAdmin,hasAccess('Admin Garage'), GetDevicesUsedData);
+router.get('/credit-note/:creditNoteId', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }), getCreditNoteById);
+router.get('/factures/charts/payments-overview', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }), GetPaymentsOverviewData);
+router.get('/factures/charts/weeks-profit', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }),GetWeeksProfitData);
+router.get('/factures/charts/devices-used', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage']
+  }), GetDevicesUsedData);
 
 
 // ========== CARNET ENTRETIEN ==========
 router.get('/carnet-entretien/vehicule/:vehiculeId', authMiddleware, getCarnetByVehiculeId);
-router.post('/creer-manuel', authMiddleware,hasAccess('Admin Garage'), creerCarnetManuel);
+router.post('/creer-manuel', authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),creerCarnetManuel);
 
 // ========== DASHBOARD ==========
-router.get('/dashboard/charge-atelier',authMiddleware,hasAccess('Admin Garage'),getDashboardData);
-router.get('/dashboard/charge-mensuelle', authMiddleware,hasAccess('Admin Garage'), getChargeMensuelle);
+router.get('/dashboard/charge-atelier',authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),getDashboardData);
+router.get('/dashboard/charge-mensuelle', authMiddleware,hasAny({
+    roles: ['Admin Garage']
+  }),getChargeMensuelle);
 
 // ========== SEARCH ==========
 router.get('/search', search);

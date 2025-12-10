@@ -5,6 +5,8 @@ import { validateTunisianPhone } from '../../utils/phoneValidator.js';
 import mongoose from "mongoose";
 
 // 📌 Créer un mécanicien avec rôle (SANS TRANSACTION)
+import bcrypt from 'bcrypt';
+
 export const createMecanicien = async (req, res) => {
   try {
     // Valider le téléphone
@@ -26,12 +28,19 @@ export const createMecanicien = async (req, res) => {
     // Générer un matricule unique
     const matricule = `MEC-${Date.now()}`;
 
+    // ✅ CORRECTION : Générer et hasher le mot de passe temporaire
+    const tempPassword = `temp${Date.now()}`;
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    console.log(`🔐 Mot de passe temporaire pour ${req.body.email}: ${tempPassword}`);
+    // ⚠️ Pensez à envoyer ce mot de passe par email au mécanicien !
+
     // Créer l'employé mécanicien dans la table Garagiste
     const mecanicien = new Garagiste({
       username: req.body.nom,
       email: req.body.email,
       phone: phoneValidation.cleanNumber,
-      password: `temp${Date.now()}`, // Mot de passe temporaire
+      password: hashedPassword, // ✅ Mot de passe hashé
       garage: req.user.garage || req.user.garageId,
       createdBy: req.user._id,
       isVerified: true,
@@ -64,7 +73,8 @@ export const createMecanicien = async (req, res) => {
     const mecanicienWithRole = {
       ...mecanicien.toObject(),
       roleId: req.body.roleId,
-      roleName: roleExists.name
+      roleName: roleExists.name,
+      tempPassword: tempPassword // ✅ Retourner le mot de passe temporaire pour l'afficher/envoyer
     };
 
     res.status(201).json(mecanicienWithRole);
@@ -72,7 +82,6 @@ export const createMecanicien = async (req, res) => {
     console.error("❌ Erreur createMecanicien:", err);
     
     // En cas d'erreur, essayer de nettoyer (rollback manuel)
-    // Ceci est optionnel mais recommandé
     if (err.mecanicienId) {
       try {
         await Garagiste.findByIdAndDelete(err.mecanicienId);
@@ -84,7 +93,6 @@ export const createMecanicien = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
-
 // 📌 Mettre à jour un mécanicien et son rôle (SANS TRANSACTION)
 export const updateMecanicien = async (req, res) => {
   try {

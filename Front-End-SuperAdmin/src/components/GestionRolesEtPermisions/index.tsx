@@ -191,33 +191,44 @@ const handleAssignPermissions = async () => {
     return;
   }
 
+  if (selectedPermissions.length === 0) {
+    alert('Veuillez sélectionner au moins une permission');
+    return;
+  }
+
   setLoading(true);
   try {
-    // Supprimer les anciennes associations pour ce rôle
+    console.log('🔄 Début affectation des permissions...');
+    
+    // Supprimer les anciennes associations
     const existingAssociations = rolePermissions.filter(
       rp => rp.roleId && rp.roleId._id === selectedRole
     );
     
     for (const assoc of existingAssociations) {
-      // ✅ VERSION AXIOS
       await axiosInstance.delete(`/deleteRolePermission/${assoc._id}`);
     }
 
-    // Créer les nouvelles associations
+    // Créer les nouvelles associations avec les DONNÉES
     for (const permId of selectedPermissions) {
-      // ✅ VERSION AXIOS
-      await axiosInstance.post(`/creeRolePermission`);
+      await axiosInstance.post('/creeRolePermission', {
+        roleId: selectedRole,    // ✅ Données envoyées
+        permissionId: permId     // ✅ Données envoyées
+      });
     }
 
     alert('Permissions affectées avec succès');
-    loadRolePermissions();
+    await loadRolePermissions();
     setShowAssignModal(false);
     setSelectedRole('');
     setSelectedPermissions([]);
+    
   } catch (error) {
+    console.error('❌ Erreur:', error);
     alert(error.response?.data?.message || 'Erreur lors de l\'affectation');
+  } finally {
+    setLoading(false);
   }
-  setLoading(false);
 };
   const openAssignModal = (roleId) => {
     setSelectedRole(roleId);
