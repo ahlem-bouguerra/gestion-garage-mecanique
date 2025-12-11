@@ -5,7 +5,7 @@ export const NAV_DATA = [
     label: "MON ESPACE",
     items: [
          {
-        title: "Gestion Des Garages et Des Clients",
+        title: "Création Des Garages et Des Employés",
         url: "/createGarageForm",
         icon: FileText,
         items: [],
@@ -23,12 +23,12 @@ export const NAV_DATA = [
         icon: User,
         items: [ ],
       },
-      {
+   /*   {
         title: "Gestion des Garages et des Garagistes Statut",
         url: "/table-garage-garagite-statut",
         icon: Settings2,
         items: [ ],
-      },
+      },*/
       {
         title: "Gestion des Rôles & Permissions",
         url: "/gestionRolesEtPermisions",
@@ -37,22 +37,16 @@ export const NAV_DATA = [
         
         ],
       },
-      {
-        title: "Gestion des Devis",
-        url: "/devis",
-        icon: FileText,
-        items: [],
-      },
    
       {
-        title: "Gestion Des Ordres",
-        url: "/gestion-ordres",
+        title: "Gestion Des Garages",
+        url: "/gestion-centrale",
         icon: Clock,
         items: [],
       },
     ],
   },
-  {
+  /*{
     label: "SERVICES",
     items: [
       {
@@ -62,6 +56,6 @@ export const NAV_DATA = [
         items: [],
       },
     ],
-  },
+  },*/
 
 ];

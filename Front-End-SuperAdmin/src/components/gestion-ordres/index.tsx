@@ -27,11 +27,19 @@ interface OrdreTravail {
   vehiculedetails?: { nom: string };
   taches?: any[];
 }
+interface SuperAdminDashboardProps {
+  selectedGarage?: Garage;  // Ajout
+  onNavigate?: () => void;  // Ajout
+}
 
-const SuperAdminDashboard: React.FC = () => {
+const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ 
+  selectedGarage: garageFromProps,
+  onNavigate 
+}) => {
   const [garages, setGarages] = useState<Garage[]>([]);
-  const [selectedGarage, setSelectedGarage] = useState<Garage | null>(null);
+   const [selectedGarage, setSelectedGarage] = useState<Garage | null>(garageFromProps || null);
   const [ordres, setOrdres] = useState<OrdreTravail[]>([]);
+    const showGarageList = !garageFromProps;
   
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -338,7 +346,8 @@ const SuperAdminDashboard: React.FC = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Liste des garages */}
+          
+ {showGarageList && (
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">
@@ -370,9 +379,10 @@ const SuperAdminDashboard: React.FC = () => {
               )}
             </div>
           </div>
+ )}
 
           {/* Ordres de travail */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-7">
             {!selectedGarage ? (
               <div className="bg-white rounded-lg shadow p-12 text-center">
                 <Filter className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -387,7 +397,7 @@ const SuperAdminDashboard: React.FC = () => {
               <div className="bg-white rounded-lg shadow">
                 {/* Statistiques */}
                 {stats?.statistiques && (
-                  <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <div className="p-9 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-gray-900">
@@ -424,7 +434,7 @@ const SuperAdminDashboard: React.FC = () => {
                 )}
 
                 {/* Liste des ordres */}
-                <div className="divide-y max-h-[calc(100vh-450px)] overflow-y-auto">
+                <div className="divide-y max-h-[calc(500vh-450px)] overflow-y-auto">
                   {loading ? (
                     <div className="p-12 text-center">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>

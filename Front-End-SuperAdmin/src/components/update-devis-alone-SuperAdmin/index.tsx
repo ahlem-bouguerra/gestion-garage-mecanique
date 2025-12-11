@@ -205,7 +205,7 @@ export default function DevisUpdateForm() {
       await updateDevis(devisId, devisData);
       
       alert("✅ Devis mis à jour avec succès !");
-      router.push('/devis');
+      router.push('/gestion-centrale');
       
     } catch (error) {
       console.error("Erreur mise à jour devis:", error);

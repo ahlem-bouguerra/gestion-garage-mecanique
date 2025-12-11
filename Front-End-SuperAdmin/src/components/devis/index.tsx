@@ -29,7 +29,11 @@ interface Devis {
   totalTTC: number;
 }
 
-export default function DevisSuperAdminPage() {
+interface GarageQuoteSystemProps {
+  selectedGarage?: string;  // Ajout
+  onNavigate?: () => void;  // Ajout
+}
+export default function DevisSuperAdminPage({ selectedGarage: garageIdProp, onNavigate }: GarageQuoteSystemProps = {}) {
   const [garages, setGarages] = useState([]);
   const [selectedGarage, setSelectedGarage] = useState("");
   const [devis, setDevis] = useState([]);
@@ -38,6 +42,8 @@ export default function DevisSuperAdminPage() {
   const [loadingDevisId, setLoadingDevisId] = useState<string | null>(null);
   const [garagesLoading, setGaragesLoading] = useState(true); // ✅ Ajout
   
+  const showGarageSelector = !garageIdProp;
+
   const statusColors = {
     brouillon: 'bg-gray-100 text-gray-800',
     envoye: 'bg-blue-100 text-blue-800',
@@ -69,6 +75,13 @@ export default function DevisSuperAdminPage() {
       header.classList.remove("hidden");
     }
   }, [selectedDevis]);
+  // Ajouter cet useEffect après vos useEffect existants
+useEffect(() => {
+  if (garageIdProp) {
+    setSelectedGarage(garageIdProp);
+    handleGarageChange(garageIdProp);
+  }
+}, [garageIdProp]);
 
   const loadGarages = async () => {
     try {
@@ -283,7 +296,7 @@ export default function DevisSuperAdminPage() {
         </h1>
         <p className="text-blue-100 mt-2">Consultez tous les devis de vos garages</p>
       </div>
-
+{showGarageSelector && (
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <label className="block text-gray-700 font-semibold mb-3 flex items-center gap-2">
           <Car className="h-5 w-5 text-blue-600" />
@@ -319,7 +332,7 @@ export default function DevisSuperAdminPage() {
           </select>
         )}
       </div>
-
+)}
       {selectedGarage && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">

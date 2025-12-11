@@ -1,7 +1,7 @@
 
 import { createTimeFrameExtractor } from "@/utils/timeframe-extractor";
 import { Metadata } from "next";
-import GarageEtGaragiteTableStatus from "@/components/TableGarageEtGaragiteStatus/index.tsx";
+import GarageEtGaragiteTableStatus from "@/components/TableGarageEtGaragiteStatus";
 
 
 export const metadata: Metadata = {
