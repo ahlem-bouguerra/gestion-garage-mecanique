@@ -70,6 +70,8 @@ import {
 
 import { getProfile ,updateProfile ,changePassword} from "../controllers/superAdmin/profileContoller.js";
 import { authGaragisteOuSuperAdmin } from "../middlewares/combinedAuth.js"
+
+import { getAllClients,getClientsPaginated ,getClientById ,searchClients ,getClientsStats,getVehiculesByProprietaire,getCarnetEntretienByVehicule} from "../controllers/superAdmin/clientController.js";
 const router = express.Router();
 
 // ========== ROUTE /ME (PROTÉGÉE) ==========
@@ -284,5 +286,17 @@ router.delete('/services/:id', superAdminMiddleware,hasAny({
     roles: ['Super Admin'],
     permissions: ['delete_service']
   }), deleteGlobalService);
+
+
+
+
+
+router.get('/all-clients', superAdminMiddleware,getAllClients);
+router.get('/clients/paginated', superAdminMiddleware,getClientsPaginated);
+router.get('/clients/:id', superAdminMiddleware,getClientById);
+router.get('/clients/search', superAdminMiddleware,searchClients);
+router.get('/clients/stats/overview', superAdminMiddleware,getClientsStats);
+router.get('/clients/:clientId/vehicules', superAdminMiddleware,getVehiculesByProprietaire);
+router.get('/clients/vehicules/:vehiculeId/carnet-entretien', superAdminMiddleware,getCarnetEntretienByVehicule);
 
 export default router;

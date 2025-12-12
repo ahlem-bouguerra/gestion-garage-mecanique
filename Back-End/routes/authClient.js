@@ -16,6 +16,7 @@ import {getClientDevis, getClientDevisById, getClientDevisStats } from '../contr
 import { getClientFactures, GetClientFactureById, GetClientFactureStats,getClientCreditNoteById} from '../controllers/clients/clientFactureController.js';
 import { search } from '../controllers/clients/ChercherGarage.js';
 import { getCarnetByVehiculeIdClient, creerCarnetManuelClient } from '../controllers/clients/carnetController.js';
+import { hasAny } from "../utils/permissionChecker.js";
 const router = express.Router();
 
 // ========== GOOGLE OAUTH (CLIENT) ==========
@@ -95,84 +96,46 @@ router.put('/client/update-profile', clientauthMiddleware,updateProfile);
 router.put("/profile/password/client", clientauthMiddleware, changePassword);
 
 
-router.get('/get-all-mes-vehicules',clientauthMiddleware,hasAny({
-    permissions: ['view_vehicule']
-  }), getMesVehicules);
+router.get('/get-all-mes-vehicules',clientauthMiddleware, getMesVehicules);
 
-router.post('/create-mes-vehicules',clientauthMiddleware,hasAny({
-    permissions: ['create_vehicule']
-  }), createVehiculeClient);
+router.post('/create-mes-vehicules',clientauthMiddleware, createVehiculeClient);
 
-router.put('/update-mes-vehicules/:vehiculeId',clientauthMiddleware,hasAny({
-    permissions: ['update_vehicule']
-  }), updateMonVehicule);
+router.put('/update-mes-vehicules/:vehiculeId',clientauthMiddleware, updateMonVehicule);
 
-router.delete('/delete-mes-vehicules/:vehiculeId',clientauthMiddleware,hasAny({
-    permissions: ['client_delete_vehicule']
-  }), deleteMonVehicule);
+router.delete('/delete-mes-vehicules/:vehiculeId',clientauthMiddleware, deleteMonVehicule);
 
-router.get('/services/garage/:garageId',hasAny({
-    permissions: ['view_service']
-  }),getGarageServicesForClient);
+router.get('/services/garage/:garageId',getGarageServicesForClient);
 
 
-router.post('/create-reservation',clientauthMiddleware,hasAny({
-    permissions: ['client_create_reservation']
-  }), ClientCreateReservation);
+router.post('/create-reservation',clientauthMiddleware, ClientCreateReservation);
 
-router.get('/client-reservations/',clientauthMiddleware,hasAny({
-    permissions: ['client_view_reservation']
-  }), ClientGetReservations);
+router.get('/client-reservations/',clientauthMiddleware, ClientGetReservations);
 
-router.put('/client-update/reservations/:id',clientauthMiddleware,hasAny({
-    permissions: ['client_update_reservation']
-  }), ClientUpdateReservation);
+router.put('/client-update/reservations/:id',clientauthMiddleware,ClientUpdateReservation);
 
-router.put('/cancel-reservation/:reservationId', clientauthMiddleware,hasAny({
-    permissions: ['client_cancel_reservation']
-  }), ClientCancelReservation);
+router.put('/cancel-reservation/:reservationId', clientauthMiddleware, ClientCancelReservation);
 
-router.get('/all-mes-devis', clientauthMiddleware,hasAny({
-  permissions: ['view_devis']
-}), getClientDevis);
+router.get('/all-mes-devis', clientauthMiddleware, getClientDevis);
 
-router.get('/mes-devis/stats', clientauthMiddleware,hasAny({
-  permissions: ['view_devis']
-}), getClientDevisStats);
+router.get('/mes-devis/stats', clientauthMiddleware, getClientDevisStats);
 
-router.get('/mes-devis/:devisId', clientauthMiddleware,hasAny({
-  permissions: ['view_devis']
-}), getClientDevisById);
+router.get('/mes-devis/:devisId', clientauthMiddleware, getClientDevisById);
 
 
-router.get('/client/factures', clientauthMiddleware,hasAny({
-  permissions: ['view_facture']
-}), getClientFactures);
+router.get('/client/factures', clientauthMiddleware, getClientFactures);
 
-router.get('/client/factures/stats', clientauthMiddleware,hasAny({
-  permissions: ['view_facture']
-}), GetClientFactureStats);
+router.get('/client/factures/stats', clientauthMiddleware, GetClientFactureStats);
 
-router.get('/client/factures/:id', clientauthMiddleware,hasAny({
-  permissions: ['view_facture']
-}), GetClientFactureById);
+router.get('/client/factures/:id', clientauthMiddleware, GetClientFactureById);
 
-router.get('/client/credit-note/:creditNoteId', clientauthMiddleware,hasAny({
-  permissions: ['view_credit_note']
-}), getClientCreditNoteById);
+router.get('/client/credit-note/:creditNoteId', clientauthMiddleware, getClientCreditNoteById);
 
 
-router.get('/carnet-entretien/:vehiculeId', clientauthMiddleware,hasAny({
-  permissions: ['view_carnet']
-}), getCarnetByVehiculeIdClient);
+router.get('/carnet-entretien/:vehiculeId', clientauthMiddleware, getCarnetByVehiculeIdClient);
 
-router.post('/creer-dans-carnet', clientauthMiddleware,hasAny({
-  permissions: ['create_carnet']
-}), creerCarnetManuelClient);
+router.post('/creer-dans-carnet', clientauthMiddleware, creerCarnetManuelClient);
 
 
-router.get('/search',hasAny({
-    permissions: ['chercher_garage']
-  }), search);
+router.get('/search', search);
 
 export default router;

@@ -34,6 +34,11 @@ interface HistoriqueEntretien {
     status: string;
   };
   source: 'carnet' | 'devis' | 'ordre';
+  garage?: {
+    nom: string;
+    telephone?: string;
+    adresse?: string;
+  };
 
   // CHAMPS POUR LES ORDRES DE TRAVAIL
   numeroOrdre?: string;
@@ -658,6 +663,12 @@ const CarnetEntretien: React.FC = () => {
                               </div>
                             </div>
                           ))}
+                          {entretien.garage && (
+  <p className="text-xl text-red-600 flex items-center gap-1">
+    <Building2 className="w-4 h-4 text-orange-500" />
+    Garage: {entretien.garage.nom}
+  </p>
+)}
 
                         </div>
                       </div>

@@ -372,13 +372,9 @@ router.delete('/deleteDevis/:id',superAdminMiddleware,hasAny({
     roles: ['Super Admin']
   }),deleteDevisForSuperAdmin);
 
-router.get("/devis/:devisId/accept",hasAny({
-    permissions: ['accept_devis']
-  }), acceptDevis);
+router.get("/devis/:devisId/accept", acceptDevis);
 
-router.get("/devis/:devisId/refuse",hasAny({
-    permissions: ['refuse_devis']
-  }), refuseDevis);
+router.get("/devis/:devisId/refuse",refuseDevis);
 
 router.post('/devis/:devisId/send-email', authGaragisteOuSuperAdmin,hasAny({
     roles: ['Admin Garage','Super Admin']

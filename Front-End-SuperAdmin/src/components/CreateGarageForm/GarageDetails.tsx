@@ -111,13 +111,13 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Header avec bouton retour */}
-      <button
-        onClick={onBack}
-        className="mb-6 text-gray-600 hover:text-gray-900 flex items-center gap-2 transition-colors"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        Retour à la liste
-      </button>
+        <button
+          onClick={onBack}
+          className="mb-6 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 flex items-center gap-2 transition-all duration-200 border border-blue-200 hover:border-blue-300 group"
+        >
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <span className="font-medium">Retour à la liste</span>
+        </button>
 
       {/* Informations du garage */}
       <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
