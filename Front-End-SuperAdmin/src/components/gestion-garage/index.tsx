@@ -273,13 +273,13 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
 
                         <button
                             onClick={handleNavigateToFactures}
-                            className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 text-left group border-2 border-transparent hover:border-purple-500 transform hover:-translate-y-2"
+                            className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 text-left group border-2 border-transparent hover:border-yellow-500 transform hover:-translate-y-2"
                         >
-                            <div className="bg-gradient-to-br from-purple-100 to-indigo-100 p-4 rounded-xl mb-6 group-hover:from-purple-600 group-hover:to-indigo-600 transition-all duration-300 inline-block">
-                                <CreditCard className="w-12 h-12 text-purple-600 group-hover:text-white transition-colors" />
+                            <div className="bg-gradient-to-br from-yellow-100 to-indigo-100 p-4 rounded-xl mb-6 group-hover:from-yellow-600 group-hover:to-indigo-600 transition-all duration-300 inline-block">
+                                <CreditCard className="w-12 h-12 text-yellow-600 group-hover:text-white transition-colors" />
                             </div>
 
-                            <h2 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-yellow-600 transition-colors">
                                 Factures
                             </h2>
 
@@ -287,7 +287,7 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
                                 Suivre et gérer les Factures
                             </p>
 
-                            <div className="flex items-center gap-2 text-purple-600 font-medium">
+                            <div className="flex items-center gap-2 text-yellow-600 font-medium">
                                 <span>Accéder</span>
                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </div>
@@ -295,13 +295,13 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
 
                         <button
                             onClick={handleNavigateToStatus}
-                            className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 text-left group border-2 border-transparent hover:border-purple-500 transform hover:-translate-y-2"
+                            className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 text-left group border-2 border-transparent hover:border-pink-500 transform hover:-translate-y-2"
                         >
-                            <div className="bg-gradient-to-br from-purple-100 to-indigo-100 p-4 rounded-xl mb-6 group-hover:from-purple-600 group-hover:to-indigo-600 transition-all duration-300 inline-block">
-                                <Settings2 className="w-12 h-12 text-purple-600 group-hover:text-white transition-colors" />
+                            <div className="bg-gradient-to-br from-pink-100 to-indigo-100 p-4 rounded-xl mb-6 group-hover:from-pink-600 group-hover:to-indigo-600 transition-all duration-300 inline-block">
+                                <Settings2 className="w-12 h-12 text-pink-600 group-hover:text-white transition-colors" />
                             </div>
 
-                            <h2 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-pink-600 transition-colors">
                                 Statut des Garages et Garagistes
                             </h2>
 
@@ -309,7 +309,7 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
                                 Suivre les statut des garages et garagistes
                             </p>
 
-                            <div className="flex items-center gap-2 text-purple-600 font-medium">
+                            <div className="flex items-center gap-2 text-pink-600 font-medium">
                                 <span>Accéder</span>
                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </div>
