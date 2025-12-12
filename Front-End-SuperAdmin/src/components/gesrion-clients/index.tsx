@@ -191,7 +191,7 @@ const SuperAdminClientsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
           <p className="text-gray-600 text-lg">Chargement des clients...</p>
@@ -203,7 +203,7 @@ const SuperAdminClientsPage = () => {
   // Vue détaillée du client
   if (selectedClient) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+      <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-7xl mx-auto">
           
           {/* Bouton retour */}
@@ -444,7 +444,7 @@ const SuperAdminClientsPage = () => {
 
   // Vue liste des clients
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+    <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         
         {/* Header */}

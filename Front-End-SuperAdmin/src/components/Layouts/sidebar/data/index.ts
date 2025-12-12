@@ -23,12 +23,7 @@ export const NAV_DATA = [
         icon: User,
         items: [ ],
       },
-   /*   {
-        title: "Gestion des Garages et des Garagistes Statut",
-        url: "/table-garage-garagite-statut",
-        icon: Settings2,
-        items: [ ],
-      },*/
+  
       {
         title: "Gestion des Rôles & Permissions",
         url: "/gestionRolesEtPermisions",
@@ -43,6 +38,12 @@ export const NAV_DATA = [
         url: "/gestion-centrale",
         icon: Clock,
         items: [],
+      },
+          {
+        title: "Gestion des Clients",
+        url: "/gestion-clients",
+        icon: Settings2,
+        items: [ ],
       },
     ],
   },
