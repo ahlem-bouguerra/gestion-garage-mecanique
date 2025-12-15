@@ -34,6 +34,20 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+
+
+ useEffect(() => {
+    const header = document.querySelector('header');
+    if (!header) return;
+
+    if (activeSection) {
+      header.classList.add("hidden");
+    } else {
+      header.classList.remove("hidden");
+    }
+  }, [activeSection]);
+
+  
     useEffect(() => {
         loadGarages();
     }, []);

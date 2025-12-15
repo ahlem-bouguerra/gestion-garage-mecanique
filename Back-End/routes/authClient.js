@@ -17,6 +17,8 @@ import { getClientFactures, GetClientFactureById, GetClientFactureStats,getClien
 import { search } from '../controllers/clients/ChercherGarage.js';
 import { getCarnetByVehiculeIdClient, creerCarnetManuelClient } from '../controllers/clients/carnetController.js';
 import { hasAny } from "../utils/permissionChecker.js";
+import { getAllMesOrdres, getOrdreById,getOrdreStats} from '../controllers/clients/clientOrdresController.js';
+import { createRating ,getRatingByOrdre } from "../controllers/clients/RatingController.js";
 const router = express.Router();
 
 // ========== GOOGLE OAUTH (CLIENT) ==========
@@ -96,46 +98,104 @@ router.put('/client/update-profile', clientauthMiddleware,updateProfile);
 router.put("/profile/password/client", clientauthMiddleware, changePassword);
 
 
-router.get('/get-all-mes-vehicules',clientauthMiddleware, getMesVehicules);
+router.get('/get-all-mes-vehicules',clientauthMiddleware,hasAny({
+    permissions: ['view_vehicule']
+  }), getMesVehicules);
 
-router.post('/create-mes-vehicules',clientauthMiddleware, createVehiculeClient);
+router.post('/create-mes-vehicules',clientauthMiddleware,hasAny({
+    permissions: ['create_vehicule']
+  }), createVehiculeClient);
 
-router.put('/update-mes-vehicules/:vehiculeId',clientauthMiddleware, updateMonVehicule);
+router.put('/update-mes-vehicules/:vehiculeId',clientauthMiddleware,hasAny({
+    permissions: ['update_vehicule']
+  }), updateMonVehicule);
 
-router.delete('/delete-mes-vehicules/:vehiculeId',clientauthMiddleware, deleteMonVehicule);
+router.delete('/delete-mes-vehicules/:vehiculeId',clientauthMiddleware,hasAny({
+    permissions: ['client_delete_vehicule']
+  }), deleteMonVehicule);
 
-router.get('/services/garage/:garageId',getGarageServicesForClient);
-
-
-router.post('/create-reservation',clientauthMiddleware, ClientCreateReservation);
-
-router.get('/client-reservations/',clientauthMiddleware, ClientGetReservations);
-
-router.put('/client-update/reservations/:id',clientauthMiddleware,ClientUpdateReservation);
-
-router.put('/cancel-reservation/:reservationId', clientauthMiddleware, ClientCancelReservation);
-
-router.get('/all-mes-devis', clientauthMiddleware, getClientDevis);
-
-router.get('/mes-devis/stats', clientauthMiddleware, getClientDevisStats);
-
-router.get('/mes-devis/:devisId', clientauthMiddleware, getClientDevisById);
+router.get('/services/garage/:garageId',clientauthMiddleware,hasAny({
+    permissions: ['view_service']
+  }),getGarageServicesForClient);
 
 
-router.get('/client/factures', clientauthMiddleware, getClientFactures);
+router.post('/create-reservation',clientauthMiddleware,hasAny({
+    permissions: ['client_create_reservation']
+  }), ClientCreateReservation);
 
-router.get('/client/factures/stats', clientauthMiddleware, GetClientFactureStats);
+router.get('/client-reservations/',clientauthMiddleware,hasAny({
+    permissions: ['client_view_reservation']
+  }), ClientGetReservations);
 
-router.get('/client/factures/:id', clientauthMiddleware, GetClientFactureById);
+router.put('/client-update/reservations/:id',clientauthMiddleware,hasAny({
+    permissions: ['client_update_reservation']
+  }), ClientUpdateReservation);
 
-router.get('/client/credit-note/:creditNoteId', clientauthMiddleware, getClientCreditNoteById);
+router.put('/cancel-reservation/:reservationId', clientauthMiddleware,hasAny({
+    permissions: ['client_cancel_reservation']
+  }), ClientCancelReservation);
+
+router.get('/all-mes-devis', clientauthMiddleware,hasAny({
+  permissions: ['view_devis']
+}), getClientDevis);
+
+router.get('/mes-devis/stats', clientauthMiddleware,hasAny({
+  permissions: ['view_devis']
+}), getClientDevisStats);
+
+router.get('/mes-devis/:devisId', clientauthMiddleware,hasAny({
+  permissions: ['view_devis']
+}), getClientDevisById);
 
 
-router.get('/carnet-entretien/:vehiculeId', clientauthMiddleware, getCarnetByVehiculeIdClient);
+router.get('/client/factures', clientauthMiddleware,hasAny({
+  permissions: ['view_facture']
+}), getClientFactures);
 
-router.post('/creer-dans-carnet', clientauthMiddleware, creerCarnetManuelClient);
+router.get('/client/factures/stats', clientauthMiddleware,hasAny({
+  permissions: ['view_facture']
+}), GetClientFactureStats);
+
+router.get('/client/factures/:id', clientauthMiddleware,hasAny({
+  permissions: ['view_facture']
+}), GetClientFactureById);
+
+router.get('/client/credit-note/:creditNoteId', clientauthMiddleware,hasAny({
+  permissions: ['view_credit_note']
+}), getClientCreditNoteById);
 
 
-router.get('/search', search);
+router.get('/carnet-entretien/:vehiculeId', clientauthMiddleware,hasAny({
+  permissions: ['view_carnet']
+}), getCarnetByVehiculeIdClient);
+
+router.post('/creer-dans-carnet', clientauthMiddleware,hasAny({
+  permissions: ['create_carnet']
+}), creerCarnetManuelClient);
+
+
+router.get('/search',clientauthMiddleware,hasAny({
+    permissions: ['chercher_garage']
+  }), search);
+
+
+
+
+router.get('/mes-ordres',clientauthMiddleware,
+  getAllMesOrdres
+);
+
+// 🔍 Récupérer un ordre spécifique par ID
+router.get('/mes-ordres/:ordreId', clientauthMiddleware,
+  getOrdreById
+);
+
+// 📊 Statistiques des ordres du client
+router.get('/mes-ordres-stats', clientauthMiddleware,
+  getOrdreStats
+);
+
+router.post('/client/rate-garage', clientauthMiddleware,createRating);
+router.get('/client/rating/:ordreId', clientauthMiddleware,getRatingByOrdre);
 
 export default router;

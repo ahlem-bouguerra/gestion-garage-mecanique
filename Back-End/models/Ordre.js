@@ -155,7 +155,20 @@ const OrdreTravailSchema = new Schema({
       type: Date,
       default: Date.now
     }
-  }]
+  }],
+  canBeRated: {
+  type: Boolean,
+  default: false
+},
+ratedAt: {
+  type: Date,
+  default: null
+},
+ratingId: {
+  type: Schema.Types.ObjectId,
+  ref: 'Rating',
+  default: null
+}
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

@@ -1,5 +1,6 @@
 // components/garage/index.tsx
 "use client";
+import ConfirmDialog from './ConfirmDialog'; // adapte le chemin exact
 
 import { useState, useEffect } from 'react';
 import { AlertCircle, CheckCircle2, X, ArrowRight } from 'lucide-react';
@@ -27,6 +28,18 @@ export default function GarageManagement() {
   const [createdGarage, setCreatedGarage] = useState(null);
   const [selectedGarage, setSelectedGarage] = useState(null);
   const [garageToEdit, setGarageToEdit] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState({
+  isOpen: false,
+  title: '',
+  message: '',
+  confirmText: 'Confirmer',
+  cancelText: 'Annuler',
+  type: 'warning' as 'danger' | 'warning' | 'info',
+  requireTextConfirm: false,
+  textToConfirm: '',
+  onConfirm: async () => {}
+});
+
   
 const [garageData, setGarageData] = useState({
   garagenom: '',
@@ -259,66 +272,66 @@ const resetForm = () => {
     setView('addGaragiste');
   };
 
-    const handleDeleteGarage = async (garage: any) => {
-    // Confirmation de suppression
-    const confirmMessage = `⚠️ ATTENTION : Cette action va supprimer :
-    
+const handleDeleteGarage = (garage: any) => {
+  setConfirmDialog({
+    isOpen: true,
+    title: '⚠️ Supprimer le garage',
+    message: `Cette action va supprimer :
+
 - Le garage "${garage.nom}"
 - Tous les garagistes de ce garage
 - Toutes leurs données associées
 
-Cette action est IRRÉVERSIBLE !
+Cette action est IRRÉVERSIBLE !`,
+    confirmText: 'Supprimer',
+    cancelText: 'Annuler',
+    type: 'danger',
+    requireTextConfirm: true,
+    textToConfirm: garage.nom,
+    onConfirm: async () => {
+      setLoading(true);
+      setError('');
+      setSuccess('');
 
-Voulez-vous vraiment continuer ?`;
-
-    if (!confirm(confirmMessage)) {
-      return;
+      try {
+        const result = await deleteGarage(garage._id);
+        setSuccess(`✅ ${result.message} — ${result.deletedGaragistes} garagiste(s) supprimé(s)`);
+        await fetchGarages();
+      } catch (err: any) {
+        setError(err.message || 'Erreur lors de la suppression');
+      } finally {
+        setLoading(false);
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+      }
     }
+  });
+};
 
-    // Double confirmation pour plus de sécurité
-    const finalConfirm = prompt(
-      `Pour confirmer, tapez le nom du garage : "${garage.nom}"`
-    );
 
-    if (finalConfirm !== garage.nom) {
-      alert("❌ Nom incorrect. Suppression annulée.");
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const result = await deleteGarage(garage._id);
-      
-      alert(`✅ ${result.message}\n\n${result.deletedGaragistes} garagiste(s) supprimé(s)`);
-      
-      // Recharger la liste
-      await fetchGarages();
-      
-    } catch (err: any) {
-      const errorMessage = err.message || 'Erreur lors de la suppression du garage';
-      alert(`❌ ${errorMessage}`);
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
   // ========== VUES (RENDER) ==========
 
   // ⭐ VUE LISTE - UNE SEULE FOIS
-  if (view === 'list') {
-    return (
+if (view === 'list') {
+  return (
+    <>
       <GarageList
         garages={garages}
         onCreateGarage={startCreateGarage}
         onAddGaragiste={startAddGaragiste}
         onViewDetails={handleViewDetails}
-        onEditGarage={handleEditGarage} // ✅ Maintenant définie
+        onEditGarage={handleEditGarage}
         onDeleteGarage={handleDeleteGarage}
       />
-    );
-  }
+
+      <ConfirmDialog
+        {...confirmDialog}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmDialog.onConfirm}
+      />
+    </>
+  );
+}
+
 
   // VUE CRÉATION GARAGE
   if (view === 'createGarage') {
@@ -508,6 +521,15 @@ Voulez-vous vraiment continuer ?`;
       />
     );
   }
+
+  <ConfirmDialog
+  {...confirmDialog}
+  onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+  onInputChange={(val: string) =>
+    setConfirmDialog(prev => ({ ...prev, inputValue: val }))
+  }
+/>
+
 
   return null;
 }

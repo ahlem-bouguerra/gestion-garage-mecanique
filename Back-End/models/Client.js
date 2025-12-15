@@ -52,4 +52,4 @@ clientSchema.index({ location: '2dsphere' }, { sparse: true });
 // ✅ FORCER la création de l'index googleId avec sparse
 clientSchema.index({ googleId: 1 }, { unique: true, sparse: true });
 
-export const Client = mongoose.model("Client", clientSchema);
+export const Client = mongoose.model("Client", clientSchema , "clients");

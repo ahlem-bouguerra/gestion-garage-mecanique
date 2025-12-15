@@ -439,7 +439,6 @@ router.delete('/deleteAtelier/:id', authMiddleware,hasAny({
 
 // ========== SERVICES ==========
 router.get('/services/available', authMiddleware,hasAny({
-    roles: ['Admin Garage'],
     permissions: ['view_service']
   }),getAvailableServices);
 
@@ -458,7 +457,6 @@ router.delete('/services/:id/remove', authMiddleware,hasAny({
   }), removeServiceFromGarage);
 
 router.get('/services/available-for-mechanics',authGaragisteOuSuperAdmin,hasAny({
-    roles: ['Admin Garage'],
     permissions: ['view_service']
   }),getServicesForMechanics)
 
@@ -598,7 +596,7 @@ router.get('/dashboard/charge-mensuelle', authMiddleware,hasAny({
 
 // ========== RESERVATIONS ==========
 router.get('/reservations',authMiddleware,hasAny({
-    permissions: ['create_reservation']
+    permissions: ['view_reservation']
   }), getReservations);
 router.put('/update/reservations/:id',authMiddleware,hasAny({
     permissions: ['update_reservation']

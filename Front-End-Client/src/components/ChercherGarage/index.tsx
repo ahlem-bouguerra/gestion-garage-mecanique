@@ -20,6 +20,9 @@ const GarageSearch = () => {
   const [userAddress, setUserAddress] = useState('');
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [showChatModal, setShowChatModal] = useState(false);
+  const getAuthToken = () => {
+      return localStorage.getItem('token') || sessionStorage.getItem('token');
+  };
   
   const [filters, setFilters] = useState({
     governorate: '',
@@ -33,11 +36,6 @@ const GarageSearch = () => {
   const [services, setServices] = useState([]);
 
   const router = useRouter();
-
-  const getAuthToken = () => {
-      return localStorage.getItem('token') || sessionStorage.getItem('token');
-  };
-
 
   // Cacher le header quand le modal de chat est ouvert
 useEffect(() => {
@@ -118,36 +116,45 @@ useEffect(() => {
   }, [filters.governorate]);
 
   // Recherche des garages (SIMPLIFIÉ - calculs dans le backend)
-  const searchGarages = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
+const searchGarages = async () => {
+  setLoading(true);
+  try {
+    const token = getAuthToken();
 
-      if (searchTerm) params.append('search', searchTerm);
-      if (filters.governorate) params.append('governorate', filters.governorate);
-      if (filters.city) params.append('city', filters.city);
-      if (userLocation) {
-        params.append('latitude', userLocation.latitude.toString());
-        params.append('longitude', userLocation.longitude.toString());
-        params.append('radius', filters.radius.toString());
-      }
-
-      const response = await fetch(`http://localhost:5000/api/search?${params}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setGarages(data.garages || []);
-        console.log('✅ Garages reçus:', data.garages.length);
-      } else {
-        setGarages([]);
-      }
-    } catch (error) {
-      console.error('Erreur recherche:', error);
-      setGarages([]);
-    } finally {
-      setLoading(false);
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      return;
     }
-  };
+    const params = new URLSearchParams();
+
+    if (searchTerm) params.append('search', searchTerm);
+    if (filters.governorate) params.append('governorate', filters.governorate);
+    if (filters.city) params.append('city', filters.city);
+    if (userLocation) {
+      params.append('latitude', userLocation.latitude.toString());
+      params.append('longitude', userLocation.longitude.toString());
+      params.append('radius', filters.radius.toString());
+    }
+
+    const response = await fetch(`http://localhost:5000/api/search?${params}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    const data = await response.json();
+
+    if (data.success) {
+      setGarages(data.garages || []);
+      console.log('✅ Garages reçus:', data.garages.length);
+    } else {
+      setGarages([]);
+    }
+  } catch (error) {
+    console.error('Erreur recherche:', error);
+    setGarages([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Charger les garages au démarrage
   useEffect(() => {

@@ -1,15 +1,16 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Client } from "../../models/Client.js";
+import { Role } from "../../models/Role.js";
+import { ClientRole } from "../../models/ClientRole.js";
 import { sendVerificationEmailForCient } from "../../utils/mailerCLient.js";
 
-
 export const registerClient = async (req, res) => {
-  const { username,email, password, phone } = req.body;
+  const { username, email, password, phone } = req.body;
 
   console.log("📥 Données reçues pour inscription :", req.body);
 
-  if (!username ||!email || !password || !phone) {
+  if (!username || !email || !password || !phone) {
     console.warn("⚠️ Champs manquants !");
     return res.status(400).json({ message: "Tous les champs sont requis." });
   }
@@ -23,7 +24,7 @@ export const registerClient = async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
-    // ✅ CRÉER UTILISATEUR - SANS AUCUNE MENTION DE LOCATION
+    // ✅ CRÉER UTILISATEUR
     const clientData = {
       username,
       email,
@@ -40,6 +41,27 @@ export const registerClient = async (req, res) => {
       id: client._id,
       email: client.email,
     });
+
+    // ✅ ATTRIBUER LE RÔLE "CLIENT" AUTOMATIQUEMENT
+    try {
+      // Recherche flexible du rôle contenant "client" (insensible à la casse)
+      const clientRole = await Role.findOne({ 
+        name: { $regex: /client/i } // Cherche "client", "Client", "CLIENT", etc.
+      });
+
+      if (clientRole) {
+        await ClientRole.create({
+          clientId: client._id,
+          roleId: clientRole._id
+        });
+        console.log("✅ Rôle 'Client' attribué à l'utilisateur");
+      } else {
+        console.warn("⚠️ Aucun rôle contenant 'client' trouvé dans la base de données");
+      }
+    } catch (roleError) {
+      console.error("❌ Erreur lors de l'attribution du rôle:", roleError.message);
+      // On continue l'inscription même si l'attribution du rôle échoue
+    }
 
     // Token pour vérification email
     const verificationToken = jwt.sign(
