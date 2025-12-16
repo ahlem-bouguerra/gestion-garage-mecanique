@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { Building2, FileText, Wrench, ChevronRight, Loader2,CreditCard,Settings2 } from 'lucide-react';
+import { Building2, FileText, Wrench, ChevronRight, Loader2, CreditCard, Settings2, Star } from 'lucide-react';
 
 // Types
 interface Garage {
@@ -16,6 +16,7 @@ interface UnifiedGarageDashboardProps {
     DevisComponent: React.ComponentType<{ selectedGarage: string; onNavigate?: () => void }>;
     OrdresComponent: React.ComponentType<{ selectedGarage: Garage; onNavigate?: () => void }>;
     FactureComponent: React.ComponentType<{ selectedGarage: Garage; onNavigate?: () => void }>;
+    RatingsComponent: React.ComponentType<{ selectedGarage: Garage }>;
     GarageEtGaragiteTableStatusComponent: React.ComponentType;
 
     apiBase?: string;
@@ -26,11 +27,12 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
     OrdresComponent,
     FactureComponent,
     GarageEtGaragiteTableStatusComponent,
+    RatingsComponent, 
     apiBase = 'http://localhost:5000/api'
 }) => {
     const [garages, setGarages] = useState<Garage[]>([]);
     const [selectedGarage, setSelectedGarage] = useState<Garage | null>(null);
-    const [activeSection, setActiveSection] = useState<'selection' | 'devis' | 'ordres' | 'factures' |'status'>('selection');
+    const [activeSection, setActiveSection] = useState<'selection' | 'devis' | 'ordres' | 'factures' |'status' | 'ratings'>('selection');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -111,6 +113,9 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
     const handleNavigateToStatus = () => {
         setActiveSection('status');
     };
+    const handleNavigateToRatings = () => {
+        setActiveSection('ratings');
+    }
 
     const handleBackToMenu = () => {
         setActiveSection('selection');
@@ -328,6 +333,28 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </div>
                         </button>
+                        {/* Dans le menu de sélection, après la carte Status */}
+<button
+    onClick={handleNavigateToRatings}
+    className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 text-left group border-2 border-transparent hover:border-amber-500 transform hover:-translate-y-2"
+>
+    <div className="bg-gradient-to-br from-amber-100 to-orange-100 p-4 rounded-xl mb-6 group-hover:from-amber-600 group-hover:to-orange-600 transition-all duration-300 inline-block">
+        <Star className="w-12 h-12 text-amber-600 group-hover:text-white transition-colors" />
+    </div>
+
+    <h2 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-amber-600 transition-colors">
+        Notations et Avis
+    </h2>
+
+    <p className="text-gray-600 mb-4">
+        Consulter et gérer les avis clients
+    </p>
+
+    <div className="flex items-center gap-2 text-amber-600 font-medium">
+        <span>Accéder</span>
+        <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+    </div>
+</button>
                     </div>
                 </div>
             </div>
@@ -433,6 +460,29 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
             </div>
         );
     }
+
+    // Affichage du composant Ratings
+if (activeSection === 'ratings') {
+    return (
+        <div>
+            <div className="bg-white border-b shadow-sm p-4 mb-6">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                    <button
+                        onClick={handleBackToMenu}
+                        className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
+                    >
+                        ← Retour au menu
+                    </button>
+                    <div className="flex items-center gap-3">
+                        <Building2 className="w-5 h-5 text-gray-600" />
+                        <span className="font-semibold text-gray-900">{selectedGarage.nom}</span>
+                    </div>
+                </div>
+            </div>
+            <RatingsComponent selectedGarage={selectedGarage} />
+        </div>
+    );
+}
 
     return null;
 };

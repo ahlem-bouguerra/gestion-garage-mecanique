@@ -322,10 +322,20 @@ export const getGarageRatings = async (req, res) => {
 export const updateRating = async (req, res) => {
   try {
     const { ratingId } = req.params;
-    const clientId = req.client._id;
+    
+    // ✅ Gestion flexible : req.client OU req.user
+    const userId = req.client?._id || req.user?._id;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentification requise'
+      });
+    }
+
     const { rating, comment, recommande } = req.body;
 
-    console.log('✏️ Modification notation:', ratingId);
+    console.log('✏️ Modification notation:', ratingId, 'par user:', userId);
 
     if (!mongoose.Types.ObjectId.isValid(ratingId)) {
       return res.status(400).json({
@@ -343,13 +353,6 @@ export const updateRating = async (req, res) => {
       });
     }
 
-    // Vérifier que c'est bien le propriétaire
-    if (existingRating.clientId.toString() !== clientId.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Vous ne pouvez pas modifier cette notation'
-      });
-    }
 
     // Vérifier le délai de modification (7 jours)
     const daysSinceRating = (Date.now() - existingRating.createdAt) / (1000 * 60 * 60 * 24);
@@ -400,9 +403,18 @@ export const updateRating = async (req, res) => {
 export const deleteRating = async (req, res) => {
   try {
     const { ratingId } = req.params;
-    const clientId = req.client._id;
+    
+    // ✅ Gestion flexible : req.client OU req.user
+    const userId = req.client?._id || req.user?._id;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentification requise'
+      });
+    }
 
-    console.log('🗑️ Suppression notation:', ratingId);
+    console.log('🗑️ Suppression notation:', ratingId, 'par user:', userId);
 
     if (!mongoose.Types.ObjectId.isValid(ratingId)) {
       return res.status(400).json({
@@ -420,13 +432,6 @@ export const deleteRating = async (req, res) => {
       });
     }
 
-    // Vérifier que c'est bien le propriétaire
-    if (rating.clientId.toString() !== clientId.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Vous ne pouvez pas supprimer cette notation'
-      });
-    }
 
     // Retirer la référence dans l'ordre
     await OrdreTravail.findByIdAndUpdate(rating.ordreId, {

@@ -3,6 +3,7 @@ import GarageQuoteSystem from "@/components/devis";
 import SuperAdminDashboard from "@/components/gestion-ordres";
 import GestionFacturesSuperAdmin from "@/components/gestion-factures";
 import GarageEtGaragiteTableStatus from "@/components/TableGarageEtGaragiteStatus";
+import GarageRatings from "@/components/gestion-notations"; // ✅ Nouveau
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -16,6 +17,7 @@ export default function Page() {
       OrdresComponent={SuperAdminDashboard}
       FactureComponent={GestionFacturesSuperAdmin}
       GarageEtGaragiteTableStatusComponent={GarageEtGaragiteTableStatus}
+      RatingsComponent={GarageRatings} // ✅ Nouveau
     />
   );
 }

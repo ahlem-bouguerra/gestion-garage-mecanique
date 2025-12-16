@@ -72,7 +72,9 @@ import { getProfile ,updateProfile ,changePassword} from "../controllers/superAd
 import { authGaragisteOuSuperAdmin } from "../middlewares/combinedAuth.js"
 
 import { getAllClients,getClientsPaginated ,getClientById ,searchClients ,getClientsStats,getVehiculesByProprietaire,getCarnetEntretienByVehicule} from "../controllers/superAdmin/clientController.js";
+import {updateRating,deleteRating,getGarageRatings } from "../controllers/clients/RatingController.js";
 const router = express.Router();
+
 
 // ========== ROUTE /ME (PROTÉGÉE) ==========
 router.get("/me", superAdminMiddleware, async (req, res) => {
@@ -298,5 +300,10 @@ router.get('/clients/search', superAdminMiddleware,searchClients);
 router.get('/clients/stats/overview', superAdminMiddleware,getClientsStats);
 router.get('/clients/:clientId/vehicules', superAdminMiddleware,getVehiculesByProprietaire);
 router.get('/clients/vehicules/:vehiculeId/carnet-entretien', superAdminMiddleware,getCarnetEntretienByVehicule);
+
+
+router.put('/update-rating/:ratingId', superAdminMiddleware,updateRating);
+router.delete('/delete-rating/:ratingId', superAdminMiddleware,deleteRating);
+router.get('/superAdmin/garage-ratings/:garageId', superAdminMiddleware,getGarageRatings);
 
 export default router;
