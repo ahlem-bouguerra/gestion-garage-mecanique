@@ -333,7 +333,7 @@ export const updateRating = async (req, res) => {
       });
     }
 
-    const { rating, comment, recommande } = req.body;
+    const { rating, comment, recommande, status } = req.body; // ✅ Ajout status
 
     console.log('✏️ Modification notation:', ratingId, 'par user:', userId);
 
@@ -352,7 +352,6 @@ export const updateRating = async (req, res) => {
         message: 'Notation non trouvée'
       });
     }
-
 
     // Vérifier le délai de modification (7 jours)
     const daysSinceRating = (Date.now() - existingRating.createdAt) / (1000 * 60 * 60 * 24);
@@ -376,6 +375,18 @@ export const updateRating = async (req, res) => {
 
     if (comment !== undefined) existingRating.comment = comment;
     if (recommande !== undefined) existingRating.recommande = recommande;
+    
+    // ✅ Mise à jour du status
+    if (status !== undefined) {
+      const validStatuses = ['active', 'signale', 'masque'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Status invalide. Valeurs autorisées: active, signale, masque'
+        });
+      }
+      existingRating.status = status;
+    }
 
     await existingRating.save();
 
