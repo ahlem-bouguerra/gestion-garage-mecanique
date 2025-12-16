@@ -18,7 +18,7 @@ import { search } from '../controllers/clients/ChercherGarage.js';
 import { getCarnetByVehiculeIdClient, creerCarnetManuelClient } from '../controllers/clients/carnetController.js';
 import { hasAny } from "../utils/permissionChecker.js";
 import { getAllMesOrdres, getOrdreById,getOrdreStats} from '../controllers/clients/clientOrdresController.js';
-import { createRating ,getRatingByOrdre } from "../controllers/clients/RatingController.js";
+import { createRating ,getRatingByOrdre,getGarageRatings } from "../controllers/clients/RatingController.js";
 const router = express.Router();
 
 // ========== GOOGLE OAUTH (CLIENT) ==========
@@ -197,5 +197,6 @@ router.get('/mes-ordres-stats', clientauthMiddleware,
 
 router.post('/client/rate-garage', clientauthMiddleware,createRating);
 router.get('/client/rating/:ordreId', clientauthMiddleware,getRatingByOrdre);
+router.get('/client/garage-ratings/:garageId', clientauthMiddleware,getGarageRatings);
 
 export default router;

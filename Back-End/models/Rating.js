@@ -79,7 +79,8 @@ const RatingSchema = new mongoose.Schema({
     dateCommence: Date,
     dateFinReelle: Date,
     totalHeuresReelles: Number,
-    vehiculeNom: String
+    vehiculeNom: String,
+    service: String,
   }
 
 }, {

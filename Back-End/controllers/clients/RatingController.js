@@ -86,7 +86,8 @@ export const createRating = async (req, res) => {
         dateCommence: ordre.dateCommence,
         dateFinReelle: ordre.dateFinReelle,
         totalHeuresReelles: ordre.totalHeuresReelles,
-        vehiculeNom: ordre.vehiculedetails?.nom
+        vehiculeNom: ordre.vehiculedetails?.nom,
+        service: ordre.taches?.map(t => t.serviceNom).join(', ') || 'N/A'
       }
     });
 
@@ -248,7 +249,7 @@ export const getGarageRatings = async (req, res) => {
 
     const ratings = await Rating.find(filter)
       .populate('ficheClientId', 'nom')
-      .select('rating comment recommande createdAt ordreSnapshot reponseGarage')
+      .select('rating comment recommande createdAt ordreSnapshot reponseGarage ')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

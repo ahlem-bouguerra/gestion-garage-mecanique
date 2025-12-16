@@ -20,6 +20,10 @@ const GarageSearch = () => {
   const [userAddress, setUserAddress] = useState('');
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [showChatModal, setShowChatModal] = useState(false);
+  const [ratings, setRatings] = useState([]);
+  const [ratingStats, setRatingStats] = useState(null);
+  const [loadingRatings, setLoadingRatings] = useState(false);
+  const [currentRatingIndex, setCurrentRatingIndex] = useState(0);
   const getAuthToken = () => {
       return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
@@ -186,28 +190,48 @@ const searchGarages = async () => {
   };
 
   // Sélectionner un garage et charger ses services
-  const handleGarageSelect = async (garageId) => {
-    const garage = garages.find(g => g._id === garageId);
-    if (!garage) return;
+const handleGarageSelect = async (garageId) => {
+  const garage = garages.find(g => g._id === garageId);
+  if (!garage) return;
 
-    setSelectedGarage(garage);
+  setSelectedGarage(garage);
+  setLoadingRatings(true);
 
-    try {
-          const token = getAuthToken();
+  try {
+    const token = getAuthToken();
     
     if (!token || token === 'null' || token === 'undefined') {
       window.location.href = '/auth/sign-in';
       return;
     }
-      const res = await axios.get(`http://localhost:5000/api/services/garage/${garageId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-      setServices(Array.isArray(res.data) ? res.data : res.data.services || []);
-    } catch (error) {
-      console.error('Erreur chargement services:', error);
-      setServices([]);
+
+    // Charger les services
+    const servicesRes = await axios.get(
+      `http://localhost:5000/api/services/garage/${garageId}`, 
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setServices(Array.isArray(servicesRes.data) ? servicesRes.data : servicesRes.data.services || []);
+
+    // NOUVEAU: Charger les ratings
+    const ratingsRes = await axios.get(
+      `http://localhost:5000/api/client/garage-ratings/${garageId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    
+    if (ratingsRes.data.success) {
+      setRatings(ratingsRes.data.ratings);
+      setRatingStats(ratingsRes.data.statistics);
     }
-  };
+
+  } catch (error) {
+    console.error('Erreur chargement données garage:', error);
+    setServices([]);
+    setRatings([]);
+    setRatingStats(null);
+  } finally {
+    setLoadingRatings(false);
+  }
+};
 
   // Rediriger vers la réservation
   const handleReservation = (garage) => {
@@ -416,6 +440,7 @@ useEffect(() => {
                         </div>
                       )}
                     </div>
+                    
 
                     <div className="mt-4 flex gap-2">
                       <button
@@ -516,6 +541,254 @@ useEffect(() => {
                 <p className="text-gray-500 text-center py-8">Aucun service disponible</p>
               )}
             </div>
+            {/* Ratings */}
+<div className="space-y-4 lg:col-span-2">
+  <h3 className="text-lg font-semibold border-b pb-2">
+    Avis clients
+    {ratingStats && (
+      <span className="text-sm font-normal text-gray-500 ml-2">
+        ({ratingStats.totalRatings} avis)
+      </span>
+    )}
+  </h3>
+  
+  {loadingRatings ? (
+    <div className="text-center py-8">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+    </div>
+  ) : ratingStats && ratingStats.totalRatings > 0 ? (
+    <div className="space-y-4">
+      {/* Stats globales */}
+<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+  <div className="flex items-start gap-8">
+    {/* Score principal */}
+<div className="text-center">
+  <div className="relative inline-block">
+    <svg className="w-32 h-32 transform -rotate-90">
+      <circle cx="64" cy="64" r="56" stroke="#e5e7eb" strokeWidth="8" fill="none" />
+      <circle 
+        cx="64" cy="64" r="56" 
+        stroke="url(#gradient)" 
+        strokeWidth="8" 
+        fill="none"
+        strokeDasharray={`${(ratingStats.averageRating / 5) * 351.86} 351.86`}
+        strokeLinecap="round"
+        className="transition-all duration-1000"
+      />
+      <defs>
+        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#fbbf24" />
+          <stop offset="100%" stopColor="#f59e0b" />
+        </linearGradient>
+      </defs>
+    </svg>
+    <div className="absolute inset-0 flex flex-col items-center justify-center">
+      <span className="text-4xl font-black text-gray-800">
+        {ratingStats.averageRating.toFixed(1)}
+      </span>
+      <div className="text-xl">
+        {/* Étoiles pleines */}
+        <span className="text-yellow-500">
+          {'★'.repeat(Math.floor(ratingStats.averageRating))}
+        </span>
+        {/* Étoiles vides */}
+        <span className="text-gray-300">
+          {'★'.repeat(5 - Math.floor(ratingStats.averageRating))}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div className="mt-2 text-sm text-gray-600 font-medium">
+    {ratingStats.totalRatings} avis clients
+  </div>
+</div>
+
+    {/* Barres de distribution */}
+    <div className="flex-1 space-y-3">
+      {[5, 4, 3, 2, 1].map(star => {
+        const count = ratingStats[`rating${star}`];
+        const percent = (count / ratingStats.totalRatings * 100).toFixed(0);
+        return (
+          <div key={star} className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-gray-700 w-8">
+              {star}★
+            </span>
+            <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
+              <div 
+                className={`h-full rounded-full transition-all duration-700 ${
+                  star === 5 ? 'bg-green-500' :
+                  star === 4 ? 'bg-lime-500' :
+                  star === 3 ? 'bg-yellow-500' :
+                  star === 2 ? 'bg-orange-500' : 'bg-red-500'
+                }`}
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+            <span className="text-sm text-gray-600 w-12 text-right font-semibold">
+              {count}
+            </span>
+          </div>
+        );
+      })}
+      
+      {ratingStats.totalRecommande > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-200 flex items-center gap-2 text-sm">
+          <span className="text-2xl">👍</span>
+          <span className="font-semibold text-green-600">
+            {ratingStats.totalRecommande} client{ratingStats.totalRecommande > 1 ? 's' : ''}
+          </span>
+          <span className="text-gray-600">recommande{ratingStats.totalRecommande > 1 ? 'nt' : ''} ce garage</span>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+      {/* Liste des avis */}
+      <div className="relative">
+  {ratings.length > 0 ? (
+    <>
+      {/* Carte avis actuel */}
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-gray-200 shadow-sm min-h-[200px]">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                {(ratings[currentRatingIndex].ficheClientId?.nom || 'C')[0].toUpperCase()}
+              </div>
+              <div>
+                <span className="font-semibold text-gray-800 block">
+                  {ratings[currentRatingIndex].ficheClientId?.nom || 'Client'}
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-yellow-400 text-lg">
+                    {'⭐'.repeat(ratings[currentRatingIndex].rating)}
+                  </span>
+                  <span className="text-gray-400">{'☆'.repeat(5 - ratings[currentRatingIndex].rating)}</span>
+                </div>
+              </div>
+            </div>
+            <span className="text-xs text-gray-500">
+              {new Date(ratings[currentRatingIndex].createdAt).toLocaleDateString('fr-FR', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })}
+            </span>
+          </div>
+          
+          {ratings[currentRatingIndex].recommande && (
+            <span className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 text-xs px-3 py-1.5 rounded-full font-medium border border-green-200">
+              👍 Recommandé
+            </span>
+          )}
+        </div>
+        
+        {ratings[currentRatingIndex].comment && (
+          <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+            <p className="text-gray-700 text-sm leading-relaxed italic">
+              "{ratings[currentRatingIndex].comment}"
+            </p>
+          </div>
+        )}
+        
+        {ratings[currentRatingIndex].reponseGarage && (
+          <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+            <div className="flex items-start gap-2">
+              <span className="text-blue-600 text-lg">💬</span>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-blue-800 mb-1.5">
+                  Réponse du garage
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {ratings[currentRatingIndex].reponseGarage}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <div className="flex items-center justify-between mt-4">
+        <button
+          onClick={() => setCurrentRatingIndex(prev => 
+            prev > 0 ? prev - 1 : ratings.length - 1
+          )}
+          disabled={ratings.length <= 1}
+          className="p-2 rounded-full bg-white border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+        >
+          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        {/* Indicateurs */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600 font-medium">
+            {currentRatingIndex + 1} / {ratings.length}
+          </span>
+          <div className="flex gap-1.5">
+            {ratings.slice(0, 5).map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentRatingIndex(idx)}
+                className={`h-2 rounded-full transition-all ${
+                  idx === currentRatingIndex 
+                    ? 'w-8 bg-blue-600' 
+                    : 'w-2 bg-gray-300 hover:bg-gray-400'
+                }`}
+              />
+            ))}
+            {ratings.length > 5 && (
+              <span className="text-gray-400 text-xs self-center ml-1">
+                +{ratings.length - 5}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <button
+          onClick={() => setCurrentRatingIndex(prev => 
+            prev < ratings.length - 1 ? prev + 1 : 0
+          )}
+          disabled={ratings.length <= 1}
+          className="p-2 rounded-full bg-white border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+        >
+          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Optionnel : Auto-play */}
+      {ratings.length > 1 && (
+        <div className="text-center mt-3">
+          <button
+            onClick={() => {
+              const interval = setInterval(() => {
+                setCurrentRatingIndex(prev => 
+                  prev < ratings.length - 1 ? prev + 1 : 0
+                );
+              }, 1000);
+              setTimeout(() => clearInterval(interval), ratings.length * 1000);
+            }}
+            className="text-xs text-blue-600 hover:text-blue-800 underline"
+          >
+            ▶️ Lecture automatique
+          </button>
+        </div>
+      )}
+    </>
+  ) : (
+    <p className="text-gray-500 text-center py-8">Aucun avis pour le moment</p>
+  )}
+</div>
+    </div>
+  ) : (
+    <p className="text-gray-500 text-center py-8">Aucun avis pour le moment</p>
+  )}
+</div>
           </div>
 
           <div className="mt-6 pt-4 border-t flex justify-end">

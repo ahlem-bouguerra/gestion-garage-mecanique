@@ -23,8 +23,9 @@ import { getDashboardData ,getChargeMensuelle} from '../controllers/garagiste/Ch
 import { getReservations, updateReservation } from '../controllers/garagiste/gererReservation.js';
 import { createEmploye } from "../controllers/garagiste/EmployeController.js";
 import { hasAny } from "../utils/permissionChecker.js";
-import { authGaragisteOuSuperAdmin } from "../middlewares/combinedAuth.js"
-import {superAdminMiddleware} from "../middlewares/superAdminAuthMiddleware.js"
+import { authGaragisteOuSuperAdmin } from "../middlewares/combinedAuth.js";
+import {superAdminMiddleware} from "../middlewares/superAdminAuthMiddleware.js";
+import { getGarageRatings } from "../controllers/clients/RatingController.js";
 
 
 const router = express.Router();
@@ -602,7 +603,7 @@ router.put('/update/reservations/:id',authMiddleware,hasAny({
     permissions: ['update_reservation']
   }),updateReservation);
 
-
+router.get('/garagiste/garage-ratings/:garageId', authMiddleware,getGarageRatings);
 
 //router.post("/create-employe", authMiddleware, createEmploye);
 
