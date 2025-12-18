@@ -37,8 +37,16 @@ const ReservationsHistory = () => {
         setError('Impossible de charger les réservations');
       }
     } catch (err) {
-      setError('Erreur de connexion au serveur');
-      console.error(err);
+       // ⭐ AJOUTER CETTE VÉRIFICATION
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
+        
+        setError('Erreur de connexion au serveur');
+        console.error(err);
     } finally {
       setLoading(false);
     }
@@ -71,9 +79,17 @@ const ReservationsHistory = () => {
       // ));
     }
   } catch (error) {
-    alert('Erreur lors de l\'annulation');
-    console.error(error);
-  }
+    // ⭐ AJOUTER CETTE VÉRIFICATION
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      
+      setError('Erreur de connexion au serveur');
+      console.error(error);
+      }
 };
 
 

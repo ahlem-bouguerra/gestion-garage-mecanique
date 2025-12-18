@@ -147,6 +147,12 @@ const ClientFactures: React.FC = () => {
         setFilteredFactures(response.data.data);
       }
     } catch (error) {
+      if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
       console.error('Erreur lors de la récupération des factures:', error);
     } finally {
       setLoading(false);
@@ -170,6 +176,12 @@ const ClientFactures: React.FC = () => {
         setShowDetailsModal(true);
       }
     } catch (error) {
+      if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
       console.error('Erreur lors de la récupération des détails:', error);
     } finally {
       setLoadingFactureId(null);
@@ -230,6 +242,12 @@ const ClientFactures: React.FC = () => {
         setStats(response.data.data);
       }
     } catch (error) {
+      if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
       console.error('Erreur lors de la récupération des stats:', error);
     }
   };

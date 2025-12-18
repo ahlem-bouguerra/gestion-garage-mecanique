@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import axios from 'axios';
 import {
   ArrowLeft,
   Calendar,
@@ -105,14 +106,14 @@ const OrdreDetailsPage = () => {
         return;
       }
 
-      const response = await fetch(
+      const response = await axios.get(
         `http://localhost:5000/api/mes-ordres/${ordreId}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
 
-      const data = await response.json();
+      const data = await response.data;
 
       if (data.success) {
         setOrdre(data.ordre);
@@ -121,6 +122,12 @@ const OrdreDetailsPage = () => {
         router.push('/mes-ordres');
       }
     } catch (error) {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
       console.error('❌ Erreur chargement ordre:', error);
       router.push('/mes-ordres');
     } finally {

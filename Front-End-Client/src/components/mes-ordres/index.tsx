@@ -4,11 +4,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Clock, 
-  CheckCircle, 
-  AlertCircle, 
-  XCircle, 
+import axios from 'axios';
+import {
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
   Star,
   Search,
   Filter,
@@ -66,34 +67,9 @@ const MesOrdresPage = () => {
   const [loading, setLoading] = useState(true);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedOrdre, setSelectedOrdre] = useState<Ordre | null>(null);
-  const [ratings, setRatings] = useState<{[key: string]: any}>({});
+  const [ratings, setRatings] = useState<{ [key: string]: any }>({});
 
-  const fetchRating = async (ordreId: string) => {
-  try {
-    const token = getAuthToken();
-    if (!token) return;
-
-    const response = await fetch(
-      `http://localhost:5000/api/client/rating/${ordreId}`,
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-
-    const data = await response.json();
-
-    if (data.success && data.rating) {
-      setRatings(prev => ({
-        ...prev,
-        [ordreId]: data.rating
-      }));
-    }
-  } catch (error) {
-    console.error('❌ Erreur chargement rating:', error);
-  }
-};
-  
-  // Filtres et pagination
+    // Filtres et pagination
   const [filters, setFilters] = useState({
     status: 'tous',
     search: '',
@@ -107,6 +83,38 @@ const MesOrdresPage = () => {
     }
     return null;
   };
+
+  const fetchRating = async (ordreId: string) => {
+    try {
+      const token = getAuthToken();
+      if (!token) return;
+
+      const response = await axios.get(
+        `http://localhost:5000/api/client/rating/${ordreId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      const data = await response.data;
+
+      if (data.success && data.rating) {
+        setRatings(prev => ({
+          ...prev,
+          [ordreId]: data.rating
+        }));
+      }
+    } catch (error) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      console.error('❌ Erreur chargement rating:', error);
+    }
+  };
+
 
   // Charger les ordres
   const fetchOrdres = async () => {
@@ -124,27 +132,33 @@ const MesOrdresPage = () => {
         ...(filters.search && { search: filters.search })
       });
 
-      const response = await fetch(
+      const response = await axios.get(
         `http://localhost:5000/api/mes-ordres?${params}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
 
-      const data = await response.json();
+      const data = await response.data;
 
       if (data.success) {
         setOrdres(data.ordres);
         data.ordres.forEach((ordre: Ordre) => {
-        if (ordre.ratingId) {
-          fetchRating(ordre._id);
-        }
-      });
-    
+          if (ordre.ratingId) {
+            fetchRating(ordre._id);
+          }
+        });
+
       } else {
         console.error('Erreur:', data.message);
       }
     } catch (error) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       console.error('❌ Erreur chargement ordres:', error);
     } finally {
       setLoading(false);
@@ -157,19 +171,25 @@ const MesOrdresPage = () => {
       const token = getAuthToken();
       if (!token) return;
 
-      const response = await fetch(
+      const response = await axios.get(
         'http://localhost:5000/api/mes-ordres-stats',
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
 
-      const data = await response.json();
+      const data = await response.data;
 
       if (data.success) {
         setStats(data.stats);
       }
     } catch (error) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       console.error('❌ Erreur chargement stats:', error);
     }
   };
@@ -186,9 +206,9 @@ const MesOrdresPage = () => {
   };
 
   // Fonction pour voir les détails
-const handleViewDetails = (ordreId: string) => {
-  router.push(`/mes-ordres/${ordreId}`);
-};
+  const handleViewDetails = (ordreId: string) => {
+    router.push(`/mes-ordres/${ordreId}`);
+  };
 
   // Rendu des badges de statut
   const StatusBadge = ({ status }: { status: string }) => {
@@ -245,29 +265,29 @@ const handleViewDetails = (ordreId: string) => {
         {/* Statistiques */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatCard 
-              title="Total" 
-              value={stats.total} 
-              icon={Calendar} 
-              color="#3B82F6" 
+            <StatCard
+              title="Total"
+              value={stats.total}
+              icon={Calendar}
+              color="#3B82F6"
             />
-            <StatCard 
-              title="En cours" 
-              value={stats.enCours} 
-              icon={TrendingUp} 
-              color="#10B981" 
+            <StatCard
+              title="En cours"
+              value={stats.enCours}
+              icon={TrendingUp}
+              color="#10B981"
             />
-            <StatCard 
-              title="Terminés" 
-              value={stats.termines} 
-              icon={CheckCircle} 
-              color="#8B5CF6" 
+            <StatCard
+              title="Terminés"
+              value={stats.termines}
+              icon={CheckCircle}
+              color="#8B5CF6"
             />
-            <StatCard 
-              title="À noter" 
-              value={stats.aNotes} 
-              icon={Star} 
-              color="#F59E0B" 
+            <StatCard
+              title="À noter"
+              value={stats.aNotes}
+              icon={Star}
+              color="#F59E0B"
             />
           </div>
         )}
@@ -377,7 +397,7 @@ const handleViewDetails = (ordreId: string) => {
                           </p>
                         </div>
 
-                        
+
                       </div>
                     </div>
                   </div>
@@ -403,36 +423,35 @@ const handleViewDetails = (ordreId: string) => {
                     )}
 
                     {ratings[ordre._id] && (
-  <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-    <div className="flex items-center gap-2 mb-2">
-      <CheckCircle className="w-4 h-4 text-green-600" />
-      <span className="text-sm font-semibold text-green-800">Votre avis</span>
-    </div>
-    <div className="flex items-center gap-1 mb-2">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          className={`w-4 h-4 ${
-            star <= ratings[ordre._id].rating
-              ? 'fill-yellow-400 text-yellow-400'
-              : 'text-gray-300'
-          }`}
-        />
-      ))}
-      <span className="text-sm text-gray-600 ml-2">
-        ({ratings[ordre._id].rating}/5)
-      </span>
-    </div>
-    {ratings[ordre._id].comment && (
-      <p className="text-sm text-gray-700 italic">
-        "{ratings[ordre._id].comment}"
-      </p>
-    )}
-    <p className="text-xs text-gray-500 mt-2">
-      Noté le {new Date(ratings[ordre._id].createdAt).toLocaleDateString('fr-FR')}
-    </p>
-  </div>
-)}
+                      <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <span className="text-sm font-semibold text-green-800">Votre avis</span>
+                        </div>
+                        <div className="flex items-center gap-1 mb-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-4 h-4 ${star <= ratings[ordre._id].rating
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'text-gray-300'
+                                }`}
+                            />
+                          ))}
+                          <span className="text-sm text-gray-600 ml-2">
+                            ({ratings[ordre._id].rating}/5)
+                          </span>
+                        </div>
+                        {ratings[ordre._id].comment && (
+                          <p className="text-sm text-gray-700 italic">
+                            "{ratings[ordre._id].comment}"
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-2">
+                          Noté le {new Date(ratings[ordre._id].createdAt).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -484,7 +503,7 @@ const RatingModal: React.FC<RatingModalProps> = ({ ordre, onClose, onSuccess }) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (rating === 0) {
       alert('Veuillez sélectionner une note');
       return;
@@ -494,20 +513,18 @@ const RatingModal: React.FC<RatingModalProps> = ({ ordre, onClose, onSuccess }) 
 
     try {
       const token = getAuthToken();
-      const response = await fetch('http://localhost:5000/api/client/rate-garage', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+      const response = await axios.post('http://localhost:5000/api/client/rate-garage', {
           ordreId: ordre._id,
           rating,
           comment
-        })
-      });
+        },
+       {   headers: {
+          Authorization: `Bearer ${token}`
+        },
+      }
+      );
 
-      const data = await response.json();
+      const data = await response.data;
 
       if (data.success) {
         alert('✅ Merci pour votre avis !');
@@ -517,6 +534,12 @@ const RatingModal: React.FC<RatingModalProps> = ({ ordre, onClose, onSuccess }) 
         alert('❌ ' + data.message);
       }
     } catch (error) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       console.error('❌ Erreur notation:', error);
       alert('Erreur lors de l\'envoi de la notation');
     } finally {
@@ -553,11 +576,10 @@ const RatingModal: React.FC<RatingModalProps> = ({ ordre, onClose, onSuccess }) 
                   className="focus:outline-none transition-transform hover:scale-110"
                 >
                   <Star
-                    className={`w-10 h-10 ${
-                      star <= (hoveredRating || rating)
+                    className={`w-10 h-10 ${star <= (hoveredRating || rating)
                         ? 'fill-yellow-400 text-yellow-400'
                         : 'text-gray-300'
-                    }`}
+                      }`}
                   />
                 </button>
               ))}

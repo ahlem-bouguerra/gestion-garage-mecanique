@@ -25,9 +25,9 @@ const GarageSearch = () => {
   const [loadingRatings, setLoadingRatings] = useState(false);
   const [currentRatingIndex, setCurrentRatingIndex] = useState(0);
   const getAuthToken = () => {
-      return localStorage.getItem('token') || sessionStorage.getItem('token');
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
-  
+
   const [filters, setFilters] = useState({
     governorate: '',
     city: '',
@@ -42,16 +42,16 @@ const GarageSearch = () => {
   const router = useRouter();
 
   // Cacher le header quand le modal de chat est ouvert
-useEffect(() => {
-  const header = document.querySelector('header');
-  if (!header) return;
+  useEffect(() => {
+    const header = document.querySelector('header');
+    if (!header) return;
 
-  if (showChatModal) {
-    header.classList.add("hidden");
-  } else {
-    header.classList.remove("hidden");
-  }
-}, [showChatModal]);
+    if (showChatModal) {
+      header.classList.add("hidden");
+    } else {
+      header.classList.remove("hidden");
+    }
+  }, [showChatModal]);
 
   // Obtenir l'adresse depuis les coordonnées
   const getUserAddress = async (latitude, longitude) => {
@@ -120,45 +120,51 @@ useEffect(() => {
   }, [filters.governorate]);
 
   // Recherche des garages (SIMPLIFIÉ - calculs dans le backend)
-const searchGarages = async () => {
-  setLoading(true);
-  try {
-    const token = getAuthToken();
+  const searchGarages = async () => {
+    setLoading(true);
+    try {
+      const token = getAuthToken();
 
-    if (!token || token === 'null' || token === 'undefined') {
-      window.location.href = '/auth/sign-in';
-      return;
-    }
-    const params = new URLSearchParams();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      const params = new URLSearchParams();
 
-    if (searchTerm) params.append('search', searchTerm);
-    if (filters.governorate) params.append('governorate', filters.governorate);
-    if (filters.city) params.append('city', filters.city);
-    if (userLocation) {
-      params.append('latitude', userLocation.latitude.toString());
-      params.append('longitude', userLocation.longitude.toString());
-      params.append('radius', filters.radius.toString());
-    }
+      if (searchTerm) params.append('search', searchTerm);
+      if (filters.governorate) params.append('governorate', filters.governorate);
+      if (filters.city) params.append('city', filters.city);
+      if (userLocation) {
+        params.append('latitude', userLocation.latitude.toString());
+        params.append('longitude', userLocation.longitude.toString());
+        params.append('radius', filters.radius.toString());
+      }
 
-    const response = await fetch(`http://localhost:5000/api/search?${params}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    
-    const data = await response.json();
+      const response = await fetch(`http://localhost:5000/api/search?${params}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-    if (data.success) {
-      setGarages(data.garages || []);
-      console.log('✅ Garages reçus:', data.garages.length);
-    } else {
-      setGarages([]);
-    }
-  } catch (error) {
-    console.error('Erreur recherche:', error);
-    setGarages([]);
-  } finally {
-    setLoading(false);
+      const data = await response.json();
+
+      if (data.success) {
+        setGarages(data.garages || []);
+        console.log('✅ Garages reçus:', data.garages.length);
+      } else {
+        setGarages([]);
+      }
+    } catch (error) {
+          if (error.response?.status === 401) {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    window.location.href = '/auth/sign-in';
+    return;
   }
-};
+      console.error('Erreur recherche:', error);
+      setGarages([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Charger les garages au démarrage
   useEffect(() => {
@@ -185,53 +191,59 @@ const searchGarages = async () => {
     const url = userLocation
       ? `https://www.google.com/maps/dir/${userLocation.latitude},${userLocation.longitude}/${lat},${lng}`
       : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-    
+
     window.open(url, '_blank');
   };
 
   // Sélectionner un garage et charger ses services
-const handleGarageSelect = async (garageId) => {
-  const garage = garages.find(g => g._id === garageId);
-  if (!garage) return;
+  const handleGarageSelect = async (garageId) => {
+    const garage = garages.find(g => g._id === garageId);
+    if (!garage) return;
 
-  setSelectedGarage(garage);
-  setLoadingRatings(true);
+    setSelectedGarage(garage);
+    setLoadingRatings(true);
 
-  try {
-    const token = getAuthToken();
-    
-    if (!token || token === 'null' || token === 'undefined') {
-      window.location.href = '/auth/sign-in';
-      return;
+    try {
+      const token = getAuthToken();
+
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+
+      // Charger les services
+      const servicesRes = await axios.get(
+        `http://localhost:5000/api/services/garage/${garageId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setServices(Array.isArray(servicesRes.data) ? servicesRes.data : servicesRes.data.services || []);
+
+      // NOUVEAU: Charger les ratings
+      const ratingsRes = await axios.get(
+        `http://localhost:5000/api/client/garage-ratings/${garageId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (ratingsRes.data.success) {
+        setRatings(ratingsRes.data.ratings);
+        setRatingStats(ratingsRes.data.statistics);
+      }
+
+    } catch (error) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      console.error('Erreur chargement données garage:', error);
+      setServices([]);
+      setRatings([]);
+      setRatingStats(null);
+    } finally {
+      setLoadingRatings(false);
     }
-
-    // Charger les services
-    const servicesRes = await axios.get(
-      `http://localhost:5000/api/services/garage/${garageId}`, 
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setServices(Array.isArray(servicesRes.data) ? servicesRes.data : servicesRes.data.services || []);
-
-    // NOUVEAU: Charger les ratings
-    const ratingsRes = await axios.get(
-      `http://localhost:5000/api/client/garage-ratings/${garageId}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    
-    if (ratingsRes.data.success) {
-      setRatings(ratingsRes.data.ratings);
-      setRatingStats(ratingsRes.data.statistics);
-    }
-
-  } catch (error) {
-    console.error('Erreur chargement données garage:', error);
-    setServices([]);
-    setRatings([]);
-    setRatingStats(null);
-  } finally {
-    setLoadingRatings(false);
-  }
-};
+  };
 
   // Rediriger vers la réservation
   const handleReservation = (garage) => {
@@ -249,29 +261,35 @@ const handleGarageSelect = async (garageId) => {
   };
 
   const checkUnreadMessages = async () => {
-  try {
-    const token = getAuthToken();
-    if (!token || token === 'null' || token === 'undefined') {
-      window.location.href = '/auth/sign-in';
-      return;
-    }
-    const res = await axios.get("http://localhost:5000/api/client-reservations/", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+      const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      const res = await axios.get("http://localhost:5000/api/client-reservations/", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-    // Compter les réservations nécessitant une action
-    const unread = res.data.reservations.filter(r => r.status === 'contre_propose').length;
-    setUnreadMessages(unread);
-  } catch (err) {
-    console.error("Erreur check messages:", err);
-  }
-};
-// Vérifier les messages toutes les 30 secondes
-useEffect(() => {
-  checkUnreadMessages();
-  const interval = setInterval(checkUnreadMessages, 30000);
-  return () => clearInterval(interval);
-}, []);
+      // Compter les réservations nécessitant une action
+      const unread = res.data.reservations.filter(r => r.status === 'contre_propose').length;
+      setUnreadMessages(unread);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      console.error("Erreur check messages:", err);
+    }
+  };
+  // Vérifier les messages toutes les 30 secondes
+  useEffect(() => {
+    checkUnreadMessages();
+    const interval = setInterval(checkUnreadMessages, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -356,18 +374,16 @@ useEffect(() => {
           <div className="flex bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode('list')}
-              className={`px-4 py-2 rounded-md flex items-center gap-2 ${
-                viewMode === 'list' ? 'bg-white shadow' : 'text-gray-600'
-              }`}
+              className={`px-4 py-2 rounded-md flex items-center gap-2 ${viewMode === 'list' ? 'bg-white shadow' : 'text-gray-600'
+                }`}
             >
               <List className="h-4 w-4" />
               Liste
             </button>
             <button
               onClick={() => setViewMode('map')}
-              className={`px-4 py-2 rounded-md flex items-center gap-2 ${
-                viewMode === 'map' ? 'bg-white shadow' : 'text-gray-600'
-              }`}
+              className={`px-4 py-2 rounded-md flex items-center gap-2 ${viewMode === 'map' ? 'bg-white shadow' : 'text-gray-600'
+                }`}
             >
               <Map className="h-4 w-4" />
               Carte
@@ -399,7 +415,7 @@ useEffect(() => {
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="text-xl font-semibold text-gray-800">{garage.nom}</h3>
-                      
+
                       <div className="flex flex-col items-end gap-1">
                         {garage.distance && (
                           <span className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">
@@ -440,7 +456,7 @@ useEffect(() => {
                         </div>
                       )}
                     </div>
-                    
+
 
                     <div className="mt-4 flex gap-2">
                       <button
@@ -481,7 +497,7 @@ useEffect(() => {
             {/* Informations */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold border-b pb-2">Informations</h3>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <span>📍</span>
@@ -516,18 +532,17 @@ useEffect(() => {
             {/* Services */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold border-b pb-2">Services proposés</h3>
-              
+
               {services.length > 0 ? (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {services.map((service) => (
                     <div key={service._id} className="bg-gray-50 rounded-lg p-4">
                       <div className="flex justify-between items-start">
                         <h4 className="font-semibold">{service.name}</h4>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          service.statut?.toLowerCase() === 'actif'
+                        <span className={`px-2 py-1 rounded-full text-xs ${service.statut?.toLowerCase() === 'actif'
                             ? 'bg-green-100 text-green-700'
                             : 'bg-red-100 text-red-700'
-                        }`}>
+                          }`}>
                           {service.statut}
                         </span>
                       </div>
@@ -542,253 +557,264 @@ useEffect(() => {
               )}
             </div>
             {/* Ratings */}
-<div className="space-y-4 lg:col-span-2">
-  <h3 className="text-lg font-semibold border-b pb-2">
-    Avis clients
-    {ratingStats && (
-      <span className="text-sm font-normal text-gray-500 ml-2">
-        ({ratingStats.totalRatings} avis)
-      </span>
-    )}
-  </h3>
-  
-  {loadingRatings ? (
-    <div className="text-center py-8">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-    </div>
-  ) : ratingStats && ratingStats.totalRatings > 0 ? (
-    <div className="space-y-4">
-      {/* Stats globales */}
-<div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-  <div className="flex items-start gap-8">
-    {/* Score principal */}
-<div className="text-center">
-  <div className="relative inline-block">
-    <svg className="w-32 h-32 transform -rotate-90">
-      <circle cx="64" cy="64" r="56" stroke="#e5e7eb" strokeWidth="8" fill="none" />
-      <circle 
-        cx="64" cy="64" r="56" 
-        stroke="url(#gradient)" 
-        strokeWidth="8" 
-        fill="none"
-        strokeDasharray={`${(ratingStats.averageRating / 5) * 351.86} 351.86`}
-        strokeLinecap="round"
-        className="transition-all duration-1000"
-      />
-      <defs>
-        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#fbbf24" />
-          <stop offset="100%" stopColor="#f59e0b" />
-        </linearGradient>
-      </defs>
-    </svg>
-    <div className="absolute inset-0 flex flex-col items-center justify-center">
-      <span className="text-4xl font-black text-gray-800">
-        {ratingStats.averageRating.toFixed(1)}
-      </span>
-      <div className="text-xl">
-        {/* Étoiles pleines */}
-        <span className="text-yellow-500">
-          {'★'.repeat(Math.floor(ratingStats.averageRating))}
-        </span>
-        {/* Étoiles vides */}
-        <span className="text-gray-300">
-          {'★'.repeat(5 - Math.floor(ratingStats.averageRating))}
-        </span>
-      </div>
-    </div>
-  </div>
-  <div className="mt-2 text-sm text-gray-600 font-medium">
-    {ratingStats.totalRatings} avis clients
-  </div>
-</div>
-
-    {/* Barres de distribution */}
-    <div className="flex-1 space-y-3">
-      {[5, 4, 3, 2, 1].map(star => {
-        const count = ratingStats[`rating${star}`];
-        const percent = (count / ratingStats.totalRatings * 100).toFixed(0);
-        return (
-          <div key={star} className="flex items-center gap-3">
-            <span className="text-sm font-semibold text-gray-700 w-8">
-              {star}★
-            </span>
-            <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
-              <div 
-                className={`h-full rounded-full transition-all duration-700 ${
-                  star === 5 ? 'bg-green-500' :
-                  star === 4 ? 'bg-lime-500' :
-                  star === 3 ? 'bg-yellow-500' :
-                  star === 2 ? 'bg-orange-500' : 'bg-red-500'
-                }`}
-                style={{ width: `${percent}%` }}
-              />
-            </div>
-            <span className="text-sm text-gray-600 w-12 text-right font-semibold">
-              {count}
-            </span>
-          </div>
-        );
-      })}
-      
-      {ratingStats.totalRecommande > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-200 flex items-center gap-2 text-sm">
-          <span className="text-2xl">👍</span>
-          <span className="font-semibold text-green-600">
-            {ratingStats.totalRecommande} client{ratingStats.totalRecommande > 1 ? 's' : ''}
-          </span>
-          <span className="text-gray-600">recommande{ratingStats.totalRecommande > 1 ? 'nt' : ''} ce garage</span>
-        </div>
-      )}
-    </div>
-  </div>
-</div>
-
-      {/* Liste des avis */}
-      <div className="relative">
-  {ratings.length > 0 ? (
-    <>
-      {/* Carte avis actuel */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-gray-200 shadow-sm min-h-[200px]">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
-                {(ratings[currentRatingIndex].ficheClientId?.nom || 'C')[0].toUpperCase()}
-              </div>
-              <div>
-                <span className="font-semibold text-gray-800 block">
-                  {ratings[currentRatingIndex].ficheClientId?.nom || 'Client'}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-yellow-400 text-lg">
-                    {'⭐'.repeat(ratings[currentRatingIndex].rating)}
+            <div className="space-y-4 lg:col-span-2">
+              <h3 className="text-lg font-semibold border-b pb-2">
+                Avis clients
+                {ratingStats && (
+                  <span className="text-sm font-normal text-gray-500 ml-2">
+                    ({ratingStats.totalRatings} avis)
                   </span>
-                  <span className="text-gray-400">{'☆'.repeat(5 - ratings[currentRatingIndex].rating)}</span>
+                )}
+              </h3>
+
+              {loadingRatings ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
                 </div>
-              </div>
+              ) : ratingStats && ratingStats.totalRatings > 0 ? (
+                <div className="space-y-4">
+                  {/* Stats globales */}
+                  <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <div className="flex items-start gap-8">
+                      {/* Score principal */}
+                      <div className="text-center">
+                        <div className="relative inline-block">
+                          <svg className="w-32 h-32 transform -rotate-90">
+                            <circle cx="64" cy="64" r="56" stroke="#e5e7eb" strokeWidth="8" fill="none" />
+                            <circle
+                              cx="64" cy="64" r="56"
+                              stroke="url(#gradient)"
+                              strokeWidth="8"
+                              fill="none"
+                              strokeDasharray={`${(ratingStats.averageRating / 5) * 351.86} 351.86`}
+                              strokeLinecap="round"
+                              className="transition-all duration-1000"
+                            />
+                            <defs>
+                              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#fbbf24" />
+                                <stop offset="100%" stopColor="#f59e0b" />
+                              </linearGradient>
+                            </defs>
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="text-4xl font-black text-gray-800">
+                              {ratingStats.averageRating.toFixed(1)}
+                            </span>
+                            <div className="text-xl">
+                              {/* Étoiles pleines */}
+                              <span className="text-yellow-500">
+                                {'★'.repeat(Math.floor(ratingStats.averageRating))}
+                              </span>
+                              {/* Étoiles vides */}
+                              <span className="text-gray-300">
+                                {'★'.repeat(5 - Math.floor(ratingStats.averageRating))}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-2 text-sm text-gray-600 font-medium">
+                          {ratingStats.totalRatings} avis clients
+                        </div>
+                      </div>
+
+                      {/* Barres de distribution */}
+                      <div className="flex-1 space-y-3">
+                        {[5, 4, 3, 2, 1].map(star => {
+                          const count = ratingStats[`rating${star}`];
+                          const percent = (count / ratingStats.totalRatings * 100).toFixed(0);
+                          return (
+                            <div key={star} className="flex items-center gap-3">
+                              <span className="text-sm font-semibold text-gray-700 w-8">
+                                {star}★
+                              </span>
+                              <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-700 ${star === 5 ? 'bg-green-500' :
+                                      star === 4 ? 'bg-lime-500' :
+                                        star === 3 ? 'bg-yellow-500' :
+                                          star === 2 ? 'bg-orange-500' : 'bg-red-500'
+                                    }`}
+                                  style={{ width: `${percent}%` }}
+                                />
+                              </div>
+                              <span className="text-sm text-gray-600 w-12 text-right font-semibold">
+                                {count}
+                              </span>
+                            </div>
+                          );
+                        })}
+
+                        {ratingStats.totalRecommande > 0 && (
+                          <div className="mt-4 pt-4 border-t border-gray-200 flex items-center gap-2 text-sm">
+                            <span className="text-2xl">👍</span>
+                            <span className="font-semibold text-green-600">
+                              {ratingStats.totalRecommande} client{ratingStats.totalRecommande > 1 ? 's' : ''}
+                            </span>
+                            <span className="text-gray-600">recommande{ratingStats.totalRecommande > 1 ? 'nt' : ''} ce garage</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Liste des avis */}
+                  <div className="relative">
+                    {ratings.length > 0 ? (
+                      <>
+                        {/* Carte avis actuel */}
+                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-gray-200 shadow-sm min-h-[200px]">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-1">
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                                  {(ratings[currentRatingIndex].ficheClientId?.nom || 'C')[0].toUpperCase()}
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-gray-800 block">
+                                    {ratings[currentRatingIndex].ficheClientId?.nom || 'Client'}
+                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-yellow-400 text-lg">
+                                      {'⭐'.repeat(ratings[currentRatingIndex].rating)}
+                                    </span>
+                                    <span className="text-gray-400">{'☆'.repeat(5 - ratings[currentRatingIndex].rating)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <span className="text-xs text-gray-500">
+                                {new Date(ratings[currentRatingIndex].createdAt).toLocaleDateString('fr-FR', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric'
+                                })}
+                              </span>
+                            </div>
+
+                            {ratings[currentRatingIndex].recommande && (
+                              <span className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 text-xs px-3 py-1.5 rounded-full font-medium border border-green-200">
+                                👍 Recommandé
+                              </span>
+                            )}
+                          </div>
+
+
+                          {ratings[currentRatingIndex].ordreSnapshot && (
+                            <div className="font-semibold text-gray-800 block">
+                              <p className="text-gray-700 text-sm leading-relaxed italic">
+                                Service :
+                                "{ratings[currentRatingIndex].ordreSnapshot.service}"
+                              </p>
+                            </div>
+                          )}
+                     
+                          {ratings[currentRatingIndex].comment && (
+                            <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                                <p className="text-gray-700 text-xl leading-relaxed italic">
+                                Commentaire Client : 
+                              </p>
+                              <p className="text-gray-700 text-sm leading-relaxed italic">
+                                "{ratings[currentRatingIndex].comment}"
+                              </p>
+                            </div>
+                          )}
+
+                          {ratings[currentRatingIndex].reponseGarage && (
+                            <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                              <div className="flex items-start gap-2">
+                                <span className="text-blue-600 text-lg">💬</span>
+                                <div className="flex-1">
+                                  <p className="text-xs font-semibold text-blue-800 mb-1.5">
+                                    Réponse du garage
+                                  </p>
+                                  <p className="text-sm text-gray-700 leading-relaxed">
+                                    {ratings[currentRatingIndex].reponseGarage}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Navigation */}
+                        <div className="flex items-center justify-between mt-4">
+                          <button
+                            onClick={() => setCurrentRatingIndex(prev =>
+                              prev > 0 ? prev - 1 : ratings.length - 1
+                            )}
+                            disabled={ratings.length <= 1}
+                            className="p-2 rounded-full bg-white border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                          >
+                            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+
+                          {/* Indicateurs */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600 font-medium">
+                              {currentRatingIndex + 1} / {ratings.length}
+                            </span>
+                            <div className="flex gap-1.5">
+                              {ratings.slice(0, 5).map((_, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => setCurrentRatingIndex(idx)}
+                                  className={`h-2 rounded-full transition-all ${idx === currentRatingIndex
+                                      ? 'w-8 bg-blue-600'
+                                      : 'w-2 bg-gray-300 hover:bg-gray-400'
+                                    }`}
+                                />
+                              ))}
+                              {ratings.length > 5 && (
+                                <span className="text-gray-400 text-xs self-center ml-1">
+                                  +{ratings.length - 5}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => setCurrentRatingIndex(prev =>
+                              prev < ratings.length - 1 ? prev + 1 : 0
+                            )}
+                            disabled={ratings.length <= 1}
+                            className="p-2 rounded-full bg-white border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                          >
+                            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        {/* Optionnel : Auto-play */}
+                        {ratings.length > 1 && (
+                          <div className="text-center mt-3">
+                            <button
+                              onClick={() => {
+                                const interval = setInterval(() => {
+                                  setCurrentRatingIndex(prev =>
+                                    prev < ratings.length - 1 ? prev + 1 : 0
+                                  );
+                                }, 1000);
+                                setTimeout(() => clearInterval(interval), ratings.length * 1000);
+                              }}
+                              className="text-xs text-blue-600 hover:text-blue-800 underline"
+                            >
+                              ▶️ Lecture automatique
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-gray-500 text-center py-8">Aucun avis pour le moment</p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-8">Aucun avis pour le moment</p>
+              )}
             </div>
-            <span className="text-xs text-gray-500">
-              {new Date(ratings[currentRatingIndex].createdAt).toLocaleDateString('fr-FR', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </span>
-          </div>
-          
-          {ratings[currentRatingIndex].recommande && (
-            <span className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 text-xs px-3 py-1.5 rounded-full font-medium border border-green-200">
-              👍 Recommandé
-            </span>
-          )}
-        </div>
-        
-        {ratings[currentRatingIndex].comment && (
-          <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
-            <p className="text-gray-700 text-sm leading-relaxed italic">
-              "{ratings[currentRatingIndex].comment}"
-            </p>
-          </div>
-        )}
-        
-        {ratings[currentRatingIndex].reponseGarage && (
-          <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-            <div className="flex items-start gap-2">
-              <span className="text-blue-600 text-lg">💬</span>
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-blue-800 mb-1.5">
-                  Réponse du garage
-                </p>
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  {ratings[currentRatingIndex].reponseGarage}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Navigation */}
-      <div className="flex items-center justify-between mt-4">
-        <button
-          onClick={() => setCurrentRatingIndex(prev => 
-            prev > 0 ? prev - 1 : ratings.length - 1
-          )}
-          disabled={ratings.length <= 1}
-          className="p-2 rounded-full bg-white border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-        >
-          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-
-        {/* Indicateurs */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600 font-medium">
-            {currentRatingIndex + 1} / {ratings.length}
-          </span>
-          <div className="flex gap-1.5">
-            {ratings.slice(0, 5).map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentRatingIndex(idx)}
-                className={`h-2 rounded-full transition-all ${
-                  idx === currentRatingIndex 
-                    ? 'w-8 bg-blue-600' 
-                    : 'w-2 bg-gray-300 hover:bg-gray-400'
-                }`}
-              />
-            ))}
-            {ratings.length > 5 && (
-              <span className="text-gray-400 text-xs self-center ml-1">
-                +{ratings.length - 5}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <button
-          onClick={() => setCurrentRatingIndex(prev => 
-            prev < ratings.length - 1 ? prev + 1 : 0
-          )}
-          disabled={ratings.length <= 1}
-          className="p-2 rounded-full bg-white border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-        >
-          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Optionnel : Auto-play */}
-      {ratings.length > 1 && (
-        <div className="text-center mt-3">
-          <button
-            onClick={() => {
-              const interval = setInterval(() => {
-                setCurrentRatingIndex(prev => 
-                  prev < ratings.length - 1 ? prev + 1 : 0
-                );
-              }, 1000);
-              setTimeout(() => clearInterval(interval), ratings.length * 1000);
-            }}
-            className="text-xs text-blue-600 hover:text-blue-800 underline"
-          >
-            ▶️ Lecture automatique
-          </button>
-        </div>
-      )}
-    </>
-  ) : (
-    <p className="text-gray-500 text-center py-8">Aucun avis pour le moment</p>
-  )}
-</div>
-    </div>
-  ) : (
-    <p className="text-gray-500 text-center py-8">Aucun avis pour le moment</p>
-  )}
-</div>
           </div>
 
           <div className="mt-6 pt-4 border-t flex justify-end">
@@ -810,24 +836,24 @@ useEffect(() => {
         </div>
       )}
       {/* Bouton chat flottant */}
-<button
-  onClick={() => setShowChatModal(true)}
-  className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center z-50 hover:scale-110"
->
-  <Mail className="h-6 w-6" />
-  {unreadMessages > 0 && (
-    <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
-      {unreadMessages}
-    </span>
-  )}
-</button>
+      <button
+        onClick={() => setShowChatModal(true)}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center z-50 hover:scale-110"
+      >
+        <Mail className="h-6 w-6" />
+        {unreadMessages > 0 && (
+          <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+            {unreadMessages}
+          </span>
+        )}
+      </button>
 
-{/* Modal de chat */}
-{showChatModal && (
-  <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <ClientReservationManagement onClose={() => setShowChatModal(false)} />
-  </div>
-)}
+      {/* Modal de chat */}
+      {showChatModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <ClientReservationManagement onClose={() => setShowChatModal(false)} />
+        </div>
+      )}
     </div>
   );
 };

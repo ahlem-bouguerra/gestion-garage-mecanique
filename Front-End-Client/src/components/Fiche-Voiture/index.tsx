@@ -571,6 +571,12 @@ export default function VehiculeManagement() {
             });
             setVehicules(response.data);
         } catch (error: any) {
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
+                window.location.href = '/auth/sign-in';
+                return;
+            }
             console.error("❌ Erreur lors du chargement des véhicules:", error);
             showError(`Erreur chargement véhicules: ${error.response?.data?.error || error.message}`);
         }
@@ -761,6 +767,12 @@ export default function VehiculeManagement() {
             fetchVehicules();
             setShowVehiculeModal(false);
         } catch (error: any) {
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
+                window.location.href = '/auth/sign-in';
+                return;
+            }
             console.error("❌ Erreur soumission véhicule:", error);
             const errorMessage = error.response?.data?.error || error.message;
             showError(`Erreur: ${errorMessage}`);
@@ -784,6 +796,12 @@ export default function VehiculeManagement() {
                 fetchVehicules();
                 showSuccess("Véhicule supprimé avec succès!");
             } catch (error: any) {
+                if (error.response?.status === 401) {
+                    localStorage.removeItem('token');
+                    sessionStorage.removeItem('token');
+                    window.location.href = '/auth/sign-in';
+                    return;
+                }
                 console.error("❌ Erreur suppression:", error);
                 const errorMessage = error.response?.data?.error || error.message;
                 showError(`Erreur suppression: ${errorMessage}`);

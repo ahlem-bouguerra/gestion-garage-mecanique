@@ -87,7 +87,13 @@ export default function ClientReservationManagement({ onClose }) {
         setHasNewMessages(hasNew);
 
         setReservations(filteredReservations);
-      } catch (err) {
+      } catch (err:any) {
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
         console.error("Erreur fetch reservations:", err);
         setError("Erreur lors du chargement des réservations");
       }
@@ -186,7 +192,13 @@ export default function ClientReservationManagement({ onClose }) {
         message: ''
       });
 
-    } catch (err) {
+    } catch (err : any) {
+      if (err.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
       console.error("Erreur complète:", err);
       console.error("Réponse serveur:", err.response?.data);
 

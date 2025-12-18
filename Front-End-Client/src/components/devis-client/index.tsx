@@ -65,6 +65,12 @@ const ClientDevisPage = () => {
         setStats(response.data.stats);
       }
     } catch (err) {
+          if (err.response?.status === 401) {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    window.location.href = '/auth/sign-in';
+    return;
+  }
       console.error('Erreur chargement stats:', err);
     }
   };
@@ -83,6 +89,12 @@ const ClientDevisPage = () => {
         setDevis(response.data.data);
       }
     } catch (err) {
+          if (err.response?.status === 401) {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    window.location.href = '/auth/sign-in';
+    return;
+  }
       setError(err.response?.data?.message || 'Erreur lors du chargement des devis');
       console.error('Erreur:', err);
     } finally {
@@ -101,6 +113,12 @@ const ClientDevisPage = () => {
         setSelectedDevis(response.data.data);
       }
     } catch (err) {
+          if (err.response?.status === 401) {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    window.location.href = '/auth/sign-in';
+    return;
+  }
       setError(err.response?.data?.message || 'Erreur lors du chargement du devis');
     }
   };

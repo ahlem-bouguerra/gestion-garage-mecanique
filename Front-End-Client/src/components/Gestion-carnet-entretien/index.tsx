@@ -72,15 +72,15 @@ interface VehiculeInfo {
     telephone?: string;
   };
   carteGrise?: {
-        numeroCG: string;
-        numeroChassis: string;
-        dateMiseCirculation: Date;
-        puissanceFiscale: number;
-        genre: 'VP' | 'VU' | 'MOTO';
-        nombrePlaces: number;
-        dateVisite?: Date;
-        dateProchaineVisite?: Date;
-    };
+    numeroCG: string;
+    numeroChassis: string;
+    dateMiseCirculation: Date;
+    puissanceFiscale: number;
+    genre: 'VP' | 'VU' | 'MOTO';
+    nombrePlaces: number;
+    dateVisite?: Date;
+    dateProchaineVisite?: Date;
+  };
 }
 
 interface Stats {
@@ -99,7 +99,7 @@ const CarnetEntretien: React.FC = () => {
   const [data, setData] = useState<CarnetEntretienData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  
+
   // ✅ NOUVEAUX ÉTATS POUR LE FORMULAIRE
   const [showAddForm, setShowAddForm] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -137,6 +137,12 @@ const CarnetEntretien: React.FC = () => {
       });
       setData(response.data);
     } catch (error: any) {
+      if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
       console.error("Erreur chargement carnet d'entretien:", error);
       setError(error.response?.data?.error || "Erreur lors du chargement");
     } finally {
@@ -162,7 +168,7 @@ const CarnetEntretien: React.FC = () => {
 
     try {
       setSaving(true);
-      
+
       const response = await axios.post(`${API_BASE_URL}/creer-dans-carnet`, {
         vehiculeId,
         date: formData.date,
@@ -173,14 +179,14 @@ const CarnetEntretien: React.FC = () => {
           prix: tache.prix
         })),
         cout: formData.cout
-        }, {
+      }, {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
 
 
       // Rafraîchir les données
       await fetchCarnetEntretien(vehiculeId);
-      
+
       // Réinitialiser le formulaire
       setFormData({
         date: new Date().toISOString().split('T')[0],
@@ -190,6 +196,12 @@ const CarnetEntretien: React.FC = () => {
       setShowAddForm(false);
 
     } catch (error: any) {
+      if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
       console.error("Erreur ajout entretien:", error);
       setError(error.response?.data?.error || "Erreur lors de l'ajout");
     } finally {
@@ -219,7 +231,7 @@ const CarnetEntretien: React.FC = () => {
   const mettreAJourTache = (index: number, field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
-      taches: prev.taches.map((tache, i) => 
+      taches: prev.taches.map((tache, i) =>
         i === index ? { ...tache, [field]: value } : tache
       )
     }));
@@ -324,120 +336,118 @@ const CarnetEntretien: React.FC = () => {
                 {data.vehicule.kilometrage && (
                   <p className="text-sm text-gray-500">Kilométrage: {data.vehicule.kilometrage.toLocaleString('fr-FR')} km</p>
                 )}
-                
+
               </div>
             </div>
           </div>
 
           {data.vehicule.carteGrise && (
-  <div className="border-t pt-4 mt-4">
-    <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center space-x-2">
-      <FileText className="w-4 h-4 text-blue-600" />
-      <span>Informations Carte Grise</span>
-    </h3>
-    
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-      {/* Numéro CG */}
-      {data.vehicule.carteGrise.numeroCG && (
-        <div className="bg-gray-50 rounded-lg p-3">
-          <p className="text-xs text-gray-500 mb-1">Numéro Carte Grise</p>
-          <p className="text-sm font-medium text-gray-900">
-            {data.vehicule.carteGrise.numeroCG}
-          </p>
-        </div>
-      )}
+            <div className="border-t pt-4 mt-4">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center space-x-2">
+                <FileText className="w-4 h-4 text-blue-600" />
+                <span>Informations Carte Grise</span>
+              </h3>
 
-      {/* Numéro Châssis */}
-      {data.vehicule.carteGrise.numeroChassis && (
-        <div className="bg-gray-50 rounded-lg p-3">
-          <p className="text-xs text-gray-500 mb-1">Numéro Châssis (VIN)</p>
-          <p className="text-sm font-medium text-gray-900 break-all">
-            {data.vehicule.carteGrise.numeroChassis}
-          </p>
-        </div>
-      )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* Numéro CG */}
+                {data.vehicule.carteGrise.numeroCG && (
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-500 mb-1">Numéro Carte Grise</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {data.vehicule.carteGrise.numeroCG}
+                    </p>
+                  </div>
+                )}
 
-      {/* Date Mise en Circulation */}
-      {data.vehicule.carteGrise.dateMiseCirculation && (
-        <div className="bg-gray-50 rounded-lg p-3">
-          <p className="text-xs text-gray-500 mb-1">Mise en Circulation</p>
-          <p className="text-sm font-medium text-gray-900">
-            {formatDate(data.vehicule.carteGrise.dateMiseCirculation)}
-          </p>
-        </div>
-      )}
+                {/* Numéro Châssis */}
+                {data.vehicule.carteGrise.numeroChassis && (
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-500 mb-1">Numéro Châssis (VIN)</p>
+                    <p className="text-sm font-medium text-gray-900 break-all">
+                      {data.vehicule.carteGrise.numeroChassis}
+                    </p>
+                  </div>
+                )}
 
-      {/* Puissance Fiscale */}
-      <div className="bg-gray-50 rounded-lg p-3">
-        <p className="text-xs text-gray-500 mb-1">Puissance Fiscale</p>
-        <p className="text-sm font-medium text-gray-900">
-          {data.vehicule.carteGrise.puissanceFiscale} CV
-        </p>
-      </div>
+                {/* Date Mise en Circulation */}
+                {data.vehicule.carteGrise.dateMiseCirculation && (
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-500 mb-1">Mise en Circulation</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {formatDate(data.vehicule.carteGrise.dateMiseCirculation)}
+                    </p>
+                  </div>
+                )}
 
-      {/* Genre de Véhicule */}
-      <div className="bg-gray-50 rounded-lg p-3">
-        <p className="text-xs text-gray-500 mb-1">Type de Véhicule</p>
-        <p className="text-sm font-medium text-gray-900">
-          {data.vehicule.carteGrise.genre === 'VP' && '🚗 Véhicule Particulier'}
-          {data.vehicule.carteGrise.genre === 'VU' && '🚚 Véhicule Utilitaire'}
-          {data.vehicule.carteGrise.genre === 'MOTO' && '🏍️ Motocyclette'}
-        </p>
-      </div>
+                {/* Puissance Fiscale */}
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-1">Puissance Fiscale</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {data.vehicule.carteGrise.puissanceFiscale} CV
+                  </p>
+                </div>
 
-      {/* Nombre de Places */}
-      <div className="bg-gray-50 rounded-lg p-3">
-        <p className="text-xs text-gray-500 mb-1">Nombre de Places</p>
-        <p className="text-sm font-medium text-gray-900">
-          {data.vehicule.carteGrise.nombrePlaces} places
-        </p>
-      </div>
+                {/* Genre de Véhicule */}
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-1">Type de Véhicule</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {data.vehicule.carteGrise.genre === 'VP' && '🚗 Véhicule Particulier'}
+                    {data.vehicule.carteGrise.genre === 'VU' && '🚚 Véhicule Utilitaire'}
+                    {data.vehicule.carteGrise.genre === 'MOTO' && '🏍️ Motocyclette'}
+                  </p>
+                </div>
 
-      {/* Dernière Visite Technique */}
-      {data.vehicule.carteGrise.dateVisite && (
-        <div className="bg-gray-50 rounded-lg p-3">
-          <p className="text-xs text-gray-500 mb-1">Dernière Visite Technique</p>
-          <p className="text-sm font-medium text-gray-900">
-            {formatDate(data.vehicule.carteGrise.dateVisite)}
-          </p>
-        </div>
-      )}
+                {/* Nombre de Places */}
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 mb-1">Nombre de Places</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {data.vehicule.carteGrise.nombrePlaces} places
+                  </p>
+                </div>
 
-      {/* Prochaine Visite Technique */}
-      {data.vehicule.carteGrise.dateProchaineVisite && (
-        <div className={`rounded-lg p-3 ${
-          new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date()
-            ? 'bg-red-50 border border-red-200'
-            : new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-            ? 'bg-yellow-50 border border-yellow-200'
-            : 'bg-gray-50'
-        }`}>
-          <p className="text-xs text-gray-500 mb-1 flex items-center space-x-1">
-            <Calendar className="w-3 h-3" />
-            <span>Prochaine Visite Technique</span>
-          </p>
-          <p className={`text-sm font-medium ${
-            new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date()
-              ? 'text-red-700'
-              : new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-              ? 'text-yellow-700'
-              : 'text-gray-900'
-          }`}>
-            {formatDate(data.vehicule.carteGrise.dateProchaineVisite)}
-          </p>
-          {new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date() && (
-            <p className="text-xs text-red-600 mt-1 font-medium">⚠️ Visite expirée</p>
+                {/* Dernière Visite Technique */}
+                {data.vehicule.carteGrise.dateVisite && (
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-500 mb-1">Dernière Visite Technique</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {formatDate(data.vehicule.carteGrise.dateVisite)}
+                    </p>
+                  </div>
+                )}
+
+                {/* Prochaine Visite Technique */}
+                {data.vehicule.carteGrise.dateProchaineVisite && (
+                  <div className={`rounded-lg p-3 ${new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date()
+                      ? 'bg-red-50 border border-red-200'
+                      : new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                        ? 'bg-yellow-50 border border-yellow-200'
+                        : 'bg-gray-50'
+                    }`}>
+                    <p className="text-xs text-gray-500 mb-1 flex items-center space-x-1">
+                      <Calendar className="w-3 h-3" />
+                      <span>Prochaine Visite Technique</span>
+                    </p>
+                    <p className={`text-sm font-medium ${new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date()
+                        ? 'text-red-700'
+                        : new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                          ? 'text-yellow-700'
+                          : 'text-gray-900'
+                      }`}>
+                      {formatDate(data.vehicule.carteGrise.dateProchaineVisite)}
+                    </p>
+                    {new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date() && (
+                      <p className="text-xs text-red-600 mt-1 font-medium">⚠️ Visite expirée</p>
+                    )}
+                    {new Date(data.vehicule.carteGrise.dateProchaineVisite) >= new Date() &&
+                      new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) && (
+                        <p className="text-xs text-yellow-600 mt-1 font-medium">⚠️ Expire bientôt</p>
+                      )}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
-          {new Date(data.vehicule.carteGrise.dateProchaineVisite) >= new Date() &&
-           new Date(data.vehicule.carteGrise.dateProchaineVisite) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) && (
-            <p className="text-xs text-yellow-600 mt-1 font-medium">⚠️ Expire bientôt</p>
-          )}
-        </div>
-      )}
-    </div>
-  </div>
-)}
-          
+
         </div>
 
 
@@ -458,7 +468,7 @@ const CarnetEntretien: React.FC = () => {
           {showAddForm && (
             <div className="p-6 border-b border-gray-200 bg-gray-50">
               <h4 className="text-md font-semibold text-gray-900 mb-4">Nouvel Entretien</h4>
-              
+
               {/* Date */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Date d'entretien</label>
@@ -483,7 +493,7 @@ const CarnetEntretien: React.FC = () => {
                     <span>Ajouter tâche</span>
                   </button>
                 </div>
-                
+
                 {formData.taches.map((tache, index) => (
                   <div key={index} className="flex space-x-2 mb-2 items-end">
                     <div className="flex-1">
@@ -617,63 +627,63 @@ const CarnetEntretien: React.FC = () => {
                   </div>
 
                   {/* AFFICHAGE DES TÂCHES/SERVICES - TOUJOURS VISIBLE */}
-                  {((entretien.taches && entretien.taches.length > 0) || 
+                  {((entretien.taches && entretien.taches.length > 0) ||
                     (entretien.services && entretien.services.length > 0)) && (
-                    <div className="mb-4">
-                      <h5 className="text-sm font-medium text-gray-700 mb-2">
-                        {entretien.source === 'ordre' ? 'Tâches réalisées:' : 'Services effectués:'}
-                      </h5>
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <div className="space-y-3">
-                          
-                          {/* AFFICHER LES TÂCHES D'ORDRE */}
-                          {entretien.taches && entretien.taches.map((tache, index) => (
-                            <div key={`tache-${index}`} className="border-b border-gray-200 last:border-b-0 pb-2 last:pb-0">
-                              <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                  <p className="font-medium text-sm">{tache.description} - Quantité: {tache.quantite}</p>
-                                  <p className="text-xs text-gray-500">
-                                    Service: {tache.serviceNom || 'Non spécifié'}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                      <div className="mb-4">
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">
+                          {entretien.source === 'ordre' ? 'Tâches réalisées:' : 'Services effectués:'}
+                        </h5>
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="space-y-3">
 
-                          {/* AFFICHER LES SERVICES DE CARNET */}
-                          {entretien.services && entretien.services.map((service, index) => (
-                            <div key={`service-${index}`} className="border-b border-gray-200 last:border-b-0 pb-2 last:pb-0">
-                              <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                  <p className="font-medium text-sm">
-                                    {service.nom} 
-                                    {service.quantite && ` - Quantité: ${service.quantite}`}
-                                  </p>
-                                  {service.description && (
-                                    <p className="text-xs text-gray-500">{service.description}</p>
-                                  )}
-                                </div>
-                                {service.prix && (
-                                  <div className="text-right">
-                                    <p className="text-sm font-medium text-gray-900">
-                                      {formatPrice(service.prix)}
+                            {/* AFFICHER LES TÂCHES D'ORDRE */}
+                            {entretien.taches && entretien.taches.map((tache, index) => (
+                              <div key={`tache-${index}`} className="border-b border-gray-200 last:border-b-0 pb-2 last:pb-0">
+                                <div className="flex justify-between items-start">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-sm">{tache.description} - Quantité: {tache.quantite}</p>
+                                    <p className="text-xs text-gray-500">
+                                      Service: {tache.serviceNom || 'Non spécifié'}
                                     </p>
                                   </div>
-                                )}
+                                </div>
                               </div>
-                            </div>
-                          ))}
-                          {entretien.garage && (
-  <p className="text-xl text-red-600 flex items-center gap-1">
-    <Building2 className="w-4 h-4 text-orange-500" />
-    Garage: {entretien.garage.nom}
-  </p>
-)}
+                            ))}
 
+                            {/* AFFICHER LES SERVICES DE CARNET */}
+                            {entretien.services && entretien.services.map((service, index) => (
+                              <div key={`service-${index}`} className="border-b border-gray-200 last:border-b-0 pb-2 last:pb-0">
+                                <div className="flex justify-between items-start">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-sm">
+                                      {service.nom}
+                                      {service.quantite && ` - Quantité: ${service.quantite}`}
+                                    </p>
+                                    {service.description && (
+                                      <p className="text-xs text-gray-500">{service.description}</p>
+                                    )}
+                                  </div>
+                                  {service.prix && (
+                                    <div className="text-right">
+                                      <p className="text-sm font-medium text-gray-900">
+                                        {formatPrice(service.prix)}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            {entretien.garage && (
+                              <p className="text-xl text-red-600 flex items-center gap-1">
+                                <Building2 className="w-4 h-4 text-orange-500" />
+                                Garage: {entretien.garage.nom}
+                              </p>
+                            )}
+
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               ))}
             </div>
