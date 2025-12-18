@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getAllGarages, getDevisByGarage, getDevisById ,deleteDevis ,sendDevisByMail , createNewFacture, replaceFactureWithCredit, checkIfDevisModified, checkActiveFactureExists} from "./api";
-import { Plus, Edit2, Eye, Send,Loader, Check, X, Car, User, Calendar, FileText, Euro, AlertCircle, Trash2,Mail } from 'lucide-react';
+import { getAllGarages, getDevisByGarage, getDevisById, deleteDevis, sendDevisByMail, createNewFacture, replaceFactureWithCredit, checkIfDevisModified, checkActiveFactureExists } from "./api";
+import { Plus, Edit2, Eye, Send, Loader, Check, X, Car, User, Calendar, FileText, Euro, AlertCircle, Trash2, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Devis {
@@ -41,7 +41,7 @@ export default function DevisSuperAdminPage({ selectedGarage: garageIdProp, onNa
   const [selectedDevis, setSelectedDevis] = useState<Devis | null>(null);
   const [loadingDevisId, setLoadingDevisId] = useState<string | null>(null);
   const [garagesLoading, setGaragesLoading] = useState(true); // ✅ Ajout
-  
+
   const showGarageSelector = !garageIdProp;
 
   const statusColors = {
@@ -50,9 +50,9 @@ export default function DevisSuperAdminPage({ selectedGarage: garageIdProp, onNa
     accepte: 'bg-green-100 text-green-800',
     refuse: 'bg-red-100 text-red-800'
   };
-  
+
   const router = useRouter();
-  
+
   const handleRedirectToCreate = () => {
     if (!selectedGarage) {
       alert("⚠️ Veuillez d'abord sélectionner un garage");
@@ -76,24 +76,24 @@ export default function DevisSuperAdminPage({ selectedGarage: garageIdProp, onNa
     }
   }, [selectedDevis]);
   // Ajouter cet useEffect après vos useEffect existants
-useEffect(() => {
-  if (garageIdProp) {
-    setSelectedGarage(garageIdProp);
-    handleGarageChange(garageIdProp);
-  }
-}, [garageIdProp]);
+  useEffect(() => {
+    if (garageIdProp) {
+      setSelectedGarage(garageIdProp);
+      handleGarageChange(garageIdProp);
+    }
+  }, [garageIdProp]);
 
   const loadGarages = async () => {
     try {
       console.log('🔄 Début chargement garages...');
       setGaragesLoading(true);
-      
+
       const data = await getAllGarages();
-      
+
       console.log('📦 Data reçue dans loadGarages:', data);
       console.log('📊 Type de data:', typeof data);
       console.log('📏 Longueur:', Array.isArray(data) ? data.length : 'pas un tableau');
-      
+
       if (Array.isArray(data) && data.length > 0) {
         console.log('✅ Garages trouvés:', data.length);
         setGarages(data);
@@ -101,7 +101,7 @@ useEffect(() => {
         console.warn('⚠️ Aucun garage reçu ou format incorrect');
         setGarages([]);
       }
-      
+
     } catch (error) {
       console.error("❌ Erreur chargement garages:", error);
       setGarages([]);
@@ -160,12 +160,12 @@ useEffect(() => {
     console.log('🚀 handleSendDevis appelé');
     console.log('📋 devisId:', devisId);
     console.log('🏢 selectedGarage:', selectedGarage);
-    
+
     if (!selectedGarage) {
       alert("⚠️ Aucun garage sélectionné !");
       return;
     }
-    
+
     if (!confirm("⚠️ Êtes-vous sûr d'envoyer ce devis par mail ?")) {
       return;
     }
@@ -273,7 +273,7 @@ useEffect(() => {
       } else {
         alert("❌ Une erreur est survenue lors de la création de la facture");
       }
-      
+
     } finally {
       setLoading(false);
     }
@@ -288,7 +288,8 @@ useEffect(() => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen  p-3">
+      <div className="w-full">
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
         <h1 className="text-3xl font-bold flex items-center gap-3">
           <FileText className="h-8 w-8" />
@@ -296,43 +297,43 @@ useEffect(() => {
         </h1>
         <p className="text-blue-100 mt-2">Consultez tous les devis de vos garages</p>
       </div>
-{showGarageSelector && (
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <label className="block text-gray-700 font-semibold mb-3 flex items-center gap-2">
-          <Car className="h-5 w-5 text-blue-600" />
-          Sélectionner un garage
-        </label>
-        
-        {/* ✅ Afficher un loader pendant le chargement */}
-        {garagesLoading ? (
-          <div className="text-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-600 mt-2">Chargement des garages...</p>
-          </div>
-        ) : garages.length === 0 ? (
-          <div className="text-center py-4 bg-yellow-50 rounded-lg border border-yellow-200">
-            <AlertCircle className="h-12 w-12 text-yellow-600 mx-auto mb-2" />
-            <p className="text-yellow-800 font-medium">Aucun garage disponible</p>
-            <p className="text-yellow-600 text-sm mt-1">Veuillez créer un garage d'abord</p>
-          </div>
-        ) : (
-          <select
-            onChange={(e) => handleGarageChange(e.target.value)}
-            value={selectedGarage}
-            className="w-full p-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold shadow-lg outline-none transition-all cursor-pointer hover:from-blue-600 hover:to-blue-700 focus:ring-4 focus:ring-blue-300"
-          >
-            <option value="" className="bg-white text-gray-800">
-              -- Choisissez un garage ({garages.length} disponible{garages.length > 1 ? 's' : ''}) --
-            </option>
-            {garages.map((g: any) => (
-              <option key={g._id} value={g._id} className="bg-white text-gray-800">
-                {g.nom || g.name || 'Garage sans nom'}
+      {showGarageSelector && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <label className="block text-gray-700 font-semibold mb-3 flex items-center gap-2">
+            <Car className="h-5 w-5 text-blue-600" />
+            Sélectionner un garage
+          </label>
+
+          {/* ✅ Afficher un loader pendant le chargement */}
+          {garagesLoading ? (
+            <div className="text-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-gray-600 mt-2">Chargement des garages...</p>
+            </div>
+          ) : garages.length === 0 ? (
+            <div className="text-center py-4 bg-yellow-50 rounded-lg border border-yellow-200">
+              <AlertCircle className="h-12 w-12 text-yellow-600 mx-auto mb-2" />
+              <p className="text-yellow-800 font-medium">Aucun garage disponible</p>
+              <p className="text-yellow-600 text-sm mt-1">Veuillez créer un garage d'abord</p>
+            </div>
+          ) : (
+            <select
+              onChange={(e) => handleGarageChange(e.target.value)}
+              value={selectedGarage}
+              className="w-full p-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold shadow-lg outline-none transition-all cursor-pointer hover:from-blue-600 hover:to-blue-700 focus:ring-4 focus:ring-blue-300"
+            >
+              <option value="" className="bg-white text-gray-800">
+                -- Choisissez un garage ({garages.length} disponible{garages.length > 1 ? 's' : ''}) --
               </option>
-            ))}
-          </select>
-        )}
-      </div>
-)}
+              {garages.map((g: any) => (
+                <option key={g._id} value={g._id} className="bg-white text-gray-800">
+                  {g.nom || g.name || 'Garage sans nom'}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
       {selectedGarage && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -559,6 +560,7 @@ useEffect(() => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

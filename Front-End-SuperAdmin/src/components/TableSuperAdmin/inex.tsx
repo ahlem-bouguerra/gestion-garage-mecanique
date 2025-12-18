@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { UserCheck, UserX } from 'lucide-react';
+import { UserCheck, UserX, Users } from 'lucide-react';
 import axios from 'axios';
 
 function SuperAdminTable() {
@@ -8,7 +8,7 @@ function SuperAdminTable() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const resultsPerPage = 10;
 
   // Configuration axios avec le token
@@ -55,7 +55,7 @@ function SuperAdminTable() {
     if (!window.confirm('Êtes-vous sûr de vouloir rétrograder cet utilisateur ?')) {
       return;
     }
-    
+
     try {
       await axiosInstance.patch(`/users/${userId}/demote`);
       // Rafraîchir la liste
@@ -71,10 +71,17 @@ function SuperAdminTable() {
   const paginatedUsers = users.slice((page - 1) * resultsPerPage, page * resultsPerPage);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des SuperAdmins</h1>
-        <p className="text-gray-600 mb-8">Gérez les permissions des utilisateurs</p>
+    <div className="min-h-screen  p-3">
+      <div className="w-full">
+
+
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Users className="h-8 w-8" />
+            Gestion des SuperAdmins
+          </h1>
+          <p className="text-blue-100 mt-2">Gérez les permissions des utilisateurs</p>
+        </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
@@ -130,7 +137,7 @@ function SuperAdminTable() {
                               </div>
                               <div className="ml-4">
                                 <div className="text-sm font-medium text-gray-900">{user.username || 'N/A'}</div>
-                                
+
                               </div>
                             </div>
                           </td>
@@ -156,11 +163,10 @@ function SuperAdminTable() {
                               <button
                                 onClick={() => promoteToSuperAdmin(user._id || user.id)}
                                 disabled={user.isSuperAdmin}
-                                className={`inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${
-                                  user.isSuperAdmin
+                                className={`inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${user.isSuperAdmin
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
-                                }`}
+                                  }`}
                                 title={user.isSuperAdmin ? 'Déjà activé' : 'Activer SuperAdmin'}
                               >
                                 <UserCheck className="w-4 h-4 mr-1" />
@@ -169,11 +175,10 @@ function SuperAdminTable() {
                               <button
                                 onClick={() => demoteSuperAdmin(user._id || user.id)}
                                 disabled={!user.isSuperAdmin}
-                                className={`inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${
-                                  !user.isSuperAdmin
+                                className={`inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${!user.isSuperAdmin
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
-                                }`}
+                                  }`}
                                 title={!user.isSuperAdmin ? 'Déjà désactivé' : 'Désactiver SuperAdmin'}
                               >
                                 <UserX className="w-4 h-4 mr-1" />
@@ -228,11 +233,10 @@ function SuperAdminTable() {
                           <button
                             key={i}
                             onClick={() => setPage(i + 1)}
-                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                              page === i + 1
+                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${page === i + 1
                                 ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
                                 : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                            }`}
+                              }`}
                           >
                             {i + 1}
                           </button>

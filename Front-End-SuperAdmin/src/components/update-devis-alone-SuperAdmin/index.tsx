@@ -34,7 +34,7 @@ export default function DevisUpdateForm() {
   useEffect(() => {
     if (!garageId || !devisId) {
       alert("⚠️ Paramètres manquants");
-      router.push('/devis');
+      router.push('/gestion-centrale');
       return;
     }
     loadDevisData();
@@ -74,7 +74,7 @@ export default function DevisUpdateForm() {
     } catch (error) {
       console.error("Erreur chargement devis:", error);
       alert("❌ Erreur lors du chargement du devis");
-      router.push('/devis');
+      router.push('/gestion-centrale');
     }
     setLoadingDevis(false);
   };
@@ -215,7 +215,7 @@ export default function DevisUpdateForm() {
   };
 
   const handleCancel = () => {
-    router.push('/devis');
+    router.push('/gestion-centrale');
   };
 
   if (!garageId || !devisId) {
@@ -224,7 +224,7 @@ export default function DevisUpdateForm() {
         <div className="bg-white rounded-lg shadow-md p-8 text-center">
           <p className="text-red-600 mb-4">⚠️ Paramètres manquants</p>
           <button
-            onClick={() => router.push('/devis')}
+            onClick={() => router.push('/gestion-centrale')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Retour à la liste

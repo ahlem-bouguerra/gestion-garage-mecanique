@@ -336,7 +336,7 @@ if (view === 'list') {
   // VUE CRÉATION GARAGE
   if (view === 'createGarage') {
     return (
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="w-full mx-auto p-6">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Créer un Garage</h1>
@@ -414,7 +414,7 @@ if (view === 'list') {
   // ⭐ VUE ÉDITION GARAGE
   if (view === 'editGarage' && garageToEdit) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="w-full mx-auto p-6">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -466,7 +466,7 @@ if (view === 'list') {
   // VUE AJOUT GARAGISTE
   if (view === 'addGaragiste' && selectedGarage) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="w-full mx-auto p-6">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="flex justify-between items-center mb-8">
             <div>

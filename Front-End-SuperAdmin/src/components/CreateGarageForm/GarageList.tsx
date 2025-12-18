@@ -19,7 +19,7 @@ export default function GarageList({
   onDeleteGarage
 }: GarageListProps) {
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="w-full p-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
         <div className="flex justify-between items-center">

@@ -2,7 +2,7 @@
 
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Filter, AlertCircle, Plus, Eye, Edit,Trash2 } from 'lucide-react';
+import { Filter, AlertCircle, Plus, Eye, Edit,Trash2 ,FileText} from 'lucide-react';
 import { getAllGarages, getOrdresByGarage, getStatistiques, getDevisDetails,deleteOrdre } from './api';
 import CreateOrderModal from './AjouterOrdre';
 import EditOrderModal from './EditOrderModal';
@@ -311,25 +311,28 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+ <div className="min-h-screen  p-3">
+      <div className="w-full">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard SuperAdmin</h1>
-            <p className="text-gray-600 mt-2">Sélectionnez un garage pour voir ses ordres de travail</p>
-          </div>
+       
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
+        <h1 className="text-3xl font-bold flex items-center gap-3">
+          <FileText className="h-8 w-8" />
+          Gestion des Ordres - Super Admin
+        </h1>
+        <p className="text-blue-100 mt-2">Consultez tous les ordres de vos garages</p>
+      </div>
 
           {selectedGarage && (
             <button
               onClick={handleCreateOrder}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition mb-4"
             >
               <Plus className="w-5 h-5" />
               Créer un Ordre
             </button>
           )}
-        </div>
+        
 
         {/* Message d'erreur */}
         {error && (

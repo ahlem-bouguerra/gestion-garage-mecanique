@@ -23,7 +23,7 @@ export default async function Page(props: PropsType) {
 
       <div>
 
-        <div className="col-span-12 xl:col-span-5">
+        <div className="w-full">
           < CreateGarageForm/>
         </div>
       </div>

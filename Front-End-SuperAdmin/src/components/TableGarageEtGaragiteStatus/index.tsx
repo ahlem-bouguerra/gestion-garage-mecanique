@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { UserCheck, UserX, Users, X } from 'lucide-react';
+import { UserCheck, UserX, Users, X ,FileText} from 'lucide-react';
 import axios from 'axios';
 
 function GarageEtGaragiteTableStatus() {
@@ -152,10 +152,15 @@ function GarageEtGaragiteTableStatus() {
   const selectedGarage = garages.find(g => (g._id || g.id) === selectedGarageId);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Garages</h1>
-        <p className="text-gray-600 mb-8">Gérez l'activation des garages et leurs garagistes</p>
+  <div className="min-h-screen  p-3">
+      <div className="w-full">
+                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
+        <h1 className="text-3xl font-bold flex items-center gap-3">
+          <FileText className="h-8 w-8" />
+          Gestion des Statut - Super Admin
+        </h1>
+        <p className="text-blue-100 mt-2">Consultez tous les statut de vos garages et garagistes</p>
+      </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">

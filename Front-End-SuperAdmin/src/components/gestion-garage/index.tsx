@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { Building2, FileText, Wrench, ChevronRight, Loader2, CreditCard, Settings2, Star } from 'lucide-react';
+import { Building2, FileText, Wrench, ChevronRight,ArrowLeft, Loader2, CreditCard, Settings2, Star } from 'lucide-react';
 
 // Types
 interface Garage {
@@ -124,8 +124,8 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
     // Écran de sélection de garage
     if (!selectedGarage) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-                <div className="max-w-9xl mx-auto">
+ <div className="min-h-screen  p-3">
+      <div className="w-full">
                     {/* Header */}
                     <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
                         <div className="flex items-center gap-4 mb-4">
@@ -215,16 +215,17 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
     // Menu de sélection (Devis ou Ordres)
     if (activeSection === 'selection') {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-                <div className="max-w-9xl mx-auto">
+ <div className="min-h-screen  p-3">
+      <div className="w-full">
                     {/* Header avec garage sélectionné */}
                     <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-                        <button
-                            onClick={handleBackToGarages}
-                            className="text-blue-600 hover:text-blue-700 font-medium mb-4 flex items-center gap-2"
-                        >
-                            ← Retour aux garages
-                        </button>
+                              <button
+                        onClick={handleBackToGarages}
+                        className="flex items-center gap-2 px-5 py-2.5 border-2 border-blue-600 mb-4 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        Retour aux garages
+                    </button>
 
                         <div className="flex items-center gap-4">
                             <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-4 rounded-xl">
@@ -362,49 +363,54 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
     }
 
     // Affichage du composant Devis
-    if (activeSection === 'devis') {
-        return (
-            <div>
-                <div className="bg-white border-b shadow-sm p-4 mb-6">
-                    <div className="max-w-7xl mx-auto flex items-center justify-between">
-                        <button
-                            onClick={handleBackToMenu}
-                            className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
-                        >
-                            ← Retour au menu
-                        </button>
-                        <div className="flex items-center gap-3">
-                            <Building2 className="w-5 h-5 text-gray-600" />
-                            <span className="font-semibold text-gray-900">{selectedGarage.nom}</span>
-                        </div>
+if (activeSection === 'devis') {
+    return (
+        <div className="min-h-screen p-3">
+            <div className="w-full mb-6">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                    <button
+                        onClick={handleBackToMenu}
+                        className="flex items-center gap-2 px-5 py-2.5 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        Retour au menu
+                    </button>
+                    
+                    <div className="flex items-center gap-3 px-4 py-2.5 border-2 border-black rounded-lg bg-white shadow-sm">
+                        <Building2 className="w-5 h-5 text-gray-600" />
+                        <span className="font-semibold text-gray-900">{selectedGarage.nom}</span>
                     </div>
                 </div>
-                <DevisComponent
-                    selectedGarage={selectedGarage._id}
-                    onNavigate={handleBackToMenu}
-                />
             </div>
-        );
-    }
+            
+            <DevisComponent
+                selectedGarage={selectedGarage._id}
+                onNavigate={handleBackToMenu}
+            />
+        </div>
+    );
+}
 
     // Affichage du composant Ordres
     if (activeSection === 'ordres') {
         return (
-            <div>
-                <div className="bg-white border-b shadow-sm p-4 mb-6">
-                    <div className="max-w-7xl mx-auto flex items-center justify-between">
-                        <button
-                            onClick={handleBackToMenu}
-                            className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
-                        >
-                            ← Retour au menu
-                        </button>
-                        <div className="flex items-center gap-3">
-                            <Building2 className="w-5 h-5 text-gray-600" />
-                            <span className="font-semibold text-gray-900">{selectedGarage.nom}</span>
-                        </div>
+            <div className="min-h-screen p-3">
+            <div className="w-full mb-6">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                    <button
+                        onClick={handleBackToMenu}
+                        className="flex items-center gap-2 px-5 py-2.5 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        Retour au menu
+                    </button>
+                    
+                    <div className="flex items-center gap-3 px-4 py-2.5 border-2 border-black rounded-lg bg-white shadow-sm">
+                        <Building2 className="w-5 h-5 text-gray-600" />
+                        <span className="font-semibold text-gray-900">{selectedGarage.nom}</span>
                     </div>
                 </div>
+            </div>
                 <OrdresComponent
                     selectedGarage={selectedGarage}
                     onNavigate={handleBackToMenu}
@@ -415,21 +421,23 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
 
     if (activeSection === 'factures') {
         return (
-            <div>
-                <div className="bg-white border-b shadow-sm p-4 mb-6">
-                    <div className="max-w-7xl mx-auto flex items-center justify-between">
-                        <button
-                            onClick={handleBackToMenu}
-                            className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
-                        >
-                            ← Retour au menu
-                        </button>
-                        <div className="flex items-center gap-3">
-                            <Building2 className="w-5 h-5 text-gray-600" />
-                            <span className="font-semibold text-gray-900">{selectedGarage.nom}</span>
-                        </div>
+            <div className="min-h-screen p-3">
+            <div className="w-full mb-6">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                    <button
+                        onClick={handleBackToMenu}
+                        className="flex items-center gap-2 px-5 py-2.5 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        Retour au menu
+                    </button>
+                    
+                    <div className="flex items-center gap-3 px-4 py-2.5 border-2 border-black rounded-lg bg-white shadow-sm">
+                        <Building2 className="w-5 h-5 text-gray-600" />
+                        <span className="font-semibold text-gray-900">{selectedGarage.nom}</span>
                     </div>
                 </div>
+            </div>
                 <FactureComponent
                     selectedGarage={selectedGarage}
                     onNavigate={handleBackToMenu}
@@ -440,21 +448,23 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
 
         if (activeSection === 'status') {
         return (
-            <div>
-                <div className="bg-white border-b shadow-sm p-4 mb-6">
-                    <div className="max-w-7xl mx-auto flex items-center justify-between">
-                        <button
-                            onClick={handleBackToMenu}
-                            className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
-                        >
-                            ← Retour au menu
-                        </button>
-                        <div className="flex items-center gap-3">
-                            <Building2 className="w-5 h-5 text-gray-600" />
-                            <span className="font-semibold text-gray-900">{selectedGarage.nom}</span>
-                        </div>
+            <div className="min-h-screen p-3">
+            <div className="w-full mb-6">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                    <button
+                        onClick={handleBackToMenu}
+                        className="flex items-center gap-2 px-5 py-2.5 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        Retour au menu
+                    </button>
+                    
+                    <div className="flex items-center gap-3 px-4 py-2.5 border-2 border-black rounded-lg bg-white shadow-sm">
+                        <Building2 className="w-5 h-5 text-gray-600" />
+                        <span className="font-semibold text-gray-900">{selectedGarage.nom}</span>
                     </div>
                 </div>
+            </div>
                 <GarageEtGaragiteTableStatusComponent
                 />
             </div>
@@ -464,16 +474,18 @@ const UnifiedGarageDashboard: React.FC<UnifiedGarageDashboardProps> = ({
     // Affichage du composant Ratings
 if (activeSection === 'ratings') {
     return (
-        <div>
-            <div className="bg-white border-b shadow-sm p-4 mb-6">
+        <div className="min-h-screen p-3">
+            <div className="w-full mb-6">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <button
                         onClick={handleBackToMenu}
-                        className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
+                        className="flex items-center gap-2 px-5 py-2.5 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
                     >
-                        ← Retour au menu
+                        <ArrowLeft className="w-5 h-5" />
+                        Retour au menu
                     </button>
-                    <div className="flex items-center gap-3">
+                    
+                    <div className="flex items-center gap-3 px-4 py-2.5 border-2 border-black rounded-lg bg-white shadow-sm">
                         <Building2 className="w-5 h-5 text-gray-600" />
                         <span className="font-semibold text-gray-900">{selectedGarage.nom}</span>
                     </div>

@@ -8,7 +8,7 @@ interface Rating {
   comment: string;
   recommande: boolean;
   createdAt: string;
-   status: 'active' | 'signale' | 'masque'; // ✅ Ajout
+  status: 'active' | 'signale' | 'masque'; // ✅ Ajout
   ficheClientId: { nom: string };
   ordreSnapshot: {
     numeroOrdre?: string;
@@ -46,7 +46,7 @@ const GarageRatings: React.FC<GarageRatingsProps> = ({
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ rating: 5, comment: '', recommande: true ,status: 'active' as 'active' | 'signale' | 'masque'});
+  const [editForm, setEditForm] = useState({ rating: 5, comment: '', recommande: true, status: 'active' as 'active' | 'signale' | 'masque' });
   const [minRating, setMinRating] = useState<number | null>(null);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ const GarageRatings: React.FC<GarageRatingsProps> = ({
     try {
       setLoading(true);
       const token = getAuthToken();
-      
+
       let url = `${apiBase}/superAdmin/garage-ratings/${selectedGarage._id}?page=${page}&limit=10`;
       if (minRating) {
         url += `&minRating=${minRating}`;
@@ -161,9 +161,8 @@ const GarageRatings: React.FC<GarageRatingsProps> = ({
         className="focus:outline-none"
       >
         <Star
-          className={`w-8 h-8 transition-colors ${
-            i < currentRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-yellow-200'
-          }`}
+          className={`w-8 h-8 transition-colors ${i < currentRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-yellow-200'
+            }`}
         />
       </button>
     ));
@@ -178,8 +177,8 @@ const GarageRatings: React.FC<GarageRatingsProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+  <div className="min-h-screen  p-3">
+      <div className="w-full">
         {/* Header avec statistiques */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">
@@ -299,21 +298,21 @@ const GarageRatings: React.FC<GarageRatingsProps> = ({
                       <label className="text-gray-700">Je recommande ce garage</label>
                     </div>
                     {/* Dans le mode édition, après la checkbox "Je recommande" */}
-<div>
-  <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-  <select
-    value={editForm.status}
-    onChange={(e) => setEditForm({ 
-      ...editForm, 
-      status: e.target.value as 'active' | 'signale' | 'masque' 
-    })}
-    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-  >
-    <option value="active">Active</option>
-    <option value="signale">Signalée</option>
-    <option value="masque">Masquée</option>
-  </select>
-</div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+                      <select
+                        value={editForm.status}
+                        onChange={(e) => setEditForm({
+                          ...editForm,
+                          status: e.target.value as 'active' | 'signale' | 'masque'
+                        })}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="active">Active</option>
+                        <option value="signale">Signalée</option>
+                        <option value="masque">Masquée</option>
+                      </select>
+                    </div>
 
                     <div className="flex gap-3">
                       <button
@@ -341,7 +340,7 @@ const GarageRatings: React.FC<GarageRatingsProps> = ({
                           <h3 className="font-bold text-lg text-gray-900">
                             {rating.ficheClientId?.nom || 'Client'}
                           </h3>
-                          
+
                           {rating.recommande && (
                             <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                               <ThumbsUp className="w-4 h-4" />
@@ -349,15 +348,15 @@ const GarageRatings: React.FC<GarageRatingsProps> = ({
                             </span>
                           )}
                           {rating.status === 'signale' && (
-    <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
-      Signalée
-    </span>
-  )}
-  {rating.status === 'masque' && (
-    <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
-      Masquée
-    </span>
-  )}
+                            <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
+                              Signalée
+                            </span>
+                          )}
+                          {rating.status === 'masque' && (
+                            <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                              Masquée
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 mb-2">
                           {renderStars(rating.rating)}

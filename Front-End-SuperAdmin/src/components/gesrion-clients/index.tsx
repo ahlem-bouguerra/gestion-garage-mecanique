@@ -203,8 +203,8 @@ const SuperAdminClientsPage = () => {
   // Vue détaillée du client
   if (selectedClient) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-7xl mx-auto">
+ <div className="min-h-screen  p-3">
+      <div className="w-full">
           
           {/* Bouton retour */}
           <button
@@ -444,17 +444,16 @@ const SuperAdminClientsPage = () => {
 
   // Vue liste des clients
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+  <div className="min-h-screen  p-3">
+      <div className="w-full">
         
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-            <Users className="w-10 h-10 text-blue-600" />
-            Gestion des Clients
-          </h1>
-          <p className="text-gray-600">Vue d'ensemble de tous les clients de la plateforme</p>
-        </div>
+                   <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
+                <h1 className="text-3xl font-bold flex items-center gap-3">
+                  <Users className="h-8 w-8" />
+                   Gestion des Clients
+                </h1>
+                <p className="text-blue-100 mt-2">Vue d'ensemble de tous les clients de la plateforme</p>
+              </div>
 
         {/* Statistiques */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

@@ -316,8 +316,8 @@ const fetchCreditNoteDetails = async (creditNoteId: string) => {
 
 
 return (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-6">
-    <div className="max-w-9xl mx-auto">
+  <div className="min-h-screen  p-3">
+      <div className="w-full">
       {/* Header avec gradient */}
       <div className="mb-8 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white">
         <div className="flex items-center gap-4 mb-2">
@@ -915,7 +915,7 @@ return (
       )}
       {showPaymentModal && selectedFacture && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-80 mx-auto p-5 border w-150 shadow-lg rounded-md bg-white">
             <h3 className="text-lg font-bold text-gray-900 mb-4">
               Enregistrer le paiement
             </h3>

@@ -109,7 +109,7 @@ export default function GarageDetails({ garageId, onBack, onAddGaragiste }: Gara
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="w-full mx-auto p-6">
       {/* Header avec bouton retour */}
         <button
           onClick={onBack}
