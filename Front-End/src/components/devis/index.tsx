@@ -4,6 +4,8 @@ import { Plus, Edit2, Eye, Send, Check, X, Car, User, Calendar, FileText, Euro, 
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import jsPDF from 'jspdf';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
 
 
 const GarageQuoteSystem = () => {
@@ -44,6 +46,8 @@ const GarageQuoteSystem = () => {
   const indexOfFirstDevis = indexOfLastDevis - itemsPerPage;
   const currentDevis = quotes.slice(indexOfFirstDevis, indexOfLastDevis);
   const totalPages = Math.ceil(quotes.length / itemsPerPage);
+  const { showAlert } = useGlobalAlert();
+  const { confirm } = useConfirm();
   const getAuthToken = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
@@ -115,12 +119,12 @@ const GarageQuoteSystem = () => {
         setCurrentUser(response.data);
       } catch (error: any) {
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission ");
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
           throw error;
         }
 
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -395,7 +399,7 @@ const GarageQuoteSystem = () => {
     } catch (error) {
       console.error('Erreur lors de la génération du PDF:', error);
       // Optionnel: Afficher une notification d'erreur à l'utilisateur
-      alert('Erreur lors de la génération du PDF. Veuillez réessayer.');
+      showAlert("error", "Erreur", 'Erreur lors de la génération du PDF. Veuillez réessayer.');
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -508,7 +512,7 @@ const GarageQuoteSystem = () => {
       setFactureExists(facturesCheck);
 
       if (Object.keys(filterParams).length > 0) {
-        showSuccess(`${devisWithCalculatedTotals.length} devis trouvé(s) avec les filtres appliqués`);
+        showAlert("success", "Filtres appliqués", `${devisWithCalculatedTotals.length} devis trouvé(s) avec les filtres appliqués`);
       }
 
     } catch (err) {
@@ -554,11 +558,11 @@ const GarageQuoteSystem = () => {
       if (isEditMode && editingQuote) {
         // Mode édition
         await devisApi.update(editingQuote.id, devisData);
-        showSuccess('Devis modifié avec succès ! Statut remis à "brouillon".');
+        showAlert("success", "Devis modifié", "Devis modifié avec succès ! Statut remis à \"brouillon\".");
       } else {
         // Mode création
         await devisApi.create(devisData);
-        showSuccess('Devis créé avec succès !');
+        showAlert("success", "Devis créé", "Devis créé avec succès !");
       }
 
       // Reset du formulaire (même code existant)
@@ -595,7 +599,7 @@ const GarageQuoteSystem = () => {
     try {
       await devisApi.updateStatus(quoteId, newStatus);
 
-      showSuccess(`Devis ${newStatus} avec succès`);
+      showAlert("success", `Devis ${newStatus} avec succès`, "");
 
       // Mettre à jour localement
       setQuotes(quotes.map(quote =>
@@ -613,13 +617,17 @@ const GarageQuoteSystem = () => {
   };
 
   const deleteQuote = async (quoteId) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce devis ?')) {
-      return;
-    }
+     const isConfirmed = await confirm({
+    title: "Suppression du véhicule",
+    message: `Êtes-vous sûr de vouloir supprimer ? Cette action est irréversible.`,
+    confirmText: "Supprimer",
+    cancelText: "Annuler",
+  });
 
+  if (!isConfirmed) return;
     try {
       await devisApi.delete(quoteId);
-      showSuccess('Devis supprimé avec succès');
+      showAlert("success", "Devis supprimé", "Devis supprimé avec succès");
 
       // Supprimer localement
       setQuotes(quotes.filter(quote => quote.id !== quoteId));
@@ -630,7 +638,7 @@ const GarageQuoteSystem = () => {
       }
 
     } catch (err) {
-      showError(err.message);
+      showAlert("error", "Erreur", err.message);
     }
   };
 
@@ -662,7 +670,7 @@ const GarageQuoteSystem = () => {
         // 2. Mettre à jour le statut
         await devisApi.updateStatus(devisId, 'envoye');
 
-        showSuccess(`Devis envoyé par email avec succès`);
+        showAlert("success", "Devis envoyé", "Devis envoyé par email avec succès");
 
         // 3. Mettre à jour localement
         setQuotes(quotes.map(quote =>
@@ -671,16 +679,16 @@ const GarageQuoteSystem = () => {
       }
     } catch (error: any) {
       if (error.response?.status === 403) {
-        alert("❌ Accès refusé : Vous n'avez pas la permission ");
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
         throw error;
       }
 
       if (error.response?.status === 401) {
-        alert("❌ Session expirée : Veuillez vous reconnecter");
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
         window.location.href = '/auth/sign-in';
         throw error;
       }
-      showError(error.response?.data?.message || 'Erreur lors de l\'envoi');
+      showAlert("error", "Erreur", error.response?.data?.message || 'Erreur lors de l\'envoi');
     } finally {
       setLoading(false);
     }
@@ -704,12 +712,12 @@ const GarageQuoteSystem = () => {
 
     } catch (error: any) {
       if (error.response?.status === 403) {
-        alert("❌ Accès refusé : Vous n'avez pas la permission ");
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
         throw error;
       }
 
       if (error.response?.status === 401) {
-        alert("❌ Session expirée : Veuillez vous reconnecter");
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
         window.location.href = '/auth/sign-in';
         throw error;
       }
@@ -746,12 +754,12 @@ const GarageQuoteSystem = () => {
       console.log(`✅ ${vehiculesData.length} véhicules chargés pour le client`);
     } catch (error: any) {
       if (error.response?.status === 403) {
-        alert("❌ Accès refusé : Vous n'avez pas la permission ");
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
         throw error;
       }
 
       if (error.response?.status === 401) {
-        alert("❌ Session expirée : Veuillez vous reconnecter");
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
         window.location.href = '/auth/sign-in';
         throw error;
       }
@@ -847,12 +855,12 @@ const GarageQuoteSystem = () => {
         return response.data;
       } catch (error: any) {
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
           throw error;
         }
 
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -875,12 +883,12 @@ const GarageQuoteSystem = () => {
         return response.data;
       } catch (error: any) {
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission ");
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
           throw error;
         }
 
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -903,12 +911,12 @@ const GarageQuoteSystem = () => {
         return response.data;
       } catch (error: any) {
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission ");
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
           throw error;
         }
 
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -931,12 +939,12 @@ const GarageQuoteSystem = () => {
         return response.data;
       } catch (error: any) {
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
           throw error;
         }
 
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -958,12 +966,12 @@ const GarageQuoteSystem = () => {
         return response.data;
       } catch (error: any) {
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
           throw error;
         }
 
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -972,13 +980,19 @@ const GarageQuoteSystem = () => {
     }
   };
 
-  const startEditQuote = (quote) => {
+  const startEditQuote = async (quote) => {
     // Vérifier si le devis peut être modifié
-    if (quote.status === 'accepte' || quote.status === 'refuse') {
-      if (!confirm('Ce devis a déjà été accepté/refusé. Voulez-vous vraiment le modifier ? Il repassera en statut "brouillon".')) {
-        return;
-      }
-    }
+     if (quote.status === "accepte" || quote.status === "refuse") { 
+    const isConfirmed = await confirm({
+      title: "Modifier un devis validé",
+      message:
+        'Ce devis a déjà été accepté/refusé. Voulez-vous vraiment le modifier ? Il repassera en statut "brouillon".',
+      confirmText: "Oui, modifier",
+      cancelText: "Annuler",
+    });
+
+    if (!isConfirmed) return;
+  }
 
     setEditingQuote(quote);
     setIsEditMode(true);
@@ -1011,19 +1025,6 @@ const GarageQuoteSystem = () => {
   };
 
 
-
-  const showError = (message) => {
-    const id = Date.now();
-    setNotifications(prev => [...prev, { id, variant: 'error', title: 'Erreur', description: message }]);
-    setTimeout(() => removeNotification(id), 5000);
-  };
-
-  const showSuccess = (message) => {
-    const id = Date.now();
-    setNotifications(prev => [...prev, { id, variant: 'success', title: 'Succès', description: message }]);
-    setTimeout(() => removeNotification(id), 3000);
-  };
-
   const removeNotification = (id) => {
     setNotifications(prev => prev.filter(notif => notif.id !== id));
   };
@@ -1052,12 +1053,12 @@ const GarageQuoteSystem = () => {
       }
     } catch (error: any) {
       if (error.response?.status === 403) {
-        alert("❌ Accès refusé : Vous n'avez pas la permission");
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
         throw error;
       }
 
       if (error.response?.status === 401) {
-        alert("❌ Session expirée : Veuillez vous reconnecter");
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
         window.location.href = '/auth/sign-in';
         throw error;
       }
@@ -1088,12 +1089,12 @@ const GarageQuoteSystem = () => {
       return response.data.success ? response.data.data : null;
     } catch (error: any) {
       if (error.response?.status === 403) {
-        alert("❌ Accès refusé : Vous n'avez pas la permission");
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
         throw error;
       }
 
       if (error.response?.status === 401) {
-        alert("❌ Session expirée : Veuillez vous reconnecter");
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
         window.location.href = '/auth/sign-in';
         throw error;
       }
@@ -1130,7 +1131,7 @@ const GarageQuoteSystem = () => {
           switch (userChoice) {
             case 'view_existing':
               setSelectedFacture(existingFacture);
-              showSuccess('Facture existante affichée');
+              showAlert("success", "Facture existante affichée", "");
               return;
 
             case 'replace_with_credit':
@@ -1142,7 +1143,7 @@ const GarageQuoteSystem = () => {
           }
         } else {
           setSelectedFacture(existingFacture);
-          showSuccess('Facture existante affichée');
+          showAlert("success", "Facture existante affichée", "");
           return;
         }
       } else {
@@ -1154,7 +1155,7 @@ const GarageQuoteSystem = () => {
 
       // ⭐ NE PAS afficher d'erreur si c'est 401/403 (déjà géré)
       if (error.response?.status !== 403 && error.response?.status !== 401) {
-        showError(error.response?.data?.message || 'Erreur lors de la gestion de facture');
+        showAlert("error", "Erreur", error.response?.data?.message || 'Erreur lors de la gestion de facture');
       }
     } finally {
       setLoading(false);
@@ -1274,9 +1275,7 @@ const GarageQuoteSystem = () => {
 
         setSelectedFacture(newFacture);
 
-        showSuccess(
-          `✅ Remplacement effectué ! Avoir N°${creditNote.creditNumber} créé, nouvelle facture N°${newFacture.numeroFacture} générée.`
-        );
+        showAlert("success", "Remplacement effectué", `✅ Remplacement effectué ! Avoir N°${creditNote.creditNumber} créé, nouvelle facture N°${newFacture.numeroFacture} générée.`);
 
         // Mettre à jour l'état local
         setFactureExists(prev => ({
@@ -1286,17 +1285,17 @@ const GarageQuoteSystem = () => {
       }
     } catch (error: any) {
       if (error.response?.status === 403) {
-        alert("❌ Accès refusé : Vous n'avez pas la permission");
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
         throw error;
       }
 
       if (error.response?.status === 401) {
-        alert("❌ Session expirée : Veuillez vous reconnecter");
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
         window.location.href = '/auth/sign-in';
         throw error;
       }
       console.error('❌ Erreur:', error);
-      showError(error.response?.data?.message || 'Erreur lors du remplacement de la facture');
+      showAlert("error", "Erreur", error.response?.data?.message || 'Erreur lors du remplacement de la facture');
     }
   };
 
@@ -1328,7 +1327,7 @@ const GarageQuoteSystem = () => {
 
         setSelectedFacture(newFacture);
 
-        showSuccess(`✅ Facture créée avec succès (N°${newFacture.numeroFacture}) !`);
+        showAlert("success", "Facture créée", `✅ Facture créée avec succès (N°${newFacture.numeroFacture}) !`);
 
         setFactureExists(prev => ({
           ...prev,
@@ -1337,17 +1336,17 @@ const GarageQuoteSystem = () => {
       }
     } catch (error: any) {
       if (error.response?.status === 403) {
-        alert("❌ Accès refusé : Vous n'avez pas la permission ");
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission ");
         throw error;
       }
 
       if (error.response?.status === 401) {
-        alert("❌ Session expirée : Veuillez vous reconnecter");
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
         window.location.href = '/auth/sign-in';
         throw error;
       }
       const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la création de facture';
-      showError(errorMessage);
+      showAlert("error", "Erreur", errorMessage);
       throw error; // ⭐ IMPORTANT: Propager l'erreur pour arrêter l'exécution
     }
   };
@@ -1368,12 +1367,12 @@ const GarageQuoteSystem = () => {
       return facture && facture.status !== 'cancelled' ? facture : null;
     } catch (error) {
       if (error.response?.status === 403) {
-        alert("❌ Accès refusé : Vous n'avez pas la permission");
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
         throw error; // ⭐ Propager l'erreur au lieu de retourner null
       }
 
       if (error.response?.status === 401) {
-        alert("❌ Session expirée : Veuillez vous reconnecter");
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
         window.location.href = '/auth/sign-in';
         throw error; // ⭐ Propager l'erreur
       }

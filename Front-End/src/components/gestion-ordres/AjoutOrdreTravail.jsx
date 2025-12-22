@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Car, Calendar, Save, UserCheck, Clock } from 'lucide-react';
 import { ordresTravailAPI } from './services/ordresTravailAPI';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
 
 const AjoutOrdreTravail = ({
   services,
@@ -15,6 +16,7 @@ const AjoutOrdreTravail = ({
 }) => {
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [quoteData, setQuoteData] = useState(null);
+  const { showAlert } = useGlobalAlert();
   const [ordreTravail, setOrdreTravail] = useState({
     devisId: '',
     dateCommence: '',
@@ -89,7 +91,7 @@ const AjoutOrdreTravail = ({
 
 } catch (error) {
   if (error.response?.status === 403) {
-    alert("❌ Accès refusé : Vous n'avez pas la permission");
+    showAlert("error", "Accès refusé", "Vous n'avez pas la permission")
   }
   onError(`Erreur lors du chargement du devis: ${error.message}`); // ⭐ "error", pas "err"
 } finally {
@@ -140,16 +142,16 @@ const AjoutOrdreTravail = ({
 
       // Validations
       if (!ordreTravail.dateCommence) {
-        throw new Error('La date de commencement est obligatoire');
+        showAlert("error", "date de commencement", "La date de commencement est obligatoire");
       }
       if (!ordreTravail.atelier) {
-        throw new Error('Veuillez sélectionner un atelier');
+        showAlert("error", "atelier", "Veuillez sélectionner un atelier");
       }
       if (ordreTravail.taches.some(t => !t.serviceId)) {
-        throw new Error('Toutes les tâches doivent avoir un service assigné');
+        showAlert("error", "service", "Toutes les tâches doivent avoir un service assigné");
       }
       if (ordreTravail.taches.some(t => !t.mecanicienId)) {
-        throw new Error('Toutes les tâches doivent avoir un mécanicien assigné');
+        showAlert("error", "mecanicien", "Toutes les tâches doivent avoir un mécanicien assigné");
       }
 
       const ordreData = {
@@ -186,7 +188,7 @@ const AjoutOrdreTravail = ({
 
 } catch (error) {  // ⭐ La variable s'appelle "error"
   if (error.response?.status === 403) {
-    alert("❌ Accès refusé : Vous n'avez pas la permission");
+    showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
   }
   onError(error.message || 'Erreur lors de la sauvegarde'); // ⭐ Utiliser "error", pas "err"
 } finally {

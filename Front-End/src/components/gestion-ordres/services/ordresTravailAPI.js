@@ -293,31 +293,38 @@ async getAteliers() {
 
 // Dans ordresTravailAPI (services/ordresTravailAPI.js)
 
-async getMecaniciensByService(serviceId) {
-  try {
-    if (!serviceId) return [];
-    
-    const response = await axios.get(
-      `http://localhost:5000/api/mecaniciens/by-service/${serviceId}`,
-      getAuthHeaders()
-    );
-    
-    // ⭐ CORRECTION : Extraire le tableau de mécaniciens
-    return response.data.mecaniciens || []; // Au lieu de response.data
-    
-  } catch (error) {
-    console.error('❌ Erreur getMecaniciensByService:', error);
-    
-    // ⭐ Retourner un tableau vide au lieu de throw pour éviter les crashes
-    if (error.response?.status === 404) {
-      console.warn('Aucun mécanicien trouvé pour ce service');
-      return [];
+ async getMecaniciensByService(serviceId) {
+    try {
+      if (!serviceId) {
+        console.warn('⚠️ ServiceId manquant');
+        return [];
+      }
+      
+      console.log('📥 Chargement mécaniciens pour service:', serviceId);
+      
+      const response = await axios.get(
+        `http://localhost:5000/api/mecaniciens/by-service/${serviceId}`,
+        getAuthHeaders()
+      );
+      
+      const mecaniciens = response.data.mecaniciens || [];
+      console.log(`✅ ${mecaniciens.length} mécaniciens trouvés`);
+      
+      return mecaniciens;
+      
+    } catch (error) {
+      console.error('❌ Erreur getMecaniciensByService:', error);
+      
+      if (error.response?.status === 404) {
+        console.warn('⚠️ Aucun mécanicien trouvé pour ce service');
+        return [];
+      }
+      
+      throw error;
     }
-    
-    throw error;
   }
-}
 };
+
 
 
 // ========== INTERCEPTEURS AXIOS ==========

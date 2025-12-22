@@ -110,26 +110,84 @@ export const getFicheClientNoms = async (req, res) => {
 
 export const updateFicheClient = async (req, res) => {
   try {
+    const clientId = req.params._id; // ou req.params.id selon ta route
+    const garageId = req.user.garageId;
 
+    const { email, telephone } = req.body;
 
+    // 1) Vérifier email déjà utilisé (par un autre client du même garage)
+    if (email) {
+      const existsEmail = await FicheClient.findOne({
+        garageId,
+        email,
+        _id: { $ne: clientId },
+      });
+
+      if (existsEmail) {
+        return res.status(409).json({
+          success: false,
+          field: "email",
+          message: "Cet email est déjà utilisé par un autre client.",
+        });
+      }
+    }
+
+    // 2) Vérifier téléphone déjà utilisé (par un autre client du même garage)
+    if (telephone) {
+      const existsTel = await FicheClient.findOne({
+        garageId,
+        telephone,
+        _id: { $ne: clientId },
+      });
+
+      if (existsTel) {
+        return res.status(409).json({
+          success: false,
+          field: "telephone",
+          message: "Ce numéro de téléphone est déjà utilisé par un autre client.",
+        });
+      }
+    }
+
+    // 3) Update
     const fiche = await FicheClient.findOneAndUpdate(
-      {
-        _id: req.params._id,
-        garageId: req.user.garageId
-      },
+      { _id: clientId, garageId },
       req.body,
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!fiche) {
-      return res.status(404).json({ error: "Client non trouvé ou non autorisé" });
+      return res.status(404).json({
+        success: false,
+        message: "Client non trouvé ou non autorisé",
+      });
     }
 
-    res.json(fiche);
+    return res.json({ success: true, data: fiche });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    // 4) Mongo duplicate key error (si index unique sur email/tel)
+    if (error?.code === 11000) {
+      const field = Object.keys(error.keyValue || {})[0] || "unknown";
+      return res.status(409).json({
+        success: false,
+        field,
+        message:
+          field === "email"
+            ? "Cet email est déjà utilisé par un autre client."
+            : field === "telephone"
+            ? "Ce numéro de téléphone est déjà utilisé par un autre client."
+            : "Valeur déjà utilisée.",
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Erreur lors de la mise à jour",
+      error: error.message,
+    });
   }
 };
+
 
 export const deleteFicheClient = async (req, res) => {
   try {

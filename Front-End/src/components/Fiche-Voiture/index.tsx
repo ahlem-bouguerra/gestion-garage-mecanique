@@ -4,6 +4,10 @@ import { Car, Plus, Edit, Trash2, User, Building2, Search, X, Calendar, BookOpen
 import axios from 'axios';
 
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
+
+
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -443,6 +447,10 @@ export default function VehiculeManagement() {
     const [visiteValidations, setVisiteValidations] = useState<{ [key: string]: FieldValidation }>({});
     const [rechercheGlobale, setRechercheGlobale] = useState("");
     const [vehiculesFiltres, setVehiculesFiltres] = useState<Vehicule[]>([]);
+    const { showAlert } = useGlobalAlert();
+    const { confirm } = useConfirm();
+
+
     const getAuthToken = () => {
         return localStorage.getItem('token') || sessionStorage.getItem('token');
     };
@@ -562,10 +570,6 @@ export default function VehiculeManagement() {
         setTimeout(() => setError(""), 5000);
     };
 
-    const showSuccess = (message: string) => {
-        console.log("✅ Succès:", message);
-        alert(typeof message === 'string' ? message : 'Opération réussie');
-    };
 
     const fetchClients = async () => {
         try {
@@ -824,13 +828,13 @@ const handleVehiculeSubmit = async (e: React.FormEvent) => {
             await axios.post(`${API_BASE_URL}/vehicules`, submitData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            showSuccess("Véhicule ajouté avec succès !");
+            showAlert("success", "Véhicule ajouté", "Véhicule ajouté avec succès !");
         } 
         else if (modalType === "edit" && selectedVehicule) {
             await axios.put(`${API_BASE_URL}/vehicules/${selectedVehicule._id}`, submitData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            showSuccess("Véhicule modifié avec succès !");
+            showAlert("success", "Véhicule modifié", "Véhicule modifié avec succès !");
         }
 
         fetchVehicules();
@@ -840,12 +844,12 @@ const handleVehiculeSubmit = async (e: React.FormEvent) => {
         
         // ⭐ VÉRIFICATION DES ERREURS D'AUTORISATION
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission d'effectuer cette action");
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
             return;
         }
         
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
             window.location.href = '/auth/sign-in';
             return;
         }
@@ -858,7 +862,15 @@ const handleVehiculeSubmit = async (e: React.FormEvent) => {
 };
 
 const deleteVehicule = async (vehicule: Vehicule) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ?`)) {
+   
+    const isConfirmed = await confirm({
+    title: "Suppression du véhicule",
+    message: `Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ? Cette action est irréversible.`,
+    confirmText: "Supprimer",
+    cancelText: "Annuler",
+  });
+
+  if (!isConfirmed) return;
         try {
             const token = getAuthToken();
   
@@ -873,19 +885,19 @@ const deleteVehicule = async (vehicule: Vehicule) => {
             });
             
             fetchVehicules();
-            showSuccess("Véhicule supprimé avec succès!");
+            showAlert("success", "Véhicule supprimé", "Véhicule supprimé avec succès!");
             
         } catch (error: any) {
 
             
             // ⭐ VÉRIFICATION DES ERREURS D'AUTORISATION
             if (error.response?.status === 403) {
-                alert("❌ Accès refusé : Vous n'avez pas la permission de supprimer ce véhicule");
+                showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
                 return;
             }
             
             if (error.response?.status === 401) {
-                alert("❌ Session expirée : Veuillez vous reconnecter");
+                showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
                 window.location.href = '/auth/sign-in';
                 return;
             }
@@ -893,7 +905,7 @@ const deleteVehicule = async (vehicule: Vehicule) => {
             const errorMessage = error.response?.data?.error || error.message;
             showError(`Erreur suppression: ${errorMessage}`);
         }
-    }
+    
 };
 
     const getVehiculeVisites = (vehiculeId: string) => {

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, FileText, DollarSign, Clock, AlertTriangle, X, User, Calendar, Car } from 'lucide-react';
 import axios from 'axios';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
 
 interface FactureDetails extends Facture {
   clientId?: {
@@ -103,7 +104,7 @@ const GestionFactures: React.FC = () => {
   const getAuthToken = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
-
+const { showAlert } = useGlobalAlert();
 
   // Récupérer les factures
   useEffect(() => {
@@ -197,7 +198,7 @@ const GestionFactures: React.FC = () => {
       });
 
       if (error.response?.status === 404) {
-        alert('Avoir non trouvé ou vous n\'avez pas les droits d\'accès');
+        showAlert("error", "Erreur", "Avoir non trouvé ou vous n'avez pas les droits d'accès");
       }
     }
   };
@@ -247,7 +248,7 @@ const GestionFactures: React.FC = () => {
 
       // Vérification que le token existe
       if (!token) {
-        alert('❌ Erreur: Token d\'authentification manquant. Veuillez vous reconnecter.');
+        showAlert("error", "Erreur", "❌ Erreur: Token d'authentification manquant. Veuillez vous reconnecter.");
         // Rediriger vers la page de connexion ou actualiser
         window.location.href = '/login';
         return;
@@ -276,17 +277,17 @@ const GestionFactures: React.FC = () => {
         setShowPaymentModal(false);
 
         // Afficher un message de succès
-        alert('✅ Paiement enregistré avec succès !');
+        showAlert("success", "Succès", "Paiement enregistré avec succès !");
       } else {
         console.error('❌ Échec paiement:', response.data.message);
-        alert('❌ Erreur: ' + response.data.message);
+        showAlert("error", "Erreur", "Erreur: " + response.data.message);
       }
     } catch (error: any) {
       console.error('❌ Erreur lors du paiement:', error);
 
       // Gestion spécifique des erreurs d'authentification
       if (error.response?.status === 401) {
-        alert('❌ Session expirée. Veuillez vous reconnecter.');
+        showAlert("error", "Erreur", "❌ Session expirée. Veuillez vous reconnecter.");
         localStorage.removeItem('token');
         window.location.href = '/login';
         return;
@@ -301,7 +302,7 @@ const GestionFactures: React.FC = () => {
         error.message ||
         'Erreur de connexion au serveur';
 
-      alert('❌ Erreur lors du paiement: ' + errorMessage);
+      showAlert("error", "Erreur", "❌ Erreur lors du paiement: " + errorMessage);
     }
   };
 

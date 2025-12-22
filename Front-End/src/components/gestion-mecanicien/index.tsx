@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Eye, Search, User, Calendar, Phone, Mail, Briefcase, AlertCircle, Check, X, Settings, Filter, Grid, List, MoreVertical } from 'lucide-react';
 import axios from 'axios';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
 
 // Service interface to match backend
 interface Service {
@@ -66,7 +68,8 @@ const MecaniciensManager = () => {
   const getAuthToken = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
-
+const { showAlert } = useGlobalAlert();
+const { confirm } = useConfirm();
   // Formulaire pour nouveau/modifier mécanicien
   const [formData, setFormData] = useState<FormData>({
     nom: '',
@@ -103,12 +106,12 @@ const MecaniciensManager = () => {
       return data;
     } catch (error: any) {
       if (error.response?.status === 403) {
-        alert("❌ Accès refusé : Vous n'avez pas la permission");
+        showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission");
         throw error;
       }
 
       if (error.response?.status === 401) {
-        alert("❌ Session expirée : Veuillez vous reconnecter");
+        showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
         window.location.href = '/auth/sign-in';
         throw error;
       }
@@ -146,11 +149,11 @@ const MecaniciensManager = () => {
       } catch (error: any) {
         // ⭐ AJOUTER la gestion 401/403
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission");
           throw error;
         }
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -172,11 +175,11 @@ const MecaniciensManager = () => {
       } catch (error: any) {
         // ⭐ AJOUTER la gestion 401/403
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission");
           throw error;
         }
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -197,11 +200,11 @@ const MecaniciensManager = () => {
         return res.data;
       } catch (error: any) {
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission");
           throw error;
         }
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -224,12 +227,12 @@ const MecaniciensManager = () => {
         return res.data;
       } catch (error: any) {
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission ");
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission ");
           throw error;
         }
 
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -251,12 +254,12 @@ const MecaniciensManager = () => {
         });
       } catch (error: any) {
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission ");
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission ");
           throw error;
         }
 
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -273,7 +276,7 @@ const MecaniciensManager = () => {
       setMecaniciens(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
-      showError(errorMessage);
+      showAlert('error', 'Erreur', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -316,12 +319,12 @@ const MecaniciensManager = () => {
 
       } catch (error: any) {
         if (error.response?.status === 403) {
-          alert("❌ Accès refusé : Vous n'avez pas la permission");
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission");
           throw error;
         }
 
         if (error.response?.status === 401) {
-          alert("❌ Session expirée : Veuillez vous reconnecter");
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
           window.location.href = '/auth/sign-in';
           throw error;
         }
@@ -351,7 +354,7 @@ const MecaniciensManager = () => {
       );
 
       if (isAlreadySelected) {
-        showError('Ce service a déjà été sélectionné');
+        showAlert('error', 'Erreur', 'Ce service a déjà été sélectionné');
         return;
       }
 
@@ -379,19 +382,19 @@ const MecaniciensManager = () => {
       setLoading(true);
 
       if (!formData.nom || !formData.telephone || !formData.email || !formData.roleId) {
-        showError('Veuillez remplir tous les champs obligatoires');
+        showAlert('error', 'Erreur', 'Veuillez remplir tous les champs obligatoires');
         return;
       }
 
       if (formData.services.length === 0) {
-        showError('Au moins un service doit être sélectionné');
+        showAlert('error', 'Erreur', 'Au moins un service doit être sélectionné');
         return;
       }
 
       // Validate that all services have both serviceId and name
       const invalidServices = formData.services.filter(service => !service.serviceId || !service.name);
       if (invalidServices.length > 0) {
-        showError('Veuillez sélectionner tous les services');
+        showAlert('error', 'Erreur', 'Veuillez sélectionner tous les services');
         return;
       }
 
@@ -403,10 +406,10 @@ const MecaniciensManager = () => {
 
       if (isEditMode && selectedMecanicien) {
         await mecaniciensApi.update(selectedMecanicien._id, apiData);
-        showSuccess('Employé modifié avec succès !');
+        showAlert('success', 'Succès', 'Employé modifié avec succès !');
       } else {
         await mecaniciensApi.create(apiData);
-        showSuccess('Employé créé avec succès !');
+        showAlert('success', 'Succès', 'Employé créé avec succès !');
       }
 
       resetForm();
@@ -415,7 +418,7 @@ const MecaniciensManager = () => {
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
-      showError(errorMessage);
+      showAlert('error', 'Erreur', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -423,16 +426,23 @@ const MecaniciensManager = () => {
 
   // Delete mécanicien
   const deleteMecanicien = async (id: string): Promise<void> => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce mécanicien ?')) return;
 
+    const isConfirmed = await confirm({
+  title: "Suppression du client",
+  message: "Êtes-vous sûr de vouloir supprimer ce mécanicien ?",
+  confirmText: "Supprimer",
+  cancelText: "Annuler",
+});
+
+if (!isConfirmed) return;
     try {
       setLoading(true);
       await mecaniciensApi.delete(id);
-      showSuccess('Employé supprimé avec succès');
+      showAlert('success', 'Succès', 'Employé supprimé avec succès');
       await loadMecaniciens();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
-      showError(errorMessage);
+      showAlert('error', 'Erreur', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -481,16 +491,6 @@ const MecaniciensManager = () => {
     setIsEditMode(false);
   };
 
-  // Show messages
-  const showError = (message: string): void => {
-    setError(message);
-    setTimeout(() => setError(''), 5000);
-  };
-
-  const showSuccess = (message: string): void => {
-    setSuccess(message);
-    setTimeout(() => setSuccess(''), 3000);
-  };
 
   // Filter mécaniciens
   const filteredMecaniciens = mecaniciens.filter(mec => {

@@ -4,6 +4,10 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Filter, Plus, User, Building2, Calendar, Car, Phone, Mail, MapPin, Eye, Edit, Trash2, History, Clock, Wrench } from 'lucide-react';
 import axios from "axios";
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
+
+
 
 interface HistoriqueVisite {
   id: string;
@@ -95,6 +99,10 @@ export default function ClientForm() {
   const [clientVehicules, setClientVehicules] = useState<{ [clientId: string]: Vehicule[] }>({});
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [dateFilter, setDateFilter] = useState("tous");
+  const { showAlert } = useGlobalAlert();
+  const { confirm } = useConfirm();
+
+
   const getAuthToken = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
@@ -179,12 +187,12 @@ const fetchAllVehicules = async (): Promise<void> => {
         
         // ⭐ VÉRIFICATION DES ERREURS D'AUTORISATION
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
             return;
         }
         
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
             window.location.href = '/auth/sign-in';
             return;
         }
@@ -300,12 +308,12 @@ const fetchAllVehicules = async (): Promise<void> => {
     } catch (error:any) {
       setError("Erreur lors du chargement des clients");
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
             return;
         }
         
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
             window.location.href = '/auth/sign-in';
             return;
         }
@@ -332,12 +340,12 @@ const fetchAllVehicules = async (): Promise<void> => {
       return response.data;
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
             return null;
         }
         
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
             window.location.href = '/auth/sign-in';
             return null;
         }
@@ -371,12 +379,12 @@ const fetchAllVehicules = async (): Promise<void> => {
       }
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
             return null;
         }
         
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
             window.location.href = '/auth/sign-in';
             return null;
         }
@@ -422,12 +430,12 @@ const fetchAllVehicules = async (): Promise<void> => {
       return [];
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
             return [];
         }
         
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
             window.location.href = '/auth/sign-in';
             return [];
         }
@@ -501,12 +509,12 @@ const fetchAllVehicules = async (): Promise<void> => {
       return response.data;
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission ");
             throw error;
         }
         
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
             window.location.href = '/auth/sign-in';
             throw error;
         }
@@ -517,56 +525,90 @@ const fetchAllVehicules = async (): Promise<void> => {
     }
   };
 
-  const updateClient = async (id: string | number, clientData: FormData): Promise<any> => {
-    try {
-            const token = getAuthToken();
-      
-      // ⭐ VÉRIFICATION CRITIQUE
-      if (!token || token === 'null' || token === 'undefined') {
-        // Rediriger vers le login
-        window.location.href = '/auth/sign-in';
-        return;
-      }
-      console.log("🔄 Frontend updateClient - ID reçu:", id);
-      console.log("🔄 Frontend updateClient - Données:", clientData);
+const updateClient = async (id: string | number, clientData: FormData): Promise<any> => {
+  try {
+    const token = getAuthToken();
 
-      if (!id) {
-        throw new Error("ID du client non défini");
-      }
+    if (!token || token === "null" || token === "undefined") {
+      window.location.href = "/auth/sign-in";
+      return;
+    }
 
-      const response = await axios.put(`${API_BASE_URL}/updateOne/${id}`, clientData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      console.log("✅ Réponse serveur:", response.data);
+    if (!id) throw new Error("ID du client non défini");
 
-      return response.data;
-    } catch (error:any) {
-        if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
-            throw error;
-        }
-        
-        if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
-            window.location.href = '/auth/sign-in';
-            throw error;
-        }
-      console.error("❌ Erreur dans updateClient:", error);
+    const response = await axios.put(`${API_BASE_URL}/updateOne/${id}`, clientData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    const status = error?.response?.status;
+    const data = error?.response?.data;
+
+    // 403
+    if (status === 403) {
+      showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
       throw error;
     }
-  };
+
+    // 401
+    if (status === 401) {
+      showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
+      window.location.href = "/auth/sign-in";
+      throw error;
+    }
+
+    // ✅ Conflit (email/téléphone déjà utilisés)
+    if (status === 409) {
+      const field = data?.field; // "email" | "telephone"
+      const message = data?.message || "Valeur déjà utilisée.";
+
+      // Affichage global
+      showAlert("error", "Conflit", message);
+
+      // Optionnel: afficher l’erreur au bon endroit
+      if (field === "telephone") {
+        setTelephoneError(message);
+      } else if (field === "email") {
+        setError(message); // ou setEmailError si tu veux créer un state emailError
+      }
+
+      // Stop ici, pas besoin de "veuillez réessayer"
+      throw error;
+    }
+
+    // Autres erreurs
+    const message =
+      data?.message ||
+      data?.error ||
+      error?.message ||
+      "Erreur lors de la mise à jour du client.";
+
+    console.error("❌ Erreur updateClient:", { status, data, error });
+
+    showAlert("error", "Erreur", message);
+    throw error;
+  }
+};
+
 
   const deleteClient = async (id: string | number): Promise<void> => {
     console.log("🗑️ Frontend - Suppression du client avec ID:", id);
 
     if (!id) {
-      alert("Erreur: ID du client non défini");
+      showAlert("error", "Erreur", "ID du client non défini");
       return;
     }
 
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce client ?")) {
-      return;
-    }
+    const isConfirmed = await confirm({
+  title: "Suppression du client",
+  message: "Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible.",
+  confirmText: "Supprimer",
+  cancelText: "Annuler",
+});
+
+if (!isConfirmed) return;
+
 
     try {
             const token = getAuthToken();
@@ -581,20 +623,21 @@ const fetchAllVehicules = async (): Promise<void> => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setClients(clients.filter(client => client._id !== id && client.id !== id));
-      alert("Client supprimé avec succès !");
+      showAlert("success", "Client supprimé", "Client supprimé avec succès !");
+
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission ");
             return ;
         }
         
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
             window.location.href = '/auth/sign-in';
             return ;
         }
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      alert("Erreur lors de la suppression : " + errorMessage);
+      showAlert("error", "Erreur lors de la suppression", errorMessage);
     }
   };
 
@@ -678,12 +721,12 @@ const fetchAllVehicules = async (): Promise<void> => {
       if (modalType === "add") {
         console.log("➕ Création d'un nouveau client:", formData);
         await createClient(formData);
-        alert("Client ajouté avec succès !");
+        showAlert("success", "Client ajouté", "Client ajouté avec succès !");
       } else if (modalType === "edit" && selectedClient) {
         const clientId = selectedClient._id;
         console.log("✏️ Modification du client avec ID:", clientId);
         await updateClient(clientId, formData);
-        alert("Client modifié avec succès !");
+        showAlert("success", "Client modifié", "Client modifié avec succès !");
       }
 
       await fetchAllClients();
@@ -691,7 +734,7 @@ const fetchAllVehicules = async (): Promise<void> => {
       closeModal();
     } catch (error:any) {
         if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
             return ;
         }
       console.error("Erreur lors de la soumission:", error);

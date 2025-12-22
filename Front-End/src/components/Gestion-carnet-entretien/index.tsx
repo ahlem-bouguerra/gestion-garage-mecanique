@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useGlobalAlert } from '../ui-elements/AlertProvider';
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -98,6 +99,7 @@ const CarnetEntretien: React.FC = () => {
   // ✅ NOUVEAUX ÉTATS POUR LE FORMULAIRE
   const [showAddForm, setShowAddForm] = useState(false);
   const [saving, setSaving] = useState(false);
+   const { showAlert } = useGlobalAlert();
 
   // État pour le formulaire d'ajout
   const [formData, setFormData] = useState({
@@ -141,12 +143,12 @@ const CarnetEntretien: React.FC = () => {
       setData(response.data);
     } catch (error: any) {
        if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission");
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
             throw error;
         }
         
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
+            showAlert("error", "Session expirée", "Veuillez vous reconnecter");
             window.location.href = '/auth/sign-in';
             throw error;
         }
@@ -208,15 +210,16 @@ const CarnetEntretien: React.FC = () => {
         cout: 0
       });
       setShowAddForm(false);
+       showAlert("success", "Tache ajoutée", "Tache ajoutée avec succès !");
 
     } catch (error: any) {
        if (error.response?.status === 403) {
-            alert("❌ Accès refusé : Vous n'avez pas la permission ");
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
             throw error;
         }
         
         if (error.response?.status === 401) {
-            alert("❌ Session expirée : Veuillez vous reconnecter");
+            showAlert("error", "Session expirée", "Veuillez vous reconnecter");
             window.location.href = '/auth/sign-in';
             throw error;
         }
@@ -233,6 +236,7 @@ const CarnetEntretien: React.FC = () => {
       ...prev,
       taches: [...prev.taches, { description: '', quantite: 1, prix: 0 }]
     }));
+    
   };
 
   // Supprimer une tâche du formulaire
@@ -321,8 +325,8 @@ const CarnetEntretien: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+        <div className="min-h-screen p-6">
+            <div className="max-w-7xl mx-auto">
         {/* Header avec bouton retour */}
         <div className="flex items-center mb-6">
           <button

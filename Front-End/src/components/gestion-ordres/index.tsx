@@ -6,6 +6,8 @@ import ListeOrdresTravail from './ListeOrdresTravail';
 import DetailOrdreTravail from './DetailOrdreTravail';
 import ModificationOrdreTravail from './ModificationOrdreTravail';
 import { ordresTravailAPI } from './services/ordresTravailAPI';
+import { useGlobalAlert } from '../ui-elements/AlertProvider';
+
 
 const OrdreTravailSystem = () => {
   // États de navigation et UI
@@ -23,6 +25,7 @@ const OrdreTravailSystem = () => {
   const [ordresTravail, setOrdresTravail] = useState([]);
   const [statistiques, setStatistiques] = useState(null);
 
+  const { showAlert } = useGlobalAlert();
 
       useEffect(() => {
     const header = document.querySelector('header');
@@ -133,7 +136,7 @@ const OrdreTravailSystem = () => {
     } catch (error) {
       console.error('Erreur chargement ordres:', error);
       setOrdresTravail([]);
-      showError('Erreur lors du chargement des ordres de travail');
+      showAlert('error', 'Erreur', 'Erreur lors du chargement des ordres de travail');
     } finally {
       setLoading(false);
     }
@@ -157,26 +160,16 @@ const OrdreTravailSystem = () => {
       const ordreData = response.ordre || response;
       setSelectedOrdre(ordreData);
     } catch (error) {
-      showError(`Erreur lors du chargement des détails: ${error.message}`);
+      showAlert('error', 'Erreur', `Erreur lors du chargement des détails: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fonctions utilitaires pour les messages
-  const showError = (message) => {
-    setError(message);
-    setTimeout(() => setError(''), 5000);
-  };
-
-  const showSuccess = (message) => {
-    setSuccess(message);
-    setTimeout(() => setSuccess(''), 3000);
-  };
 
   // Gestionnaires d'événements
   const handleOrdreSaved = () => {
-    showSuccess('Ordre de travail sauvegardé avec succès !');
+    showAlert('success', 'Succès', 'Ordre de travail sauvegardé avec succès !');
     if (activeTab === 'list') {
       loadOrdresTravail();
       loadStatistiques();
@@ -184,7 +177,7 @@ const OrdreTravailSystem = () => {
   };
 
   const handleOrdreDeleted = () => {
-    showSuccess('Ordre de travail supprimé avec succès !');
+    showAlert('success', 'Succès', 'Ordre de travail supprimé avec succès !');
     loadOrdresTravail();
     loadStatistiques();
     if (selectedOrdre) {
@@ -193,7 +186,7 @@ const OrdreTravailSystem = () => {
   };
 
   const handleOrdreUpdated = () => {
-    showSuccess('Ordre de travail modifié avec succès !');
+    showAlert('success', 'Succès', 'Ordre de travail modifié avec succès !');
     setEditMode(false);
     if (selectedOrdre) {
       loadOrdreDetails(selectedOrdre._id);
@@ -305,7 +298,7 @@ const OrdreTravailSystem = () => {
             mecaniciens={mecaniciens}
             onLoadMecaniciensByService={loadMecaniciensByService}
             onOrdreSaved={handleOrdreSaved}
-            onError={showError}
+            onError={showAlert}
             loading={loading}
             setLoading={setLoading}
           />
@@ -322,8 +315,8 @@ const OrdreTravailSystem = () => {
           onLoadOrdres={loadOrdresTravail}
           onLoadOrdreDetails={loadOrdreDetails}
           onFiltersChange={setFilters}
-          onError={showError}
-          onSuccess={showSuccess}
+          onError={showAlert}
+          onSuccess={showAlert}
           onOrdreDeleted={handleOrdreDeleted}
           onEditOrdre={handleEditOrdre}
           onOrdresSupprimes={handleOrdresSupprimes} // ✅ Nouvelle prop
@@ -338,8 +331,8 @@ const OrdreTravailSystem = () => {
             ordre={selectedOrdre}
             onClose={handleCloseModals}
             onEdit={() => setEditMode(true)}
-            onError={showError}
-            onSuccess={showSuccess}
+            onError={showAlert}
+            onSuccess={showAlert}
             onOrdreUpdated={() => {
               loadOrdreDetails(selectedOrdre._id);
               if (activeTab === 'list') {
@@ -361,7 +354,7 @@ const OrdreTravailSystem = () => {
             onClose={handleCloseModals}
             onCancel={handleCancelEdit}
             onSaved={handleOrdreUpdated}
-            onError={showError}
+            onError={showAlert}
             loading={loading}
             setLoading={setLoading}
           />
