@@ -219,7 +219,7 @@ const deleteAtelier = async (id) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* En-tête */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
