@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto"; // ✅ Ajouter cet import
 import jwt from "jsonwebtoken";
 import { Garagiste } from "../../models/Garagiste.js";
 import { sendVerificationEmail } from "../../utils/mailer.js";
@@ -46,11 +47,18 @@ export const register = async (req, res) => {
     });
 
     // Token pour vérification email
-    const verificationToken = jwt.sign(
+  /*  const verificationToken = jwt.sign(
       { userId: user._id, purpose: 'email_verification' }, 
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
-    );
+    );*/
+
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+
+      // Sauvegarder le token dans l'utilisateur
+      user.verificationToken = verificationToken;
+      user.verificationTokenExpiry = Date.now() + 3600000; // 1 heure
+      await user.save();
 
     await sendVerificationEmail(email, verificationToken);
     console.log("📧 Email de vérification envoyé à :", email);

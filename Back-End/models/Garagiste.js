@@ -30,6 +30,16 @@ const garagisteSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+
+  verificationToken: {
+  type: String,
+  default: null
+  },
+  
+  verificationTokenExpiry: {
+    type: Date,
+    default: null
+  },
   
   isVerified: {
     type: Boolean,

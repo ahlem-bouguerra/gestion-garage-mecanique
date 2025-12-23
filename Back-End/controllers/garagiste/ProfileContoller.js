@@ -1,5 +1,7 @@
 import { Garagiste } from "../../models/Garagiste.js";
 import bcrypt from "bcryptjs";
+import { sendVerificationEmail } from "../../utils/mailer.js";
+import crypto from "crypto";
 
 // ========== GET PROFILE ==========
 export const getProfile = async (req, res) => {
@@ -84,6 +86,11 @@ export const updateProfile = async (req, res) => {
       updateData.email = email.toLowerCase().trim();
       // Si l'email change, demander une nouvelle vérification
       updateData.isVerified = false;
+
+        // Générer un nouveau token de vérification
+      const verificationToken = crypto.randomBytes(32).toString("hex");
+      updateData.verificationToken = verificationToken;
+      updateData.verificationTokenExpiry = Date.now() + 3600000; // 1 heure
     }
 
     // Ajouter phone uniquement s'il est fourni
@@ -116,6 +123,17 @@ export const updateProfile = async (req, res) => {
     }
 
     console.log('✅ Profil mis à jour:', updatedProfile.email);
+
+    // Envoyer l'email de vérification si l'email a changé
+    if (email && email !== req.user.email) {
+      try {
+        await sendVerificationEmail(updateData.email, updateData.verificationToken);
+        console.log('📧 Email de vérification envoyé à:', updateData.email);
+      } catch (emailError) {
+        console.error('⚠️ Erreur envoi email:', emailError);
+        // On ne bloque pas la réponse même si l'email échoue
+      }
+    }
 
     res.status(200).json({
       success: true,

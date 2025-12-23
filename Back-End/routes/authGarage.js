@@ -192,12 +192,15 @@ router.get("/verify-email/:token", async (req, res) => {
   const token = req.params.token;
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await Garagiste.findById(decoded.userId);
+    // ✅ REMPLACER jwt.verify par une recherche en base
+    const user = await Garagiste.findOne({
+      verificationToken: token,
+      verificationTokenExpiry: { $gt: Date.now() }
+    });
 
     if (!user) {
-      console.log("❌ Utilisateur non trouvé pour la vérification");
-      return res.redirect(`${process.env.FRONTEND_URL}/auth/sign-in?error=user_not_found`);
+      console.log("❌ Token invalide ou expiré");
+      return res.redirect(`${process.env.FRONTEND_URL}/auth/sign-in?error=invalid_token`);
     }
 
     if (user.isVerified) {
@@ -205,8 +208,10 @@ router.get("/verify-email/:token", async (req, res) => {
       return res.redirect(`${process.env.FRONTEND_URL}/auth/sign-in?verified=already`);
     }
 
+    // ✅ Marquer comme vérifié et supprimer le token
     user.isVerified = true;
-    user.token = undefined;
+    user.verificationToken = null;
+    user.verificationTokenExpiry = null;
     await user.save();
 
     console.log("✅ Email vérifié avec succès pour:", user.email);
