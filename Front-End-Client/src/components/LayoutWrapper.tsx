@@ -19,6 +19,11 @@ const pagesWithoutLayout = [
   "/auth/complete-profile",
   "/auth/google-callback",
   "/Auth/SigninForm",
+<<<<<<< HEAD
+=======
+  "/landing",
+  "/recherche-global"
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
   
   // Ajoutez d'autres routes ici selon vos besoins
 ];

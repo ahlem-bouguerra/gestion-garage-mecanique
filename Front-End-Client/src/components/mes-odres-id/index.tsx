@@ -149,7 +149,11 @@ const OrdreDetailsPage = () => {
       suspendu: { color: 'bg-red-100 text-red-800 border-red-300', label: 'Suspendu' }
     };
 
+<<<<<<< HEAD
     const config = configs[status as keyof typeof configs];
+=======
+    const config = configs[status as keyof typeof configs]|| configs.en_attente;
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 
     return (
       <span className={`px-4 py-2 rounded-lg font-semibold border-2 ${config.color}`}>

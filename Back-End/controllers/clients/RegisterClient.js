@@ -4,6 +4,10 @@ import { Client } from "../../models/Client.js";
 import { Role } from "../../models/Role.js";
 import { ClientRole } from "../../models/ClientRole.js";
 import { sendVerificationEmailForCient } from "../../utils/mailerCLient.js";
+<<<<<<< HEAD
+=======
+import crypto from "crypto"; 
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 
 export const registerClient = async (req, res) => {
   const { username, email, password, phone } = req.body;
@@ -45,7 +49,11 @@ export const registerClient = async (req, res) => {
     // ✅ ATTRIBUER LE RÔLE "CLIENT" AUTOMATIQUEMENT
     try {
       // Recherche flexible du rôle contenant "client" (insensible à la casse)
+<<<<<<< HEAD
       const clientRole = await Role.findOne({ 
+=======
+      const clientRole = await Role.findOne({
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
         name: { $regex: /client/i } // Cherche "client", "Client", "CLIENT", etc.
       });
 
@@ -63,26 +71,45 @@ export const registerClient = async (req, res) => {
       // On continue l'inscription même si l'attribution du rôle échoue
     }
 
+<<<<<<< HEAD
     // Token pour vérification email
     const verificationToken = jwt.sign(
       { clientId: client._id, purpose: 'email_verification' }, 
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+=======
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    // Sauvegarder le token dans l'utilisateur
+    client.verificationToken = verificationToken;
+    client.verificationTokenExpiry = Date.now() + 3600000; // 1 heure
+    await client.save();
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 
     await sendVerificationEmailForCient(email, verificationToken);
     console.log("📧 Email de vérification envoyé à :", email);
 
+<<<<<<< HEAD
     res.status(201).json({ 
       message: "Inscription réussie. Vérifie ton email.",
       clientId: client._id 
+=======
+    res.status(201).json({
+      message: "Inscription réussie. Vérifie ton email.",
+      clientId: client._id
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     });
 
   } catch (err) {
     console.error("❌ Erreur lors de l'inscription :", err.message);
     console.error("❌ Stack trace:", err.stack);
+<<<<<<< HEAD
     res.status(500).json({ 
       message: "Erreur serveur.", 
+=======
+    res.status(500).json({
+      message: "Erreur serveur.",
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
       error: err.message
     });
   }

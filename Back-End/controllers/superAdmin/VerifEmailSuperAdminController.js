@@ -1,12 +1,23 @@
 import {Users} from '../../models/Users.js';
 import jwt from "jsonwebtoken";
+<<<<<<< HEAD
+=======
+import crypto from "crypto";
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 
 export const verifEmailSuperAdmin = async (req, res) => {
   const token = req.params.token;
 
   try {
+<<<<<<< HEAD
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await Users.findById(decoded.userId);
+=======
+        const user = await Users.findOne({
+          verificationToken: token,
+          verificationTokenExpiry: { $gt: Date.now() }
+        });
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     
     if (!user) {
       console.log("❌ Utilisateur non trouvé pour la vérification");
@@ -21,7 +32,12 @@ export const verifEmailSuperAdmin = async (req, res) => {
 
     // ✅ MARQUER COMME VÉRIFIÉ
     user.isVerified = true;
+<<<<<<< HEAD
     user.token = undefined;
+=======
+    user.verificationToken = null;
+    user.verificationTokenExpiry = null;
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     await user.save();
 
     console.log("✅ Email vérifié avec succès pour:", user.email);

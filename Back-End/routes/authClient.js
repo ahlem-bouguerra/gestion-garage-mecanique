@@ -114,18 +114,26 @@ router.delete('/delete-mes-vehicules/:vehiculeId',clientauthMiddleware,hasAny({
     permissions: ['client_delete_vehicule']
   }), deleteMonVehicule);
 
+<<<<<<< HEAD
 router.get('/services/garage/:garageId',clientauthMiddleware,hasAny({
     permissions: ['view_service']
   }),getGarageServicesForClient);
+=======
+router.get('/services/garage/:garageId',getGarageServicesForClient);
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 
 
 router.post('/create-reservation',clientauthMiddleware,hasAny({
     permissions: ['client_create_reservation']
   }), ClientCreateReservation);
 
+<<<<<<< HEAD
 router.get('/client-reservations/',clientauthMiddleware,hasAny({
     permissions: ['client_view_reservation']
   }), ClientGetReservations);
+=======
+router.get('/client-reservations/',ClientGetReservations);
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 
 router.put('/client-update/reservations/:id',clientauthMiddleware,hasAny({
     permissions: ['client_update_reservation']
@@ -174,9 +182,13 @@ router.post('/creer-dans-carnet', clientauthMiddleware,hasAny({
 }), creerCarnetManuelClient);
 
 
+<<<<<<< HEAD
 router.get('/search',clientauthMiddleware,hasAny({
     permissions: ['chercher_garage']
   }), search);
+=======
+router.get('/search', search);
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 
 
 
@@ -197,6 +209,10 @@ router.get('/mes-ordres-stats', clientauthMiddleware,
 
 router.post('/client/rate-garage', clientauthMiddleware,createRating);
 router.get('/client/rating/:ordreId', clientauthMiddleware,getRatingByOrdre);
+<<<<<<< HEAD
 router.get('/client/garage-ratings/:garageId', clientauthMiddleware,getGarageRatings);
+=======
+router.get('/client/garage-ratings/:garageId',getGarageRatings);
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 
 export default router;

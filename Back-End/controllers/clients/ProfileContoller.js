@@ -1,5 +1,10 @@
 import { Client } from "../../models/Client.js";
 import bcrypt from "bcryptjs";
+<<<<<<< HEAD
+=======
+import crypto from 'crypto';
+import { sendVerificationEmailForCient } from "../../utils/mailerCLient.js";
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 
 // ========== GET PROFILE ==========
 export const getProfile = async (req, res) => {
@@ -36,7 +41,10 @@ export const getProfile = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 // ========== UPDATE PROFILE ==========
+=======
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 export const updateProfile = async (req, res) => {
   try {
     console.log('✏️ UPDATE Profile - User ID:', req.client._id);
@@ -77,6 +85,14 @@ export const updateProfile = async (req, res) => {
       updateData.email = email.toLowerCase().trim();
       // Si l'email change, demander une nouvelle vérification
       updateData.isVerified = false;
+<<<<<<< HEAD
+=======
+
+      // ✅ AJOUT : Générer un nouveau token de vérification
+      const verificationToken = crypto.randomBytes(32).toString("hex");
+      updateData.verificationToken = verificationToken;
+      updateData.verificationTokenExpiry = Date.now() + 3600000; // 1 heure
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     }
 
     // Ajouter phone uniquement s'il est fourni
@@ -90,7 +106,10 @@ export const updateProfile = async (req, res) => {
       { $set: updateData },
       { new: true, runValidators: true }
     )
+<<<<<<< HEAD
 
+=======
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
       .select('-password -resetPasswordToken')
       .lean();
 
@@ -103,6 +122,20 @@ export const updateProfile = async (req, res) => {
 
     console.log('✅ Profil mis à jour:', updatedProfile.email);
 
+<<<<<<< HEAD
+=======
+    // ✅ AJOUT : Envoyer l'email de vérification si l'email a changé
+    if (email && email !== req.client.email) {
+      try {
+        await sendVerificationEmailForCient(updateData.email, updateData.verificationToken);
+        console.log('📧 Email de vérification envoyé à:', updateData.email);
+      } catch (emailError) {
+        console.error('⚠️ Erreur envoi email:', emailError);
+        // On ne bloque pas la réponse même si l'email échoue
+      }
+    }
+
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     res.status(200).json({
       success: true,
       message: "Profil mis à jour avec succès",
@@ -129,7 +162,10 @@ export const updateProfile = async (req, res) => {
     });
   }
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 // ========== CHANGE PASSWORD ==========
 export const changePassword = async (req, res) => {
   try {

@@ -4,8 +4,13 @@ import { Users } from "../../models/Users.js";
 import { sendVerificationEmailForCient } from "../../utils/mailerSuperAdmin.js";
 import { UserRole } from "../../models/UserRole.js";
 import { Role } from "../../models/Role.js";
+<<<<<<< HEAD
 
 // ========== INSCRIPTION UTILISATEUR PUBLIC (NON SUPER ADMIN) ==========
+=======
+import crypto from "crypto"; // ✅ Ajouter cet import en haut du fichier
+
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 export const registerUser = async (req, res) => {
   const { username, email, password, phone } = req.body;
   
@@ -38,17 +43,33 @@ export const registerUser = async (req, res) => {
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
     
+<<<<<<< HEAD
     // ✅ Créer l'utilisateur NORMAL (isSuperAdmin: false forcé)
+=======
+    // ✅ Générer le token de vérification avec crypto
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    
+    // ✅ Créer l'utilisateur NORMAL avec le token de vérification
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     const newUser = await Users.create({
       username,
       email,
       password: hashedPassword,
       phone,
       isVerified: false,
+<<<<<<< HEAD
       isSuperAdmin: false // ✅ FORCÉ À FALSE
     });
 
      let superAdminRole = await Role.findOne({ name: "SuperAdmin" });
+=======
+      isSuperAdmin: false, // ✅ FORCÉ À FALSE
+      verificationToken: verificationToken, // ✅ Stocker le token
+      verificationTokenExpiry: Date.now() + 3600000 // ✅ 1 heure d'expiration
+    });
+
+    let superAdminRole = await Role.findOne({ name: "SuperAdmin" });
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     if (!superAdminRole) {
       // Si le rôle n'existe pas, on le crée
       superAdminRole = await Role.create({ name: "SuperAdmin", description: "Rôle SuperAdmin par défaut" });
@@ -65,6 +86,7 @@ export const registerUser = async (req, res) => {
       isSuperAdmin: newUser.isSuperAdmin // devrait être false
     });
     
+<<<<<<< HEAD
     // Envoyer l'email de vérification
     const verificationToken = jwt.sign(
       { 
@@ -75,6 +97,9 @@ export const registerUser = async (req, res) => {
       { expiresIn: "24h" }
     );
     
+=======
+    // ✅ Envoyer l'email de vérification avec le token crypto
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     await sendVerificationEmailForCient(email, verificationToken);
     console.log("📧 Email de vérification envoyé à:", email);
     

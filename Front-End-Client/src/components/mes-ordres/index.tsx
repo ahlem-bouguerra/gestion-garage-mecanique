@@ -104,7 +104,11 @@ const MesOrdresPage = () => {
           [ordreId]: data.rating
         }));
       }
+<<<<<<< HEAD
     } catch (error) {
+=======
+    } catch (error : any) {
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
@@ -141,6 +145,7 @@ const MesOrdresPage = () => {
 
       const data = await response.data;
 
+<<<<<<< HEAD
       if (data.success) {
         setOrdres(data.ordres);
         data.ordres.forEach((ordre: Ordre) => {
@@ -153,6 +158,21 @@ const MesOrdresPage = () => {
         console.error('Erreur:', data.message);
       }
     } catch (error) {
+=======
+     if (data.success) {
+  setOrdres(data.ordres);
+  
+  // Charger tous les ratings en parallèle
+  const ratingsPromises = data.ordres
+    .filter((ordre: Ordre) => ordre.ratingId)
+    .map((ordre: Ordre) => fetchRating(ordre._id));
+    
+  await Promise.all(ratingsPromises);
+}else {
+        console.error('Erreur:', data.message);
+      }
+    } catch (error : any) {
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
@@ -183,7 +203,11 @@ const MesOrdresPage = () => {
       if (data.success) {
         setStats(data.stats);
       }
+<<<<<<< HEAD
     } catch (error) {
+=======
+    } catch (error : any) {
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
@@ -197,7 +221,11 @@ const MesOrdresPage = () => {
   useEffect(() => {
     fetchOrdres();
     fetchStats();
+<<<<<<< HEAD
   }, [filters]);
+=======
+  }, [filters.page, filters.status, filters.search]);
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 
   // Fonction pour ouvrir le modal de notation
   const handleRate = (ordre: Ordre) => {
@@ -219,7 +247,11 @@ const MesOrdresPage = () => {
       suspendu: { icon: XCircle, color: 'bg-red-100 text-red-800', label: 'Suspendu' }
     };
 
+<<<<<<< HEAD
     const config = configs[status as keyof typeof configs];
+=======
+    const config = configs[status as keyof typeof configs]|| configs.en_attente;
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     const Icon = config.icon;
 
     return (
@@ -533,7 +565,11 @@ const RatingModal: React.FC<RatingModalProps> = ({ ordre, onClose, onSuccess }) 
       } else {
         alert('❌ ' + data.message);
       }
+<<<<<<< HEAD
     } catch (error) {
+=======
+    } catch (error : any) {
+>>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
