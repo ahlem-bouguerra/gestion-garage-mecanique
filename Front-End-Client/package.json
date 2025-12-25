@@ -7,13 +7,8 @@
     "build": "next build",
     "start": "next start -p 3001"
   },
-<<<<<<< HEAD
-
-  "dependencies": {
-=======
   "dependencies": {
     "@motionone/utils": "^10.18.0",
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     "apexcharts": "^4.5.0",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
@@ -23,11 +18,7 @@
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "flatpickr": "^4.6.13",
-<<<<<<< HEAD
-    "framer-motion": "^12.23.12",
-=======
     "framer-motion": "^12.23.26",
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.12.0",
     "js-cookie": "^3.0.5",
@@ -35,10 +26,7 @@
     "jspdf": "^3.0.2",
     "jsvectormap": "^1.6.0",
     "leaflet": "^1.9.4",
-<<<<<<< HEAD
-=======
     "lenis": "^1.3.16",
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     "libphonenumber-js": "^1.12.10",
     "lucide-react": "^0.539.0",
     "mongoose": "^8.17.0",
@@ -55,10 +43,7 @@
     "react-leaflet": "^5.0.0",
     "recharts": "^3.2.0",
     "sonner": "^2.0.7",
-<<<<<<< HEAD
-=======
     "styled-components": "^6.1.19",
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
@@ -69,10 +54,7 @@
     "@types/node": "^22",
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
-<<<<<<< HEAD
-=======
     "@types/styled-components": "^5.1.36",
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     "autoprefixer": "^10.4.20",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",

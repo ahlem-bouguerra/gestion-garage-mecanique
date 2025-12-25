@@ -22,8 +22,6 @@ const clientSchema = new mongoose.Schema({
       return !this.googleId;
     }
   },
-<<<<<<< HEAD
-=======
     verificationToken: {
   type: String,
   default: null
@@ -33,7 +31,7 @@ const clientSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
+
   isVerified: {
     type: Boolean,
     default: false

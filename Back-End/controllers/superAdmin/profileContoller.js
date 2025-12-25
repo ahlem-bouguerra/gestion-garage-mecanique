@@ -1,12 +1,10 @@
 // controllers/ProfileController.js
 import { Users } from "../../models/Users.js";
 import bcrypt from "bcryptjs";
-<<<<<<< HEAD
-=======
+
 import crypto from 'crypto';
 import { sendVerificationEmailForCient } from "../../utils/mailerSuperAdmin.js";
 
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 
 export const getProfile = async (req, res) => {
   try {
@@ -57,17 +55,12 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
-    // Vérifier si l'email existe déjà (sauf pour l'utilisateur actuel)
-    if (email && email !== req.user.email) {
-=======
     // ✅ Récupérer l'ancien email pour comparaison
     const currentUser = await Users.findById(req.user._id);
     const emailHasChanged = email && email.toLowerCase().trim() !== currentUser.email;
 
     // Vérifier si l'email existe déjà (sauf pour l'utilisateur actuel)
     if (emailHasChanged) {
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
       const existingUser = await Users.findOne({
         email: email.toLowerCase(),
         _id: { $ne: req.user._id }
@@ -86,13 +79,6 @@ export const updateProfile = async (req, res) => {
       username: username.trim()
     };
 
-<<<<<<< HEAD
-    // Ajouter email uniquement s'il est fourni et différent
-    if (email && email !== req.user.email) {
-      updateData.email = email.toLowerCase().trim();
-      // Si l'email change, demander une nouvelle vérification
-      updateData.isVerified = false;
-=======
     // ✅ Variables pour l'envoi d'email
     let verificationToken = null;
 
@@ -111,7 +97,6 @@ export const updateProfile = async (req, res) => {
         ancien: currentUser.email,
         nouveau: updateData.email
       });
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     }
 
     // Ajouter phone uniquement s'il est fourni
@@ -125,11 +110,7 @@ export const updateProfile = async (req, res) => {
       { $set: updateData },
       { new: true, runValidators: true }
     )
-<<<<<<< HEAD
-      .select('-password -resetPasswordToken')
-=======
       .select('-password -resetPasswordToken -verificationToken')
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
       .lean();
 
     if (!updatedProfile) {
@@ -141,11 +122,6 @@ export const updateProfile = async (req, res) => {
 
     console.log('✅ Profil mis à jour:', updatedProfile.email);
 
-<<<<<<< HEAD
-    res.status(200).json({
-      success: true,
-      message: "Profil mis à jour avec succès",
-=======
     // ✅ Envoyer l'email de vérification si l'email a changé
     if (emailHasChanged && verificationToken) {
       try {
@@ -179,7 +155,6 @@ export const updateProfile = async (req, res) => {
       success: true,
       message: "Profil mis à jour avec succès",
       emailChanged: false,
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
       data: updatedProfile
     });
 
@@ -205,11 +180,6 @@ export const updateProfile = async (req, res) => {
 };
 
 
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 export const changePassword = async (req, res) => {
   try {
     console.log('🔐 CHANGE Password - User ID:', req.user._id);

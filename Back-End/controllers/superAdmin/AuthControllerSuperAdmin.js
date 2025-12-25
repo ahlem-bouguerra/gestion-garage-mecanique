@@ -4,13 +4,8 @@ import { Users } from "../../models/Users.js";
 import { sendVerificationEmailForCient } from "../../utils/mailerSuperAdmin.js";
 import { UserRole } from "../../models/UserRole.js";
 import { Role } from "../../models/Role.js";
-<<<<<<< HEAD
-
-// ========== INSCRIPTION UTILISATEUR PUBLIC (NON SUPER ADMIN) ==========
-=======
 import crypto from "crypto"; // ✅ Ajouter cet import en haut du fichier
 
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
 export const registerUser = async (req, res) => {
   const { username, email, password, phone } = req.body;
   
@@ -42,39 +37,32 @@ export const registerUser = async (req, res) => {
     
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-<<<<<<< HEAD
-    // ✅ Créer l'utilisateur NORMAL (isSuperAdmin: false forcé)
-=======
+
     // ✅ Générer le token de vérification avec crypto
     const verificationToken = crypto.randomBytes(32).toString("hex");
     
-    // ✅ Créer l'utilisateur NORMAL avec le token de vérification
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
+    // ✅ Créer l'utilisateur NORMAL avec TOUS les champs
     const newUser = await Users.create({
       username,
       email,
       password: hashedPassword,
       phone,
       isVerified: false,
-<<<<<<< HEAD
-      isSuperAdmin: false // ✅ FORCÉ À FALSE
+      isSuperAdmin: false,
+      verificationToken: verificationToken,
+      verificationTokenExpiry: Date.now() + 3600000 // 1 heure
     });
 
-     let superAdminRole = await Role.findOne({ name: "SuperAdmin" });
-=======
-      isSuperAdmin: false, // ✅ FORCÉ À FALSE
-      verificationToken: verificationToken, // ✅ Stocker le token
-      verificationTokenExpiry: Date.now() + 3600000 // ✅ 1 heure d'expiration
-    });
-
+    // ✅ Récupérer ou créer le rôle SuperAdmin (UNE SEULE FOIS)
     let superAdminRole = await Role.findOne({ name: "SuperAdmin" });
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     if (!superAdminRole) {
-      // Si le rôle n'existe pas, on le crée
-      superAdminRole = await Role.create({ name: "SuperAdmin", description: "Rôle SuperAdmin par défaut" });
+      superAdminRole = await Role.create({ 
+        name: "SuperAdmin", 
+        description: "Rôle SuperAdmin par défaut" 
+      });
     }
 
+    // ✅ Assigner le rôle à l'utilisateur
     await UserRole.create({
       userId: newUser._id,
       roleId: superAdminRole._id
@@ -83,23 +71,9 @@ export const registerUser = async (req, res) => {
     console.log("✅ Utilisateur créé:", {
       id: newUser._id,
       email: newUser.email,
-      isSuperAdmin: newUser.isSuperAdmin // devrait être false
+      isSuperAdmin: newUser.isSuperAdmin
     });
     
-<<<<<<< HEAD
-    // Envoyer l'email de vérification
-    const verificationToken = jwt.sign(
-      { 
-        userId: newUser._id, 
-        purpose: 'email_verification' 
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" }
-    );
-    
-=======
-    // ✅ Envoyer l'email de vérification avec le token crypto
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
     await sendVerificationEmailForCient(email, verificationToken);
     console.log("📧 Email de vérification envoyé à:", email);
     
@@ -116,7 +90,6 @@ export const registerUser = async (req, res) => {
     });
   }
 };
-
 // ========== LOGIN (UTILISATEURS ET SUPER ADMINS) ==========
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;

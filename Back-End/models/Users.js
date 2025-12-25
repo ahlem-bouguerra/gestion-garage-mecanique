@@ -22,8 +22,6 @@ const usersSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-<<<<<<< HEAD
-=======
     verificationToken: {
         type: String,
         default: null
@@ -33,7 +31,7 @@ const usersSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
+
 
     resetPasswordToken: {
         type: String,
@@ -43,19 +41,12 @@ const usersSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
-<<<<<<< HEAD
      // Super admin a tous les droits
   isSuperAdmin: {
     type: Boolean,
     default: false
   },
-=======
-    // Super admin a tous les droits
-    isSuperAdmin: {
-        type: Boolean,
-        default: false
-    },
->>>>>>> 19f15ce9 (ajouter la partie avantartie avant login)
+
 
 
 }, {
