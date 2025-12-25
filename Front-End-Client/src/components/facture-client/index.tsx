@@ -64,7 +64,7 @@ interface FactureDetails {
   tvaRate: number;
   remiseRate: number;
   timbreFiscal: number;
-  paymentStatus: 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye' | 'annule';
+  paymentStatus: 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye' | 'annulee';
   invoiceDate: string;
   dueDate: string;
   paymentAmount: number;
@@ -89,7 +89,16 @@ interface Stats {
   totalImpaye: number;
   facturesEnRetard: number;
 }
+// Type pour le modal
+interface ModalState {
+  type: 'facture' | 'credit' | null;
+  data: FactureDetails | CreditNoteDetails | null;
+  isOpen: boolean;
+}
 
+// Type pour les filtres
+type StatusFilter = 'tous' | 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye';
+const API_BASE_URL = `http://localhost:5000/api`;
 const ClientFactures: React.FC = () => {
   const [factures, setFactures] = useState<FactureDetails[]>([]);
   const [filteredFactures, setFilteredFactures] = useState<FactureDetails[]>([]);
@@ -107,7 +116,9 @@ const ClientFactures: React.FC = () => {
   const [selectedFacture, setSelectedFacture] = useState<FactureDetails | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [creditNoteDetails, setCreditNoteDetails] = useState(null);
+  const [creditNoteDetails, setCreditNoteDetails] =
+  useState<CreditNoteDetails | null>(null);
+
   const [showCreditNoteModal, setShowCreditNoteModal] = useState(false);
   const itemsPerPage = 5;
 
@@ -139,14 +150,14 @@ const ClientFactures: React.FC = () => {
         window.location.href = '/auth/sign-in';
         return;
       }
-      const response = await axios.get('http://localhost:5000/api/client/factures', {
+      const response = await axios.get(`${API_BASE_URL}/client/factures`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
         setFactures(response.data.data);
         setFilteredFactures(response.data.data);
       }
-    } catch (error) {
+    } catch (error :any) {
       if (error.response?.status === 401) {
           localStorage.removeItem('token');
           sessionStorage.removeItem('token');
@@ -167,7 +178,7 @@ const ClientFactures: React.FC = () => {
         window.location.href = '/auth/sign-in';
         return;
       }
-      const response = await axios.get(`http://localhost:5000/api/client/factures/${factureId}`, {
+      const response = await axios.get(`${API_BASE_URL}/client/factures/${factureId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = response.data;
@@ -175,7 +186,7 @@ const ClientFactures: React.FC = () => {
         setSelectedFacture(data.data);
         setShowDetailsModal(true);
       }
-    } catch (error) {
+    } catch (error : any) {
       if (error.response?.status === 401) {
           localStorage.removeItem('token');
           sessionStorage.removeItem('token');
@@ -199,7 +210,7 @@ const ClientFactures: React.FC = () => {
       console.log('🚀 Appel API pour ID:', creditNoteId);
       console.log('🔑 Token:', getAuthToken());
 
-      const response = await axios.get(`http://localhost:5000/api/client/credit-note/${creditNoteId}`, {
+      const response = await axios.get(`${API_BASE_URL}/client/credit-note/${creditNoteId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -235,13 +246,13 @@ const ClientFactures: React.FC = () => {
         window.location.href = '/auth/sign-in';
         return;
       }
-      const response = await axios.get('http://localhost:5000/api/client/factures/stats', {
+      const response = await axios.get(`${API_BASE_URL}/client/factures/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
         setStats(response.data.data);
       }
-    } catch (error) {
+    } catch (error : any) {
       if (error.response?.status === 401) {
           localStorage.removeItem('token');
           sessionStorage.removeItem('token');
@@ -321,11 +332,22 @@ const ClientFactures: React.FC = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Mes Factures</h1>
-        <p className="text-gray-600">Consultez et payez vos factures</p>
-      </div>
+
+            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-4 rounded-xl">
+              <DollarSign className="w-10 h-10 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">
+                Mes Factures
+              </h1>
+              <p className="text-gray-600 text-lg mt-">
+                Consultez et payez vos factures
+              </p>
+            </div>
+          </div>
+        </div>
 
       {/* Statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

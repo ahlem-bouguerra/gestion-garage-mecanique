@@ -115,13 +115,13 @@ const OrdreDetailsPage = () => {
         console.error('Erreur:', data.message);
         router.push('/mes-ordres');
       }
-    } catch (error:any) {
-        if (error.response?.status === 401) {
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
-          window.location.href = '/auth/sign-in';
-          return;
-        }
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       console.error('❌ Erreur chargement ordre:', error);
       router.push('/mes-ordres');
     } finally {
@@ -143,7 +143,7 @@ const OrdreDetailsPage = () => {
       suspendu: { color: 'bg-red-100 text-red-800 border-red-300', label: 'Suspendu' }
     };
 
-    const config = configs[status as keyof typeof configs]|| configs.en_attente;
+    const config = configs[status as keyof typeof configs] || configs.en_attente;
 
     return (
       <span className={`px-4 py-2 rounded-lg font-semibold border-2 ${config.color}`}>
@@ -184,7 +184,7 @@ const OrdreDetailsPage = () => {
           <div className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
             <span>
-              {tache.status === 'terminee' 
+              {tache.status === 'terminee'
                 ? `${tache.heuresReelles}h réelles`
                 : `${tache.estimationHeures}h estimées`
               }
@@ -227,7 +227,7 @@ const OrdreDetailsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         {/* Bouton retour */}
         <button
@@ -313,7 +313,7 @@ const OrdreDetailsPage = () => {
             )}
           </div>
 
-          
+
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -343,7 +343,7 @@ const OrdreDetailsPage = () => {
                 ))}
               </div>
             </div>
-            
+
 
             {/* Notes */}
             {ordre.notes && ordre.notes.length > 0 && (

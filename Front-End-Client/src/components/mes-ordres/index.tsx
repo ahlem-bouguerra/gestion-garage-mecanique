@@ -15,7 +15,8 @@ import {
   Filter,
   Eye,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  Car
 } from 'lucide-react';
 
 interface Rating {
@@ -69,7 +70,7 @@ const MesOrdresPage = () => {
   const [selectedOrdre, setSelectedOrdre] = useState<Ordre | null>(null);
   const [ratings, setRatings] = useState<{ [key: string]: any }>({});
 
-    // Filtres et pagination
+  // Filtres et pagination
   const [filters, setFilters] = useState({
     status: 'tous',
     search: '',
@@ -105,7 +106,7 @@ const MesOrdresPage = () => {
         }));
       }
 
-    } catch (error : any) {
+    } catch (error: any) {
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
@@ -142,19 +143,19 @@ const MesOrdresPage = () => {
 
       const data = await response.data;
 
-     if (data.success) {
-  setOrdres(data.ordres);
-  
-  // Charger tous les ratings en parallèle
-  const ratingsPromises = data.ordres
-    .filter((ordre: Ordre) => ordre.ratingId)
-    .map((ordre: Ordre) => fetchRating(ordre._id));
-    
-  await Promise.all(ratingsPromises);
-}else {
+      if (data.success) {
+        setOrdres(data.ordres);
+
+        // Charger tous les ratings en parallèle
+        const ratingsPromises = data.ordres
+          .filter((ordre: Ordre) => ordre.ratingId)
+          .map((ordre: Ordre) => fetchRating(ordre._id));
+
+        await Promise.all(ratingsPromises);
+      } else {
         console.error('Erreur:', data.message);
       }
-    } catch (error : any) {
+    } catch (error: any) {
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
@@ -186,7 +187,7 @@ const MesOrdresPage = () => {
         setStats(data.stats);
       }
 
-    } catch (error : any) {
+    } catch (error: any) {
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
@@ -224,7 +225,7 @@ const MesOrdresPage = () => {
       suspendu: { icon: XCircle, color: 'bg-red-100 text-red-800', label: 'Suspendu' }
     };
 
-    const config = configs[status as keyof typeof configs]|| configs.en_attente;
+    const config = configs[status as keyof typeof configs] || configs.en_attente;
     const Icon = config.icon;
 
     return (
@@ -259,13 +260,26 @@ const MesOrdresPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
-        {/* En-tête */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Mes Ordres de Travail</h1>
-          <p className="text-gray-600 mt-2">Suivez l'avancement de vos réparations</p>
+
+
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-4 rounded-xl">
+              <Car className="w-10 h-10 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">
+                Mes Ordres de Travail
+              </h1>
+              <p className="text-gray-600 text-lg mt-">
+                Suivez l'avancement de vos réparations
+              </p>
+            </div>
+          </div>
         </div>
+
 
         {/* Statistiques */}
         {stats && (
@@ -438,8 +452,8 @@ const MesOrdresPage = () => {
                             <Star
                               key={star}
                               className={`w-4 h-4 ${star <= ratings[ordre._id].rating
-                                  ? 'fill-yellow-400 text-yellow-400'
-                                  : 'text-gray-300'
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-gray-300'
                                 }`}
                             />
                           ))}
@@ -519,14 +533,15 @@ const RatingModal: React.FC<RatingModalProps> = ({ ordre, onClose, onSuccess }) 
     try {
       const token = getAuthToken();
       const response = await axios.post('http://localhost:5000/api/client/rate-garage', {
-          ordreId: ordre._id,
-          rating,
-          comment
-        },
-       {   headers: {
-          Authorization: `Bearer ${token}`
-        },
-      }
+        ordreId: ordre._id,
+        rating,
+        comment
+      },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+        }
       );
 
       const data = await response.data;
@@ -539,7 +554,7 @@ const RatingModal: React.FC<RatingModalProps> = ({ ordre, onClose, onSuccess }) 
         alert('❌ ' + data.message);
       }
 
-    } catch (error : any) {
+    } catch (error: any) {
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
@@ -583,8 +598,8 @@ const RatingModal: React.FC<RatingModalProps> = ({ ordre, onClose, onSuccess }) 
                 >
                   <Star
                     className={`w-10 h-10 ${star <= (hoveredRating || rating)
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-gray-300'
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'text-gray-300'
                       }`}
                   />
                 </button>

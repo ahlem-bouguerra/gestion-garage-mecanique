@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Phone, MapPin, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, Clock, Phone, MapPin, AlertCircle, CheckCircle, XCircle, Building2 } from 'lucide-react';
 import axios from 'axios';
 
 // Types
@@ -230,13 +230,24 @@ const ReservationsHistory: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Mes Réservations</h1>
-          <p className="text-gray-600">Consultez l'historique de vos rendez-vous</p>
-        </div>
+        <div className="min-h-screen p-6">
+            <div className="max-w-7xl mx-auto">
+     
+                            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-4 rounded-xl">
+                                <Building2 className="w-10 h-10 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-4xl font-bold text-gray-900">
+                                    Mes Réservations
+                                </h1>
+                                <p className="text-gray-600 text-lg mt-">
+                                    Consultez l'historique de vos rendez-vous
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">

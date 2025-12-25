@@ -460,24 +460,6 @@ const ReservationForm = () => {
                                     </select>
                                 </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
