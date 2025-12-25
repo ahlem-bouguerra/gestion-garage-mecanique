@@ -4,7 +4,7 @@ import { Eye, Calendar, Car, FileText, AlertCircle, CheckCircle, XCircle, Clock 
 import axios from 'axios';
 
 const ClientDevisPage = () => {
-  const [devis, setDevis] = useState([]);
+  const [devis, setDevis] = useState<any[]>([]);
   const [stats, setStats] = useState({
     total: 0,
     brouillon: 0,
@@ -12,7 +12,7 @@ const ClientDevisPage = () => {
     accepte: 0,
     refuse: 0
   });
-  const [selectedDevis, setSelectedDevis] = useState(null);
+  const [selectedDevis, setSelectedDevis] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('tous'); // tous, brouillon, envoye, accepte, refuse
@@ -64,7 +64,7 @@ const ClientDevisPage = () => {
       if (response.data.success) {
         setStats(response.data.stats);
       }
-    } catch (err) {
+    } catch (err :any) {
           if (err.response?.status === 401) {
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
@@ -88,7 +88,7 @@ const ClientDevisPage = () => {
       if (response.data.success) {
         setDevis(response.data.data);
       }
-    } catch (err) {
+    } catch (err:any) {
           if (err.response?.status === 401) {
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
@@ -103,7 +103,7 @@ const ClientDevisPage = () => {
   };
 
   // 🔍 Charger un devis spécifique
-  const loadDevisDetails = async (devisId) => {
+  const loadDevisDetails = async (devisId:string) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/mes-devis/${devisId}`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
@@ -112,7 +112,7 @@ const ClientDevisPage = () => {
       if (response.data.success) {
         setSelectedDevis(response.data.data);
       }
-    } catch (err) {
+    } catch (err : any) {
           if (err.response?.status === 401) {
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
@@ -131,7 +131,7 @@ const ClientDevisPage = () => {
   // Filtrer les devis
   const filteredDevis = filter === 'tous'
     ? devis
-    : devis.filter(d => d.status === filter);
+    : devis.filter((d:any) => d.status === filter);
 
   return (
         <div className="min-h-screen p-6">
@@ -216,7 +216,7 @@ const ClientDevisPage = () => {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
               >
-                {status === 'tous' ? 'Tous' : statusLabels[status]}
+                {status === 'tous' ? 'Tous' : statusLabels[status as keyof typeof statusLabels]}
               </button>
             ))}
           </div>
@@ -257,7 +257,7 @@ const ClientDevisPage = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredDevis.map(d => {
-                    const StatusIcon = statusIcons[d.status];
+                    const StatusIcon = statusIcons[d.status as keyof typeof statusIcons];
                     return (
                       <tr key={d._id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -285,9 +285,9 @@ const ClientDevisPage = () => {
                           {d.finalTotalTTC?.toFixed(3) || '0.000'} DT
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[d.status]}`}>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[d.status as keyof typeof statusColors]}`}>
                             <StatusIcon className="h-3 w-3 mr-1" />
-                            {statusLabels[d.status]}
+                            {statusLabels[d.status as keyof typeof statusLabels]}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -357,7 +357,7 @@ const ClientDevisPage = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {selectedDevis.services.map((s, i) => (
+                      {selectedDevis.services.map((s : any, i : number) => (
                         <tr key={i}>
                           <td className="px-4 py-2 text-sm">{s.piece}</td>
                           <td className="px-4 py-2 text-sm">{s.quantity}</td>

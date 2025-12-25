@@ -5,39 +5,133 @@ import { Search, MapPin, List, Map, Navigation, Phone, Mail, Clock, Car } from '
 import dynamic from 'next/dynamic';
 import axios from 'axios';
 import ClientReservationManagement from '../gestion-reservations-client';
+// types/garage.ts
+
+export interface Location {
+  type: string;
+  coordinates: [number, number]; // [longitude, latitude]
+}
+
+export interface City {
+  _id: string;
+  name: string;
+}
+
+export interface Governorate {
+  _id: string;
+  name: string;
+}
+
+export interface Garage {
+  _id: string;
+  nom: string;
+  streetAddress?: string;
+  cityId?: City;
+  cityName?: string;
+  governorateId?: Governorate;
+  governorateName?: string;
+  telephoneProfessionnel?: string;
+  emailProfessionnel?: string;
+  phone?: string;
+  location?: Location;
+  distance?: number;
+  drivingDistance?: number;
+  estimatedTime?: string;
+}
+
+export interface Service {
+  _id: string;
+  name: string;
+  description?: string;
+  statut?: string;
+  garageId?: string;
+}
+
+export interface FicheClient {
+  _id: string;
+  nom?: string;
+}
+
+export interface OrdreSnapshot {
+  service: string;
+  [key: string]: any;
+}
+
+export interface Rating {
+  _id: string;
+  rating: number;
+  comment?: string;
+  recommande?: boolean;
+  reponseGarage?: string;
+  ficheClientId?: FicheClient;
+  ordreSnapshot?: OrdreSnapshot;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface RatingStats {
+  averageRating: number;
+  totalRatings: number;
+  rating5: number;
+  rating4: number;
+  rating3: number;
+  rating2: number;
+  rating1: number;
+  totalRecommande: number;
+  [key: string]: number;
+}
+
+export interface Filters {
+  governorate: string;
+  city: string;
+  radius: number;
+}
+
+export interface UserLocation {
+  latitude: number;
+  longitude: number;
+}
+export interface MapViewProps {
+  garages: Garage[];
+  userLocation: UserLocation | null;
+  userAddress: string;
+  onGarageSelect: (garageId: string) => void;
+}
 
 const MapView = dynamic(() => import('./MapView'), {
   ssr: false,
   loading: () => <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">Chargement de la carte...</div>
 });
 
+export const API_BASE_URL = 'http://localhost:5000/api';
+
 const GarageSearch = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [garages, setGarages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [viewMode, setViewMode] = useState('map');
-  const [userLocation, setUserLocation] = useState(null);
-  const [userAddress, setUserAddress] = useState('');
-  const [unreadMessages, setUnreadMessages] = useState(0);
-  const [showChatModal, setShowChatModal] = useState(false);
-  const [ratings, setRatings] = useState([]);
-  const [ratingStats, setRatingStats] = useState(null);
-  const [loadingRatings, setLoadingRatings] = useState(false);
-  const [currentRatingIndex, setCurrentRatingIndex] = useState(0);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [garages, setGarages] = useState<Garage[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const [userAddress, setUserAddress] = useState<string>('');
+  const [unreadMessages, setUnreadMessages] = useState<number>(0);
+  const [showChatModal, setShowChatModal] = useState<boolean>(false);
+  const [ratings, setRatings] = useState<Rating[]>([]);
+  const [ratingStats, setRatingStats] = useState<RatingStats | null>(null);
+  const [loadingRatings, setLoadingRatings] = useState<boolean>(false);
+  const [currentRatingIndex, setCurrentRatingIndex] = useState<number>(0);
   const getAuthToken = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<Filters>({
     governorate: '',
     city: '',
-    radius: 100000 // Défaut 100km
+    radius: 100000
   });
 
-  const [governorates, setGovernorates] = useState([]);
-  const [cities, setCities] = useState([]);
-  const [selectedGarage, setSelectedGarage] = useState(null);
-  const [services, setServices] = useState([]);
+  const [governorates, setGovernorates] = useState<Governorate[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [selectedGarage, setSelectedGarage] = useState<Garage | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
 
   const router = useRouter();
 
@@ -54,7 +148,7 @@ const GarageSearch = () => {
   }, [showChatModal]);
 
   // Obtenir l'adresse depuis les coordonnées
-  const getUserAddress = async (latitude, longitude) => {
+  const getUserAddress = async (latitude: number, longitude: number) => {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=fr`
@@ -90,7 +184,7 @@ const GarageSearch = () => {
   useEffect(() => {
     const loadGovernorates = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/governorates');
+        const response = await fetch(`${API_BASE_URL}/governorates`);
         const data = await response.json();
         setGovernorates(Array.isArray(data) ? data : data.governorates || []);
       } catch (error) {
@@ -109,7 +203,7 @@ const GarageSearch = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:5000/api/cities/${filters.governorate}`);
+        const response = await fetch(`${API_BASE_URL}/cities/${filters.governorate}`);
         const data = await response.json();
         setCities(Array.isArray(data) ? data : data.cities || []);
       } catch (error) {
@@ -140,7 +234,7 @@ const GarageSearch = () => {
         params.append('radius', filters.radius.toString());
       }
 
-      const response = await fetch(`http://localhost:5000/api/search?${params}`, {
+      const response = await fetch(`${API_BASE_URL}/search?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -152,13 +246,13 @@ const GarageSearch = () => {
       } else {
         setGarages([]);
       }
-    } catch (error) {
-          if (error.response?.status === 401) {
-    localStorage.removeItem('token');
-    sessionStorage.removeItem('token');
-    window.location.href = '/auth/sign-in';
-    return;
-  }
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       console.error('Erreur recherche:', error);
       setGarages([]);
     } finally {
@@ -184,7 +278,7 @@ const GarageSearch = () => {
   }, [searchTerm, filters]);
 
   // Obtenir l'itinéraire vers un garage
-  const getDirections = (garage) => {
+  const getDirections = (garage: Garage) => {
     if (!garage.location?.coordinates) return;
 
     const [lng, lat] = garage.location.coordinates;
@@ -196,7 +290,7 @@ const GarageSearch = () => {
   };
 
   // Sélectionner un garage et charger ses services
-  const handleGarageSelect = async (garageId) => {
+  const handleGarageSelect = async (garageId: string) => {
     const garage = garages.find(g => g._id === garageId);
     if (!garage) return;
 
@@ -213,14 +307,14 @@ const GarageSearch = () => {
 
       // Charger les services
       const servicesRes = await axios.get(
-        `http://localhost:5000/api/services/garage/${garageId}`,
+        `${API_BASE_URL}/services/garage/${garageId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setServices(Array.isArray(servicesRes.data) ? servicesRes.data : servicesRes.data.services || []);
 
       // NOUVEAU: Charger les ratings
       const ratingsRes = await axios.get(
-        `http://localhost:5000/api/client/garage-ratings/${garageId}`,
+        `${API_BASE_URL}/client/garage-ratings/${garageId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -229,7 +323,7 @@ const GarageSearch = () => {
         setRatingStats(ratingsRes.data.statistics);
       }
 
-    } catch (error) {
+    } catch (error: any) {
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
@@ -246,7 +340,7 @@ const GarageSearch = () => {
   };
 
   // Rediriger vers la réservation
-  const handleReservation = (garage) => {
+  const handleReservation = (garage: Garage) => {
     const queryParams = new URLSearchParams({
       garageId: garage._id,
       nom: garage.nom,
@@ -267,14 +361,16 @@ const GarageSearch = () => {
         window.location.href = '/auth/sign-in';
         return;
       }
-      const res = await axios.get("http://localhost:5000/api/client-reservations/", {
+      const res = await axios.get(`${API_BASE_URL}/client-reservations/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       // Compter les réservations nécessitant une action
-      const unread = res.data.reservations.filter(r => r.status === 'contre_propose').length;
+      const unread = Array.isArray(res.data.reservations) 
+      ? res.data.reservations.filter((r: any) => r.status === 'contre_propose').length 
+      : 0;
       setUnreadMessages(unread);
-    } catch (err) {
+    } catch (err: any) {
       if (err.response?.status === 401) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
@@ -290,6 +386,23 @@ const GarageSearch = () => {
     const interval = setInterval(checkUnreadMessages, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Ajouter cette fonction avant le return
+  const getRatingCount = (star: number): number => {
+    const key = `rating${star}` as keyof RatingStats;
+    return (ratingStats?.[key] as number) || 0;
+  };
+
+  const getBarColor = (star: number): string => {
+    const colors = {
+      5: 'bg-green-500',
+      4: 'bg-lime-500',
+      3: 'bg-yellow-500',
+      2: 'bg-orange-500',
+      1: 'bg-red-500'
+    };
+    return colors[star as keyof typeof colors] || 'bg-gray-500';
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -540,8 +653,8 @@ const GarageSearch = () => {
                       <div className="flex justify-between items-start">
                         <h4 className="font-semibold">{service.name}</h4>
                         <span className={`px-2 py-1 rounded-full text-xs ${service.statut?.toLowerCase() === 'actif'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
                           }`}>
                           {service.statut}
                         </span>
@@ -621,8 +734,9 @@ const GarageSearch = () => {
                       {/* Barres de distribution */}
                       <div className="flex-1 space-y-3">
                         {[5, 4, 3, 2, 1].map(star => {
-                          const count = ratingStats[`rating${star}`];
-                          const percent = (count / ratingStats.totalRatings * 100).toFixed(0);
+                          const count = getRatingCount(star);
+                          const percent = ratingStats ? (count / ratingStats.totalRatings * 100).toFixed(0) : '0';
+
                           return (
                             <div key={star} className="flex items-center gap-3">
                               <span className="text-sm font-semibold text-gray-700 w-8">
@@ -630,11 +744,7 @@ const GarageSearch = () => {
                               </span>
                               <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
                                 <div
-                                  className={`h-full rounded-full transition-all duration-700 ${star === 5 ? 'bg-green-500' :
-                                      star === 4 ? 'bg-lime-500' :
-                                        star === 3 ? 'bg-yellow-500' :
-                                          star === 2 ? 'bg-orange-500' : 'bg-red-500'
-                                    }`}
+                                  className={`h-full rounded-full transition-all duration-700 ${getBarColor(star)}`}
                                   style={{ width: `${percent}%` }}
                                 />
                               </div>
@@ -645,13 +755,15 @@ const GarageSearch = () => {
                           );
                         })}
 
-                        {ratingStats.totalRecommande > 0 && (
+                        {ratingStats && ratingStats.totalRecommande > 0 && (
                           <div className="mt-4 pt-4 border-t border-gray-200 flex items-center gap-2 text-sm">
                             <span className="text-2xl">👍</span>
                             <span className="font-semibold text-green-600">
                               {ratingStats.totalRecommande} client{ratingStats.totalRecommande > 1 ? 's' : ''}
                             </span>
-                            <span className="text-gray-600">recommande{ratingStats.totalRecommande > 1 ? 'nt' : ''} ce garage</span>
+                            <span className="text-gray-600">
+                              recommande{ratingStats.totalRecommande > 1 ? 'nt' : ''} ce garage
+                            </span>
                           </div>
                         )}
                       </div>
@@ -707,11 +819,11 @@ const GarageSearch = () => {
                               </p>
                             </div>
                           )}
-                     
+
                           {ratings[currentRatingIndex].comment && (
                             <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
-                                <p className="text-gray-700 text-xl leading-relaxed italic">
-                                Commentaire Client : 
+                              <p className="text-gray-700 text-xl leading-relaxed italic">
+                                Commentaire Client :
                               </p>
                               <p className="text-gray-700 text-sm leading-relaxed italic">
                                 "{ratings[currentRatingIndex].comment}"
@@ -761,8 +873,8 @@ const GarageSearch = () => {
                                   key={idx}
                                   onClick={() => setCurrentRatingIndex(idx)}
                                   className={`h-2 rounded-full transition-all ${idx === currentRatingIndex
-                                      ? 'w-8 bg-blue-600'
-                                      : 'w-2 bg-gray-300 hover:bg-gray-400'
+                                    ? 'w-8 bg-blue-600'
+                                    : 'w-2 bg-gray-300 hover:bg-gray-400'
                                     }`}
                                 />
                               ))}

@@ -5,54 +5,141 @@ import { Calendar, Clock, User, Phone, Mail, FileText, MapPin, ArrowLeft, Send }
 import { useSearchParams } from "next/navigation";
 import axios from 'axios';
 
-interface Service {
-    _id: string;
-    name: string;
-    statut: string;
-    description?: string;
+export interface Service {
+  _id: string;
+  name: string;
+  statut: string;
+  description?: string;
+  garageId?: string;
 }
 
+export interface Voiture {
+  _id: string;
+  marque: string;
+  modele: string;
+  immatriculation: string;
+  annee?: number;
+  couleur?: string;
+  numeroSerie?: string;
+}
 
+export interface CurrentUser {
+  _id: string;
+  username: string;
+  phone: string;
+  email?: string;
+  role?: string;
+  location?: {
+    type: string;
+    coordinates: [number, number];
+  };
+}
+
+export interface GarageData {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  governorate: string;
+  phone?: string;
+  email?: string;
+}
+
+export interface CreneauDemande {
+  date: string;
+  heureDebut: string;
+}
+
+export interface FormData {
+  clientId: string;
+  vehiculeId: string;
+  clientName: string;
+  clientPhone: string;
+  clientEmail: string;
+  serviceId: string;
+  date: string;
+  heureDebut: string;
+  descriptionDepannage: string;
+}
+
+export interface FormErrors {
+  clientName?: string;
+  clientPhone?: string;
+  clientEmail?: string;
+  serviceId?: string;
+  date?: string;
+  heureDebut?: string;
+  descriptionDepannage?: string;
+  submit?: string;
+}
+
+export interface ReservationData {
+  garageId: string;
+  clientId: string;
+  vehiculeId: string | null;
+  clientName: string;
+  clientPhone: string;
+  clientEmail: string | null;
+  serviceId: string;
+  creneauDemande: CreneauDemande;
+  descriptionDepannage: string;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
+
+export const API_BASE_URL = 'http://localhost:5000/api';
 const ReservationForm = () => {
-    const [voitures, setVoitures] = useState([]); // Liste de voitures
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const [garageData, setGarageData] = useState<any>({});
-    const [services, setServices] = useState<Service[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
-    const [currentUser, setCurrentUser] = useState(null);
-    const [formData, setFormData] = useState({
-        clientId: '',
-        vehiculeId: '',
-        clientName: '',
-        clientPhone: '',
-        clientEmail: '',
-        serviceId: '',
-        date: '',
-        heureDebut: '',
-        descriptionDepannage: '',
-    });
-    const [errors, setErrors] = useState({});
-    const [success, setSuccess] = useState(false);
-    const [selectedGarage, setSelectedGarage] = useState<Garage | null>(null);
+   const [voitures, setVoitures] = useState<Voiture[]>([]);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [garageData, setGarageData] = useState<GarageData>({
+    id: '',
+    name: '',
+    address: '',
+    city: '',
+    governorate: '',
+    phone: '',
+    email: ''
+  });
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [formData, setFormData] = useState<FormData>({
+    clientId: '',
+    vehiculeId: '',
+    clientName: '',
+    clientPhone: '',
+    clientEmail: '',
+    serviceId: '',
+    date: '',
+    heureDebut: '',
+    descriptionDepannage: '',
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [success, setSuccess] = useState<boolean>(false);
+
     const getAuthToken = () => {
         return localStorage.getItem('token') || sessionStorage.getItem('token');
     };
 
-    useEffect(() => {
-        if (searchParams) {
-            setGarageData({
-                id: searchParams.get("garageId"),
-                name: searchParams.get("garageName"),
-                address: searchParams.get("garageAddress"),
-                city: searchParams.get("garageCity"),
-                governorate: searchParams.get("garageGovernorate"),
-                phone: searchParams.get("garagePhone"),
-                email: searchParams.get("garageEmail"),
-            });
-        }
-    }, [searchParams]);
+  useEffect(() => {
+    if (searchParams) {
+      setGarageData({
+        id: searchParams.get("garageId") || '',
+        name: searchParams.get("garageName") || '',
+        address: searchParams.get("garageAddress") || '',
+        city: searchParams.get("garageCity") || '',
+        governorate: searchParams.get("garageGovernorate") || '',
+        phone: searchParams.get("garagePhone") || '',
+        email: searchParams.get("garageEmail") || '',
+      });
+    }
+  }, [searchParams]);
     useEffect(() => {
         const fetchUserWithLocation = async () => {
             const token = localStorage.getItem("token");
@@ -68,7 +155,7 @@ const ReservationForm = () => {
                     window.location.href = '/auth/sign-in';
                     return;
                 }
-                const response = await axios.get("http://localhost:5000/api/client/profile", {
+                const response = await axios.get(`${API_BASE_URL}/client/profile`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
@@ -100,7 +187,7 @@ const ReservationForm = () => {
             const token = localStorage.getItem("token");
             if (!token) return;
             try {
-                const res = await axios.get("http://localhost:5000/api/get-all-mes-vehicules", {
+                const res = await axios.get(`${API_BASE_URL}/get-all-mes-vehicules`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 // ✅ adapte cette URL à ton API réelle
@@ -128,7 +215,7 @@ const ReservationForm = () => {
                     return;
                 }
                 const res = await axios.get(
-                    `http://localhost:5000/api/services/garage/${garageData.id}`, {
+                    `${API_BASE_URL}/services/garage/${garageData.id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 }
                 );
@@ -161,36 +248,36 @@ const ReservationForm = () => {
 
     const timeOptions = generateTimeOptions();
 
-    const validateForm = () => {
-        const newErrors = {};
+const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
 
-        if (!formData.clientName.trim()) newErrors.clientName = 'Le nom est requis';
-        if (!formData.clientPhone.trim()) newErrors.clientPhone = 'Le téléphone est requis';
-        if (!formData.serviceId) newErrors.serviceId = 'Veuillez sélectionner un service';
-        if (!formData.date) newErrors.date = 'La date est requise';
-        if (!formData.heureDebut) newErrors.heureDebut = 'L\'heure de début est requise';
-        if (!formData.descriptionDepannage.trim()) newErrors.descriptionDepannage = 'La description est requise';
+    if (!formData.clientName.trim()) newErrors.clientName = 'Le nom est requis';
+    if (!formData.clientPhone.trim()) newErrors.clientPhone = 'Le téléphone est requis';
+    if (!formData.serviceId) newErrors.serviceId = 'Veuillez sélectionner un service';
+    if (!formData.date) newErrors.date = 'La date est requise';
+    if (!formData.heureDebut) newErrors.heureDebut = 'L\'heure de début est requise';
+    if (!formData.descriptionDepannage.trim()) newErrors.descriptionDepannage = 'La description est requise';
 
-        // Validation de la date (pas dans le passé)
-        if (formData.date && new Date(formData.date) < new Date().setHours(0, 0, 0, 0)) {
-            newErrors.date = 'La date ne peut pas être dans le passé';
-        }
+    // Validation de la date (pas dans le passé)
+    if (formData.date && new Date(formData.date) < new Date(new Date().setHours(0, 0, 0, 0))) {
+      newErrors.date = 'La date ne peut pas être dans le passé';
+    }
 
-        // Validation du téléphone (format tunisien basique)
-        const phoneRegex = /^(\+216|216)?[2-9][0-9]{7}$/;
-        if (formData.clientPhone && !phoneRegex.test(formData.clientPhone.replace(/\s/g, ''))) {
-            newErrors.clientPhone = 'Format de téléphone invalide (ex: +216 20 123 456)';
-        }
+    // Validation du téléphone (format tunisien basique)
+    const phoneRegex = /^(\+216|216)?[2-9][0-9]{7}$/;
+    if (formData.clientPhone && !phoneRegex.test(formData.clientPhone.replace(/\s/g, ''))) {
+      newErrors.clientPhone = 'Format de téléphone invalide (ex: +216 20 123 456)';
+    }
 
-        // Validation de l'email si fourni
-        if (formData.clientEmail && !/\S+@\S+\.\S+/.test(formData.clientEmail)) {
-            newErrors.clientEmail = 'Format d\'email invalide';
-        }
+    // Validation de l'email si fourni
+    if (formData.clientEmail && !/\S+@\S+\.\S+/.test(formData.clientEmail)) {
+      newErrors.clientEmail = 'Format d\'email invalide';
+    }
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-    ;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
 
     const handleSubmit = async () => {
         console.log("Button cliqué !");
@@ -236,7 +323,7 @@ const ReservationForm = () => {
                 return;
             }
             const response = await axios.post(
-                'http://localhost:5000/api/create-reservation',
+                 `${API_BASE_URL}/create-reservation`,
                 {
                     garageId: garageData.id,
                     clientId: formData.clientId,
