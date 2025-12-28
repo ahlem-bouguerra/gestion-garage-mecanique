@@ -104,13 +104,273 @@ const carnetentretiens = [
     "createdAt": "2025-12-01T14:13:34.601Z",
     "updatedAt": "2025-12-01T14:13:34.601Z",
     "__v": 0
+  },
+  {
+    "_id": "693c046df8479df31413cfe8",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "dateCommencement": "2025-12-12T00:00:00.000Z",
+    "dateFinCompletion": "2025-12-12T00:00:00.000Z",
+    "statut": "termine",
+    "totalTTC": 0,
+    "kilometrageEntretien": null,
+    "notes": "Ajouté manuellement par le client",
+    "services": [
+      {
+        "nom": "ttttt",
+        "description": "ttttt",
+        "quantite": 1,
+        "prix": 0,
+        "_id": "693c046df8479df31413cfe9"
+      }
+    ],
+    "pieces": [],
+    "createdAt": "2025-12-12T12:02:53.371Z",
+    "updatedAt": "2025-12-12T12:02:53.371Z",
+    "__v": 0
+  },
+  {
+    "_id": "693c0b40f8479df31413d045",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "dateCommencement": "2025-12-12T00:00:00.000Z",
+    "dateFinCompletion": "2025-12-12T00:00:00.000Z",
+    "statut": "termine",
+    "totalTTC": 10,
+    "kilometrageEntretien": null,
+    "notes": "Ajouté manuellement par le client",
+    "services": [
+      {
+        "nom": "tacge",
+        "description": "tacge",
+        "quantite": 1,
+        "prix": 0,
+        "_id": "693c0b40f8479df31413d046"
+      }
+    ],
+    "pieces": [],
+    "createdAt": "2025-12-12T12:32:00.267Z",
+    "updatedAt": "2025-12-12T12:32:00.267Z",
+    "__v": 0
+  },
+  {
+    "_id": "693c0ccd73d1e38fa2f872a5",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "devisId": "692eb51c3158d0bba107e1af",
+    "dateCommencement": "2025-12-12T12:37:00.000Z",
+    "dateFinCompletion": "2025-12-12T12:38:06.501Z",
+    "statut": "termine",
+    "totalTTC": 1440,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0011",
+    "services": [
+      {
+        "nom": "wc",
+        "description": "climatisation",
+        "quantite": 1,
+        "_id": "693c0ccd73d1e38fa2f872a6"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-12T12:38:37.254Z",
+    "updatedAt": "2025-12-12T12:38:37.254Z",
+    "__v": 0
+  },
+  {
+    "_id": "6943c869860839c2561e22f2",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "devisId": "6941a671eb4e2ff1220c8c1b",
+    "dateCommencement": "2025-12-18T14:36:00.000Z",
+    "dateFinCompletion": "2025-12-16T18:36:50.281Z",
+    "statut": "termine",
+    "totalTTC": 1320,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0014",
+    "services": [
+      {
+        "nom": "hhhh",
+        "description": "climatisation",
+        "quantite": 1,
+        "_id": "6943c869860839c2561e22f3"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-18T09:24:57.291Z",
+    "updatedAt": "2025-12-18T09:24:57.291Z",
+    "__v": 0
+  },
+  {
+    "_id": "6943c869860839c2561e22f5",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "devisId": "6941ca0ca6e7af927b6c2572",
+    "dateCommencement": "2025-12-17T08:07:00.000Z",
+    "dateFinCompletion": "2025-12-16T21:08:12.992Z",
+    "statut": "termine",
+    "totalTTC": 180,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0016",
+    "services": [
+      {
+        "nom": "pneu",
+        "description": "entretien",
+        "quantite": 1,
+        "_id": "6943c869860839c2561e22f6"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-18T09:24:57.296Z",
+    "updatedAt": "2025-12-18T09:24:57.296Z",
+    "__v": 0
+  },
+  {
+    "_id": "6943c869860839c2561e22f8",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "devisId": "69419bb414849d9e7cb87ca6",
+    "dateCommencement": "2025-12-16T18:50:00.000Z",
+    "dateFinCompletion": "2025-12-16T17:51:04.755Z",
+    "statut": "termine",
+    "totalTTC": 120,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0013",
+    "services": [
+      {
+        "nom": "ff",
+        "description": "climatisation",
+        "quantite": 1,
+        "_id": "6943c869860839c2561e22f9"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-18T09:24:57.299Z",
+    "updatedAt": "2025-12-18T09:24:57.299Z",
+    "__v": 0
+  },
+  {
+    "_id": "6949179899b2638a309e1c89",
+    "vehiculeId": "691af8fca7dcfc06162ccd16",
+    "devisId": "691db4ce807a8aa37603e0a7",
+    "dateCommencement": "2025-11-23T12:53:00.000Z",
+    "dateFinCompletion": "2025-11-23T12:14:23.337Z",
+    "statut": "termine",
+    "totalTTC": 252,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0004",
+    "services": [
+      {
+        "nom": "eee",
+        "description": "Pneumatiques et suspension",
+        "quantite": 1,
+        "_id": "6949179899b2638a309e1c8a"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-22T10:04:08.849Z",
+    "updatedAt": "2025-12-22T10:04:08.849Z",
+    "__v": 0
+  },
+  {
+    "_id": "694917ac99b2638a309e1d0d",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "devisId": "6941cc0cdb9498032b27c835",
+    "dateCommencement": "2025-12-17T09:09:00.000Z",
+    "dateFinCompletion": "2025-12-16T21:17:20.786Z",
+    "statut": "termine",
+    "totalTTC": 1320,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0017",
+    "services": [
+      {
+        "nom": "aaa",
+        "description": "climatisation",
+        "quantite": 1,
+        "_id": "694917ac99b2638a309e1d0e"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-22T10:04:28.228Z",
+    "updatedAt": "2025-12-22T10:04:28.228Z",
+    "__v": 0
+  },
+  {
+    "_id": "694917ac99b2638a309e1d10",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "devisId": "6941a76beb4e2ff1220c924f",
+    "dateCommencement": "2025-12-19T08:00:00.000Z",
+    "dateFinCompletion": "2025-12-16T18:40:24.489Z",
+    "statut": "termine",
+    "totalTTC": 1464,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0015",
+    "services": [
+      {
+        "nom": "phare",
+        "description": "entretien",
+        "quantite": 2,
+        "_id": "694917ac99b2638a309e1d11"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-22T10:04:28.236Z",
+    "updatedAt": "2025-12-22T10:04:28.236Z",
+    "__v": 0
+  },
+  {
+    "_id": "69491c6b99b2638a309e236c",
+    "vehiculeId": "691af8fca7dcfc06162ccd16",
+    "dateCommencement": "2025-12-22T00:00:00.000Z",
+    "dateFinCompletion": "2025-12-22T00:00:00.000Z",
+    "statut": "termine",
+    "totalTTC": 0,
+    "notes": "Ajouté manuellement",
+    "services": [
+      {
+        "nom": "yhujikolm",
+        "description": "entretien",
+        "quantite": 1,
+        "prix": 0,
+        "_id": "69491c6b99b2638a309e236d"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-22T10:24:43.567Z",
+    "updatedAt": "2025-12-22T10:24:43.567Z",
+    "__v": 0
+  },
+  {
+    "_id": "69491e1199b2638a309e23d0",
+    "vehiculeId": "691af8fca7dcfc06162ccd16",
+    "dateCommencement": "2025-12-22T00:00:00.000Z",
+    "dateFinCompletion": "2025-12-22T00:00:00.000Z",
+    "statut": "termine",
+    "totalTTC": 0,
+    "notes": "Ajouté manuellement",
+    "services": [
+      {
+        "nom": "dddddddd",
+        "description": "entretien",
+        "quantite": 1,
+        "prix": 0,
+        "_id": "69491e1199b2638a309e23d1"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-22T10:31:45.739Z",
+    "updatedAt": "2025-12-22T10:31:45.739Z",
+    "__v": 0
   }
 ];
 
 const clients = [
   {
     "_id": "6911cb63ccd145adc6354d98",
-    "username": "magher",
+    "username": "gaffousa ras el fakrouna",
     "email": "ahlembouguerra@outlook.fr",
     "password": "$2b$10$qUTzDStezxvCC79QDgOlRuWdas/UEO1l2klBtXkaanRylhuVPP/5K",
     "phone": "26541236",
@@ -119,7 +379,36 @@ const clients = [
     "resetPasswordToken": "$2b$10$OuexKT.OZjOeRbmJmaGwN.6fWzLdyWsLqj/cxJSvM/XE1rQQs.N62",
     "resetPasswordExpires": "2025-11-16T10:50:20.127Z",
     "createdAt": "2025-11-10T11:24:19.451Z",
-    "updatedAt": "2025-11-16T09:50:20.130Z",
+    "updatedAt": "2025-12-28T12:43:01.085Z",
+    "__v": 0,
+    "verificationToken": null,
+    "verificationTokenExpiry": null
+  },
+  {
+    "_id": "693be8f83cc266e4a6e9f18d",
+    "username": "bou ali mansour",
+    "email": "ahlembouguerra20@gmail.com",
+    "password": "$2b$10$xFK7rZtQxiCsLaFoUFpyhuaWVVehanTWe2Dl3raezP7eSKFSHTGS6",
+    "phone": "56321789",
+    "isVerified": false,
+    "googleId": null,
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "createdAt": "2025-12-12T10:05:44.743Z",
+    "updatedAt": "2025-12-12T10:05:44.743Z",
+    "__v": 0
+  },
+  {
+    "_id": "693be93e3cc266e4a6e9f193",
+    "username": "ahlembouguerra",
+    "email": "ahlembouguerra12@gmail.com",
+    "phone": "",
+    "isVerified": true,
+    "googleId": "118243487113723594629",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "createdAt": "2025-12-12T10:06:54.453Z",
+    "updatedAt": "2025-12-12T10:06:54.453Z",
     "__v": 0
   }
 ];
@@ -347,6 +636,153 @@ const creditnotes = [
     "createdAt": "2025-12-10T10:31:02.186Z",
     "updatedAt": "2025-12-10T10:31:02.186Z",
     "__v": 0
+  },
+  {
+    "_id": "693ab10cf0a8819860196d57",
+    "creditNumber": "AV-2025-000010",
+    "originalFactureId": "691dc992f059c09f59b104f5",
+    "originalFactureNumber": "FAC-019",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "inspectionDate": "2025-11-19T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "eee",
+        "quantity": 2,
+        "unitPrice": 100,
+        "total": 200,
+        "_id": "691dc992f059c09f59b104f6"
+      }
+    ],
+    "maindoeuvre": 10,
+    "tvaRate": 20,
+    "totalHT": 210,
+    "totalTVA": 42,
+    "totalTTC": 252,
+    "totalRemise": 22.68,
+    "finalTotalTTC": 230.32,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-11T11:54:52.256Z",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-11T11:54:52.260Z",
+    "updatedAt": "2025-12-11T11:54:52.260Z",
+    "__v": 0
+  },
+  {
+    "_id": "693ab1d1f0a8819860196ebd",
+    "creditNumber": "AV-2025-000011",
+    "originalFactureId": "692582f3bc90c33f84d87fc8",
+    "originalFactureNumber": "FAC-029",
+    "clientId": "691af6c0143c7678f8f10730",
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "inspectionDate": "2025-11-25T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "aa",
+        "quantity": 1,
+        "unitPrice": 10,
+        "total": 10,
+        "_id": "692582f3bc90c33f84d87fc9"
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "692582f3bc90c33f84d87fca"
+      }
+    ],
+    "maindoeuvre": 1000,
+    "tvaRate": 20,
+    "totalHT": 1110,
+    "totalTVA": 222,
+    "totalTTC": 1332,
+    "totalRemise": 0,
+    "finalTotalTTC": 1333,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-11T11:58:09.823Z",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-11T11:58:09.826Z",
+    "updatedAt": "2025-12-11T11:58:09.826Z",
+    "__v": 0
+  },
+  {
+    "_id": "69494bf3ce3188cdd4484d3d",
+    "creditNumber": "AV-2025-000012",
+    "originalFactureId": "6949229099b2638a309e417c",
+    "originalFactureNumber": "FAC-036",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "ccc cc - TUN544",
+    "inspectionDate": "2025-12-22T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "b",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "6949229099b2638a309e417d"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalTTC": 240,
+    "totalRemise": 24,
+    "finalTotalTTC": 217,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-22T13:47:31.915Z",
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-22T13:47:31.917Z",
+    "updatedAt": "2025-12-22T13:47:31.917Z",
+    "__v": 0
+  },
+  {
+    "_id": "694e5731a7c3f5573ba132ff",
+    "creditNumber": "AV-2025-000013",
+    "originalFactureId": "69494bf3ce3188cdd4484d49",
+    "originalFactureNumber": "FAC-038",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "ccc cc - TUN544",
+    "inspectionDate": "2025-12-22T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "b",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "69494bf3ce3188cdd4484d4a"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalTTC": 240,
+    "totalRemise": 24,
+    "finalTotalTTC": 217,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-26T09:36:49.625Z",
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-26T09:36:49.627Z",
+    "updatedAt": "2025-12-26T09:36:49.627Z",
+    "__v": 0
   }
 ];
 
@@ -391,12 +827,27 @@ const ficheclients = [
   },
   {
     "_id": "692eb4ed3158d0bba107e02c",
-    "nom": "magher",
+    "nom": "maher",
     "type": "particulier",
     "telephone": "26541236",
     "email": "ahlembouguerra@outlook.fr",
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "clientId": "6911cb63ccd145adc6354d98",
+    "__v": 0,
+    "adresse": "sousse",
+    "adresseSociete": "",
+    "emailSociete": "",
+    "nomSociete": "",
+    "telephoneSociete": ""
+  },
+  {
+    "_id": "6949171499b2638a309e1b3a",
+    "nom": "pst",
+    "type": "particulier",
+    "adresse": "sousse",
+    "telephone": "21939809",
+    "email": "pst@gamil.com",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
     "__v": 0
   }
 ];
@@ -500,7 +951,7 @@ const vehicules = [
       "dateProchaineVisite": "2026-12-17T00:00:00.000Z"
     },
     "createdAt": "2025-11-17T10:29:16.145Z",
-    "updatedAt": "2025-11-17T10:29:16.145Z",
+    "updatedAt": "2025-12-22T10:04:02.192Z",
     "__v": 0
   },
   {
@@ -654,7 +1105,41 @@ const vehicules = [
       "dateProchaineVisite": "2027-11-04T00:00:00.000Z"
     },
     "createdAt": "2025-12-02T09:46:02.479Z",
-    "updatedAt": "2025-12-02T09:46:02.479Z",
+    "updatedAt": "2025-12-22T10:19:55.453Z",
+    "__v": 0
+  },
+  {
+    "_id": "69491b8599b2638a309e221b",
+    "proprietaireId": "691af6f2143c7678f8f10755",
+    "proprietaireModel": "FicheClient",
+    "marque": "ccc",
+    "modele": "cc",
+    "immatriculation": "TUN544",
+    "annee": 2020,
+    "typeCarburant": "essence",
+    "kilometrage": 21000,
+    "statut": "actif",
+    "creePar": "garagiste",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [
+      {
+        "garageId": "69147725cb1b9aa1eaa81e3f",
+        "datePremiereVisite": "2025-12-22T10:20:53.021Z",
+        "_id": "69491b8599b2638a309e221c"
+      }
+    ],
+    "carteGrise": {
+      "numeroCG": "OIPŶGYH",
+      "numeroChassis": "TYUIOPIUH",
+      "dateMiseCirculation": "2025-12-22T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-12-22T00:00:00.000Z",
+      "dateProchaineVisite": "2028-06-22T00:00:00.000Z"
+    },
+    "createdAt": "2025-12-22T10:20:53.029Z",
+    "updatedAt": "2025-12-22T10:20:53.029Z",
     "__v": 0
   }
 ];
@@ -868,6 +1353,16 @@ const ficheclientvehicules = [
     "createdAt": "2025-12-02T09:56:16.049Z",
     "updatedAt": "2025-12-02T09:56:16.049Z",
     "__v": 0
+  },
+  {
+    "_id": "69491b8599b2638a309e221e",
+    "ficheClientId": "691af6f2143c7678f8f10755",
+    "vehiculeId": "69491b8599b2638a309e221b",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "dateAssociation": "2025-12-22T10:20:53.036Z",
+    "createdAt": "2025-12-22T10:20:53.037Z",
+    "updatedAt": "2025-12-22T10:20:53.037Z",
+    "__v": 0
   }
 ];
 
@@ -876,10 +1371,10 @@ const garages = [
     "_id": "69147725cb1b9aa1eaa81e3f",
     "nom": "Garage Elite Motors Premium",
     "matriculeFiscal": "987654321777",
-    "governorateId": "689de78ebbd7f699052feeaf",
-    "governorateName": "SOUSSE",
-    "cityId": "689de78ebbd7f699052ff017",
-    "cityName": "SOUSSE VILLE (Sousse)",
+    "governorateId": "689de78cbbd7f699052fda09",
+    "governorateName": "JENDOUBA",
+    "cityId": "689de78cbbd7f699052fdaa1",
+    "cityName": "JENDOUBA (Cite Snit)",
     "streetAddress": "",
     "garagisteAdmins": [
       "6917342f9b5729f0dbd904e0"
@@ -892,48 +1387,22 @@ const garages = [
     "location": {
       "type": "Point",
       "coordinates": [
-        10.63,
-        35.8269
+        8.784,
+        36.497
       ]
     },
     "createdAt": "2025-11-12T12:01:41.005Z",
-    "updatedAt": "2025-12-01T14:19:42.577Z",
+    "updatedAt": "2025-12-28T12:13:13.967Z",
     "__v": 0
-  },
-  {
-    "_id": "6916fb6416edea752b1f81b3",
-    "nom": "garage plus",
-    "matriculeFiscal": "874593",
-    "governorateId": "689de78dbbd7f699052fe483",
-    "governorateName": "MONASTIR",
-    "cityId": "689de78dbbd7f699052fe595",
-    "cityName": "MONASTIR (Monastir)",
-    "streetAddress": "",
-    "garagisteAdmins": [],
-    "description": "ffffff",
-    "horaires": "lundi-samedi : 08:00-17:00",
-    "isActive": false,
-    "emailProfessionnel": "auto0@gamil.com",
-    "telephoneProfessionnel": "45 001 987",
-    "createdAt": "2025-11-14T09:50:28.440Z",
-    "updatedAt": "2025-12-09T19:37:35.794Z",
-    "__v": 0,
-    "location": {
-      "type": "Point",
-      "coordinates": [
-        10.8,
-        35.7644
-      ]
-    }
   },
   {
     "_id": "691733369b5729f0dbd904a1",
     "nom": "bassem garage",
     "matriculeFiscal": "15rsksd9842f",
-    "governorateId": "689de78ebbd7f699052feeaf",
-    "governorateName": "SOUSSE",
-    "cityId": "689de78ebbd7f699052feeb5",
-    "cityName": "BOU FICHA (Bou Ficha)",
+    "governorateId": "689de78ebbd7f699052ff019",
+    "governorateName": "TATAOUINE",
+    "cityId": "689de78ebbd7f699052ff037",
+    "cityName": "TATAOUINE SUD (Tataouine)",
     "streetAddress": "",
     "garagisteAdmins": [
       "691733589b5729f0dbd904a7",
@@ -945,13 +1414,13 @@ const garages = [
     "emailProfessionnel": "auto2@gamil.com",
     "telephoneProfessionnel": "45 222 987",
     "createdAt": "2025-11-14T13:48:38.567Z",
-    "updatedAt": "2025-12-01T14:19:04.574Z",
+    "updatedAt": "2025-12-25T08:32:22.109Z",
     "__v": 0,
     "location": {
       "type": "Point",
       "coordinates": [
-        10.3997,
-        36.2933
+        10.4514,
+        32.9297
       ]
     }
   },
@@ -967,11 +1436,11 @@ const garages = [
     "garagisteAdmins": [],
     "description": "ssssssss",
     "horaires": "Lun-Mar: 08h00-17h00, Mer: 09h00-17h00, Jeu-Sam: 08h00-17h00, Dim: Fermé",
-    "isActive": true,
+    "isActive": false,
     "emailProfessionnel": "auto3@gamil.com",
     "telephoneProfessionnel": "45 333 987",
     "createdAt": "2025-11-21T20:27:59.329Z",
-    "updatedAt": "2025-12-01T14:18:45.508Z",
+    "updatedAt": "2025-12-11T13:16:29.948Z",
     "__v": 0,
     "location": {
       "type": "Point",
@@ -1082,88 +1551,10 @@ const garagistes = [
       "services": []
     },
     "createdAt": "2025-11-12T12:01:40.999Z",
-    "updatedAt": "2025-11-16T13:29:56.823Z",
-    "__v": 0
-  },
-  {
-    "_id": "6916fb7916edea752b1f81b9",
-    "username": "sana",
-    "email": "aal@gmail.com",
-    "password": "$2b$10$IQL7tCZlW14woBtw6NedvuZ3Pkhqeh7cc5ujzomM96PjagLbrPHEO",
-    "phone": "26532108",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "6916fb6416edea752b1f81b3",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T09:50:49.294Z",
-    "updatedAt": "2025-11-14T09:50:49.294Z",
-    "__v": 0
-  },
-  {
-    "_id": "69170706bbb04ea7ba9caf0c",
-    "username": "ahlem.bouguerra",
-    "email": "ahlembouguerra@o.r",
-    "password": "$2b$10$m4IieI97G8H1VLvg0Ip95eW.czLVSnA7DVZABj0TYkNuQkwF5Fmui",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "6916fb6416edea752b1f81b3",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T10:40:06.938Z",
-    "updatedAt": "2025-11-14T10:40:06.938Z",
-    "__v": 0
-  },
-  {
-    "_id": "6917076ebbb04ea7ba9caf17",
-    "username": "rim",
-    "email": "rim@gmail.com",
-    "password": "$2b$10$YpDDf/TO9hYh68iH2pd3levjQ30e4wt3dLu/5FDpBWYEeSyg.NjzO",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "6916fb6416edea752b1f81b3",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T10:41:50.752Z",
-    "updatedAt": "2025-11-14T10:41:50.752Z",
-    "__v": 0
-  },
-  {
-    "_id": "69170787bbb04ea7ba9caf22",
-    "username": "sana",
-    "email": "sana@gmail.com",
-    "password": "$2b$10$Dl3WdFvWiZm0fD4AvoTpk.leIJ1NO2xvgHHrn/61e36u4okI9cPSe",
-    "phone": "26532108",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "6916fb6416edea752b1f81b3",
-    "isActive": true,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T10:42:15.220Z",
-    "updatedAt": "2025-11-16T19:34:25.478Z",
-    "__v": 0
+    "updatedAt": "2025-12-23T09:58:53.603Z",
+    "__v": 0,
+    "verificationToken": null,
+    "verificationTokenExpiry": null
   },
   {
     "_id": "69172c691fd203ef3d3f1c38",
@@ -1194,7 +1585,7 @@ const garagistes = [
       "typeContrat": "CDI"
     },
     "createdAt": "2025-11-14T13:19:37.954Z",
-    "updatedAt": "2025-12-01T13:32:43.585Z",
+    "updatedAt": "2025-12-22T13:53:15.875Z",
     "__v": 0
   },
   {
@@ -1215,106 +1606,6 @@ const garagistes = [
     },
     "createdAt": "2025-11-14T13:49:12.805Z",
     "updatedAt": "2025-11-14T13:49:12.805Z",
-    "__v": 0
-  },
-  {
-    "_id": "6917342f9b5729f0dbd904e0",
-    "username": "ahlem.bouguerra",
-    "email": "ahlembouguerra2@gmail.com",
-    "password": "$2b$10$qKWZbKI4cQ65kfnmQhsU9.WKDsFGh.z3vUpL6aycK4dCGAVz/iGnC",
-    "phone": "sdfgh",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "69147725cb1b9aa1eaa81e3f",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T13:52:47.706Z",
-    "updatedAt": "2025-11-14T13:52:47.706Z",
-    "__v": 0
-  },
-  {
-    "_id": "6917373a9b5729f0dbd90514",
-    "username": "bb",
-    "email": "aalff@gmail.com",
-    "password": "$2b$10$9XM55KvERRXVWbXFDGpk0eoTi1a1tX/NcXKETs/iN6pGxSRl9Rw7O",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "691733369b5729f0dbd904a1",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T14:05:46.562Z",
-    "updatedAt": "2025-11-14T14:05:46.562Z",
-    "__v": 0
-  },
-  {
-    "_id": "691739a4094cf4f8355c0417",
-    "username": "test",
-    "email": "test@gamil.com",
-    "password": "$2b$10$kkdBIoTTsMb7jEVNXlxB2.bcmMQQl7NgPNvuNciFrTo7zyqSNvN7C",
-    "phone": "959416",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "691733369b5729f0dbd904a1",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T14:16:04.580Z",
-    "updatedAt": "2025-11-14T14:16:04.580Z",
-    "__v": 0
-  },
-  {
-    "_id": "69173a1a094cf4f8355c0458",
-    "username": "aaaaaa",
-    "email": "ddd@gmail.com",
-    "password": "$2b$10$kiL1kqQFxDgLUZuSjKtaw.4y6oBO/V2ho5hbB8cV1RWUAyNXEw2Qu",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "691733369b5729f0dbd904a1",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T14:18:02.887Z",
-    "updatedAt": "2025-11-14T14:18:02.887Z",
-    "__v": 0
-  },
-  {
-    "_id": "6919c0f716032cb2db210ff4",
-    "username": "ahlem.bouguerra",
-    "email": "ahlembouguerra25@gmail.com",
-    "password": "$2b$10$aE4NoJJbpBKh23.YH57TU.PQqk8lPWglZBtalo41/n67vvHh.Psqi",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": true,
-    "garage": "691733369b5729f0dbd904a1",
-    "isActive": true,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-16T12:17:59.106Z",
-    "updatedAt": "2025-11-18T18:44:48.784Z",
     "__v": 0
   },
   {
@@ -1351,47 +1642,7 @@ const garagistes = [
       "typeContrat": "CDI"
     },
     "createdAt": "2025-11-17T09:29:18.809Z",
-    "updatedAt": "2025-12-10T08:11:07.706Z",
-    "__v": 0
-  },
-  {
-    "_id": "691ccfd6f3dc52eef330ac78",
-    "username": "test",
-    "email": "test@gmail.com",
-    "password": "$2b$10$e7wXdo1/6wtPufZ0nSrLD.rlq2a/TH33a2gB2FJ1VE/IRREr6ASsa",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "691733369b5729f0dbd904a1",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-18T19:58:14.478Z",
-    "updatedAt": "2025-11-18T19:58:14.478Z",
-    "__v": 0
-  },
-  {
-    "_id": "6920cc8012b157508946ae7c",
-    "username": "sana",
-    "email": "aa7l@gmail.com",
-    "password": "$2b$10$pzx1zVl9H9Oq1UdwKit2celBM2RGya4NBfe7a/D0dKX4FHjsiKFrW",
-    "phone": "26532108",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "6920cb4f69f0734e2ffd2296",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-21T20:33:04.229Z",
-    "updatedAt": "2025-11-21T20:33:04.229Z",
+    "updatedAt": "2025-12-22T13:49:13.578Z",
     "__v": 0
   },
   {
@@ -1411,7 +1662,7 @@ const garagistes = [
       "services": []
     },
     "createdAt": "2025-11-21T21:14:46.379Z",
-    "updatedAt": "2025-11-21T21:14:46.379Z",
+    "updatedAt": "2025-12-11T13:16:34.866Z",
     "__v": 0
   },
   {
@@ -1464,41 +1715,7 @@ const garagistes = [
       "services": []
     },
     "createdAt": "2025-12-08T09:47:42.284Z",
-    "updatedAt": "2025-12-08T09:47:42.284Z",
-    "__v": 0
-  },
-  {
-    "_id": "69392f0608a82f11cc52393e",
-    "username": "testeur",
-    "email": "ahlembouguerra@gmail.com",
-    "password": "$2b$10$YhVJkiTCulWZIvFN16R.H.TyYZ2IaG2MpUoD4xtuwltObwHE6M2tG",
-    "phone": "56321789",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": true,
-    "garage": "69147725cb1b9aa1eaa81e3f",
-    "isActive": true,
-    "createdBy": "69147724cb1b9aa1eaa81e3d",
-    "mecanicienData": {
-      "dateNaissance": null,
-      "poste": "Apprenti",
-      "dateEmbauche": "2025-12-10T00:00:00.000Z",
-      "typeContrat": "CDI",
-      "statut": "Actif",
-      "salaire": 1200,
-      "services": [
-        {
-          "serviceId": "692d98a1a8353948763487db",
-          "name": "entretien",
-          "_id": "69392f0608a82f11cc52393f"
-        }
-      ],
-      "experience": "rr",
-      "permisConduire": "B",
-      "matricule": "MEC-1765355270465"
-    },
-    "createdAt": "2025-12-10T08:27:50.600Z",
-    "updatedAt": "2025-12-10T08:27:50.600Z",
+    "updatedAt": "2025-12-11T13:16:24.201Z",
     "__v": 0
   }
 ];
@@ -1632,14 +1849,6 @@ const garagisteroles = [
     "__v": 0
   },
   {
-    "_id": "6916fb7916edea752b1f81bc",
-    "garagisteId": "6916fb7916edea752b1f81b9",
-    "roleId": "69146ecd0754dae9bf0af7bb",
-    "createdAt": "2025-11-14T09:50:49.297Z",
-    "updatedAt": "2025-11-14T09:50:49.297Z",
-    "__v": 0
-  },
-  {
     "_id": "69170706bbb04ea7ba9caf0f",
     "garagisteId": "69170706bbb04ea7ba9caf0c",
     "roleId": "69146ecd0754dae9bf0af7ba",
@@ -1736,14 +1945,6 @@ const garagisteroles = [
     "__v": 0
   },
   {
-    "_id": "692d98fba835394876348920",
-    "garagisteId": "69172c691fd203ef3d3f1c38",
-    "roleId": "691cc0c8f2242d62ea689974",
-    "createdAt": "2025-12-01T13:32:43.595Z",
-    "updatedAt": "2025-12-01T13:32:43.595Z",
-    "__v": 0
-  },
-  {
     "_id": "69369ebeda23168f8ea75baf",
     "garagisteId": "69369ebeda23168f8ea75bad",
     "roleId": "691cc0c8f2242d62ea689974",
@@ -1752,19 +1953,19 @@ const garagisteroles = [
     "__v": 0
   },
   {
-    "_id": "69392b1b5b53b8561865eabf",
+    "_id": "69494c59ce3188cdd4484e3a",
     "garagisteId": "691aeaeeb3a8dd8c3875e974",
     "roleId": "691cc0c8f2242d62ea689974",
-    "createdAt": "2025-12-10T08:11:07.713Z",
-    "updatedAt": "2025-12-10T08:11:07.713Z",
+    "createdAt": "2025-12-22T13:49:13.588Z",
+    "updatedAt": "2025-12-22T13:49:13.588Z",
     "__v": 0
   },
   {
-    "_id": "69392f0608a82f11cc523941",
-    "garagisteId": "69392f0608a82f11cc52393e",
+    "_id": "69494d4bce3188cdd4485053",
+    "garagisteId": "69172c691fd203ef3d3f1c38",
     "roleId": "691cc0c8f2242d62ea689974",
-    "createdAt": "2025-12-10T08:27:50.610Z",
-    "updatedAt": "2025-12-10T08:27:50.610Z",
+    "createdAt": "2025-12-22T13:53:15.880Z",
+    "updatedAt": "2025-12-22T13:53:15.880Z",
     "__v": 0
   }
 ];
@@ -1929,7 +2130,7 @@ const ordretravails = [
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
-    "status": "en_cours",
+    "status": "supprime",
     "description": "Ordre de travail généré depuis le devis DEV020",
     "taches": [
       {
@@ -1971,55 +2172,10 @@ const ordretravails = [
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "notes": [],
     "createdAt": "2025-11-23T10:00:03.373Z",
-    "updatedAt": "2025-11-23T12:14:40.036Z",
-    "__v": 0
-  },
-  {
-    "_id": "6922f8ad71f90cf76a16f702",
-    "numeroOrdre": "ORD-0006",
-    "devisId": "DEV019",
-    "clientInfo": {
-      "nom": "helmi",
-      "ClientId": "691f78f8163a17aa79fb6995"
-    },
-    "vehiculedetails": {
-      "nom": "ppp p1 - 52TUN77",
-      "vehiculeId": "691f7928163a17aa79fb6a0c"
-    },
-    "dateCommence": "2025-11-23T12:05:00.000Z",
-    "dateFinPrevue": "2025-11-23T13:05:00.000Z",
-    "dateFinReelle": "2025-11-23T12:06:41.829Z",
-    "atelierId": "691b0336f15086b702a468c5",
-    "atelierNom": "atelier A",
-    "priorite": "normale",
-    "status": "termine",
-    "description": "Ordre de travail généré depuis le devis DEV019",
-    "taches": [
-      {
-        "description": "aaaa",
-        "quantite": 1,
-        "serviceId": "6911db6a227f68139eab73bf",
-        "serviceNom": "Entretien et révision",
-        "mecanicienId": "691b039cf15086b702a46920",
-        "mecanicienNom": "mecanicien",
-        "estimationHeures": 1,
-        "heuresReelles": 0,
-        "notes": "",
-        "status": "assignee",
-        "_id": "6922f8ad71f90cf76a16f703",
-        "createdAt": "2025-11-23T12:06:05.924Z",
-        "updatedAt": "2025-11-23T12:06:05.924Z"
-      }
-    ],
-    "totalHeuresEstimees": 1,
-    "totalHeuresReelles": 0,
-    "nombreTaches": 1,
-    "nombreTachesTerminees": 0,
-    "garageId": "69147725cb1b9aa1eaa81e3f",
-    "notes": [],
-    "createdAt": "2025-11-23T12:06:05.925Z",
-    "updatedAt": "2025-11-23T12:06:41.830Z",
-    "__v": 0
+    "updatedAt": "2025-12-22T13:00:37.554Z",
+    "__v": 0,
+    "canBeRated": false,
+    "dateFinReelle": "2025-12-22T13:00:23.167Z"
   },
   {
     "_id": "6922faf1dd9115eea286b1bf",
@@ -2033,28 +2189,30 @@ const ordretravails = [
       "nom": "cc 10 (11TUN12)",
       "vehiculeId": "691d9545807a8aa37603d048"
     },
-    "dateCommence": "2025-11-23T12:15:00.000Z",
-    "dateFinPrevue": "2025-11-23T13:15:00.000Z",
+    "dateCommence": "2025-11-23T11:15:00.000Z",
+    "dateFinPrevue": "2025-11-23T12:15:00.000Z",
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
-    "priorite": "normale",
-    "status": "en_cours",
+    "priorite": "urgente",
+    "status": "termine",
     "description": "Ordre de travail généré depuis le devis DEV021",
     "taches": [
       {
         "description": "aaaaa",
         "quantite": 1,
-        "serviceId": "6911db6a227f68139eab73bf",
-        "serviceNom": "Entretien et révision",
-        "mecanicienId": "691b039cf15086b702a46920",
-        "mecanicienNom": "mecanicien",
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
         "estimationHeures": 1,
         "heuresReelles": 0,
         "notes": "",
         "status": "assignee",
+        "dateDebut": null,
+        "dateFin": null,
         "_id": "6922faf1dd9115eea286b1c0",
-        "createdAt": "2025-11-23T12:15:45.011Z",
-        "updatedAt": "2025-11-23T12:15:45.011Z"
+        "createdAt": "2025-12-12T08:35:11.242Z",
+        "updatedAt": "2025-12-12T08:35:11.242Z"
       }
     ],
     "createdBy": "69147724cb1b9aa1eaa81e3d",
@@ -2065,8 +2223,11 @@ const ordretravails = [
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "notes": [],
     "createdAt": "2025-11-23T12:15:45.011Z",
-    "updatedAt": "2025-11-23T13:10:41.034Z",
-    "__v": 0
+    "updatedAt": "2025-12-22T12:27:56.316Z",
+    "__v": 1,
+    "updatedBy": "691398cf7412d3ea832a4af6",
+    "canBeRated": false,
+    "dateFinReelle": "2025-12-22T12:27:56.314Z"
   },
   {
     "_id": "6923127809a5989674a26dc1",
@@ -2085,7 +2246,7 @@ const ordretravails = [
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
-    "status": "en_attente",
+    "status": "termine",
     "description": "Ordre de travail généré depuis le devis DEV018",
     "taches": [
       {
@@ -2111,8 +2272,10 @@ const ordretravails = [
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "notes": [],
     "createdAt": "2025-11-23T13:56:08.581Z",
-    "updatedAt": "2025-11-23T13:56:08.581Z",
-    "__v": 0
+    "updatedAt": "2025-12-23T09:25:26.989Z",
+    "__v": 0,
+    "canBeRated": false,
+    "dateFinReelle": "2025-12-23T09:25:26.979Z"
   },
   {
     "_id": "692312aa09a5989674a26e73",
@@ -2131,7 +2294,7 @@ const ordretravails = [
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
-    "status": "en_attente",
+    "status": "supprime",
     "description": "Ordre de travail généré depuis le devis DEV017",
     "taches": [
       {
@@ -2157,8 +2320,9 @@ const ordretravails = [
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "notes": [],
     "createdAt": "2025-11-23T13:56:58.334Z",
-    "updatedAt": "2025-11-23T13:56:58.334Z",
-    "__v": 0
+    "updatedAt": "2025-12-12T08:38:15.851Z",
+    "__v": 0,
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
   },
   {
     "_id": "6923278e0a8695033342b845",
@@ -2177,7 +2341,7 @@ const ordretravails = [
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
-    "status": "en_cours",
+    "status": "supprime",
     "description": "Ordre de travail pour devis undefined",
     "taches": [
       {
@@ -2204,43 +2368,404 @@ const ordretravails = [
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "notes": [],
     "createdAt": "2025-11-23T15:26:06.853Z",
-    "updatedAt": "2025-11-23T15:27:26.181Z",
-    "__v": 0
+    "updatedAt": "2025-12-22T12:47:14.048Z",
+    "__v": 0,
+    "canBeRated": false,
+    "dateFinReelle": "2025-12-22T12:24:48.586Z",
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
   },
   {
-    "_id": "692341034fa998e88a52c733",
-    "numeroOrdre": "ORD-0011",
-    "devisId": "DEV023",
+    "_id": "693c0ca673d1e38fa2f86f80",
+    "devisId": "DEV026",
     "clientInfo": {
-      "nom": "test",
-      "ClientId": "691af6f2143c7678f8f10755"
+      "nom": "magher",
+      "ClientId": "692eb4ed3158d0bba107e02c"
     },
     "vehiculedetails": {
-      "nom": "azer 123 - 123TUN12",
-      "vehiculeId": "691af8fca7dcfc06162ccd16"
+      "nom": "bys 20 - 15TUN45",
+      "vehiculeId": "692da677083a7057c997e20d"
     },
-    "dateCommence": "2025-11-23T17:14:00.000Z",
-    "dateFinPrevue": "2025-11-23T18:14:00.000Z",
+    "dateCommence": "2025-12-12T12:37:00.000Z",
+    "dateFinPrevue": "2025-12-12T13:37:00.000Z",
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
-    "status": "en_attente",
-    "description": "Ordre de travail pour devis undefined",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV026",
     "taches": [
       {
-        "description": "CCCCCC",
+        "description": "wc",
         "quantite": 1,
-        "serviceId": "691b0347f15086b702a468d0",
-        "serviceNom": "Pneumatiques et suspension",
-        "mecanicienId": "691b039cf15086b702a46920",
-        "mecanicienNom": "mecanicien",
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
         "estimationHeures": 1,
         "heuresReelles": 0,
         "notes": "",
         "status": "assignee",
-        "_id": "692341034fa998e88a52c734",
-        "createdAt": "2025-11-23T17:14:43.233Z",
-        "updatedAt": "2025-11-23T17:14:43.233Z"
+        "_id": "693c0ca673d1e38fa2f86f81",
+        "createdAt": "2025-12-12T12:37:58.948Z",
+        "updatedAt": "2025-12-12T12:37:58.948Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-12-12T12:37:58.948Z",
+    "updatedAt": "2025-12-22T12:49:21.345Z",
+    "numeroOrdre": "ORD-0011",
+    "__v": 0,
+    "dateFinReelle": "2025-12-12T12:38:06.501Z",
+    "ratedAt": "2025-12-18T10:21:12.157Z",
+    "ratingId": "6943d598f68fee5a2429afd0",
+    "canBeRated": false,
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "6941a791eb4e2ff1220c944a",
+    "devisId": "DEV030",
+    "clientInfo": {
+      "nom": "magher",
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "woles 20 - 8TUN78",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-19T08:00:00.000Z",
+    "dateFinPrevue": "2025-12-19T09:00:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV030",
+    "taches": [
+      {
+        "description": "phare",
+        "quantite": 2,
+        "serviceId": "692d98a1a8353948763487db",
+        "serviceNom": "entretien",
+        "mecanicienId": "69392f0608a82f11cc52393e",
+        "mecanicienNom": "testeur",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6941a791eb4e2ff1220c944b",
+        "createdAt": "2025-12-16T18:40:17.980Z",
+        "updatedAt": "2025-12-16T18:40:17.980Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": true,
+    "notes": [],
+    "createdAt": "2025-12-16T18:40:17.980Z",
+    "updatedAt": "2025-12-22T13:43:37.753Z",
+    "numeroOrdre": "ORD-0015",
+    "__v": 0,
+    "dateFinReelle": "2025-12-16T18:40:24.489Z",
+    "ratedAt": "2025-12-18T10:21:00.654Z",
+    "ratingId": "6943d58cf68fee5a2429afb4",
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "6941cc5bdb9498032b27cd8f",
+    "devisId": "DEV032",
+    "clientInfo": {
+      "nom": "magher",
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "woles 20 - 8TUN78",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-17T09:09:00.000Z",
+    "dateFinPrevue": "2025-12-17T10:09:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV032",
+    "taches": [
+      {
+        "description": "aaa",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6941cc5bdb9498032b27cd90",
+        "createdAt": "2025-12-16T21:17:15.051Z",
+        "updatedAt": "2025-12-16T21:17:15.051Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": true,
+    "notes": [],
+    "createdAt": "2025-12-16T21:17:15.052Z",
+    "updatedAt": "2025-12-22T13:43:43.850Z",
+    "numeroOrdre": "ORD-0017",
+    "__v": 0,
+    "dateFinReelle": "2025-12-16T21:17:20.786Z",
+    "ratedAt": "2025-12-18T10:20:51.286Z",
+    "ratingId": "6943d583f68fee5a2429af9b",
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "69493ea9ce3188cdd4483a69",
+    "devisId": "DEV033",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "citroen 201 - TUN789",
+      "vehiculeId": "691b3a6269fbb0ac63fcc494"
+    },
+    "dateCommence": "2025-12-22T16:40:00.000Z",
+    "dateFinPrevue": "2025-12-22T17:40:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_cours",
+    "description": "Ordre de travail généré depuis le devis DEV033",
+    "taches": [
+      {
+        "description": "xxxxxx",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "69493ea9ce3188cdd4483a6a",
+        "createdAt": "2025-12-22T13:40:25.392Z",
+        "updatedAt": "2025-12-22T13:40:25.392Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
+    "notes": [],
+    "createdAt": "2025-12-22T12:50:49.195Z",
+    "updatedAt": "2025-12-22T13:40:25.392Z",
+    "numeroOrdre": "ORD-0018",
+    "__v": 8,
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "69493f8ece3188cdd4483f26",
+    "devisId": "DEV031",
+    "clientInfo": {
+      "nom": "magher",
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "bys 20 - 15TUN45",
+      "vehiculeId": "692da677083a7057c997e20d"
+    },
+    "dateCommence": "2025-12-22T14:54:00.000Z",
+    "dateFinPrevue": "2025-12-22T15:54:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "termine",
+    "description": "Ordre de travail généré depuis le devis DEV031",
+    "taches": [
+      {
+        "description": "pneu",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "69493f8ece3188cdd4483f27",
+        "createdAt": "2025-12-22T12:54:38.936Z",
+        "updatedAt": "2025-12-22T12:54:38.936Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": "2025-12-24T20:47:12.404Z",
+    "ratingId": "694c515050b13e2a22e6b1d1",
+    "notes": [],
+    "createdAt": "2025-12-22T12:54:38.936Z",
+    "updatedAt": "2025-12-24T20:47:12.404Z",
+    "numeroOrdre": "ORD-0019",
+    "__v": 0,
+    "dateFinReelle": "2025-12-22T13:00:13.588Z"
+  },
+  {
+    "_id": "694e5eafa7ef27c5bda4a6ce",
+    "devisId": "DEV036",
+    "clientInfo": {
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "bys 20 - 15TUN45",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-26T10:10:00.000Z",
+    "dateFinPrevue": "2025-12-26T11:10:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_attente",
+    "description": "Ordre de travail généré depuis le devis DEV036",
+    "taches": [
+      {
+        "description": "join",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "694e5eafa7ef27c5bda4a6cf",
+        "createdAt": "2025-12-26T10:08:47.636Z",
+        "updatedAt": "2025-12-26T10:08:47.636Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
+    "notes": [],
+    "createdAt": "2025-12-26T10:08:47.637Z",
+    "updatedAt": "2025-12-26T10:08:47.637Z",
+    "numeroOrdre": "ORD-0020",
+    "__v": 0
+  },
+  {
+    "_id": "694e715c3a7c2133481df4b4",
+    "devisId": "DEV037",
+    "clientInfo": {
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "bys 20 - 15TUN45",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-26T10:30:00.000Z",
+    "dateFinPrevue": "2025-12-26T11:30:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "termine",
+    "description": "Ordre de travail généré depuis le devis DEV037",
+    "taches": [
+      {
+        "description": "wwww",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "694e715c3a7c2133481df4b5",
+        "createdAt": "2025-12-26T11:28:38.006Z",
+        "updatedAt": "2025-12-26T11:28:38.006Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
+    "notes": [],
+    "createdAt": "2025-12-26T11:28:28.272Z",
+    "updatedAt": "2025-12-26T11:28:46.417Z",
+    "numeroOrdre": "ORD-0021",
+    "__v": 1,
+    "updatedBy": "69147724cb1b9aa1eaa81e3d",
+    "dateFinReelle": "2025-12-26T11:28:46.416Z"
+  },
+  {
+    "_id": "6951275302aeaa79e0cffe12",
+    "devisId": "DEV041",
+    "clientInfo": {
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "woles 20 (8TUN78)",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-28T11:49:00.000Z",
+    "dateFinPrevue": "2025-12-28T12:49:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_attente",
+    "description": "Ordre de travail pour devis DEV041",
+    "taches": [
+      {
+        "description": "sd",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "dateDebut": null,
+        "dateFin": null,
+        "_id": "6951275302aeaa79e0cffe13",
+        "createdAt": "2025-12-28T12:56:27.961Z",
+        "updatedAt": "2025-12-28T12:56:27.961Z"
       }
     ],
     "createdBy": "691398cf7412d3ea832a4af6",
@@ -2249,32 +2774,36 @@ const ordretravails = [
     "nombreTaches": 1,
     "nombreTachesTerminees": 0,
     "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
     "notes": [],
-    "createdAt": "2025-11-23T17:14:43.234Z",
-    "updatedAt": "2025-11-23T17:14:43.234Z",
-    "__v": 0
+    "createdAt": "2025-12-28T12:49:23.649Z",
+    "updatedAt": "2025-12-28T12:56:27.961Z",
+    "numeroOrdre": "ORD-0022",
+    "__v": 1,
+    "updatedBy": "691398cf7412d3ea832a4af6"
   },
   {
-    "_id": "692d992ea8353948763489f5",
-    "devisId": "DEV025",
+    "_id": "6951292e02aeaa79e0d00013",
+    "devisId": "DEV040",
     "clientInfo": {
-      "nom": "ahlem bouguerra",
-      "ClientId": "691af6c0143c7678f8f10730"
+      "ClientId": "692eb4ed3158d0bba107e02c"
     },
     "vehiculedetails": {
-      "nom": "cc 10 - 11TUN12",
-      "vehiculeId": "691d9545807a8aa37603d048"
+      "nom": "woles 20 - 8TUN78",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
     },
-    "dateCommence": "2025-12-01T12:33:00.000Z",
-    "dateFinPrevue": "2025-12-01T14:33:00.000Z",
+    "dateCommence": "2025-12-28T12:57:00.000Z",
+    "dateFinPrevue": "2025-12-28T13:57:00.000Z",
     "atelierId": "691b0336f15086b702a468c5",
     "atelierNom": "atelier A",
     "priorite": "normale",
-    "status": "en_cours",
-    "description": "Ordre de travail généré depuis le devis DEV025",
+    "status": "en_attente",
+    "description": "Ordre de travail pour devis DEV040",
     "taches": [
       {
-        "description": "aa",
+        "description": "xxx",
         "quantite": 1,
         "serviceId": "692d988fa8353948763487cf",
         "serviceNom": "climatisation",
@@ -2284,15 +2813,47 @@ const ordretravails = [
         "heuresReelles": 0,
         "notes": "",
         "status": "assignee",
-        "dateDebut": null,
-        "dateFin": null,
-        "_id": "692d992ea8353948763489f6",
-        "createdAt": "2025-12-09T19:42:45.864Z",
-        "updatedAt": "2025-12-09T19:42:45.864Z"
-      },
+        "_id": "6951292e02aeaa79e0d00014",
+        "createdAt": "2025-12-28T12:57:18.186Z",
+        "updatedAt": "2025-12-28T12:57:18.186Z"
+      }
+    ],
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
+    "notes": [],
+    "createdAt": "2025-12-28T12:57:18.186Z",
+    "updatedAt": "2025-12-28T12:57:18.186Z",
+    "numeroOrdre": "ORD-0023",
+    "__v": 0
+  },
+  {
+    "_id": "695129e402aeaa79e0d00761",
+    "devisId": "DEV043",
+    "clientInfo": {
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "woles 20 - 8TUN78",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-28T13:00:00.000Z",
+    "dateFinPrevue": "2025-12-28T14:00:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_attente",
+    "description": "Ordre de travail généré depuis le devis DEV043",
+    "taches": [
       {
-        "description": "bb",
-        "quantite": 2,
+        "description": "vbhjk",
+        "quantite": 1,
         "serviceId": "692d988fa8353948763487cf",
         "serviceNom": "climatisation",
         "mecanicienId": "692d981539a56cf2278c3c3a",
@@ -2301,25 +2862,25 @@ const ordretravails = [
         "heuresReelles": 0,
         "notes": "",
         "status": "assignee",
-        "dateDebut": null,
-        "dateFin": null,
-        "_id": "692d992ea8353948763489f7",
-        "createdAt": "2025-12-09T19:42:45.864Z",
-        "updatedAt": "2025-12-09T19:42:45.864Z"
+        "_id": "695129e402aeaa79e0d00762",
+        "createdAt": "2025-12-28T13:00:20.853Z",
+        "updatedAt": "2025-12-28T13:00:20.853Z"
       }
     ],
     "createdBy": "69147724cb1b9aa1eaa81e3d",
-    "totalHeuresEstimees": 2,
+    "totalHeuresEstimees": 1,
     "totalHeuresReelles": 0,
-    "nombreTaches": 2,
+    "nombreTaches": 1,
     "nombreTachesTerminees": 0,
     "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
     "notes": [],
-    "createdAt": "2025-12-01T13:33:34.033Z",
-    "updatedAt": "2025-12-10T10:31:09.683Z",
-    "numeroOrdre": "ORD-0012",
-    "__v": 1,
-    "updatedBy": "691398cf7412d3ea832a4af6"
+    "createdAt": "2025-12-28T13:00:20.853Z",
+    "updatedAt": "2025-12-28T13:00:20.853Z",
+    "numeroOrdre": "ORD-0024",
+    "__v": 0
   }
 ];
 
@@ -2405,7 +2966,7 @@ const devis = [
     "clientName": "test",
     "vehicleInfo": "azer 123 - 123TUN12",
     "vehiculeId": "691af8fca7dcfc06162ccd16",
-    "factureId": "691dc992f059c09f59b104f5",
+    "factureId": "693ab10cf0a8819860196d63",
     "inspectionDate": "2025-11-19",
     "services": [
       {
@@ -2432,7 +2993,7 @@ const devis = [
     "status": "envoye",
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-19T12:15:10.834Z",
-    "updatedAt": "2025-11-20T10:26:02.069Z",
+    "updatedAt": "2025-12-11T11:54:52.293Z",
     "__v": 0
   },
   {
@@ -2744,7 +3305,7 @@ const devis = [
     "clientName": "ahlem bouguerra",
     "vehicleInfo": "cc 10 - 11TUN12",
     "vehiculeId": "691d9545807a8aa37603d048",
-    "factureId": "692582f3bc90c33f84d87fc8",
+    "factureId": "693ab1d1f0a8819860196ecc",
     "inspectionDate": "2025-11-25",
     "services": [
       {
@@ -2763,21 +3324,21 @@ const devis = [
     "totalHT": 1110,
     "totalServicesHT": 110,
     "totalTTC": 1332,
-    "finalTotalTTC": 1332,
+    "finalTotalTTC": 1198.8,
     "tvaRate": 20,
-    "remiseRate": 0,
+    "remiseRate": 10,
     "montantTVA": 222,
-    "montantRemise": 0,
+    "montantRemise": 133.20000000000002,
     "maindoeuvre": 1000,
     "estimatedTime": {
       "days": 1,
       "hours": 0,
       "minutes": 0
     },
-    "status": "accepte",
+    "status": "envoye",
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-11-25T08:50:52.217Z",
-    "updatedAt": "2025-11-25T10:20:35.364Z",
+    "updatedAt": "2025-12-11T11:58:09.854Z",
     "__v": 0
   },
   {
@@ -2811,10 +3372,630 @@ const devis = [
       "hours": 2,
       "minutes": 0
     },
-    "status": "brouillon",
+    "status": "accepte",
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-12-02T09:45:00.948Z",
-    "updatedAt": "2025-12-10T10:32:56.663Z",
+    "updatedAt": "2025-12-12T12:37:31.206Z",
+    "__v": 0
+  },
+  {
+    "_id": "69406d7a355dfc1f66182e08",
+    "id": "DEV027",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientName": "magher",
+    "vehicleInfo": "woles 20 - 8TUN78",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "factureId": null,
+    "inspectionDate": "2025-12-15",
+    "services": [
+      {
+        "piece": "wwww",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 200,
+    "totalServicesHT": 100,
+    "totalTTC": 240,
+    "finalTotalTTC": 240,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 40,
+    "montantRemise": 0,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-15T20:20:10.855Z",
+    "updatedAt": "2025-12-15T20:20:23.874Z",
+    "__v": 0
+  },
+  {
+    "_id": "69419bb414849d9e7cb87ca6",
+    "id": "DEV028",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientName": "magher",
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "factureId": null,
+    "inspectionDate": "2025-12-16",
+    "services": [
+      {
+        "piece": "ff",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 100,
+    "totalServicesHT": 100,
+    "totalTTC": 120,
+    "finalTotalTTC": 0,
+    "tvaRate": 20,
+    "remiseRate": 100,
+    "montantTVA": 20,
+    "montantRemise": 120,
+    "maindoeuvre": 0,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-16T17:49:40.739Z",
+    "updatedAt": "2025-12-16T17:49:55.453Z",
+    "__v": 0
+  },
+  {
+    "_id": "6941a671eb4e2ff1220c8c1b",
+    "id": "DEV029",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientName": "magher",
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "factureId": null,
+    "inspectionDate": "2025-12-16",
+    "services": [
+      {
+        "piece": "hhhh",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000
+      }
+    ],
+    "totalHT": 1100,
+    "totalServicesHT": 1000,
+    "totalTTC": 1320,
+    "finalTotalTTC": 1188,
+    "tvaRate": 20,
+    "remiseRate": 10,
+    "montantTVA": 220,
+    "montantRemise": 132,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 2,
+      "hours": 0,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-16T18:35:29.513Z",
+    "updatedAt": "2025-12-16T18:36:03.445Z",
+    "__v": 0
+  },
+  {
+    "_id": "6941a76beb4e2ff1220c924f",
+    "id": "DEV030",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientName": "magher",
+    "vehicleInfo": "woles 20 - 8TUN78",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "factureId": null,
+    "inspectionDate": "2025-12-16",
+    "services": [
+      {
+        "piece": "phare",
+        "quantity": 2,
+        "unitPrice": 600,
+        "total": 1200
+      }
+    ],
+    "totalHT": 1220,
+    "totalServicesHT": 1200,
+    "totalTTC": 1464,
+    "finalTotalTTC": 1464,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 244,
+    "montantRemise": 0,
+    "maindoeuvre": 20,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0
+    },
+    "status": "brouillon",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-16T18:39:39.097Z",
+    "updatedAt": "2025-12-25T20:52:01.534Z",
+    "__v": 0
+  },
+  {
+    "_id": "6941ca0ca6e7af927b6c2572",
+    "id": "DEV031",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientName": "maher gafsi",
+    "vehicleInfo": "woles 20 - 8TUN78",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "factureId": null,
+    "inspectionDate": "2025-12-19",
+    "services": [
+      {
+        "piece": "pneu",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 150,
+    "totalServicesHT": 100,
+    "totalTTC": 180,
+    "finalTotalTTC": 180,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 30,
+    "montantRemise": 0,
+    "maindoeuvre": 50,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 3,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-16T21:07:24.608Z",
+    "updatedAt": "2025-12-26T11:43:04.889Z",
+    "__v": 0
+  },
+  {
+    "_id": "6949226799b2638a309e3f98",
+    "id": "DEV032",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientName": "test",
+    "vehicleInfo": "ccc cc - TUN544",
+    "vehiculeId": "69491b8599b2638a309e221b",
+    "factureId": "694e5731a7c3f5573ba1330b",
+    "inspectionDate": "2025-12-22",
+    "services": [
+      {
+        "piece": "b",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 200,
+    "totalServicesHT": 100,
+    "totalTTC": 240,
+    "finalTotalTTC": 216,
+    "tvaRate": 20,
+    "remiseRate": 10,
+    "montantTVA": 40,
+    "montantRemise": 24,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 1,
+      "hours": 0,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-22T10:50:15.076Z",
+    "updatedAt": "2025-12-26T09:36:49.657Z",
+    "__v": 0
+  },
+  {
+    "_id": "6949240e99b2638a309e58b3",
+    "id": "DEV033",
+    "clientId": "691af6c0143c7678f8f10730",
+    "clientName": "ahlem bouguerra",
+    "vehicleInfo": "citroen 201 - TUN789",
+    "vehiculeId": "691b3a6269fbb0ac63fcc494",
+    "factureId": null,
+    "inspectionDate": "2025-12-25",
+    "services": [
+      {
+        "piece": "xxxxxx",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 200,
+    "totalServicesHT": 100,
+    "totalTTC": 240,
+    "finalTotalTTC": 216,
+    "tvaRate": 20,
+    "remiseRate": 10,
+    "montantTVA": 40,
+    "montantRemise": 24,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 1,
+      "minutes": 0
+    },
+    "status": "brouillon",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-22T10:57:18.846Z",
+    "updatedAt": "2025-12-26T09:34:06.186Z",
+    "__v": 0
+  },
+  {
+    "_id": "694da188d9b0f41c11f95578",
+    "id": "DEV034",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientName": "maher gafsi",
+    "vehicleInfo": "woles 20 - 8TUN78",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "factureId": null,
+    "inspectionDate": "2025-12-26",
+    "services": [
+      {
+        "piece": "ccc",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 110,
+    "totalServicesHT": 100,
+    "totalTTC": 132,
+    "finalTotalTTC": 132,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 22,
+    "montantRemise": 0,
+    "maindoeuvre": 10,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "envoye",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-25T20:41:44.607Z",
+    "updatedAt": "2025-12-26T11:09:19.282Z",
+    "__v": 0
+  },
+  {
+    "_id": "694e497b53af7743bb8b886f",
+    "id": "DEV035",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "factureId": null,
+    "inspectionDate": "2026-01-08",
+    "services": [
+      {
+        "piece": "cccc",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 110,
+    "totalServicesHT": 100,
+    "totalTTC": 132,
+    "finalTotalTTC": 118.8,
+    "tvaRate": 20,
+    "remiseRate": 10,
+    "montantTVA": 22,
+    "montantRemise": 13.200000000000001,
+    "maindoeuvre": 10,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-26T08:38:19.788Z",
+    "updatedAt": "2025-12-26T09:34:24.651Z",
+    "__v": 0
+  },
+  {
+    "_id": "694e4ccda7c3f5573ba11ca8",
+    "id": "DEV036",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "factureId": null,
+    "inspectionDate": "2025-12-27",
+    "services": [
+      {
+        "piece": "join",
+        "quantity": 1,
+        "unitPrice": 50,
+        "total": 50
+      }
+    ],
+    "totalHT": 100,
+    "totalServicesHT": 50,
+    "totalTTC": 120,
+    "finalTotalTTC": 120,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 20,
+    "montantRemise": 0,
+    "maindoeuvre": 50,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-26T08:52:29.332Z",
+    "updatedAt": "2025-12-26T09:34:30.068Z",
+    "__v": 0
+  },
+  {
+    "_id": "694e71053a7c2133481dee69",
+    "id": "DEV037",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "factureId": null,
+    "inspectionDate": "2025-12-26",
+    "services": [
+      {
+        "piece": "wwww",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 110,
+    "totalServicesHT": 100,
+    "totalTTC": 132,
+    "finalTotalTTC": 132,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 22,
+    "montantRemise": 0,
+    "maindoeuvre": 10,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "envoye",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-26T11:27:01.517Z",
+    "updatedAt": "2025-12-26T11:53:37.007Z",
+    "__v": 0
+  },
+  {
+    "_id": "6951204ec97b187552d081c6",
+    "id": "DEV038",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "factureId": null,
+    "inspectionDate": "2025-12-28",
+    "services": [
+      {
+        "piece": "frrt",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 200,
+    "totalServicesHT": 100,
+    "totalTTC": 240,
+    "finalTotalTTC": 240,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 40,
+    "montantRemise": 0,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-28T12:19:26.160Z",
+    "updatedAt": "2025-12-28T12:20:55.477Z",
+    "__v": 0
+  },
+  {
+    "_id": "695122dbc97b187552d08456",
+    "id": "DEV039",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "vehicleInfo": "woles 20 (8TUN78)",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "factureId": null,
+    "inspectionDate": "2025-12-28",
+    "services": [
+      {
+        "piece": "sdf",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 200,
+    "totalServicesHT": 100,
+    "totalTTC": 238,
+    "finalTotalTTC": 238,
+    "tvaRate": 19,
+    "remiseRate": 0,
+    "montantTVA": 38,
+    "montantRemise": 0,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "brouillon",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-28T12:30:19.227Z",
+    "updatedAt": "2025-12-28T12:30:19.227Z",
+    "__v": 0
+  },
+  {
+    "_id": "6951264d02aeaa79e0cffac8",
+    "id": "DEV040",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "vehicleInfo": "woles 20 - 8TUN78",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "factureId": null,
+    "inspectionDate": "2025-12-28",
+    "services": [
+      {
+        "piece": "xxx",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 1100,
+    "totalServicesHT": 100,
+    "totalTTC": 1320,
+    "finalTotalTTC": 1320,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 220,
+    "montantRemise": 0,
+    "maindoeuvre": 1000,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "status": "envoye",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-28T12:45:01.833Z",
+    "updatedAt": "2025-12-28T12:45:11.208Z",
+    "__v": 0
+  },
+  {
+    "_id": "6951268702aeaa79e0cffc54",
+    "id": "DEV041",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "vehicleInfo": "woles 20 (8TUN78)",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "factureId": null,
+    "inspectionDate": "2025-12-28",
+    "services": [
+      {
+        "piece": "sd",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 200,
+    "totalServicesHT": 100,
+    "totalTTC": 238,
+    "finalTotalTTC": 238,
+    "tvaRate": 19,
+    "remiseRate": 0,
+    "montantTVA": 38,
+    "montantRemise": 0,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 1,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-28T12:45:59.423Z",
+    "updatedAt": "2025-12-28T12:59:50.646Z",
+    "__v": 0
+  },
+  {
+    "_id": "6951270202aeaa79e0cffd0b",
+    "id": "DEV042",
+    "clientId": "691f78f8163a17aa79fb6995",
+    "vehicleInfo": "ppp p1 (52TUN77)",
+    "vehiculeId": "691f7928163a17aa79fb6a0c",
+    "factureId": null,
+    "inspectionDate": "2025-12-28",
+    "services": [
+      {
+        "piece": "4523",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100
+      }
+    ],
+    "totalHT": 200,
+    "totalServicesHT": 100,
+    "totalTTC": 238,
+    "finalTotalTTC": 238,
+    "tvaRate": 19,
+    "remiseRate": 0,
+    "montantTVA": 38,
+    "montantRemise": 0,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0
+    },
+    "status": "envoye",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-28T12:48:02.740Z",
+    "updatedAt": "2025-12-28T12:58:33.394Z",
+    "__v": 0
+  },
+  {
+    "_id": "6951296502aeaa79e0d002cc",
+    "id": "DEV043",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "vehicleInfo": "woles 20 - 8TUN78",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "factureId": null,
+    "inspectionDate": "2025-12-28",
+    "services": [
+      {
+        "piece": "vbhjk",
+        "quantity": 1,
+        "unitPrice": 10,
+        "total": 10
+      }
+    ],
+    "totalHT": 110,
+    "totalServicesHT": 10,
+    "totalTTC": 132,
+    "finalTotalTTC": 132,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "montantTVA": 22,
+    "montantRemise": 0,
+    "maindoeuvre": 100,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 1,
+      "minutes": 0
+    },
+    "status": "accepte",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-28T12:58:13.832Z",
+    "updatedAt": "2025-12-28T12:59:16.315Z",
     "__v": 0
   }
 ];
@@ -2992,7 +4173,7 @@ const factures = [
     "totalTTC": 252,
     "finalTotalTTC": 230.32,
     "timbreFiscal": 1,
-    "paymentStatus": "paye",
+    "paymentStatus": "annule",
     "paymentDate": "2025-11-24T00:00:00.000Z",
     "paymentMethod": "cheque",
     "paymentAmount": 230.32,
@@ -3002,11 +4183,13 @@ const factures = [
       "minutes": 0
     },
     "createdAt": "2025-11-19T13:43:46.209Z",
-    "updatedAt": "2025-11-24T13:57:35.288Z",
-    "status": "active",
-    "replacedByFactureId": "691db529807a8aa37603e19b",
+    "updatedAt": "2025-12-11T11:54:52.289Z",
+    "status": "cancelled",
+    "replacedByFactureId": "693ab10cf0a8819860196d63",
     "garageId": "69147725cb1b9aa1eaa81e3f",
-    "__v": 0
+    "__v": 0,
+    "cancelledAt": "2025-12-11T11:54:52.263Z",
+    "creditNoteId": "693ab10cf0a8819860196d57"
   },
   {
     "_id": "69234330d2083783f08e7397",
@@ -3447,7 +4630,7 @@ const factures = [
     "totalTTC": 1332,
     "finalTotalTTC": 1333,
     "timbreFiscal": 1,
-    "paymentStatus": "paye",
+    "paymentStatus": "annule",
     "paymentDate": "2025-11-25T00:00:00.000Z",
     "paymentMethod": "virement",
     "paymentAmount": 1333,
@@ -3458,11 +4641,13 @@ const factures = [
     },
     "createdBy": "691398cf7412d3ea832a4af6",
     "createdAt": "2025-11-25T10:20:35.358Z",
-    "updatedAt": "2025-11-25T10:21:02.110Z",
-    "status": "active",
-    "replacedByFactureId": "69258217bc90c33f84d87e34",
+    "updatedAt": "2025-12-11T11:58:09.850Z",
+    "status": "cancelled",
+    "replacedByFactureId": "693ab1d1f0a8819860196ecc",
     "garageId": "69147725cb1b9aa1eaa81e3f",
-    "__v": 0
+    "__v": 0,
+    "cancelledAt": "2025-12-11T11:58:09.829Z",
+    "creditNoteId": "693ab1d1f0a8819860196ebd"
   },
   {
     "_id": "692d9f1a02da10b41441c4ef",
@@ -3636,8 +4821,8 @@ const factures = [
     "totalTTC": 1440,
     "finalTotalTTC": 1441,
     "timbreFiscal": 1,
-    "paymentStatus": "en_attente",
-    "paymentAmount": 0,
+    "paymentStatus": "paye",
+    "paymentAmount": 1441,
     "estimatedTime": {
       "days": 0,
       "hours": 2,
@@ -3648,12 +4833,646 @@ const factures = [
     "replacedByFactureId": "693879cae82dd096f2e3c630",
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "createdAt": "2025-12-10T10:31:02.226Z",
-    "updatedAt": "2025-12-10T10:31:02.226Z",
+    "updatedAt": "2025-12-25T09:48:51.085Z",
+    "__v": 0,
+    "paymentDate": "2025-12-25T00:00:00.000Z",
+    "paymentMethod": "cheque"
+  },
+  {
+    "_id": "693ab10cf0a8819860196d63",
+    "numeroFacture": "FAC-034",
+    "devisId": "691db4ce807a8aa37603e0a7",
+    "clientId": "691af6f2143c7678f8f10755",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "invoiceDate": "2025-12-11T11:54:52.276Z",
+    "dueDate": "2026-01-10T11:54:52.276Z",
+    "inspectionDate": "2025-11-19T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "eee",
+        "quantity": 2,
+        "unitPrice": 100,
+        "total": 200,
+        "_id": "693ab10cf0a8819860196d64"
+      }
+    ],
+    "maindoeuvre": 10,
+    "tvaRate": 20,
+    "remiseRate": 9,
+    "totalHT": 210,
+    "totalTVA": 42,
+    "totalRemise": 22.68,
+    "totalTTC": 252,
+    "finalTotalTTC": 230.32,
+    "timbreFiscal": 1,
+    "paymentStatus": "en_attente",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 3,
+      "minutes": 0
+    },
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "status": "active",
+    "replacedByFactureId": "691dc992f059c09f59b104f5",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-11T11:54:52.281Z",
+    "updatedAt": "2025-12-11T11:54:52.281Z",
     "__v": 0
+  },
+  {
+    "_id": "693ab1d1f0a8819860196ecc",
+    "numeroFacture": "FAC-035",
+    "devisId": "69256decd929346ef89b6852",
+    "clientId": "691af6c0143c7678f8f10730",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "invoiceDate": "2025-12-11T11:58:09.837Z",
+    "dueDate": "2026-01-10T11:58:09.837Z",
+    "inspectionDate": "2025-11-25T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "aa",
+        "quantity": 1,
+        "unitPrice": 10,
+        "total": 10,
+        "_id": "693ab1d1f0a8819860196ecd"
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "693ab1d1f0a8819860196ece"
+      }
+    ],
+    "maindoeuvre": 1000,
+    "tvaRate": 20,
+    "remiseRate": 10,
+    "totalHT": 1110,
+    "totalTVA": 222,
+    "totalRemise": 133.20000000000002,
+    "totalTTC": 1332,
+    "finalTotalTTC": 1199.8,
+    "timbreFiscal": 1,
+    "paymentStatus": "paye",
+    "paymentAmount": 1199.8,
+    "estimatedTime": {
+      "days": 1,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "status": "active",
+    "replacedByFactureId": "692582f3bc90c33f84d87fc8",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-11T11:58:09.847Z",
+    "updatedAt": "2025-12-22T13:46:44.506Z",
+    "__v": 0,
+    "paymentDate": "2025-12-22T00:00:00.000Z",
+    "paymentMethod": "especes"
+  },
+  {
+    "_id": "6949229099b2638a309e417c",
+    "numeroFacture": "FAC-036",
+    "devisId": "6949226799b2638a309e3f98",
+    "clientId": "691af6f2143c7678f8f10755",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "ccc cc - TUN544",
+    "inspectionDate": "2025-12-22T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "b",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "6949229099b2638a309e417d"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "remiseRate": 10,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalRemise": 24,
+    "totalTTC": 240,
+    "finalTotalTTC": 217,
+    "timbreFiscal": 1,
+    "paymentStatus": "annule",
+    "paymentAmount": 217,
+    "estimatedTime": {
+      "days": 1,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "cancelled",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-12-22T10:50:56.030Z",
+    "dueDate": "2026-01-21T10:50:56.030Z",
+    "createdAt": "2025-12-22T10:50:56.030Z",
+    "updatedAt": "2025-12-22T13:47:31.935Z",
+    "__v": 0,
+    "paymentDate": "2025-12-22T00:00:00.000Z",
+    "paymentMethod": "especes",
+    "cancelledAt": "2025-12-22T13:47:31.920Z",
+    "creditNoteId": "69494bf3ce3188cdd4484d3d",
+    "replacedByFactureId": "69494bf3ce3188cdd4484d49"
+  },
+  {
+    "_id": "69494bebce3188cdd4484d13",
+    "numeroFacture": "FAC-037",
+    "devisId": "6949240e99b2638a309e58b3",
+    "clientId": "691af6c0143c7678f8f10730",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "citroen 201 - TUN789",
+    "inspectionDate": "2025-12-25T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "xxxxxx",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "69494bebce3188cdd4484d14"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalRemise": 0,
+    "totalTTC": 240,
+    "finalTotalTTC": 241,
+    "timbreFiscal": 1,
+    "paymentStatus": "en_attente",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 1,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-12-22T13:47:23.631Z",
+    "dueDate": "2026-01-21T13:47:23.631Z",
+    "createdAt": "2025-12-22T13:47:23.631Z",
+    "updatedAt": "2025-12-22T13:47:23.631Z",
+    "__v": 0
+  },
+  {
+    "_id": "69494bf3ce3188cdd4484d49",
+    "numeroFacture": "FAC-038",
+    "devisId": "6949226799b2638a309e3f98",
+    "clientId": "691af6f2143c7678f8f10755",
+    "realClientId": null,
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "ccc cc - TUN544",
+    "invoiceDate": "2025-12-22T13:47:31.928Z",
+    "dueDate": "2026-01-21T13:47:31.928Z",
+    "inspectionDate": "2025-12-22T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "b",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "69494bf3ce3188cdd4484d4a"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "remiseRate": 10,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalRemise": 24,
+    "totalTTC": 240,
+    "finalTotalTTC": 217,
+    "timbreFiscal": 1,
+    "paymentStatus": "annule",
+    "paymentAmount": 217,
+    "estimatedTime": {
+      "days": 1,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "cancelled",
+    "replacedByFactureId": "694e5731a7c3f5573ba1330b",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-22T13:47:31.932Z",
+    "updatedAt": "2025-12-26T09:36:49.652Z",
+    "__v": 0,
+    "paymentDate": "2025-12-22T00:00:00.000Z",
+    "paymentMethod": "cheque",
+    "cancelledAt": "2025-12-26T09:36:49.630Z",
+    "creditNoteId": "694e5731a7c3f5573ba132ff"
+  },
+  {
+    "_id": "694e56ada7c3f5573ba132a0",
+    "numeroFacture": "FAC-039",
+    "devisId": "694e4ccda7c3f5573ba11ca8",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "realClientId": "6911cb63ccd145adc6354d98",
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "inspectionDate": "2025-12-27T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "join",
+        "quantity": 1,
+        "unitPrice": 50,
+        "total": 50,
+        "_id": "694e56ada7c3f5573ba132a1"
+      }
+    ],
+    "maindoeuvre": 50,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 100,
+    "totalTVA": 20,
+    "totalRemise": 0,
+    "totalTTC": 120,
+    "finalTotalTTC": 121,
+    "timbreFiscal": 1,
+    "paymentStatus": "en_attente",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-12-26T09:34:37.948Z",
+    "dueDate": "2026-01-25T09:34:37.948Z",
+    "createdAt": "2025-12-26T09:34:37.948Z",
+    "updatedAt": "2025-12-26T09:34:37.948Z",
+    "__v": 0
+  },
+  {
+    "_id": "694e5727a7c3f5573ba132d6",
+    "numeroFacture": "FAC-040",
+    "devisId": "694e497b53af7743bb8b886f",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "realClientId": "6911cb63ccd145adc6354d98",
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "inspectionDate": "2026-01-08T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "cccc",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "694e5727a7c3f5573ba132d7"
+      }
+    ],
+    "maindoeuvre": 10,
+    "tvaRate": 20,
+    "remiseRate": 10,
+    "totalHT": 110,
+    "totalTVA": 22,
+    "totalRemise": 13.200000000000001,
+    "totalTTC": 132,
+    "finalTotalTTC": 119.8,
+    "timbreFiscal": 1,
+    "paymentStatus": "paye",
+    "paymentAmount": 119.8,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-12-26T09:36:39.373Z",
+    "dueDate": "2026-01-25T09:36:39.373Z",
+    "createdAt": "2025-12-26T09:36:39.373Z",
+    "updatedAt": "2025-12-26T11:08:54.082Z",
+    "__v": 0,
+    "paymentDate": "2025-12-26T00:00:00.000Z",
+    "paymentMethod": "especes"
+  },
+  {
+    "_id": "694e5731a7c3f5573ba1330b",
+    "numeroFacture": "FAC-041",
+    "devisId": "6949226799b2638a309e3f98",
+    "clientId": "691af6f2143c7678f8f10755",
+    "realClientId": null,
+    "vehicleInfo": "ccc cc - TUN544",
+    "invoiceDate": "2025-12-26T09:36:49.640Z",
+    "dueDate": "2026-01-25T09:36:49.640Z",
+    "inspectionDate": "2025-12-22T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "b",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "694e5731a7c3f5573ba1330c"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "remiseRate": 10,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalRemise": 24,
+    "totalTTC": 240,
+    "finalTotalTTC": 217,
+    "timbreFiscal": 1,
+    "paymentStatus": "en_attente",
+    "paymentAmount": 0,
+    "estimatedTime": {
+      "days": 1,
+      "hours": 0,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "active",
+    "replacedByFactureId": "69494bf3ce3188cdd4484d49",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-26T09:36:49.648Z",
+    "updatedAt": "2025-12-26T09:36:49.648Z",
+    "__v": 0
+  },
+  {
+    "_id": "694e712f3a7c2133481df1a4",
+    "numeroFacture": "FAC-042",
+    "devisId": "694e71053a7c2133481dee69",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "realClientId": "6911cb63ccd145adc6354d98",
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "inspectionDate": "2025-12-26T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "wwww",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "694e712f3a7c2133481df1a5"
+      }
+    ],
+    "maindoeuvre": 10,
+    "tvaRate": 20,
+    "remiseRate": 0,
+    "totalHT": 110,
+    "totalTVA": 22,
+    "totalRemise": 0,
+    "totalTTC": 132,
+    "finalTotalTTC": 133,
+    "timbreFiscal": 1,
+    "paymentStatus": "partiellement_paye",
+    "paymentAmount": 20,
+    "estimatedTime": {
+      "days": 0,
+      "hours": 2,
+      "minutes": 0
+    },
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "status": "active",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "invoiceDate": "2025-12-26T11:27:43.939Z",
+    "dueDate": "2026-01-25T11:27:43.939Z",
+    "createdAt": "2025-12-26T11:27:43.939Z",
+    "updatedAt": "2025-12-26T11:28:06.666Z",
+    "__v": 0,
+    "paymentDate": "2025-12-26T00:00:00.000Z",
+    "paymentMethod": "especes"
   }
 ];
 
-const reservations = [];
+const reservations = [
+  {
+    "_id": "69405fd7db5c439229d85a49",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "clientName": "magher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-21T00:00:00.000Z",
+      "heureDebut": "18:00"
+    },
+    "descriptionDepannage": "cghbjk",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": "Nouvelle proposition de créneau",
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-15T19:21:59.619Z",
+    "updatedAt": "2025-12-15T19:30:16.635Z",
+    "__v": 0
+  },
+  {
+    "_id": "6941a269eb4e2ff1220c896a",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "magher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d988fa8353948763487cf",
+    "creneauDemande": {
+      "date": "2025-12-17T00:00:00.000Z",
+      "heureDebut": "15:30"
+    },
+    "descriptionDepannage": "ww",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-16T18:18:17.412Z",
+    "updatedAt": "2025-12-16T18:58:13.212Z",
+    "__v": 0
+  },
+  {
+    "_id": "6941b4b8eb4e2ff1220c9e9d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "clientName": "magher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-17T00:00:00.000Z",
+      "heureDebut": "10:00"
+    },
+    "descriptionDepannage": "huile",
+    "status": "accepte",
+    "messageGarage": "bienvenue",
+    "messageClient": "oui je peut mais a 10:00",
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-16T19:36:24.142Z",
+    "updatedAt": "2025-12-16T19:53:21.925Z",
+    "__v": 0
+  },
+  {
+    "_id": "694cf97d6a115adccb7bccf2",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "maher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-25T00:00:00.000Z",
+      "heureDebut": "12:00"
+    },
+    "creneauPropose": {},
+    "descriptionDepannage": "c",
+    "status": "en_attente",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-25T08:44:45.265Z",
+    "updatedAt": "2025-12-25T08:44:45.265Z",
+    "__v": 0
+  },
+  {
+    "_id": "694cff31b145cdfa316c2440",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "maher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-25T00:00:00.000Z",
+      "heureDebut": "15:00"
+    },
+    "descriptionDepannage": "fgggg",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-25T09:09:05.332Z",
+    "updatedAt": "2025-12-25T09:40:34.269Z",
+    "__v": 0
+  },
+  {
+    "_id": "694d0fc02904657c2e230f52",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "maher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d988fa8353948763487cf",
+    "creneauDemande": {
+      "date": "2025-12-25T00:00:00.000Z",
+      "heureDebut": "16:30"
+    },
+    "creneauPropose": {},
+    "descriptionDepannage": "xx",
+    "status": "en_attente",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-25T10:19:44.590Z",
+    "updatedAt": "2025-12-25T10:19:44.590Z",
+    "__v": 0
+  },
+  {
+    "_id": "694d15602904657c2e23104f",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "maher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-26T00:00:00.000Z",
+      "heureDebut": "16:30"
+    },
+    "descriptionDepannage": "sdfghj",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-25T10:43:44.202Z",
+    "updatedAt": "2025-12-28T13:18:33.135Z",
+    "__v": 0
+  },
+  {
+    "_id": "694d164704f28a9f6df2136d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "maher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-25T00:00:00.000Z",
+      "heureDebut": "17:00"
+    },
+    "descriptionDepannage": "xxxxxxx",
+    "status": "accepte",
+    "messageGarage": "Nouveau créneau proposé",
+    "messageClient": "Contre-proposition acceptée",
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-25T10:47:35.631Z",
+    "updatedAt": "2025-12-28T13:04:50.717Z",
+    "__v": 0
+  },
+  {
+    "_id": "694e71f43a7c2133481df691",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "clientName": "gaffousa ras el gakrouna",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-27T00:00:00.000Z",
+      "heureDebut": "16:00"
+    },
+    "descriptionDepannage": "ww",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-26T11:31:00.796Z",
+    "updatedAt": "2025-12-26T11:31:18.111Z",
+    "__v": 0
+  },
+  {
+    "_id": "69511faec97b187552d07dad",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "gaffousa ras el gakrouna",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-29T00:00:00.000Z",
+      "heureDebut": "17:00"
+    },
+    "descriptionDepannage": "qswdfgh",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-28T12:16:46.593Z",
+    "updatedAt": "2025-12-28T12:16:58.135Z",
+    "__v": 0
+  }
+];
 
 const services = [
   {
@@ -3703,8 +5522,10 @@ const users = [
     "resetPasswordExpires": "2025-12-09T21:25:12.812Z",
     "isSuperAdmin": true,
     "createdAt": "2025-11-11T20:13:03.802Z",
-    "updatedAt": "2025-12-09T20:25:12.813Z",
-    "__v": 0
+    "updatedAt": "2025-12-25T08:33:30.379Z",
+    "__v": 0,
+    "verificationToken": null,
+    "verificationTokenExpiry": null
   },
   {
     "_id": "6915b3aae76b84adbb3e5916",

@@ -221,5 +221,152 @@
     "createdAt": "2025-12-10T10:31:02.186Z",
     "updatedAt": "2025-12-10T10:31:02.186Z",
     "__v": 0
+  },
+  {
+    "_id": "693ab10cf0a8819860196d57",
+    "creditNumber": "AV-2025-000010",
+    "originalFactureId": "691dc992f059c09f59b104f5",
+    "originalFactureNumber": "FAC-019",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "inspectionDate": "2025-11-19T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "eee",
+        "quantity": 2,
+        "unitPrice": 100,
+        "total": 200,
+        "_id": "691dc992f059c09f59b104f6"
+      }
+    ],
+    "maindoeuvre": 10,
+    "tvaRate": 20,
+    "totalHT": 210,
+    "totalTVA": 42,
+    "totalTTC": 252,
+    "totalRemise": 22.68,
+    "finalTotalTTC": 230.32,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-11T11:54:52.256Z",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-11T11:54:52.260Z",
+    "updatedAt": "2025-12-11T11:54:52.260Z",
+    "__v": 0
+  },
+  {
+    "_id": "693ab1d1f0a8819860196ebd",
+    "creditNumber": "AV-2025-000011",
+    "originalFactureId": "692582f3bc90c33f84d87fc8",
+    "originalFactureNumber": "FAC-029",
+    "clientId": "691af6c0143c7678f8f10730",
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "inspectionDate": "2025-11-25T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "aa",
+        "quantity": 1,
+        "unitPrice": 10,
+        "total": 10,
+        "_id": "692582f3bc90c33f84d87fc9"
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "692582f3bc90c33f84d87fca"
+      }
+    ],
+    "maindoeuvre": 1000,
+    "tvaRate": 20,
+    "totalHT": 1110,
+    "totalTVA": 222,
+    "totalTTC": 1332,
+    "totalRemise": 0,
+    "finalTotalTTC": 1333,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-11T11:58:09.823Z",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-11T11:58:09.826Z",
+    "updatedAt": "2025-12-11T11:58:09.826Z",
+    "__v": 0
+  },
+  {
+    "_id": "69494bf3ce3188cdd4484d3d",
+    "creditNumber": "AV-2025-000012",
+    "originalFactureId": "6949229099b2638a309e417c",
+    "originalFactureNumber": "FAC-036",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "ccc cc - TUN544",
+    "inspectionDate": "2025-12-22T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "b",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "6949229099b2638a309e417d"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalTTC": 240,
+    "totalRemise": 24,
+    "finalTotalTTC": 217,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-22T13:47:31.915Z",
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-22T13:47:31.917Z",
+    "updatedAt": "2025-12-22T13:47:31.917Z",
+    "__v": 0
+  },
+  {
+    "_id": "694e5731a7c3f5573ba132ff",
+    "creditNumber": "AV-2025-000013",
+    "originalFactureId": "69494bf3ce3188cdd4484d49",
+    "originalFactureNumber": "FAC-038",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "ccc cc - TUN544",
+    "inspectionDate": "2025-12-22T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "b",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "69494bf3ce3188cdd4484d4a"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalTTC": 240,
+    "totalRemise": 24,
+    "finalTotalTTC": 217,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-26T09:36:49.625Z",
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-26T09:36:49.627Z",
+    "updatedAt": "2025-12-26T09:36:49.627Z",
+    "__v": 0
   }
 ]

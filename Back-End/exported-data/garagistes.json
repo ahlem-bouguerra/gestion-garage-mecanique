@@ -76,88 +76,10 @@
       "services": []
     },
     "createdAt": "2025-11-12T12:01:40.999Z",
-    "updatedAt": "2025-11-16T13:29:56.823Z",
-    "__v": 0
-  },
-  {
-    "_id": "6916fb7916edea752b1f81b9",
-    "username": "sana",
-    "email": "aal@gmail.com",
-    "password": "$2b$10$IQL7tCZlW14woBtw6NedvuZ3Pkhqeh7cc5ujzomM96PjagLbrPHEO",
-    "phone": "26532108",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "6916fb6416edea752b1f81b3",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T09:50:49.294Z",
-    "updatedAt": "2025-11-14T09:50:49.294Z",
-    "__v": 0
-  },
-  {
-    "_id": "69170706bbb04ea7ba9caf0c",
-    "username": "ahlem.bouguerra",
-    "email": "ahlembouguerra@o.r",
-    "password": "$2b$10$m4IieI97G8H1VLvg0Ip95eW.czLVSnA7DVZABj0TYkNuQkwF5Fmui",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "6916fb6416edea752b1f81b3",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T10:40:06.938Z",
-    "updatedAt": "2025-11-14T10:40:06.938Z",
-    "__v": 0
-  },
-  {
-    "_id": "6917076ebbb04ea7ba9caf17",
-    "username": "rim",
-    "email": "rim@gmail.com",
-    "password": "$2b$10$YpDDf/TO9hYh68iH2pd3levjQ30e4wt3dLu/5FDpBWYEeSyg.NjzO",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "6916fb6416edea752b1f81b3",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T10:41:50.752Z",
-    "updatedAt": "2025-11-14T10:41:50.752Z",
-    "__v": 0
-  },
-  {
-    "_id": "69170787bbb04ea7ba9caf22",
-    "username": "sana",
-    "email": "sana@gmail.com",
-    "password": "$2b$10$Dl3WdFvWiZm0fD4AvoTpk.leIJ1NO2xvgHHrn/61e36u4okI9cPSe",
-    "phone": "26532108",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "6916fb6416edea752b1f81b3",
-    "isActive": true,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T10:42:15.220Z",
-    "updatedAt": "2025-11-16T19:34:25.478Z",
-    "__v": 0
+    "updatedAt": "2025-12-23T09:58:53.603Z",
+    "__v": 0,
+    "verificationToken": null,
+    "verificationTokenExpiry": null
   },
   {
     "_id": "69172c691fd203ef3d3f1c38",
@@ -188,7 +110,7 @@
       "typeContrat": "CDI"
     },
     "createdAt": "2025-11-14T13:19:37.954Z",
-    "updatedAt": "2025-12-01T13:32:43.585Z",
+    "updatedAt": "2025-12-22T13:53:15.875Z",
     "__v": 0
   },
   {
@@ -209,106 +131,6 @@
     },
     "createdAt": "2025-11-14T13:49:12.805Z",
     "updatedAt": "2025-11-14T13:49:12.805Z",
-    "__v": 0
-  },
-  {
-    "_id": "6917342f9b5729f0dbd904e0",
-    "username": "ahlem.bouguerra",
-    "email": "ahlembouguerra2@gmail.com",
-    "password": "$2b$10$qKWZbKI4cQ65kfnmQhsU9.WKDsFGh.z3vUpL6aycK4dCGAVz/iGnC",
-    "phone": "sdfgh",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "69147725cb1b9aa1eaa81e3f",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T13:52:47.706Z",
-    "updatedAt": "2025-11-14T13:52:47.706Z",
-    "__v": 0
-  },
-  {
-    "_id": "6917373a9b5729f0dbd90514",
-    "username": "bb",
-    "email": "aalff@gmail.com",
-    "password": "$2b$10$9XM55KvERRXVWbXFDGpk0eoTi1a1tX/NcXKETs/iN6pGxSRl9Rw7O",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "691733369b5729f0dbd904a1",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T14:05:46.562Z",
-    "updatedAt": "2025-11-14T14:05:46.562Z",
-    "__v": 0
-  },
-  {
-    "_id": "691739a4094cf4f8355c0417",
-    "username": "test",
-    "email": "test@gamil.com",
-    "password": "$2b$10$kkdBIoTTsMb7jEVNXlxB2.bcmMQQl7NgPNvuNciFrTo7zyqSNvN7C",
-    "phone": "959416",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "691733369b5729f0dbd904a1",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T14:16:04.580Z",
-    "updatedAt": "2025-11-14T14:16:04.580Z",
-    "__v": 0
-  },
-  {
-    "_id": "69173a1a094cf4f8355c0458",
-    "username": "aaaaaa",
-    "email": "ddd@gmail.com",
-    "password": "$2b$10$kiL1kqQFxDgLUZuSjKtaw.4y6oBO/V2ho5hbB8cV1RWUAyNXEw2Qu",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "691733369b5729f0dbd904a1",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-14T14:18:02.887Z",
-    "updatedAt": "2025-11-14T14:18:02.887Z",
-    "__v": 0
-  },
-  {
-    "_id": "6919c0f716032cb2db210ff4",
-    "username": "ahlem.bouguerra",
-    "email": "ahlembouguerra25@gmail.com",
-    "password": "$2b$10$aE4NoJJbpBKh23.YH57TU.PQqk8lPWglZBtalo41/n67vvHh.Psqi",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": true,
-    "garage": "691733369b5729f0dbd904a1",
-    "isActive": true,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-16T12:17:59.106Z",
-    "updatedAt": "2025-11-18T18:44:48.784Z",
     "__v": 0
   },
   {
@@ -345,47 +167,7 @@
       "typeContrat": "CDI"
     },
     "createdAt": "2025-11-17T09:29:18.809Z",
-    "updatedAt": "2025-12-10T08:11:07.706Z",
-    "__v": 0
-  },
-  {
-    "_id": "691ccfd6f3dc52eef330ac78",
-    "username": "test",
-    "email": "test@gmail.com",
-    "password": "$2b$10$e7wXdo1/6wtPufZ0nSrLD.rlq2a/TH33a2gB2FJ1VE/IRREr6ASsa",
-    "phone": "21939809",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "691733369b5729f0dbd904a1",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-18T19:58:14.478Z",
-    "updatedAt": "2025-11-18T19:58:14.478Z",
-    "__v": 0
-  },
-  {
-    "_id": "6920cc8012b157508946ae7c",
-    "username": "sana",
-    "email": "aa7l@gmail.com",
-    "password": "$2b$10$pzx1zVl9H9Oq1UdwKit2celBM2RGya4NBfe7a/D0dKX4FHjsiKFrW",
-    "phone": "26532108",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": false,
-    "garage": "6920cb4f69f0734e2ffd2296",
-    "isActive": false,
-    "createdBy": null,
-    "mecanicienData": {
-      "statut": "Actif",
-      "services": []
-    },
-    "createdAt": "2025-11-21T20:33:04.229Z",
-    "updatedAt": "2025-11-21T20:33:04.229Z",
+    "updatedAt": "2025-12-22T13:49:13.578Z",
     "__v": 0
   },
   {
@@ -405,7 +187,7 @@
       "services": []
     },
     "createdAt": "2025-11-21T21:14:46.379Z",
-    "updatedAt": "2025-11-21T21:14:46.379Z",
+    "updatedAt": "2025-12-11T13:16:34.866Z",
     "__v": 0
   },
   {
@@ -458,41 +240,7 @@
       "services": []
     },
     "createdAt": "2025-12-08T09:47:42.284Z",
-    "updatedAt": "2025-12-08T09:47:42.284Z",
-    "__v": 0
-  },
-  {
-    "_id": "69392f0608a82f11cc52393e",
-    "username": "testeur",
-    "email": "ahlembouguerra@gmail.com",
-    "password": "$2b$10$YhVJkiTCulWZIvFN16R.H.TyYZ2IaG2MpUoD4xtuwltObwHE6M2tG",
-    "phone": "56321789",
-    "resetPasswordToken": null,
-    "resetPasswordExpires": null,
-    "isVerified": true,
-    "garage": "69147725cb1b9aa1eaa81e3f",
-    "isActive": true,
-    "createdBy": "69147724cb1b9aa1eaa81e3d",
-    "mecanicienData": {
-      "dateNaissance": null,
-      "poste": "Apprenti",
-      "dateEmbauche": "2025-12-10T00:00:00.000Z",
-      "typeContrat": "CDI",
-      "statut": "Actif",
-      "salaire": 1200,
-      "services": [
-        {
-          "serviceId": "692d98a1a8353948763487db",
-          "name": "entretien",
-          "_id": "69392f0608a82f11cc52393f"
-        }
-      ],
-      "experience": "rr",
-      "permisConduire": "B",
-      "matricule": "MEC-1765355270465"
-    },
-    "createdAt": "2025-12-10T08:27:50.600Z",
-    "updatedAt": "2025-12-10T08:27:50.600Z",
+    "updatedAt": "2025-12-11T13:16:24.201Z",
     "__v": 0
   }
 ]

@@ -88,14 +88,6 @@
     "__v": 0
   },
   {
-    "_id": "6916fb7916edea752b1f81bc",
-    "garagisteId": "6916fb7916edea752b1f81b9",
-    "roleId": "69146ecd0754dae9bf0af7bb",
-    "createdAt": "2025-11-14T09:50:49.297Z",
-    "updatedAt": "2025-11-14T09:50:49.297Z",
-    "__v": 0
-  },
-  {
     "_id": "69170706bbb04ea7ba9caf0f",
     "garagisteId": "69170706bbb04ea7ba9caf0c",
     "roleId": "69146ecd0754dae9bf0af7ba",
@@ -192,14 +184,6 @@
     "__v": 0
   },
   {
-    "_id": "692d98fba835394876348920",
-    "garagisteId": "69172c691fd203ef3d3f1c38",
-    "roleId": "691cc0c8f2242d62ea689974",
-    "createdAt": "2025-12-01T13:32:43.595Z",
-    "updatedAt": "2025-12-01T13:32:43.595Z",
-    "__v": 0
-  },
-  {
     "_id": "69369ebeda23168f8ea75baf",
     "garagisteId": "69369ebeda23168f8ea75bad",
     "roleId": "691cc0c8f2242d62ea689974",
@@ -208,19 +192,19 @@
     "__v": 0
   },
   {
-    "_id": "69392b1b5b53b8561865eabf",
+    "_id": "69494c59ce3188cdd4484e3a",
     "garagisteId": "691aeaeeb3a8dd8c3875e974",
     "roleId": "691cc0c8f2242d62ea689974",
-    "createdAt": "2025-12-10T08:11:07.713Z",
-    "updatedAt": "2025-12-10T08:11:07.713Z",
+    "createdAt": "2025-12-22T13:49:13.588Z",
+    "updatedAt": "2025-12-22T13:49:13.588Z",
     "__v": 0
   },
   {
-    "_id": "69392f0608a82f11cc523941",
-    "garagisteId": "69392f0608a82f11cc52393e",
+    "_id": "69494d4bce3188cdd4485053",
+    "garagisteId": "69172c691fd203ef3d3f1c38",
     "roleId": "691cc0c8f2242d62ea689974",
-    "createdAt": "2025-12-10T08:27:50.610Z",
-    "updatedAt": "2025-12-10T08:27:50.610Z",
+    "createdAt": "2025-12-22T13:53:15.880Z",
+    "updatedAt": "2025-12-22T13:53:15.880Z",
     "__v": 0
   }
 ]

@@ -10,8 +10,10 @@
     "resetPasswordExpires": "2025-12-09T21:25:12.812Z",
     "isSuperAdmin": true,
     "createdAt": "2025-11-11T20:13:03.802Z",
-    "updatedAt": "2025-12-09T20:25:12.813Z",
-    "__v": 0
+    "updatedAt": "2025-12-25T08:33:30.379Z",
+    "__v": 0,
+    "verificationToken": null,
+    "verificationTokenExpiry": null
   },
   {
     "_id": "6915b3aae76b84adbb3e5916",

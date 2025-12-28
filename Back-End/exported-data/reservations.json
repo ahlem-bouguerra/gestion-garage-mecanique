@@ -1,1 +1,214 @@
-[]
+[
+  {
+    "_id": "69405fd7db5c439229d85a49",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "clientName": "magher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-21T00:00:00.000Z",
+      "heureDebut": "18:00"
+    },
+    "descriptionDepannage": "cghbjk",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": "Nouvelle proposition de créneau",
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-15T19:21:59.619Z",
+    "updatedAt": "2025-12-15T19:30:16.635Z",
+    "__v": 0
+  },
+  {
+    "_id": "6941a269eb4e2ff1220c896a",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "magher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d988fa8353948763487cf",
+    "creneauDemande": {
+      "date": "2025-12-17T00:00:00.000Z",
+      "heureDebut": "15:30"
+    },
+    "descriptionDepannage": "ww",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-16T18:18:17.412Z",
+    "updatedAt": "2025-12-16T18:58:13.212Z",
+    "__v": 0
+  },
+  {
+    "_id": "6941b4b8eb4e2ff1220c9e9d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "clientName": "magher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-17T00:00:00.000Z",
+      "heureDebut": "10:00"
+    },
+    "descriptionDepannage": "huile",
+    "status": "accepte",
+    "messageGarage": "bienvenue",
+    "messageClient": "oui je peut mais a 10:00",
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-16T19:36:24.142Z",
+    "updatedAt": "2025-12-16T19:53:21.925Z",
+    "__v": 0
+  },
+  {
+    "_id": "694cf97d6a115adccb7bccf2",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "maher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-25T00:00:00.000Z",
+      "heureDebut": "12:00"
+    },
+    "creneauPropose": {},
+    "descriptionDepannage": "c",
+    "status": "en_attente",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-25T08:44:45.265Z",
+    "updatedAt": "2025-12-25T08:44:45.265Z",
+    "__v": 0
+  },
+  {
+    "_id": "694cff31b145cdfa316c2440",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "maher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-25T00:00:00.000Z",
+      "heureDebut": "15:00"
+    },
+    "descriptionDepannage": "fgggg",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-25T09:09:05.332Z",
+    "updatedAt": "2025-12-25T09:40:34.269Z",
+    "__v": 0
+  },
+  {
+    "_id": "694d0fc02904657c2e230f52",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "maher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d988fa8353948763487cf",
+    "creneauDemande": {
+      "date": "2025-12-25T00:00:00.000Z",
+      "heureDebut": "16:30"
+    },
+    "creneauPropose": {},
+    "descriptionDepannage": "xx",
+    "status": "en_attente",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-25T10:19:44.590Z",
+    "updatedAt": "2025-12-25T10:19:44.590Z",
+    "__v": 0
+  },
+  {
+    "_id": "694d15602904657c2e23104f",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "maher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-26T00:00:00.000Z",
+      "heureDebut": "16:30"
+    },
+    "descriptionDepannage": "sdfghj",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-25T10:43:44.202Z",
+    "updatedAt": "2025-12-28T13:18:33.135Z",
+    "__v": 0
+  },
+  {
+    "_id": "694d164704f28a9f6df2136d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "maher",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-25T00:00:00.000Z",
+      "heureDebut": "17:00"
+    },
+    "descriptionDepannage": "xxxxxxx",
+    "status": "accepte",
+    "messageGarage": "Nouveau créneau proposé",
+    "messageClient": "Contre-proposition acceptée",
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-25T10:47:35.631Z",
+    "updatedAt": "2025-12-28T13:04:50.717Z",
+    "__v": 0
+  },
+  {
+    "_id": "694e71f43a7c2133481df691",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "clientName": "gaffousa ras el gakrouna",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-27T00:00:00.000Z",
+      "heureDebut": "16:00"
+    },
+    "descriptionDepannage": "ww",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-26T11:31:00.796Z",
+    "updatedAt": "2025-12-26T11:31:18.111Z",
+    "__v": 0
+  },
+  {
+    "_id": "69511faec97b187552d07dad",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "clientName": "gaffousa ras el gakrouna",
+    "clientPhone": "26541236",
+    "clientEmail": "ahlembouguerra@outlook.fr",
+    "serviceId": "692d98a1a8353948763487db",
+    "creneauDemande": {
+      "date": "2025-12-29T00:00:00.000Z",
+      "heureDebut": "17:00"
+    },
+    "descriptionDepannage": "qswdfgh",
+    "status": "accepte",
+    "messageGarage": null,
+    "messageClient": null,
+    "clientId": "6911cb63ccd145adc6354d98",
+    "createdAt": "2025-12-28T12:16:46.593Z",
+    "updatedAt": "2025-12-28T12:16:58.135Z",
+    "__v": 0
+  }
+]

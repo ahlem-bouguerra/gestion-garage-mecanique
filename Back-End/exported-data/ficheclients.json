@@ -39,12 +39,27 @@
   },
   {
     "_id": "692eb4ed3158d0bba107e02c",
-    "nom": "magher",
+    "nom": "maher",
     "type": "particulier",
     "telephone": "26541236",
     "email": "ahlembouguerra@outlook.fr",
     "garageId": "69147725cb1b9aa1eaa81e3f",
     "clientId": "6911cb63ccd145adc6354d98",
+    "__v": 0,
+    "adresse": "sousse",
+    "adresseSociete": "",
+    "emailSociete": "",
+    "nomSociete": "",
+    "telephoneSociete": ""
+  },
+  {
+    "_id": "6949171499b2638a309e1b3a",
+    "nom": "pst",
+    "type": "particulier",
+    "adresse": "sousse",
+    "telephone": "21939809",
+    "email": "pst@gamil.com",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
     "__v": 0
   }
 ]

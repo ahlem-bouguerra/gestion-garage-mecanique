@@ -3,10 +3,10 @@
     "_id": "69147725cb1b9aa1eaa81e3f",
     "nom": "Garage Elite Motors Premium",
     "matriculeFiscal": "987654321777",
-    "governorateId": "689de78ebbd7f699052feeaf",
-    "governorateName": "SOUSSE",
-    "cityId": "689de78ebbd7f699052ff017",
-    "cityName": "SOUSSE VILLE (Sousse)",
+    "governorateId": "689de78cbbd7f699052fda09",
+    "governorateName": "JENDOUBA",
+    "cityId": "689de78cbbd7f699052fdaa1",
+    "cityName": "JENDOUBA (Cite Snit)",
     "streetAddress": "",
     "garagisteAdmins": [
       "6917342f9b5729f0dbd904e0"
@@ -19,48 +19,22 @@
     "location": {
       "type": "Point",
       "coordinates": [
-        10.63,
-        35.8269
+        8.784,
+        36.497
       ]
     },
     "createdAt": "2025-11-12T12:01:41.005Z",
-    "updatedAt": "2025-12-01T14:19:42.577Z",
+    "updatedAt": "2025-12-28T12:13:13.967Z",
     "__v": 0
-  },
-  {
-    "_id": "6916fb6416edea752b1f81b3",
-    "nom": "garage plus",
-    "matriculeFiscal": "874593",
-    "governorateId": "689de78dbbd7f699052fe483",
-    "governorateName": "MONASTIR",
-    "cityId": "689de78dbbd7f699052fe595",
-    "cityName": "MONASTIR (Monastir)",
-    "streetAddress": "",
-    "garagisteAdmins": [],
-    "description": "ffffff",
-    "horaires": "lundi-samedi : 08:00-17:00",
-    "isActive": false,
-    "emailProfessionnel": "auto0@gamil.com",
-    "telephoneProfessionnel": "45 001 987",
-    "createdAt": "2025-11-14T09:50:28.440Z",
-    "updatedAt": "2025-12-09T19:37:35.794Z",
-    "__v": 0,
-    "location": {
-      "type": "Point",
-      "coordinates": [
-        10.8,
-        35.7644
-      ]
-    }
   },
   {
     "_id": "691733369b5729f0dbd904a1",
     "nom": "bassem garage",
     "matriculeFiscal": "15rsksd9842f",
-    "governorateId": "689de78ebbd7f699052feeaf",
-    "governorateName": "SOUSSE",
-    "cityId": "689de78ebbd7f699052feeb5",
-    "cityName": "BOU FICHA (Bou Ficha)",
+    "governorateId": "689de78ebbd7f699052ff019",
+    "governorateName": "TATAOUINE",
+    "cityId": "689de78ebbd7f699052ff037",
+    "cityName": "TATAOUINE SUD (Tataouine)",
     "streetAddress": "",
     "garagisteAdmins": [
       "691733589b5729f0dbd904a7",
@@ -72,13 +46,13 @@
     "emailProfessionnel": "auto2@gamil.com",
     "telephoneProfessionnel": "45 222 987",
     "createdAt": "2025-11-14T13:48:38.567Z",
-    "updatedAt": "2025-12-01T14:19:04.574Z",
+    "updatedAt": "2025-12-25T08:32:22.109Z",
     "__v": 0,
     "location": {
       "type": "Point",
       "coordinates": [
-        10.3997,
-        36.2933
+        10.4514,
+        32.9297
       ]
     }
   },
@@ -94,11 +68,11 @@
     "garagisteAdmins": [],
     "description": "ssssssss",
     "horaires": "Lun-Mar: 08h00-17h00, Mer: 09h00-17h00, Jeu-Sam: 08h00-17h00, Dim: Fermé",
-    "isActive": true,
+    "isActive": false,
     "emailProfessionnel": "auto3@gamil.com",
     "telephoneProfessionnel": "45 333 987",
     "createdAt": "2025-11-21T20:27:59.329Z",
-    "updatedAt": "2025-12-01T14:18:45.508Z",
+    "updatedAt": "2025-12-11T13:16:29.948Z",
     "__v": 0,
     "location": {
       "type": "Point",

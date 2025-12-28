@@ -207,5 +207,15 @@
     "createdAt": "2025-12-02T09:56:16.049Z",
     "updatedAt": "2025-12-02T09:56:16.049Z",
     "__v": 0
+  },
+  {
+    "_id": "69491b8599b2638a309e221e",
+    "ficheClientId": "691af6f2143c7678f8f10755",
+    "vehiculeId": "69491b8599b2638a309e221b",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "dateAssociation": "2025-12-22T10:20:53.036Z",
+    "createdAt": "2025-12-22T10:20:53.037Z",
+    "updatedAt": "2025-12-22T10:20:53.037Z",
+    "__v": 0
   }
 ]

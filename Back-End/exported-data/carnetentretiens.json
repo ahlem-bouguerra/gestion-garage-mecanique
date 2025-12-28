@@ -91,5 +91,265 @@
     "createdAt": "2025-12-01T14:13:34.601Z",
     "updatedAt": "2025-12-01T14:13:34.601Z",
     "__v": 0
+  },
+  {
+    "_id": "693c046df8479df31413cfe8",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "dateCommencement": "2025-12-12T00:00:00.000Z",
+    "dateFinCompletion": "2025-12-12T00:00:00.000Z",
+    "statut": "termine",
+    "totalTTC": 0,
+    "kilometrageEntretien": null,
+    "notes": "Ajouté manuellement par le client",
+    "services": [
+      {
+        "nom": "ttttt",
+        "description": "ttttt",
+        "quantite": 1,
+        "prix": 0,
+        "_id": "693c046df8479df31413cfe9"
+      }
+    ],
+    "pieces": [],
+    "createdAt": "2025-12-12T12:02:53.371Z",
+    "updatedAt": "2025-12-12T12:02:53.371Z",
+    "__v": 0
+  },
+  {
+    "_id": "693c0b40f8479df31413d045",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "dateCommencement": "2025-12-12T00:00:00.000Z",
+    "dateFinCompletion": "2025-12-12T00:00:00.000Z",
+    "statut": "termine",
+    "totalTTC": 10,
+    "kilometrageEntretien": null,
+    "notes": "Ajouté manuellement par le client",
+    "services": [
+      {
+        "nom": "tacge",
+        "description": "tacge",
+        "quantite": 1,
+        "prix": 0,
+        "_id": "693c0b40f8479df31413d046"
+      }
+    ],
+    "pieces": [],
+    "createdAt": "2025-12-12T12:32:00.267Z",
+    "updatedAt": "2025-12-12T12:32:00.267Z",
+    "__v": 0
+  },
+  {
+    "_id": "693c0ccd73d1e38fa2f872a5",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "devisId": "692eb51c3158d0bba107e1af",
+    "dateCommencement": "2025-12-12T12:37:00.000Z",
+    "dateFinCompletion": "2025-12-12T12:38:06.501Z",
+    "statut": "termine",
+    "totalTTC": 1440,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0011",
+    "services": [
+      {
+        "nom": "wc",
+        "description": "climatisation",
+        "quantite": 1,
+        "_id": "693c0ccd73d1e38fa2f872a6"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-12T12:38:37.254Z",
+    "updatedAt": "2025-12-12T12:38:37.254Z",
+    "__v": 0
+  },
+  {
+    "_id": "6943c869860839c2561e22f2",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "devisId": "6941a671eb4e2ff1220c8c1b",
+    "dateCommencement": "2025-12-18T14:36:00.000Z",
+    "dateFinCompletion": "2025-12-16T18:36:50.281Z",
+    "statut": "termine",
+    "totalTTC": 1320,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0014",
+    "services": [
+      {
+        "nom": "hhhh",
+        "description": "climatisation",
+        "quantite": 1,
+        "_id": "6943c869860839c2561e22f3"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-18T09:24:57.291Z",
+    "updatedAt": "2025-12-18T09:24:57.291Z",
+    "__v": 0
+  },
+  {
+    "_id": "6943c869860839c2561e22f5",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "devisId": "6941ca0ca6e7af927b6c2572",
+    "dateCommencement": "2025-12-17T08:07:00.000Z",
+    "dateFinCompletion": "2025-12-16T21:08:12.992Z",
+    "statut": "termine",
+    "totalTTC": 180,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0016",
+    "services": [
+      {
+        "nom": "pneu",
+        "description": "entretien",
+        "quantite": 1,
+        "_id": "6943c869860839c2561e22f6"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-18T09:24:57.296Z",
+    "updatedAt": "2025-12-18T09:24:57.296Z",
+    "__v": 0
+  },
+  {
+    "_id": "6943c869860839c2561e22f8",
+    "vehiculeId": "692da677083a7057c997e20d",
+    "devisId": "69419bb414849d9e7cb87ca6",
+    "dateCommencement": "2025-12-16T18:50:00.000Z",
+    "dateFinCompletion": "2025-12-16T17:51:04.755Z",
+    "statut": "termine",
+    "totalTTC": 120,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0013",
+    "services": [
+      {
+        "nom": "ff",
+        "description": "climatisation",
+        "quantite": 1,
+        "_id": "6943c869860839c2561e22f9"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-18T09:24:57.299Z",
+    "updatedAt": "2025-12-18T09:24:57.299Z",
+    "__v": 0
+  },
+  {
+    "_id": "6949179899b2638a309e1c89",
+    "vehiculeId": "691af8fca7dcfc06162ccd16",
+    "devisId": "691db4ce807a8aa37603e0a7",
+    "dateCommencement": "2025-11-23T12:53:00.000Z",
+    "dateFinCompletion": "2025-11-23T12:14:23.337Z",
+    "statut": "termine",
+    "totalTTC": 252,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0004",
+    "services": [
+      {
+        "nom": "eee",
+        "description": "Pneumatiques et suspension",
+        "quantite": 1,
+        "_id": "6949179899b2638a309e1c8a"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-22T10:04:08.849Z",
+    "updatedAt": "2025-12-22T10:04:08.849Z",
+    "__v": 0
+  },
+  {
+    "_id": "694917ac99b2638a309e1d0d",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "devisId": "6941cc0cdb9498032b27c835",
+    "dateCommencement": "2025-12-17T09:09:00.000Z",
+    "dateFinCompletion": "2025-12-16T21:17:20.786Z",
+    "statut": "termine",
+    "totalTTC": 1320,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0017",
+    "services": [
+      {
+        "nom": "aaa",
+        "description": "climatisation",
+        "quantite": 1,
+        "_id": "694917ac99b2638a309e1d0e"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-22T10:04:28.228Z",
+    "updatedAt": "2025-12-22T10:04:28.228Z",
+    "__v": 0
+  },
+  {
+    "_id": "694917ac99b2638a309e1d10",
+    "vehiculeId": "692eb55a3158d0bba107e1e7",
+    "devisId": "6941a76beb4e2ff1220c924f",
+    "dateCommencement": "2025-12-19T08:00:00.000Z",
+    "dateFinCompletion": "2025-12-16T18:40:24.489Z",
+    "statut": "termine",
+    "totalTTC": 1464,
+    "kilometrageEntretien": null,
+    "notes": "Créé automatiquement depuis l'ordre ORD-0015",
+    "services": [
+      {
+        "nom": "phare",
+        "description": "entretien",
+        "quantite": 2,
+        "_id": "694917ac99b2638a309e1d11"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-22T10:04:28.236Z",
+    "updatedAt": "2025-12-22T10:04:28.236Z",
+    "__v": 0
+  },
+  {
+    "_id": "69491c6b99b2638a309e236c",
+    "vehiculeId": "691af8fca7dcfc06162ccd16",
+    "dateCommencement": "2025-12-22T00:00:00.000Z",
+    "dateFinCompletion": "2025-12-22T00:00:00.000Z",
+    "statut": "termine",
+    "totalTTC": 0,
+    "notes": "Ajouté manuellement",
+    "services": [
+      {
+        "nom": "yhujikolm",
+        "description": "entretien",
+        "quantite": 1,
+        "prix": 0,
+        "_id": "69491c6b99b2638a309e236d"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-22T10:24:43.567Z",
+    "updatedAt": "2025-12-22T10:24:43.567Z",
+    "__v": 0
+  },
+  {
+    "_id": "69491e1199b2638a309e23d0",
+    "vehiculeId": "691af8fca7dcfc06162ccd16",
+    "dateCommencement": "2025-12-22T00:00:00.000Z",
+    "dateFinCompletion": "2025-12-22T00:00:00.000Z",
+    "statut": "termine",
+    "totalTTC": 0,
+    "notes": "Ajouté manuellement",
+    "services": [
+      {
+        "nom": "dddddddd",
+        "description": "entretien",
+        "quantite": 1,
+        "prix": 0,
+        "_id": "69491e1199b2638a309e23d1"
+      }
+    ],
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "pieces": [],
+    "createdAt": "2025-12-22T10:31:45.739Z",
+    "updatedAt": "2025-12-22T10:31:45.739Z",
+    "__v": 0
   }
 ]
