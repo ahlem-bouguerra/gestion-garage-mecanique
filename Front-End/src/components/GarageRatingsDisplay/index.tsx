@@ -225,11 +225,11 @@ const res = await axios.get(
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0">
-                  {rating.ficheClientId?.nom?.charAt(0).toUpperCase() || 'C'}
+                 {(rating.clientNom || rating.ficheClientId?.nom || 'C').charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
                   <h3 className="font-semibold text-gray-900 truncate">
-                    {rating.ficheClientId?.nom || 'Client'}
+                    {rating.clientNom || rating.ficheClientId?.nom || 'Client'}
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
                     {renderStars(rating.rating)}

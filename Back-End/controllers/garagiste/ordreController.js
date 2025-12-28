@@ -122,7 +122,6 @@ const mecanicien = await Garagiste.findOne({
       devisId: devis.id,
       garageId: targetGarageId,
       clientInfo: {
-        nom: devis.clientName,
         ClientId: devis.clientId,
         telephone: devis.clientPhone,
         email: devis.clientEmail,
@@ -146,7 +145,30 @@ const mecanicien = await Garagiste.findOne({
 
     // 🔗 Populate des relations
     await ordreSauve.populate([
-      { path: 'devisId', select: 'id clientName vehicleInfo vehiculeId' },
+      { 
+        path: 'devisId', 
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      },
+      { 
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      },
       { path: 'atelierId', select: 'name localisation' },
       { path: 'taches.serviceId', select: 'name' },
       { path: 'taches.mecanicienId', select: 'username email phone' }
@@ -180,22 +202,25 @@ export const getOrdresTravail = async (req, res) => {
       dateFin,
       sortBy = 'createdAt',
       sortOrder = 'desc',
-      garageId // ⭐ NOUVEAU : Paramètre pour SuperAdmin
+      garageId
     } = req.query;
 
-    // ⭐ Construction du filtre selon le rôle
     const filter = {};
     
-    // Si SuperAdmin ET garageId fourni, utiliser ce garageId
-    // Sinon, utiliser le garageId de l'utilisateur connecté
     if (req.user.isSuperAdmin && garageId) {
       filter.garageId = garageId;
     } else if (!req.user.isSuperAdmin) {
       filter.garageId = req.user.garage || req.user.garageId;
     }
-    // Si SuperAdmin sans garageId, pas de filtre garage (tous les ordres)
     
- 
+    // ⭐ IMPORTANT : Exclure les ordres supprimés par défaut
+    if (!status || status !== 'supprime') {
+      filter.status = { $ne: 'supprime' };
+    }
+    
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
     
     if (atelier) filter.atelierId = atelier;
     if (priorite) filter.priorite = priorite;
@@ -209,17 +234,38 @@ export const getOrdresTravail = async (req, res) => {
 
     console.log('🔍 Filtre appliqué:', filter);
 
-    // Options de tri
     const sortOptions = {};
     sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
-    // Calcul de pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const limitNum = parseInt(limit);
 
-    // Requête avec pagination
+    // ⭐ POPULATE CORRIGÉ
     const ordres = await OrdreTravail.find(filter)
-      .populate('devisId', 'id clientName vehicleInfo')
+      .populate({
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      })
+      .populate({
+        path: 'clientInfo.ClientId',  // ⭐ Populate direct de ClientId
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      })
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name')
       .populate('taches.mecanicienId', 'username email phone')
@@ -228,7 +274,6 @@ export const getOrdresTravail = async (req, res) => {
       .limit(limitNum)
       .lean();
 
-    // Compter le total pour la pagination
     const total = await OrdreTravail.countDocuments(filter);
     const totalPages = Math.ceil(total / limitNum);
 
@@ -254,6 +299,7 @@ export const getOrdresTravail = async (req, res) => {
   }
 };
 
+
 export const getOrdreTravailById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -269,12 +315,35 @@ export const getOrdreTravailById = async (req, res) => {
     }
     
     const ordre = await OrdreTravail.findOne(filter)
-      .populate('devisId', 'id clientName vehicleInfo inspectionDate services')
+      .populate({
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      })
+      .populate({
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      })
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name description')
-.populate('taches.mecanicienId', 'username phone email')
-.populate('createdBy', 'username email')
-.populate('updatedBy', 'username email');
+      .populate('taches.mecanicienId', 'username phone email')
+      .populate('createdBy', 'username email')
+      .populate('updatedBy', 'username email');
 
     if (!ordre) {
       console.log('Ordre non trouvé pour ID:', id);
@@ -542,7 +611,30 @@ export const getOrdresByStatus = async (req, res) => {
     };
 
     const ordres = await OrdreTravail.find(filter)
-      .populate('devisId', 'id clientName vehicleInfo')
+      .populate({
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      })
+      .populate({
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      })
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name')
       .populate('taches.mecanicienId', 'username email phone')
@@ -592,7 +684,30 @@ export const getOrdresByAtelier = async (req, res) => {
     };
 
     const ordres = await OrdreTravail.find(filter)
-      .populate('devisId', 'id clientName vehicleInfo')
+      .populate({
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      })
+      .populate({
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      })
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name')
       .populate('taches.mecanicienId', 'username email phone')
@@ -787,7 +902,31 @@ export const updateOrdreTravail = async (req, res) => {
     const ordreSauve = await ordre.save();
 
     // Populer les références pour la réponse
-    await ordreSauve.populate([
+   await ordreSauve.populate([
+      { 
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      },
+      {
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      },
       { path: 'atelierId', select: 'name localisation' },
       { path: 'taches.serviceId', select: 'name' },
       { path: 'taches.mecanicienId', select: 'username email telephone' }
@@ -829,24 +968,46 @@ export const getOrdresSupprimes = async (req, res) => {
 
     // Récupérer les ordres supprimés avec pagination
     const ordres = await OrdreTravail.find(filter)
-      .populate([
-        { 
-          path: 'atelierId', 
-          select: 'name localisation' 
-        },
-        { 
-          path: 'taches.serviceId', 
-          select: 'name' 
-        },
-        { 
-          path: 'taches.mecanicienId', 
-          select: 'username email phone' 
+      .populate({
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
         }
-      ])
-      .sort({ updatedAt: -1 }) // Trier par dernière modification (suppression)
+      })
+      .populate({
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      })
+      .populate({ 
+        path: 'atelierId', 
+        select: 'name localisation' 
+      })
+      .populate({ 
+        path: 'taches.serviceId', 
+        select: 'name' 
+      })
+      .populate({ 
+        path: 'taches.mecanicienId', 
+        select: 'username email phone' 
+      })
+      .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit)
-      .lean(); // Pour de meilleures performances
+      .lean();
 
     console.log(`📊 ${ordres.length} ordres supprimés trouvés sur ${total} total`);
 

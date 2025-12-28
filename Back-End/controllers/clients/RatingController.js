@@ -248,12 +248,34 @@ export const getGarageRatings = async (req, res) => {
     }
 
     const ratings = await Rating.find(filter)
-      .populate('ficheClientId', 'nom')
-      .select('rating comment recommande createdAt ordreSnapshot reponseGarage ')
+      .populate('ficheClientId', 'nom clientId')  // ✅ Ajouter clientId
+      .populate({                                  // ✅ Nouveau populate
+        path: 'ficheClientId',
+        populate: {
+          path: 'clientId',
+          select: 'username'
+        }
+      })
+      .select('rating comment recommande createdAt ordreSnapshot reponseGarage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
+
+      const ratingsAvecNomEffectif = ratings.map(rating => {
+  let nomEffectif;
+  
+  if (rating.ficheClientId?.clientId?.username) {
+    nomEffectif = rating.ficheClientId.clientId.username;
+  } else {
+    nomEffectif = rating.ficheClientId?.nom || 'Client inconnu';
+  }
+  
+  return {
+    ...rating,
+    clientNom: nomEffectif  // ✅ Ajouter le nom effectif
+  };
+});
 
     const total = await Rating.countDocuments(filter);
 
@@ -295,7 +317,7 @@ export const getGarageRatings = async (req, res) => {
 
     res.json({
       success: true,
-      ratings,
+      ratings: ratingsAvecNomEffectif,
       statistics,
       pagination: {
         page,

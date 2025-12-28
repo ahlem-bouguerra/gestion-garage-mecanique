@@ -8,6 +8,31 @@ import CreateOrderModal from './AjouterOrdre';
 import EditOrderModal from './EditOrderModal';
 import OrderDetailsModal from './details-ordre';
 
+const getClientName = (ordre) => {
+  // Priorité 1 : clientInfo avec Client lié
+  if (ordre.clientInfo?.ClientId?.clientId?.username) {
+    return ordre.clientInfo.ClientId.clientId.username;
+  }
+  
+  // Priorité 2 : clientInfo direct
+  if (ordre.clientInfo?.ClientId?.nom) {
+    return ordre.clientInfo.ClientId.nom;
+  }
+  
+  // Priorité 3 : via devis avec Client lié
+  if (ordre.devisId?.clientId?.clientId?.username) {
+    return ordre.devisId.clientId.clientId.username;
+  }
+  
+  // Priorité 4 : via devis direct
+  if (ordre.devisId?.clientId?.nom) {
+    return ordre.devisId.clientId.nom;
+  }
+  
+  return 'N/A';
+};
+
+
 interface Garage {
   _id: string;
   nom: string;
@@ -472,7 +497,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                               </span>
                             </div>
                             <p className="text-sm text-gray-600 truncate">
-                              Client: {ordre.clientInfo?.nom || ordre.devisId?.clientName || 'N/A'}
+                              {getClientName(ordre)}
                             </p>
                             <p className="text-sm text-gray-600 truncate">
                               Véhicule: {ordre.vehiculedetails?.nom || ordre.devisId?.vehicleInfo || 'N/A'}

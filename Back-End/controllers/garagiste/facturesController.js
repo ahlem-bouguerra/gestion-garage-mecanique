@@ -90,9 +90,23 @@ export const CreateFacture = async (req, res) => {
     const facture = new Facture(factureData);
     await facture.save();
 
-    const populatedFacture = await Facture.findById(facture._id)
-      .populate('clientId', 'nom email telephone')
-      .populate('devisId', 'id status');
+const populatedFacture = await Facture.findById(facture._id)
+  .populate({
+    path: 'clientId',
+    model: 'FicheClient',
+    select: 'nom email telephone clientId',
+    populate: {
+      path: 'clientId',
+      model: 'Client',
+      select: 'username email phone'
+    }
+  })
+  .populate({
+    path: 'realClientId',
+    model: 'Client',
+    select: 'username email phone'
+  })
+  .populate('devisId', 'id status');
 
     res.status(201).json({ 
       success: true, 
@@ -174,13 +188,27 @@ export const GetAllFactures = async (req, res) => {
     sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
     // Exécution de la requête
-    const factures = await Facture.find(query)
-      .select('numeroFacture clientInfo vehicleInfo totalTTC finalTotalTTC paymentAmount paymentStatus invoiceDate creditNoteId dueDate')
-      .populate('clientInfo', 'nom email telephone')
-      .populate('devisId', 'id status')
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(parseInt(limit));
+const factures = await Facture.find(query)
+  .select('numeroFacture clientInfo vehicleInfo totalTTC finalTotalTTC paymentAmount paymentStatus invoiceDate creditNoteId dueDate')
+  .populate({
+    path: 'clientId',
+    model: 'FicheClient',
+    select: 'nom email telephone clientId',
+    populate: {
+      path: 'clientId',
+      model: 'Client',
+      select: 'username email phone'
+    }
+  })
+  .populate({
+    path: 'realClientId',
+    model: 'Client',
+    select: 'username email phone'
+  })
+  .populate('devisId', 'id status')
+  .sort(sortOptions)
+  .skip(skip)
+  .limit(parseInt(limit));
 
     const total = await Facture.countDocuments(query);
 
@@ -358,13 +386,27 @@ export const GetFactureById = async (req, res) => {
     }
 
     const facture = await Facture.findOne({
-      _id: id,
-      garageId: garageIdToUse
-    })
-      .populate("clientId", "nom email telephone adresse")
-      .populate("devisId", "id status")
-      .populate("services", "name description")
-      .populate("garageId", "nom governorateName cityName streetAddress telephoneProfessionnel emailProfessionnel ");
+  _id: id,
+  garageId: garageIdToUse
+})
+  .populate({
+    path: 'clientId',
+    model: 'FicheClient',
+    select: 'nom email telephone adresse clientId',
+    populate: {
+      path: 'clientId',
+      model: 'Client',
+      select: 'username email phone'
+    }
+  })
+  .populate({
+    path: 'realClientId',
+    model: 'Client',
+    select: 'username email phone'
+  })
+  .populate('devisId', 'id status')
+  .populate('services', 'name description')
+  .populate('garageId', 'nom governorateName cityName streetAddress telephoneProfessionnel emailProfessionnel');
 
     if (!facture) {
       return res.status(404).json({
@@ -772,14 +814,39 @@ if (req.user.isSuperAdmin) {
       updatedAt: new Date()
     });
 
-    // 7. Populer la réponse
-    const populatedFacture = await Facture.findById(newFacture._id)
-      .populate('clientId', 'nom email telephone')
-      .populate('devisId', 'id status');
+const populatedFacture = await Facture.findById(newFacture._id)
+  .populate({
+    path: 'clientId',
+    model: 'FicheClient',
+    select: 'nom email telephone clientId',
+    populate: {
+      path: 'clientId',
+      model: 'Client',
+      select: 'username email phone'
+    }
+  })
+  .populate({
+    path: 'realClientId',
+    model: 'Client',
+    select: 'username email phone'
+  })
+  .populate('devisId', 'id status');
 
-    const populatedCreditNote = creditNote ? 
-      await CreditNote.findById(creditNote._id).populate('originalFactureId', 'numeroFacture') :
-      null;
+const populatedCreditNote = creditNote ? 
+  await CreditNote.findById(creditNote._id)
+    .populate({
+      path: 'clientId',
+      model: 'FicheClient',
+      select: 'nom email telephone clientId',
+      populate: {
+        path: 'clientId',
+        model: 'Client',
+        select: 'username email phone'
+      }
+    })
+    .populate('originalFactureId', 'numeroFacture') :
+  null;
+
 
     // 8. Réponse avec les deux documents
     res.status(201).json({ 
@@ -842,13 +909,22 @@ export const getCreditNoteById = async (req, res) => {
     const existsCheck = await CreditNote.findById(creditNoteId);
     console.log('💾 Avoir existe?', !!existsCheck);
     
-    const creditNote = await CreditNote.findOne({
-      _id: creditNoteId,
-      garageId: garageIdToUse  // ← Utiliser la variable
-    })
-    .populate('clientId', 'nom email telephone adresse')
-    .populate('originalFactureId', 'numeroFacture')
-    .populate('services', 'name description');
+const creditNote = await CreditNote.findOne({
+  _id: creditNoteId,
+  garageId: garageIdToUse
+})
+  .populate({
+    path: 'clientId',
+    model: 'FicheClient',
+    select: 'nom email telephone adresse clientId',
+    populate: {
+      path: 'clientId',
+      model: 'Client',
+      select: 'username email phone'
+    }
+  })
+  .populate('originalFactureId', 'numeroFacture')
+  .populate('services', 'name description');
 
     if (!creditNote) {
       console.log('❌ Avoir non trouvé pour ce garage');

@@ -4,6 +4,30 @@ import { X, Save, User, MapPin, Wrench, UserCheck, Clock, AlertCircle } from 'lu
 import { ordresTravailAPI } from './services/ordresTravailAPI';
 import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
 
+const getClientName = (ordre) => {
+  // Priorité 1 : clientInfo avec Client lié
+  if (ordre.clientInfo?.ClientId?.clientId?.username) {
+    return ordre.clientInfo.ClientId.clientId.username;
+  }
+  
+  // Priorité 2 : clientInfo direct
+  if (ordre.clientInfo?.ClientId?.nom) {
+    return ordre.clientInfo.ClientId.nom;
+  }
+  
+  // Priorité 3 : via devis avec Client lié
+  if (ordre.devisId?.clientId?.clientId?.username) {
+    return ordre.devisId.clientId.clientId.username;
+  }
+  
+  // Priorité 4 : via devis direct
+  if (ordre.devisId?.clientId?.nom) {
+    return ordre.devisId.clientId.nom;
+  }
+  
+  return 'N/A';
+};
+
 const ModificationOrdreTravail = ({
   ordre,
   services,
@@ -261,7 +285,7 @@ const ModificationOrdreTravail = ({
             </h3>
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
-                <span className="font-medium">Client:</span> {ordre.clientInfo?.nom || 'N/A'}
+                <span className="font-medium">Client:</span> {getClientName(ordre)}
               </div>
               <div>
                 <span className="font-medium">Véhicule:</span> {ordre.vehiculedetails?.nom || 'N/A'}

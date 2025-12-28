@@ -73,4 +73,17 @@ FicheClientSchema.index({ nom: 1, garageId: 1 }, { unique: true });
 FicheClientSchema.index({ email: 1, garageId: 1 }, { unique: true });
 FicheClientSchema.index({ telephone: 1, garageId: 1 }, { unique: true });
 
+// Virtual pour obtenir le nom effectif du client
+FicheClientSchema.virtual('nomEffectif').get(function() {
+  // Si clientId existe et est populé, utiliser Client.username
+  if (this.clientId && this.clientId.username) {
+    return this.clientId.username;
+  }
+  // Sinon utiliser le nom de FicheClient
+  return this.nom;
+});
+
+// Pour que les virtuals apparaissent dans JSON
+FicheClientSchema.set('toJSON', { virtuals: true });
+FicheClientSchema.set('toObject', { virtuals: true });
 export default mongoose.model("FicheClient", FicheClientSchema);

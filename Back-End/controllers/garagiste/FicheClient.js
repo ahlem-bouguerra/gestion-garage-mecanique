@@ -51,7 +51,8 @@ export const getFicheClients = async (req, res) => {
       }
       
       console.log('👑 SuperAdmin récupère les clients du garage:', garageId);
-      clients = await FicheClient.find({ garageId });
+      clients = await FicheClient.find({ garageId })
+      .populate('clientId', 'username email'); 
     } 
     // ⭐ Cas 2 : Garagiste - utilise son propre garage
     else {
@@ -62,7 +63,8 @@ export const getFicheClients = async (req, res) => {
       }
       
       console.log('🔧 Garagiste récupère ses clients');
-      clients = await FicheClient.find({ garageId: req.user.garage });
+      clients = await FicheClient.find({ garageId: req.user.garage })
+      .populate('clientId', 'username email'); 
     }
 
     res.json(clients);
@@ -79,7 +81,7 @@ export const getFicheClientById = async (req, res) => {
     const fiche = await FicheClient.findOne({
       _id: req.params._id,
       garageId: req.user.garageId
-    });
+    }).populate('clientId', 'username email phone'); 
 
     if (!fiche) {
       return res.status(404).json({ error: "Client non trouvé ou non autorisé" });
@@ -94,14 +96,34 @@ export const getFicheClientById = async (req, res) => {
 
 export const getFicheClientNoms = async (req, res) => {
   try {
-
-
+    // ✅ Récupérer les fiches clients avec populate
     const clients = await FicheClient.find(
-      { garageId: req.user.garageId },
-      { nom: 1, type: 1, _id: 1 }
-    );
+      { garageId: req.user.garageId }
+    )
+    .populate('clientId', 'username email') // ⭐ AJOUTER POPULATE
+    .select('nom type _id clientId') // ⭐ INCLURE clientId dans select
+    .lean(); // Pour pouvoir modifier les objets
 
-    res.json(clients);
+    // ✅ Ajouter nomEffectif à chaque client
+    const clientsAvecNomEffectif = clients.map(client => {
+      let nomEffectif;
+      
+      // Si clientId existe et est populé avec username
+      if (client.clientId && client.clientId.username) {
+        nomEffectif = client.clientId.username;
+      } else {
+        nomEffectif = client.nom;
+      }
+      
+      return {
+        _id: client._id,
+        nom: client.nom,
+        nomEffectif: nomEffectif,
+        type: client.type
+      };
+    });
+
+    res.json(clientsAvecNomEffectif);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

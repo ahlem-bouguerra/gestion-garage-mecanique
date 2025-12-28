@@ -18,44 +18,53 @@ export const getAllVehicules = async (req, res) => {
     const liaisons = await FicheClientVehicule.find({
       ficheClientId: { $in: clientIds },
       garageId : req.user.garageId
-    }).select('vehiculeId ficheClientId'); // ✅ Inclure ficheClientId
+    }).select('vehiculeId ficheClientId');
     
     const vehiculeIds = liaisons.map(l => l.vehiculeId);
     
-    // ✅ Récupérer les véhicules SANS populate
     const vehicules = await Vehicule.find({
       _id: { $in: vehiculeIds },
       statut: 'actif'
     }).sort({ createdAt: -1 });
 
-    // ✅ Créer un map des liaisons
     const liaisonMap = {};
     liaisons.forEach(l => {
       liaisonMap[l.vehiculeId.toString()] = l.ficheClientId;
     });
 
-    // ✅ Récupérer toutes les fiches clients correspondantes
+    // ✅ MODIFIÉ : Récupérer FicheClient ET populate clientId
     const fichesClients = await FicheClient.find({
       _id: { $in: Object.values(liaisonMap) }
-    });
+    }).populate('clientId', 'username email'); // ⭐ AJOUTER POPULATE
 
     const ficheMap = {};
     fichesClients.forEach(f => {
       ficheMap[f._id.toString()] = f;
     });
 
-    // ✅ Enrichir les véhicules avec les infos de FicheClient
     const vehiculesAvecClient = vehicules.map(vehicule => {
       const vehiculeObj = vehicule.toObject();
       const ficheClientId = liaisonMap[vehicule._id.toString()];
       const ficheClient = ficheMap[ficheClientId?.toString()];
       
-      // ✅ Remplacer proprietaireId par les données de la FicheClient
-      vehiculeObj.proprietaireId = ficheClient || {
-        nom: 'Client inconnu',
-        type: 'particulier',
-        telephone: 'N/A'
-      };
+      // ✅ AJOUTER nomEffectif
+      if (ficheClient) {
+        const ficheObj = ficheClient.toObject();
+        // Si clientId existe et est populé, utiliser username
+        if (ficheObj.clientId && ficheObj.clientId.username) {
+          ficheObj.nomEffectif = ficheObj.clientId.username;
+        } else {
+          ficheObj.nomEffectif = ficheObj.nom;
+        }
+        vehiculeObj.proprietaireId = ficheObj;
+      } else {
+        vehiculeObj.proprietaireId = {
+          nom: 'Client inconnu',
+          nomEffectif: 'Client inconnu',
+          type: 'particulier',
+          telephone: 'N/A'
+        };
+      }
       
       return vehiculeObj;
     });
@@ -90,14 +99,28 @@ export const getVehiculeById = async (req, res) => {
       return res.status(404).json({ error: 'Véhicule non trouvé' });
     }
 
-    // ✅ Récupérer la FicheClient du garage
-    const ficheClient = await FicheClient.findById(liaison.ficheClientId);
+    // ✅ MODIFIÉ : populate clientId
+    const ficheClient = await FicheClient.findById(liaison.ficheClientId)
+      .populate('clientId', 'username email'); // ⭐ AJOUTER POPULATE
 
     const vehiculeAvecClient = vehicule.toObject();
-    vehiculeAvecClient.proprietaireId = ficheClient || {
-      nom: 'Client inconnu',
-      type: 'particulier'
-    };
+    
+    if (ficheClient) {
+      const ficheObj = ficheClient.toObject();
+      // ✅ AJOUTER nomEffectif
+      if (ficheObj.clientId && ficheObj.clientId.username) {
+        ficheObj.nomEffectif = ficheObj.clientId.username;
+      } else {
+        ficheObj.nomEffectif = ficheObj.nom;
+      }
+      vehiculeAvecClient.proprietaireId = ficheObj;
+    } else {
+      vehiculeAvecClient.proprietaireId = {
+        nom: 'Client inconnu',
+        nomEffectif: 'Client inconnu',
+        type: 'particulier'
+      };
+    }
 
     res.json(vehiculeAvecClient);
   } catch (error) {
@@ -117,7 +140,6 @@ export const getVehiculesByProprietaire = async (req, res) => {
 
     let garageIdToCheck;
     
-    // ⭐ Déterminer le garageId selon le rôle
     if (req.user.isSuperAdmin) {
       const { garageId } = req.query;
       
@@ -132,10 +154,11 @@ export const getVehiculesByProprietaire = async (req, res) => {
       garageIdToCheck = req.user.garage;
     }
 
+    // ✅ MODIFIÉ : populate clientId
     const ficheClient = await FicheClient.findOne({
       _id: clientId,
       garageId: garageIdToCheck
-    });
+    }).populate('clientId', 'username email'); // ⭐ AJOUTER POPULATE
     
     if (!ficheClient) {
       return res.status(404).json({ error: 'Client non trouvé dans ce garage' });
@@ -153,9 +176,17 @@ export const getVehiculesByProprietaire = async (req, res) => {
       statut: 'actif'
     }).sort({ createdAt: -1 });
 
+    // ✅ AJOUTER nomEffectif à ficheClient
+    const ficheObj = ficheClient.toObject();
+    if (ficheObj.clientId && ficheObj.clientId.username) {
+      ficheObj.nomEffectif = ficheObj.clientId.username;
+    } else {
+      ficheObj.nomEffectif = ficheObj.nom;
+    }
+
     const vehiculesAvecClient = vehicules.map(v => {
       const vObj = v.toObject();
-      vObj.proprietaireId = ficheClient;
+      vObj.proprietaireId = ficheObj;
       return vObj;
     });
 
@@ -242,7 +273,14 @@ export const createVehicule = async (req, res) => {
       
       // ✅ Retourner avec FicheClient
       const vehiculeAvecClient = vehiculeExistant.toObject();
-      vehiculeAvecClient.proprietaireId = ficheClient;
+      const ficheObj = ficheClient.toObject();
+if (ficheObj.clientId && ficheObj.clientId.username) {
+  ficheObj.nomEffectif = ficheObj.clientId.username;
+} else {
+  ficheObj.nomEffectif = ficheObj.nom;
+}
+vehiculeAvecClient.proprietaireId = ficheObj;
+
       
       return res.status(200).json({
         message: 'Véhicule existant associé au client',
@@ -340,7 +378,13 @@ if (req.body.carteGrise) {
 
     // ✅ Retourner avec FicheClient
     const vehiculeAvecClient = vehiculeSauve.toObject();
-    vehiculeAvecClient.proprietaireId = ficheClient;
+    const ficheObj = ficheClient.toObject();
+if (ficheObj.clientId && ficheObj.clientId.username) {
+  ficheObj.nomEffectif = ficheObj.clientId.username;
+} else {
+  ficheObj.nomEffectif = ficheObj.nom;
+}
+vehiculeAvecClient.proprietaireId = ficheObj;
 
     console.log("✅ Véhicule créé avec succès");
     res.status(201).json(vehiculeAvecClient);
@@ -449,21 +493,21 @@ export const updateVehicule = async (req, res) => {
       }
     }
 
-    // ✅ NOUVEAU : Mise à jour carte grise
-if (req.body.carteGrise) {
-  const { numeroCG, numeroChassis, dateMiseCirculation, puissanceFiscale, genre, nombrePlaces, dateVisite, dateProchaineVisite } = req.body.carteGrise;
-  
-  updateData.carteGrise = {};
-  
-  if (numeroCG) updateData.carteGrise.numeroCG = numeroCG.trim().toUpperCase();
-  if (numeroChassis) updateData.carteGrise.numeroChassis = numeroChassis.trim().toUpperCase();
-  if (dateMiseCirculation) updateData.carteGrise.dateMiseCirculation = new Date(dateMiseCirculation);
-  if (puissanceFiscale) updateData.carteGrise.puissanceFiscale = parseInt(puissanceFiscale);
-  if (genre) updateData.carteGrise.genre = genre;
-  if (nombrePlaces) updateData.carteGrise.nombrePlaces = parseInt(nombrePlaces);
-  if (dateVisite) updateData.carteGrise.dateVisite = new Date(dateVisite);
-  if (dateProchaineVisite) updateData.carteGrise.dateProchaineVisite = new Date(dateProchaineVisite);
-}
+    // Mise à jour carte grise
+    if (req.body.carteGrise) {
+      const { numeroCG, numeroChassis, dateMiseCirculation, puissanceFiscale, genre, nombrePlaces, dateVisite, dateProchaineVisite } = req.body.carteGrise;
+      
+      updateData.carteGrise = {};
+      
+      if (numeroCG) updateData.carteGrise.numeroCG = numeroCG.trim().toUpperCase();
+      if (numeroChassis) updateData.carteGrise.numeroChassis = numeroChassis.trim().toUpperCase();
+      if (dateMiseCirculation) updateData.carteGrise.dateMiseCirculation = new Date(dateMiseCirculation);
+      if (puissanceFiscale) updateData.carteGrise.puissanceFiscale = parseInt(puissanceFiscale);
+      if (genre) updateData.carteGrise.genre = genre;
+      if (nombrePlaces) updateData.carteGrise.nombrePlaces = parseInt(nombrePlaces);
+      if (dateVisite) updateData.carteGrise.dateVisite = new Date(dateVisite);
+      if (dateProchaineVisite) updateData.carteGrise.dateProchaineVisite = new Date(dateProchaineVisite);
+    }
 
     const vehiculeModifie = await Vehicule.findByIdAndUpdate(
       id,
@@ -471,11 +515,22 @@ if (req.body.carteGrise) {
       { new: true, runValidators: true }
     );
 
-    // ✅ Récupérer la FicheClient
-    const ficheClient = await FicheClient.findById(liaison.ficheClientId);
+    // ✅ MODIFIÉ : populate clientId et ajouter nomEffectif
+    const ficheClient = await FicheClient.findById(liaison.ficheClientId)
+      .populate('clientId', 'username email'); // ⭐ AJOUTER POPULATE
     
     const vehiculeAvecClient = vehiculeModifie.toObject();
-    vehiculeAvecClient.proprietaireId = ficheClient;
+    
+    if (ficheClient) {
+      const ficheObj = ficheClient.toObject();
+      // ✅ AJOUTER nomEffectif
+      if (ficheObj.clientId && ficheObj.clientId.username) {
+        ficheObj.nomEffectif = ficheObj.clientId.username;
+      } else {
+        ficheObj.nomEffectif = ficheObj.nom;
+      }
+      vehiculeAvecClient.proprietaireId = ficheObj;
+    }
 
     res.json(vehiculeAvecClient);
 

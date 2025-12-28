@@ -33,10 +33,6 @@ const devisSchema = new mongoose.Schema({
     ref: 'FicheClient', // Référence vers votre modèle Client
     required: true
   },
-  clientName: {
-    type: String,
-    required: true
-  },
   vehicleInfo: {
     type: String,
     required: true

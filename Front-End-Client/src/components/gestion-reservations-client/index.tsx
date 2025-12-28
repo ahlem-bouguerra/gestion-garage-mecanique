@@ -78,9 +78,10 @@ export default function ClientReservationManagement({ onClose }) {
         const res = await axios.get("http://localhost:5000/api/client-reservations/", {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const filteredReservations = res.data.reservations.filter(reservation =>
+        /*const filteredReservations = res.data.reservations.filter(reservation =>
           !isDatePassed(reservation.creneauDemande.date)
-        );
+        );*/
+        const filteredReservations = res.data.reservations;
 
         // Détecter nouveaux messages
         const hasNew = filteredReservations.some(r => r.status === 'contre_propose');

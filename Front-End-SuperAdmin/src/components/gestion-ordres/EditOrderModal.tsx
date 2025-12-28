@@ -10,6 +10,31 @@ import {
   getMecaniciensByService
 } from './api';
 
+const getClientName = (ordre) => {
+  // Priorité 1 : clientInfo avec Client lié
+  if (ordre.clientInfo?.ClientId?.clientId?.username) {
+    return ordre.clientInfo.ClientId.clientId.username;
+  }
+  
+  // Priorité 2 : clientInfo direct
+  if (ordre.clientInfo?.ClientId?.nom) {
+    return ordre.clientInfo.ClientId.nom;
+  }
+  
+  // Priorité 3 : via devis avec Client lié
+  if (ordre.devisId?.clientId?.clientId?.username) {
+    return ordre.devisId.clientId.clientId.username;
+  }
+  
+  // Priorité 4 : via devis direct
+  if (ordre.devisId?.clientId?.nom) {
+    return ordre.devisId.clientId.nom;
+  }
+  
+  return 'N/A';
+};
+
+
 interface EditOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -282,7 +307,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                 <div>
                   <span className="text-gray-600">Client:</span>
                   <span className="ml-2 font-medium">
-                    {ordre?.clientInfo?.nom || ordre?.devisId?.clientName || 'N/A'}
+                    {getClientName(ordre)}
                   </span>
                 </div>
                 <div>

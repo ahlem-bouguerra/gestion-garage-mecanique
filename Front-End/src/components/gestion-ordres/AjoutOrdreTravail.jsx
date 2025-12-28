@@ -4,6 +4,7 @@ import { User, Car, Calendar, Save, UserCheck, Clock } from 'lucide-react';
 import { ordresTravailAPI } from './services/ordresTravailAPI';
 import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
 
+
 const AjoutOrdreTravail = ({
   services,
   ateliers,
@@ -244,7 +245,12 @@ const AjoutOrdreTravail = ({
                 <User className="h-5 w-5 text-gray-500" />
                 <div>
                   <p className="font-medium">Client</p>
-                  <p className="text-gray-600">{quoteData.clientName}</p>
+                  <p className="text-gray-600">
+  {quoteData?.clientId?.clientId?.username || 
+   quoteData?.clientId?.nom || 
+   quoteData?.clientName || 
+   'N/A'}
+</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">

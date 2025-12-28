@@ -64,6 +64,7 @@ interface VehiculeInfo {
   proprietaire: {
     _id: string;
     nom: string;
+    nomEffectif:string;
     type: 'particulier' | 'professionnel';
     telephone?: string;
   };
@@ -373,7 +374,8 @@ const CarnetEntretien: React.FC = () => {
                 <User className="w-4 h-4 text-green-600" />
               )}
               <span className="font-medium text-gray-900">
-                {data.vehicule.proprietaire.nom}
+
+                {data.vehicule.proprietaire.nomEffectif || data.vehicule.proprietaire.nom}
               </span>
               <span className={`px-2 py-1 text-xs rounded-full ${data.vehicule.proprietaire.type === 'professionnel'
                   ? 'bg-blue-100 text-blue-800'

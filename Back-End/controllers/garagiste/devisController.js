@@ -1,5 +1,6 @@
 import Devis from "../../models/Devis.js";
 import OrdreTravail from '../../models/Ordre.js'; 
+import FicheClient from "../../models/FicheClient.js";
 
 
 export const createDevis = async (req, res) => {
@@ -7,7 +8,7 @@ export const createDevis = async (req, res) => {
     console.log('📥 Données reçues:', req.body);
     console.log('👤 Utilisateur:', req.user);
 
-    const { clientId, clientName, vehicleInfo, vehiculeId, inspectionDate, services, montantTVA, montantRemise, tvaRate, remiseRate, maindoeuvre, estimatedTime, garageId } = req.body;
+    const { clientId,vehicleInfo, vehiculeId, inspectionDate, services, montantTVA, montantRemise, tvaRate, remiseRate, maindoeuvre, estimatedTime, garageId } = req.body;
 
     // ⭐ Détermine le garageId selon le rôle
     let finalGarageId;
@@ -61,7 +62,6 @@ export const createDevis = async (req, res) => {
     const newDevis = new Devis({
       id: devisId,
       clientId,
-      clientName,
       garageId: finalGarageId,
       vehicleInfo,
       vehiculeId,
@@ -107,30 +107,82 @@ export const getAllDevis = async (req, res) => {
   try {
     const { status, clientName, dateDebut, dateFin } = req.query;
     const filters = {};
-    filters.garageId= req.user.garage;
+    filters.garageId = req.user.garage;
 
     if (status && status !== 'tous') filters.status = status.toLowerCase();
-    if (clientName) filters.clientName = { $regex: clientName, $options: 'i' };
 
-    if (dateDebut || dateFin) {
-      filters.inspectionDate = {}; // ✅ Changé de 'date' à 'inspectionDate'
+    // 🔍 Si recherche par nom de client
+    if (clientName) {
+      const clientsAvecCompte = await FicheClient.find({
+        garageId: req.user.garage
+      })
+      .populate({
+        path: 'clientId',
+        match: { username: { $regex: clientName, $options: 'i' } }
+      });
       
-      if (dateDebut) {
-        // ✅ Comme c'est un String, on compare directement les strings au format ISO
-        filters.inspectionDate.$gte = dateDebut; // Pas besoin de new Date()
-      }
-      if (dateFin) {
-        filters.inspectionDate.$lte = dateFin;
+      const idsClientsAvecCompte = clientsAvecCompte
+        .filter(c => c.clientId)
+        .map(c => c._id);
+      
+      const clientsSansCompte = await FicheClient.find({
+        garageId: req.user.garage,
+        nom: { $regex: clientName, $options: 'i' }
+      }).select('_id');
+      
+      const idsClientsSansCompte = clientsSansCompte.map(c => c._id);
+      const allClientIds = [...idsClientsAvecCompte, ...idsClientsSansCompte];
+      
+      if (allClientIds.length > 0) {
+        filters.clientId = { $in: allClientIds };
+      } else {
+        return res.json({ success: true, data: [] });
       }
     }
 
+    if (dateDebut || dateFin) {
+      filters.inspectionDate = {};
+      if (dateDebut) filters.inspectionDate.$gte = dateDebut;
+      if (dateFin) filters.inspectionDate.$lte = dateFin;
+    }
+
     console.log('🔍 Filtres appliqués:', JSON.stringify(filters, null, 2));
-    const devis = await Devis.find(filters).sort({ createdAt: -1 });
+    
+    const devis = await Devis.find(filters)
+      .populate({
+        path: 'clientId',
+        select: 'nom type clientId',
+        populate: {
+          path: 'clientId',
+          select: 'username email phone'
+        }
+      })
+      .sort({ createdAt: -1 })
+      .lean(); // ✅ Ajouter .lean()
+      
     console.log('📊 Nombre de résultats:', devis.length);
+
+    // ✅ Enrichir chaque devis avec clientName
+    const devisEnrichis = devis.map(d => {
+      let clientName = 'Client inconnu';
+      
+      if (d.clientId) {
+        if (d.clientId.clientId?.username) {
+          clientName = d.clientId.clientId.username;
+        } else {
+          clientName = d.clientId.nom;
+        }
+      }
+      
+      return {
+        ...d,
+        clientName
+      };
+    });
 
     res.json({
       success: true,
-      data: devis
+      data: devisEnrichis
     });
   } catch (error) {
     res.status(500).json({
@@ -148,20 +200,48 @@ export const getDevisById = async (req, res) => {
     
     let devis;
     
-    // Vérifier si l'ID ressemble à un ObjectId MongoDB (24 caractères hex)
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      // C'est un ObjectId MongoDB
-      devis = await Devis.findById(id);
+      devis = await Devis.findById(id)
+        .populate({
+          path: 'clientId',
+          select: 'nom type clientId',
+          populate: {
+            path: 'clientId',
+            select: 'username email phone'
+          }
+        })
+        .lean(); // ✅ Ajouter .lean()
     } else {
-      // C'est un ID personnalisé (DEV001, DEV002, etc.)
-      devis = await Devis.findOne({ id: id });
+      devis = await Devis.findOne({ id: id })
+        .populate({
+          path: 'clientId',
+          select: 'nom type clientId',
+          populate: {
+            path: 'clientId',
+            select: 'username email phone'
+          }
+        })
+        .lean(); // ✅ Ajouter .lean()
     }
     
     if (!devis) {
       return res.status(404).json({ error: 'Devis non trouvé' });
     }
+
+    // ✅ Enrichir avec clientName
+    let clientName = 'Client inconnu';
+    if (devis.clientId) {
+      if (devis.clientId.clientId?.username) {
+        clientName = devis.clientId.clientId.username;
+      } else {
+        clientName = devis.clientId.nom;
+      }
+    }
     
-    res.json(devis);
+    res.json({
+      ...devis,
+      clientName
+    });
   } catch (error) {
     console.error("❌ Erreur getDevisById:", error);
     res.status(500).json({ error: error.message });
@@ -170,15 +250,46 @@ export const getDevisById = async (req, res) => {
 
 export const getAllDevisByGarage = async (req, res) => {
   try {
-    const { garageId } = req.params; // 💥 Récupérer l'ID du garage depuis l'URL
+    const { garageId } = req.params;
 
-    const devis = await Devis.find({ garageId }).sort({ createdAt: -1 });
+    const devis = await Devis.find({ garageId })
+      .populate({
+        path: 'clientId',
+        select: 'nom type clientId',
+        populate: {
+          path: 'clientId',
+          select: 'username email phone'
+        }
+      })
+      .sort({ createdAt: -1 })
+      .lean(); // ✅ Ajouter .lean() pour pouvoir modifier les objets
 
     if (!devis || devis.length === 0) {
       return res.status(200).json([]);
     }
 
-    return res.json(devis);
+    // ✅ Enrichir chaque devis avec clientName
+    const devisEnrichis = devis.map(d => {
+      let clientName = 'Client inconnu';
+      
+      // Si clientId (FicheClient) existe et est populé
+      if (d.clientId) {
+        // Si clientId.clientId (Client) existe, utiliser username
+        if (d.clientId.clientId?.username) {
+          clientName = d.clientId.clientId.username;
+        } else {
+          // Sinon utiliser nom de FicheClient
+          clientName = d.clientId.nom;
+        }
+      }
+      
+      return {
+        ...d,
+        clientName  // ✅ Ajouter le nom effectif
+      };
+    });
+
+    return res.json(devisEnrichis);
 
   } catch (error) {
     console.error("❌ Erreur getAllDevisByGarage:", error);
@@ -187,13 +298,20 @@ export const getAllDevisByGarage = async (req, res) => {
 };
 
 
-
 export const getDevisByNum = async (req, res) => {
   try {
     const { id } = req.params; // ex: "DEV017"
 
     // 🔎 Recherche du devis via le champ "id" (pas _id)
-    const devis = await Devis.findOne({ id: id, garageId: req.user.garage });
+    const devis = await Devis.findOne({ id: id, garageId: req.user.garage })  
+    .populate({
+      path: 'clientId',
+      select: 'nom type clientId',
+      populate: {
+        path: 'clientId',
+        select: 'username email phone'
+      }
+    });
 
     if (!devis) {
       return res.status(404).json({ error: `Devis avec id ${id} non trouvé` });
@@ -250,7 +368,6 @@ export const updateDevis = async (req, res) => {
     const { id } = req.params;
     const { 
       clientId, 
-      clientName, 
       vehicleInfo, 
       inspectionDate, 
       services, 
@@ -286,7 +403,15 @@ export const updateDevis = async (req, res) => {
     console.log('🔍 Critères de recherche:', searchCriteria);
 
     // Vérifier l'existence
-    const existingDevis = await Devis.findOne(searchCriteria);
+    const existingDevis = await Devis.findOne(searchCriteria)
+    .populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+});
 
     if (!existingDevis) {
       console.log('❌ Devis non trouvé');
@@ -317,7 +442,6 @@ export const updateDevis = async (req, res) => {
       searchCriteria,
       {
         clientId,
-        clientName,
         vehicleInfo,
         inspectionDate,
         services: processedServices,
@@ -368,7 +492,15 @@ export const updateFactureId = async (req, res) => {
     console.log('🔄 Mise à jour devis:', id);
     console.log('📥 Nouvelles données:', updateData);
 
-    const existingDevis = await Devis.findById(id).where({ garageId: req.user.garage });
+    const existingDevis = await Devis.findById(id).where({ garageId: req.user.garage })
+    .populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+})
     if (!existingDevis) {
       return res.status(404).json({ success: false, message: 'Devis non trouvé' });
     }
@@ -411,7 +543,14 @@ export const deleteDevis = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const devis = await Devis.findOne({ id, garageId: req.user.garage});
+    const devis = await Devis.findOne({ id, garageId: req.user.garage}).populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+});
     if (!devis) {
       return res.status(404).json({
         success: false,
@@ -448,7 +587,15 @@ export const acceptDevis = async (req, res) => {
       devisId, 
       { status: 'accepte' }, 
       { new: true }
-    );
+    )
+    .populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+});
     
     if (!devis) {
       return res.status(404).send(`
@@ -485,8 +632,15 @@ export const refuseDevis = async (req, res) => {
       devisId, 
       { status: 'refuse' }, 
       { new: true }
-    );
-    
+    )
+    .populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+});
     if (!devis) {
       return res.status(404).send(`
         <html><body><h1>❌ Devis non trouvé</h1></body></html>
@@ -522,7 +676,15 @@ export const deleteDevisForSuperAdmin = async (req,res) =>{
   try {
     const { id } = req.params;
 
-    const devis = await Devis.findById(id);
+    const devis = await Devis.findById(id)
+    .populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+});
 
     if (!devis) {
       return res.status(404).json({ error: 'Devis non trouvé' });

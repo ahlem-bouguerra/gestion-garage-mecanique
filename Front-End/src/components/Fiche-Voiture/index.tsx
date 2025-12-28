@@ -39,6 +39,7 @@ interface Vehicule {
 interface Client {
     _id: string;
     nom: string;
+    nomEffectif?: string; // ⭐ AJOUTER CETTE LIGNE
     type: "particulier" | "professionnel";
     telephone?: string;
     email?: string;
@@ -650,21 +651,23 @@ export default function VehiculeManagement() {
     }, [clients]);
 
 
-    const getClientName = (clientData: string | any) => {
-        console.log("🔍 Recherche client ID/Data:", clientData);
-        console.log("🔍 Clients disponibles:", clients.length);
+const getClientName = (clientData: string | any) => {
+    // Si c'est un objet avec nomEffectif, l'utiliser en priorité
+    if (typeof clientData === 'object' && clientData?.nomEffectif) {
+        return clientData.nomEffectif;
+    }
+    
+    // Sinon, fallback sur nom
+    if (typeof clientData === 'object' && clientData?.nom) {
+        return clientData.nom;
+    }
 
-        if (typeof clientData === 'object' && clientData?.nom) {
-            console.log("🔍 Client trouvé directement:", clientData.nom);
-            return clientData.nom;
-        }
-
-        const clientId = typeof clientData === 'object' ? clientData?._id : clientData;
-        const client = clients.find(c => c._id === clientId);
-        console.log("🔍 Client trouvé:", client?.nom || 'Non trouvé');
-
-        return client ? client.nom : "Client inconnu";
-    };
+    // Si c'est un ID, chercher dans clients
+    const clientId = typeof clientData === 'object' ? clientData?._id : clientData;
+    const client = clients.find(c => c._id === clientId);
+    
+    return client ? (client.nomEffectif || client.nom) : "Client inconnu";
+};
 
     const getClientType = (clientData: string | any) => {
         if (typeof clientData === 'object' && clientData?.type) {
@@ -1179,7 +1182,7 @@ const deleteVehicule = async (vehicule: Vehicule) => {
                                                     key={client._id}
                                                     value={client._id}
                                                 >
-                                                    {client.nom} ({client.type})
+                                                    {client.nomEffectif || client.nom} ({client.type})
                                                 </option>
                                             ))}
                                         </ValidatedField>

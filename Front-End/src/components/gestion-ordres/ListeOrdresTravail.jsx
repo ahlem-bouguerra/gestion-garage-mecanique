@@ -5,6 +5,29 @@ import { ordresTravailAPI } from './services/ordresTravailAPI';
 import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
 import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
 
+const getClientName = (ordre) => {
+  // Priorité 1 : clientInfo avec Client lié
+  if (ordre.clientInfo?.ClientId?.clientId?.username) {
+    return ordre.clientInfo.ClientId.clientId.username;
+  }
+  
+  // Priorité 2 : clientInfo direct
+  if (ordre.clientInfo?.ClientId?.nom) {
+    return ordre.clientInfo.ClientId.nom;
+  }
+  
+  // Priorité 3 : via devis avec Client lié
+  if (ordre.devisId?.clientId?.clientId?.username) {
+    return ordre.devisId.clientId.clientId.username;
+  }
+  
+  // Priorité 4 : via devis direct
+  if (ordre.devisId?.clientId?.nom) {
+    return ordre.devisId.clientId.nom;
+  }
+  
+  return 'N/A';
+};
 
 
 const ListeOrdresTravail = ({
@@ -257,7 +280,7 @@ const loadOrdresSupprimes = async () => {
                         {ordre.numeroOrdre}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {ordre.clientInfo?.nom || 'N/A'}
+                        {getClientName(ordre)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {ordre.vehiculedetails?.nom || 'N/A'}

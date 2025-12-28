@@ -32,7 +32,7 @@ export default function DevisCreateForm() {
   useEffect(() => {
     if (!garageId) {
       alert("⚠️ Aucun garage sélectionné");
-      router.push('/devis');
+      router.push('/gestion-centrale');
       return;
     }
     loadClients();
@@ -50,31 +50,34 @@ export default function DevisCreateForm() {
     setLoadingClients(false);
   };
 
-  // Charger les véhicules quand on sélectionne un client
-  const handleClientChange = async (clientId: string) => {
-    setSelectedClient(clientId);
-    setSelectedVehiculeId("");
-    setVehicules([]);
+
+const handleClientChange = async (clientId: string) => {
+  setSelectedClient(clientId);
+  setSelectedVehiculeId("");
+  setVehicules([]);
+  
+  const client = clients.find((c: any) => c._id === clientId);
+  if (client) {
+    // ✅ Utiliser nomEffectif au lieu de nom
+    const nomClient = client.nomEffectif || client.nom || 'Client inconnu';
     
-    const client = clients.find((c: any) => c._id === clientId);
-    if (client) {
-      setFormData(prev => ({ 
-        ...prev, 
-        clientName: client.nom,
-        vehicleInfo: ""
-      }));
-      
-      setLoadingVehicules(true);
-      try {
-        const vehs = await loadVehiculesByClient(clientId, garageId);
-        setVehicules(vehs || []);
-      } catch (error) {
-        console.error("Erreur chargement véhicules:", error);
-        alert("❌ Erreur lors du chargement des véhicules");
-      }
-      setLoadingVehicules(false);
+    setFormData(prev => ({ 
+      ...prev, 
+      clientName: nomClient,  // ✅ Changé ici
+      vehicleInfo: ""
+    }));
+    
+    setLoadingVehicules(true);
+    try {
+      const vehs = await loadVehiculesByClient(clientId, garageId);
+      setVehicules(vehs || []);
+    } catch (error) {
+      console.error("Erreur chargement véhicules:", error);
+      alert("❌ Erreur lors du chargement des véhicules");
     }
-  };
+    setLoadingVehicules(false);
+  }
+};
 
   // Sélectionner un véhicule
   const handleVehicleChange = (vehicleId: string) => {
@@ -172,7 +175,7 @@ export default function DevisCreateForm() {
       alert("✅ Devis créé avec succès !");
       
       // Rediriger vers la liste des devis
-      router.push('/devis');
+      router.push('/gestion-centrale');
       
     } catch (error) {
       console.error("Erreur création devis:", error);
@@ -182,7 +185,7 @@ export default function DevisCreateForm() {
   };
 
   const handleCancel = () => {
-    router.push('/devis');
+    router.push('/gestion-centrale');
   };
 
   if (!garageId) {
@@ -191,7 +194,7 @@ export default function DevisCreateForm() {
         <div className="bg-white rounded-lg shadow-md p-8 text-center">
           <p className="text-red-600 mb-4">⚠️ Aucun garage sélectionné</p>
           <button
-            onClick={() => router.push('/devis')}
+            onClick={() => router.push('/gestion-centrale')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Retour à la liste
@@ -235,8 +238,9 @@ export default function DevisCreateForm() {
                   >
                     <option value="">-- Sélectionner un client --</option>
                     {clients.map((c: any) => (
+                      // ✅ Modifier l'affichage dans le select - ligne ~246
                       <option key={c._id} value={c._id}>
-                        {c.nom} {c.type && `(${c.type})`}
+                        {c.nomEffectif || c.nom} {c.type && `(${c.type})`}
                       </option>
                     ))}
                   </select>

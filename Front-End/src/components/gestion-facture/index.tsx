@@ -4,6 +4,116 @@ import { Plus, Search, Filter, FileText, DollarSign, Clock, AlertTriangle, X, Us
 import axios from 'axios';
 import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
 
+export const getFactureClientName = (facture) => {
+  // Priorité 1 : realClientId (compte Client direct)
+  if (facture.realClientId?.username) {
+    return facture.realClientId.username;
+  }
+  
+  // Priorité 2 : clientId avec Client lié (FicheClient -> Client)
+  if (facture.clientId?.clientId?.username) {
+    return facture.clientId.clientId.username;
+  }
+  
+  // Priorité 3 : clientId sans Client lié (FicheClient seul)
+  if (facture.clientId?.nom) {
+    return facture.clientId.nom;
+  }
+  
+  // Priorité 4 : clientInfo (données snapshot de la facture)
+  if (facture.clientInfo?.nom) {
+    return facture.clientInfo.nom;
+  }
+  
+  return 'N/A';
+};
+
+// Interfaces pour les détails de l'avoir (Credit Note)
+interface CreditNoteDetails {
+  _id: string;
+  creditNumber: string;
+  originalFactureNumber: number;
+  creditDate: string;
+  reason: string;
+  status: 'active' | 'cancelled';
+  
+  // Informations client (peut venir de différentes sources)
+  clientId?: {
+    nom: string;
+    email: string;
+    telephone: string;
+    adresse?: string;
+    clientId?: {
+      username: string;
+    };
+  };
+  realClientId?: {
+    username: string;
+  };
+  clientInfo?: {
+    nom: string;
+    email: string;
+    telephone: string;
+  };
+  
+  // Informations véhicule
+  vehicleInfo: string;
+  
+  // Services annulés
+  services?: Array<{
+    name: string;
+    description: string;
+    piece: string;
+    quantity: number;
+    unitPrice: number;
+    total: number;
+  }>;
+  
+  // Montants financiers
+  maindoeuvre?: number;
+  totalHT?: number;
+  totalTVA?: number;
+  tvaRate?: number;
+  totalRemise?: number;
+  remiseRate?: number;
+  totalTTC: number;
+  timbreFiscal?: number;
+  finalTotalTTC: number;
+  
+  // Informations garage
+  garageId?: {
+    nom: string;
+    governorateName: string;
+    cityName: string;
+    streetAddress: string;
+    telephoneProfessionnel: string;
+    emailProfessionnel: string;
+  };
+  
+  // Métadonnées
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Interface pour l'utilisateur courant
+interface CurrentUser {
+  _id: string;
+  username: string;
+  email: string;
+  role: 'admin' | 'user' | 'mechanic' | 'manager';
+  garageId?: string;
+  location?: {
+    city: string;
+    governorate: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  // Ajoutez d'autres propriétés selon vos besoins
+}
+
+// Interface étendue pour Facture avec toutes les propriétés possibles
 interface FactureDetails extends Facture {
   clientId?: {
     nom: string;
@@ -23,10 +133,15 @@ interface FactureDetails extends Facture {
     unitPrice: number;
     total: number;
   }>;
-  maindoeuvre?: number; // C'est juste un nombre selon votre schéma
+  maindoeuvre?: number;
   tvaRate?: number;
   totalHT?: number;
   totalTVA?: number;
+  totalTTC: number; // ✅ AJOUTEZ CETTE LIGNE si elle manque
+  totalRemise?: number; // ✅ AJOUTEZ CETTE LIGNE si elle manque
+  remiseRate?: number; // ✅ AJOUTEZ CETTE LIGNE si elle manque
+  timbreFiscal?: number; // ✅ AJOUTEZ CETTE LIGNE si elle manque
+  paymentAmount: number;
   estimatedTime?: {
     days: number;
     hours: number;
@@ -35,11 +150,44 @@ interface FactureDetails extends Facture {
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
+  garageId?: { // ✅ AJOUTEZ CETTE LIGNE si elle manque
+    nom: string;
+    governorateName: string;
+    cityName: string;
+    streetAddress: string;
+    telephoneProfessionnel: string;
+    emailProfessionnel: string;
+  };
+  realClientId?: { // ✅ AJOUTEZ CETTE LIGNE si elle manque
+    username: string;
+  };
 }
+
+// Interface pour les données de paiement
+interface PaymentData {
+  paymentAmount: number;
+  paymentMethod: 'especes' | 'cheque' | 'virement' | 'carte';
+  paymentDate: string;
+  reference?: string;
+}
+
+// Interface pour la réponse API générique
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+}
+
+// Types pour améliorer la sécurité des types
+type PaymentStatus = 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye' | 'annule';
+type FactureStatus = 'active' | 'cancelled';
+type PaymentMethod = 'especes' | 'cheque' | 'virement' | 'carte';
+
 interface Facture {
   _id: string;
   numeroFacture: number;
-  creditNoteId?: string;
+  creditNoteId: string;
   replacedByFactureId?: string;
   status?: 'active' | 'cancelled';
   clientInfo: {
@@ -52,7 +200,7 @@ interface Facture {
   paymentStatus: 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye' | 'annule';
   invoiceDate: string;
   dueDate: string;
-  paymentAmount?: number;
+  paymentAmount: number;
   ordreId: string;
 }
 interface Stats {
@@ -93,9 +241,9 @@ const GestionFactures: React.FC = () => {
   const [factureDetails, setFactureDetails] = useState<FactureDetails | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [creditNoteDetails, setCreditNoteDetails] = useState(null);
+  const [creditNoteDetails, setCreditNoteDetails] = useState<CreditNoteDetails | null>(null);
   const [showCreditNoteModal, setShowCreditNoteModal] = useState(false);
   const itemsPerPage = 5;
   const indexOfLastFacture = currentPage * itemsPerPage;
@@ -171,7 +319,7 @@ const { showAlert } = useGlobalAlert();
     }
   };
 
-  const fetchCreditNoteDetails = async (creditNoteId) => {
+  const fetchCreditNoteDetails = async (creditNoteId: string) => {
     try {
       console.log('🚀 Appel API pour ID:', creditNoteId);
       console.log('🔑 Token:', getAuthToken());
@@ -189,7 +337,7 @@ const { showAlert } = useGlobalAlert();
         setCreditNoteDetails(data.data);
         setShowCreditNoteModal(true);
       }
-    } catch (error) {
+    } catch (error :any) {
       console.error('❌ Erreur détaillée:', {
         status: error.response?.status,
         message: error.response?.data?.message,
@@ -242,7 +390,7 @@ const { showAlert } = useGlobalAlert();
     setFilteredFactures(filtered);
   }, [searchTerm, statusFilter, factures]);
 
-  const handlePayment = async (factureId: string, paymentData: any) => {
+  const handlePayment = async (factureId: string, paymentData: PaymentData) => {
     try {
       const token = localStorage.getItem("token");
 
@@ -346,7 +494,7 @@ const { showAlert } = useGlobalAlert();
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-20xl mx-auto">
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Factures</h1>
@@ -490,7 +638,7 @@ const { showAlert } = useGlobalAlert();
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{facture.clientInfo.nom}</div>
+                      <div className="text-sm font-medium text-gray-900"> <p>{getFactureClientName(facture)}</p></div>
 
                     </div>
                   </td>
@@ -763,7 +911,7 @@ const { showAlert } = useGlobalAlert();
                     FACTURÉ À
                   </h3>
                   <div className="space-y-1 text-gray-700">
-                    <p className="font-medium text-lg">{factureDetails.clientId?.nom || factureDetails.clientInfo.nom}</p>
+                    <p className="font-medium text-lg">{getFactureClientName(factureDetails)}</p>
                     {factureDetails.clientId?.adresse && (
                       <p>{factureDetails.clientId.adresse}</p>
                     )}
@@ -1020,9 +1168,9 @@ const { showAlert } = useGlobalAlert();
               <div>
                 <h4 className="font-semibold text-gray-800 mb-3">Client</h4>
                 <div className="space-y-1 text-sm text-gray-700">
-                  <p className="font-medium">{creditNoteDetails.clientInfo.nom}</p>
-                  <p>Tél: {creditNoteDetails.clientId?.telephone || creditNoteDetails.clientInfo.telephone}</p>
-                  <p>Email: {creditNoteDetails.clientId?.email || creditNoteDetails.clientInfo.email}</p>
+                  <p className="font-medium">{getFactureClientName(creditNoteDetails)}</p>
+                  <p>Tél: {creditNoteDetails.clientId?.telephone || creditNoteDetails.clientInfo?.telephone}</p>
+                  <p>Email: {creditNoteDetails.clientId?.email || creditNoteDetails.clientInfo?.email}</p>
                 </div>
 
                 <h4 className="font-semibold text-gray-800 mb-2 mt-4">Véhicule</h4>

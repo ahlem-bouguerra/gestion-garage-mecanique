@@ -26,14 +26,11 @@ const GarageQuoteSystem = () => {
   const [notifications, setNotifications] = useState([]);
   const [editingQuote, setEditingQuote] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [factureExists, setFactureExists] = useState({});
   const [selectedFacture, setSelectedFacture] = useState(null);
-  const [invoiceData, setInvoiceData] = useState(null);
   const router = useRouter();
   const [filters, setFilters] = useState({ status: '', clientName: '', dateDebut: '', dateFin: '' });
   const [newQuote, setNewQuote] = useState({ clientName: '', vehicleInfo: '', vehiculeId: '', inspectionDate: '', services: [{ piece: '', quantity: 1, unitPrice: 0 }] });
-  const [newquote, setNewquote] = useState({ services: [{ piece: '', quantity: 1, unitPrice: 0 }] });
   const statusColors = { brouillon: 'bg-gray-100 text-gray-800', envoye: 'bg-blue-100 text-blue-800', accepte: 'bg-green-100 text-green-800', refuse: 'bg-red-100 text-red-800' };
   const statusIcons = { brouillon: FileText, envoye: Send, accepte: Check, refuse: X };
   const [currentUser, setCurrentUser] = useState(null);
@@ -52,9 +49,31 @@ const GarageQuoteSystem = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
 
-  const filteredClients = clients.filter(client =>
-    client.nom.toLowerCase().includes(searchClient.toLowerCase())
-  );
+  // Au début du composant, remplace le filteredClients par :
+  const filteredClients = clients.filter(client => {
+    const searchLower = searchClient.toLowerCase();
+
+    // Chercher dans le nom direct
+    const matchNom = client.nom?.toLowerCase().includes(searchLower);
+
+    // Chercher dans le username si le client a un compte lié
+    const matchUsername = client.nomEffectif?.toLowerCase().includes(searchLower);
+
+    return matchNom || matchUsername;
+  });
+
+  // Ajoute cette fonction au début de ton composant
+  const getClientName = (devis) => {
+    // Si le client a un compte lié avec username
+    if (devis.clientId?.clientId?.username) {
+      return devis.clientId.clientId.username;
+    }
+    // Sinon utilise le nom direct de la fiche
+    if (devis.clientId?.nom) {
+      return devis.clientId.nom;
+    }
+    return 'Client inconnu';
+  };
 
   // Composant Alert personnalisé
   const Alert = ({ variant = 'info', title, description, onClose }) => {
@@ -150,12 +169,12 @@ const GarageQuoteSystem = () => {
     const header = document.querySelector('header');
     if (!header) return;
 
-    if (selectedInvoice || selectedQuote || selectedQuote) {
+    if (selectedQuote || selectedQuote) {
       header.classList.add("hidden");
     } else {
       header.classList.remove("hidden");
     }
-  }, [selectedInvoice, selectedQuote, selectedQuote]);
+  }, [selectedQuote, selectedQuote]);
 
   useEffect(() => {
     const header = document.querySelector('header');
@@ -201,7 +220,7 @@ const GarageQuoteSystem = () => {
       pdf.setFontSize(10);
 
       // Client (gauche)
-      pdf.text(`Nom: ${selectedQuote.clientName}`, 20, yPosition);
+      pdf.text(`Nom: ${getClientName(selectedQuote)}`, 20, yPosition);
       pdf.text(`Véhicule: ${selectedQuote.vehicleInfo}`, 20, yPosition + 6);
       pdf.text(`Date: ${selectedQuote.inspectionDate}`, 20, yPosition + 12);
 
@@ -515,8 +534,8 @@ const GarageQuoteSystem = () => {
         showAlert("success", "Filtres appliqués", `${devisWithCalculatedTotals.length} devis trouvé(s) avec les filtres appliqués`);
       }
 
-    } catch (err) {
-      showError(err.message);
+    } catch (err: any) {
+      showAlert("error", "Erreur", err.message);
     } finally {
       setLoading(false);
     }
@@ -529,18 +548,17 @@ const GarageQuoteSystem = () => {
 
       // Validation (même code existant)
       if (!selectedClientId || !newQuote.vehicleInfo || !selectedVehiculeId || !newQuote.inspectionDate) {
-        showError('Veuillez remplir tous les champs obligatoires');
+        showAlert("error", "Erreur", 'Veuillez remplir tous les champs obligatoires');
         return;
       }
 
       if (newQuote.services.some(s => !s.piece || s.quantity <= 0 || s.unitPrice < 0)) {
-        showError('Veuillez vérifier les services (pièces, quantités, prix)');
+        showAlert("error", "Erreur", 'Veuillez vérifier les services (pièces, quantités, prix)');
         return;
       }
 
       const devisData = {
         clientId: selectedClientId,
-        clientName: newQuote.clientName,
         vehicleInfo: newQuote.vehicleInfo,
         vehiculeId: selectedVehiculeId,
         inspectionDate: newQuote.inspectionDate,
@@ -587,8 +605,8 @@ const GarageQuoteSystem = () => {
       await loadDevisWithFactures();
       setActiveTab('list');
 
-    } catch (err) {
-      showError(err.message);
+    } catch (err: any) {
+      showAlert("error", "Erreur", err.message);
     } finally {
       setLoading(false);
     }
@@ -611,20 +629,20 @@ const GarageQuoteSystem = () => {
         setSelectedQuote({ ...selectedQuote, status: newStatus });
       }
 
-    } catch (err) {
-      showError(err.message);
+    } catch (err: any) {
+      showAlert("error", "Erreur", err.message);
     }
   };
 
   const deleteQuote = async (quoteId) => {
-     const isConfirmed = await confirm({
-    title: "Suppression du véhicule",
-    message: `Êtes-vous sûr de vouloir supprimer ? Cette action est irréversible.`,
-    confirmText: "Supprimer",
-    cancelText: "Annuler",
-  });
+    const isConfirmed = await confirm({
+      title: "Suppression du véhicule",
+      message: `Êtes-vous sûr de vouloir supprimer ? Cette action est irréversible.`,
+      confirmText: "Supprimer",
+      cancelText: "Annuler",
+    });
 
-  if (!isConfirmed) return;
+    if (!isConfirmed) return;
     try {
       await devisApi.delete(quoteId);
       showAlert("success", "Devis supprimé", "Devis supprimé avec succès");
@@ -727,7 +745,10 @@ const GarageQuoteSystem = () => {
   };
 
   const loadVehiculesByClient = async (clientId) => {
-    if (!clientId) {
+    // ✅ PROTECTION : Extraire l'ID si c'est un objet
+    const actualId = typeof clientId === 'object' ? clientId._id : clientId;
+
+    if (!actualId) {
       setVehicules([]);
       return;
     }
@@ -735,14 +756,14 @@ const GarageQuoteSystem = () => {
     setLoadingVehicules(true);
     try {
       const token = getAuthToken();
-      // ⭐ VÉRIFICATION CRITIQUE
       if (!token || token === 'null' || token === 'undefined') {
-        // Rediriger vers le login
         window.location.href = '/auth/sign-in';
         return;
       }
+
+      // ✅ Utilise actualId au lieu de clientId
       const response = await axios.get(
-        `http://localhost:5000/api/vehicules/proprietaire/${clientId}`,
+        `http://localhost:5000/api/vehicules/proprietaire/${actualId}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -752,7 +773,7 @@ const GarageQuoteSystem = () => {
       setVehicules(vehiculesData);
 
       console.log(`✅ ${vehiculesData.length} véhicules chargés pour le client`);
-    } catch (error: any) {
+    } catch (error) {
       if (error.response?.status === 403) {
         showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
         throw error;
@@ -765,30 +786,22 @@ const GarageQuoteSystem = () => {
       }
       console.error('❌ Erreur lors du chargement des véhicules:', error);
       setVehicules([]);
-      // Optionnel: afficher une notification d'erreur à l'utilisateur
     } finally {
       setLoadingVehicules(false);
     }
   };
 
 
-  const handleClientChange = async (e: { target: { value: any; }; }) => {
-    const clientId = e.target.value;
-    const selectedClient = clients.find(c => c._id === clientId);
-
-
-
+  const handleClientChange = async (clientId) => {
     setSelectedClientId(clientId);
+
     setNewQuote({
       ...newQuote,
-      clientName: selectedClient ? selectedClient.nom : '',
       vehicleInfo: '' // Reset véhicule quand on change de client
     });
 
-    // Charger les véhicules pour ce client
     await loadVehiculesByClient(clientId);
     setSelectedVehiculeId('');
-
   };
 
   // Fonction pour mettre à jour un service
@@ -982,24 +995,23 @@ const GarageQuoteSystem = () => {
 
   const startEditQuote = async (quote) => {
     // Vérifier si le devis peut être modifié
-     if (quote.status === "accepte" || quote.status === "refuse") { 
-    const isConfirmed = await confirm({
-      title: "Modifier un devis validé",
-      message:
-        'Ce devis a déjà été accepté/refusé. Voulez-vous vraiment le modifier ? Il repassera en statut "brouillon".',
-      confirmText: "Oui, modifier",
-      cancelText: "Annuler",
-    });
+    if (quote.status === "accepte" || quote.status === "refuse") {
+      const isConfirmed = await confirm({
+        title: "Modifier un devis validé",
+        message:
+          'Ce devis a déjà été accepté/refusé. Voulez-vous vraiment le modifier ? Il repassera en statut "brouillon".',
+        confirmText: "Oui, modifier",
+        cancelText: "Annuler",
+      });
 
-    if (!isConfirmed) return;
-  }
+      if (!isConfirmed) return;
+    }
 
     setEditingQuote(quote);
     setIsEditMode(true);
 
     // Pré-remplir le formulaire avec les données existantes
     setNewQuote({
-      clientName: quote.clientName,
       vehicleInfo: quote.vehicleInfo,
       inspectionDate: quote.inspectionDate,
       services: quote.services.map(service => ({
@@ -1018,7 +1030,8 @@ const GarageQuoteSystem = () => {
 
     // Charger les véhicules du client
     if (quote.clientId) {
-      loadVehiculesByClient(quote.clientId);
+      const clientIdValue = typeof quote.clientId === 'object' ? quote.clientId._id : quote.clientId;
+      loadVehiculesByClient(clientIdValue);
     }
 
     setActiveTab('create');
@@ -1365,7 +1378,7 @@ const GarageQuoteSystem = () => {
 
       const facture = response.data;
       return facture && facture.status !== 'cancelled' ? facture : null;
-    } catch (error) {
+    } catch (error: any) {
       if (error.response?.status === 403) {
         showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
         throw error; // ⭐ Propager l'erreur au lieu de retourner null
@@ -1389,7 +1402,7 @@ const GarageQuoteSystem = () => {
 
   return (
     <div className="min-h-screen  p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-20xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Devis</h1>
@@ -1648,7 +1661,7 @@ const GarageQuoteSystem = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <User className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm text-gray-900">{quote.clientName}</span>
+                              <span className="text-sm text-gray-900"> {getClientName(quote)}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -1835,20 +1848,28 @@ const GarageQuoteSystem = () => {
                           key={client._id}
                           onClick={() => {
                             setSelectedClientId(client._id);
-                            setSearchClient(client.nom);
+                            setSearchClient(client.nomEffectif || client.nom);
                             setNewQuote({
                               ...newQuote,
-                              clientName: client.nom,
                               vehicleInfo: ''
                             });
+
+                            // ✅ Passe directement l'ID, pas l'objet
                             loadVehiculesByClient(client._id);
                             setSelectedVehiculeId('');
                             setShowClientDropdown(false);
                           }}
                           className="px-4 py-2 hover:bg-blue-50 cursor-pointer transition-colors"
                         >
-                          <div className="font-medium">{client.nom}</div>
-                          <div className="text-xs text-gray-500">{client.type}</div>
+                          <div className="font-medium">
+                            {client.nomEffectif || client.nom}
+                          </div>
+                          <div className="text-xs text-gray-500 flex items-center justify-between">
+                            <span>{client.type}</span>
+                            {client.nomEffectif && client.nomEffectif !== client.nom && (
+                              <span className="text-green-600 text-xs">✓ Compte</span>
+                            )}
+                          </div>
                         </div>
                       ))
                     ) : (
@@ -2208,7 +2229,7 @@ const GarageQuoteSystem = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <h3 className="font-medium text-gray-900 mb-2">Informations Client</h3>
-                    <p className="text-gray-600">Nom: {selectedQuote.clientName}</p>
+                    <p className="text-gray-600">Nom: {getClientName(selectedQuote)}</p>
                     <p className="text-gray-600">Véhicule: {selectedQuote.vehicleInfo}</p>
                     <p className="text-gray-600">Date d'inspection: {selectedQuote.inspectionDate}</p>
                     <p className="text-gray-600">

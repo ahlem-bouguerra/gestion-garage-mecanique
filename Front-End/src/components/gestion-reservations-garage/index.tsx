@@ -47,9 +47,10 @@ const isDatePassed = (dateString) => {
           headers: { Authorization: `Bearer ${getAuthToken()}` }
         });
         
-        const filteredReservations = res.data.filter(reservation => 
+        /*const filteredReservations = res.data.filter(reservation => 
           !isDatePassed(reservation.creneauDemande.date)
-        );
+        );*/
+        const filteredReservations = res.data || [];
         
         setReservations(filteredReservations);
       } catch (err) {
@@ -126,11 +127,11 @@ const isDatePassed = (dateString) => {
       playNotificationSound();
       
       const res = await axios.get("http://localhost:5000/api/reservations", {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-      const filteredReservations = res.data.filter(reservation => 
-        !isDatePassed(reservation.creneauDemande.date)
-      );
+  headers: { Authorization: `Bearer ${getAuthToken()}` }
+});
+const filteredReservations = (res.data || []).filter(reservation => 
+  !isDatePassed(reservation.creneauDemande.date)
+);
       setReservations(filteredReservations);
       setSelectedReservation(null);
       setResponseData({

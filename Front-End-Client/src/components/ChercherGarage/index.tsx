@@ -780,11 +780,11 @@ const GarageSearch = () => {
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-1">
                                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
-                                  {(ratings[currentRatingIndex].ficheClientId?.nom || 'C')[0].toUpperCase()}
+                                  {(ratings[currentRatingIndex].clientNom || ratings[currentRatingIndex].ficheClientId?.nom || 'C')[0].toUpperCase()}
                                 </div>
                                 <div>
                                   <span className="font-semibold text-gray-800 block">
-                                    {ratings[currentRatingIndex].ficheClientId?.nom || 'Client'}
+                                    {ratings[currentRatingIndex].clientNom || 'Client'}
                                   </span>
                                   <div className="flex items-center gap-2">
                                     <span className="text-yellow-400 text-lg">

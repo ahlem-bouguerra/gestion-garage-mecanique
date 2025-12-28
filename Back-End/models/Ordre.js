@@ -74,13 +74,16 @@ const OrdreTravailSchema = new Schema({
     required: true,
     unique: true, 
   },
-  clientInfo: {
-    nom: { type: String, required: true },
-    ClientId: { type: Object, required: true },
-    telephone: String,
-    email: String,
-    adresse: String
+clientInfo: {
+  ClientId: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'FicheClient',  // ⭐ Ajustez selon le nom de votre modèle Client
+    required: true 
   },
+  telephone: String,
+  email: String,
+  adresse: String
+},
   vehiculedetails: {
     nom: { type: String, required: true },
     vehiculeId: { type: Object, required: true },

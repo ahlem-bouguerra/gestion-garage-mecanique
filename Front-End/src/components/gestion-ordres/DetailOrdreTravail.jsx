@@ -5,6 +5,29 @@ import { ordresTravailAPI } from './services/ordresTravailAPI';
 import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
 import { useGlobalAlert } from '../ui-elements/AlertProvider';
 
+const getClientName = (ordre) => {
+  // Priorité 1 : clientInfo avec Client lié
+  if (ordre.clientInfo?.ClientId?.clientId?.username) {
+    return ordre.clientInfo.ClientId.clientId.username;
+  }
+  
+  // Priorité 2 : clientInfo direct
+  if (ordre.clientInfo?.ClientId?.nom) {
+    return ordre.clientInfo.ClientId.nom;
+  }
+  
+  // Priorité 3 : via devis avec Client lié
+  if (ordre.devisId?.clientId?.clientId?.username) {
+    return ordre.devisId.clientId.clientId.username;
+  }
+  
+  // Priorité 4 : via devis direct
+  if (ordre.devisId?.clientId?.nom) {
+    return ordre.devisId.clientId.nom;
+  }
+  
+  return 'N/A';
+};
 
 const DetailOrdreTravail = ({
   ordre,
@@ -142,7 +165,7 @@ const terminerOrdre = async () => {
                 Informations Client
               </h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Nom:</span> {ordre.clientInfo?.nom || 'N/A'}</p>
+                <p><span className="font-medium">Nom:</span>{getClientName(ordre)}</p>
                 <p><span className="font-medium">Véhicule:</span> {ordre.vehiculedetails?.nom || 'N/A'}</p>
                 <p><span className="font-medium">Devis N°:</span> {ordre.devisId || 'N/A'}</p>
               </div>

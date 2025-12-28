@@ -165,37 +165,51 @@ export const getCarnetByVehiculeId = async (req, res) => {
 
     console.log("📊 Total historique:", historique.length);
 
-    // ✅ RÉCUPÉRER LA FICHE CLIENT
-    let ficheClient = null;
-    if (liaison) {
-      ficheClient = await FicheClient.findById(liaison.ficheClientId);
-    } else if (vehicule.proprietaireModel === 'FicheClient') {
-      ficheClient = await FicheClient.findOne({
-        _id: vehicule.proprietaireId
-      });
-    }
+// ✅ RÉCUPÉRER LA FICHE CLIENT AVEC POPULATE
+let ficheClient = null;
+if (liaison) {
+  ficheClient = await FicheClient.findById(liaison.ficheClientId)
+    .populate('clientId', 'username email'); // ⭐ AJOUTER POPULATE
+} else if (vehicule.proprietaireModel === 'FicheClient') {
+  ficheClient = await FicheClient.findOne({
+    _id: vehicule.proprietaireId
+  })
+  .populate('clientId', 'username email'); // ⭐ AJOUTER POPULATE
+}
 
-    const vehiculeData = {
-      _id: vehicule._id,
-      marque: vehicule.marque,
-      modele: vehicule.modele,
-      immatriculation: vehicule.immatriculation,
-      annee: vehicule.annee,
-      typeCarburant: vehicule.typeCarburant,
-      kilometrage: vehicule.kilometrage,
-       carteGrise: vehicule.carteGrise || null,
-      proprietaire: ficheClient ? {
-        _id: ficheClient._id,
-        nom: ficheClient.nom,
-        type: ficheClient.type,
-        telephone: ficheClient.telephone
-      } : {
-        _id: 'unknown',
-        nom: 'Client inconnu',
-        type: 'particulier',
-        telephone: 'N/A'
-      }
-    };
+// ✅ CALCULER nomEffectif
+let nomEffectif = 'Client inconnu';
+if (ficheClient) {
+  if (ficheClient.clientId && ficheClient.clientId.username) {
+    nomEffectif = ficheClient.clientId.username;
+  } else {
+    nomEffectif = ficheClient.nom;
+  }
+}
+
+const vehiculeData = {
+  _id: vehicule._id,
+  marque: vehicule.marque,
+  modele: vehicule.modele,
+  immatriculation: vehicule.immatriculation,
+  annee: vehicule.annee,
+  typeCarburant: vehicule.typeCarburant,
+  kilometrage: vehicule.kilometrage,
+  carteGrise: vehicule.carteGrise || null,
+  proprietaire: ficheClient ? {
+    _id: ficheClient._id,
+    nom: ficheClient.nom,
+    nomEffectif: nomEffectif, // ⭐ AJOUTER CETTE LIGNE
+    type: ficheClient.type,
+    telephone: ficheClient.telephone
+  } : {
+    _id: 'unknown',
+    nom: 'Client inconnu',
+    nomEffectif: 'Client inconnu', // ⭐ AJOUTER CETTE LIGNE
+    type: 'particulier',
+    telephone: 'N/A'
+  }
+};
 
     res.json({
       vehicule: vehiculeData,
