@@ -45,15 +45,8 @@ export const updateProfile = async (req, res) => {
     console.log('✏️ UPDATE Profile - User ID:', req.client._id);
     console.log('📝 Données reçues:', req.body);
 
-    const { username, email, phone } = req.body;
+    const {email, phone } = req.body;
 
-    // Validation des champs
-    if (!username?.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Le nom d'utilisateur est requis"
-      });
-    }
 
     // Vérifier si l'email existe déjà (sauf pour l'utilisateur actuel)
     if (email && email !== req.client.email) {
@@ -71,9 +64,7 @@ export const updateProfile = async (req, res) => {
     }
 
     // Préparer les données à mettre à jour
-    const updateData = {
-      username: username.trim()
-    };
+    const updateData = {};
 
     // Ajouter email uniquement s'il est fourni et différent
     if (email && email !== req.client.email) {

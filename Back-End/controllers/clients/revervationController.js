@@ -131,24 +131,72 @@ export const ClientCreateReservation = async (req, res) => {
 
 export const ClientGetReservations = async (req, res) => {
   try {
-    const clientId = req.client._id;  // <- corriger ici
-    const reservations = await Reservation.find({ clientId })
+    const clientId = req.client._id;
+    
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // ✅ Construire les filtres correctement
+    const filters = { clientId };
+    
+    // ✅ CORRECTION : Gérer le filtre de statut
+    if (req.query.status && req.query.status !== 'all_month') {
+      // Si un statut spécifique est demandé, on filtre par ce statut
+      filters.status = req.query.status;
+    }
+    
+    // ✅ CORRECTION : Pour 'all_month', on ne filtre PAS par statut
+    // On retourne toutes les réservations du mois en cours (tous statuts confondus)
+    if (!req.query.status || req.query.status === 'all_month') {
+      const currentDate = new Date();
+      const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
+      
+      filters['creneauDemande.date'] = { 
+        $gte: startOfMonth,
+        $lte: endOfMonth 
+      };
+    }
+
+    // ✅ Log pour debug
+    console.log('🔍 Filtres appliqués:', JSON.stringify(filters, null, 2));
+    console.log('📄 Page:', page, 'Limit:', limit);
+
+    // Compter le total
+    const total = await Reservation.countDocuments(filters);
+    console.log('📊 Total trouvé:', total);
+
+    // Récupérer les réservations
+    const reservations = await Reservation.find(filters)
       .populate('serviceId', 'name')
       .populate('garageId', 'nom telephoneProfessionnel emailProfessionnel')
       .populate('vehiculeId', 'immatriculation marque modele annee couleur typeCarburant kilometrage')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-
-      .sort({ createdAt: -1 });
+    const pages = Math.ceil(total / limit);
+    
+    console.log('✅ Pages calculées:', pages);
 
     res.status(200).json({
       success: true,
-      reservations
+      reservations,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages,
+        hasMore: page * limit < total
+      }
     });
   } catch (error) {
-    console.error('Erreur:', error);
+    console.error('❌ Erreur:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Erreur serveur' 
+      message: 'Erreur serveur',
+      error: error.message 
     });
   }
 };

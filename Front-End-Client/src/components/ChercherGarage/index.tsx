@@ -822,10 +822,10 @@ const GarageSearch = () => {
 
                           {ratings[currentRatingIndex].comment && (
                             <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
-                              <p className="text-gray-700 text-xl leading-relaxed italic">
+                              <p className="text-gray-700 text-s leading-relaxed italic">
                                 Commentaire Client :
                               </p>
-                              <p className="text-gray-700 text-sm leading-relaxed italic">
+                              <p className="text-gray-700 text-l leading-relaxed italic">
                                 "{ratings[currentRatingIndex].comment}"
                               </p>
                             </div>

@@ -30,29 +30,27 @@ const ReservationsHistory: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterType>('all_month');
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // ✅ Fonction utilitaire pour obtenir le token
   const getAuthToken = (): string | null => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
 
-  // ✅ Fonction utilitaire pour rediriger vers login
   const redirectToLogin = () => {
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     window.location.href = '/auth/sign-in';
   };
 
-  // ✅ Vérifier si le token est valide
   const isValidToken = (token: string | null): boolean => {
     return !!token && token !== 'null' && token !== 'undefined';
   };
 
   useEffect(() => {
     fetchReservations();
-  }, []);
+  }, [currentPage, filter]);
 
-  // ✅ Récupérer les réservations
   const fetchReservations = async () => {
     try {
       setLoading(true);
@@ -64,12 +62,37 @@ const ReservationsHistory: React.FC = () => {
         return;
       }
 
-      const response = await axios.get(`${API_BASE_URL}/client-reservations/`, {
-        headers: { Authorization: `Bearer ${token}` }
+      // ✅ FIX: Construction correcte des params
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: '10',
+        status: filter
       });
+
+      // ✅ FIX: URL sans double slash
+      const response = await axios.get(
+        `${API_BASE_URL}/client-reservations?${params.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      console.log('📦 Réponse API:', response.data);
 
       if (response.data.success) {
         setReservations(response.data.reservations);
+
+        // ✅ FIX: Vérification et mise à jour de la pagination
+        if (response.data.pagination) {
+          const pages = response.data.pagination.pages || 0;
+          setTotalPages(pages);
+          console.log('📄 Total pages:', pages);
+          console.log('📝 Total items:', response.data.pagination.total);
+          console.log('📍 Page actuelle:', response.data.pagination.page);
+        } else {
+          console.warn('⚠️ Pas de données de pagination dans la réponse');
+          setTotalPages(0);
+        }
       } else {
         setError('Impossible de charger les réservations');
       }
@@ -79,13 +102,12 @@ const ReservationsHistory: React.FC = () => {
         return;
       }
       setError('Erreur de connexion au serveur');
-      console.error('Erreur fetch réservations:', err);
+      console.error('❌ Erreur fetch réservations:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Annuler une réservation
   const handleCancelReservation = async (reservationId: string) => {
     if (!window.confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
       return;
@@ -117,19 +139,6 @@ const ReservationsHistory: React.FC = () => {
     }
   };
 
-  // ✅ Compter les réservations du mois en cours
-  const getCurrentMonthCount = (): number => {
-    const currentDate = new Date();
-    return reservations.filter(reservation => {
-      const reservationDate = new Date(reservation.creneauDemande.date);
-      return (
-        reservationDate.getMonth() === currentDate.getMonth() &&
-        reservationDate.getFullYear() === currentDate.getFullYear()
-      );
-    }).length;
-  };
-
-  // ✅ Informations sur le statut
   const getStatusInfo = (status: Reservation['status']) => {
     const statusMap = {
       en_attente: {
@@ -161,7 +170,6 @@ const ReservationsHistory: React.FC = () => {
     return statusMap[status] || statusMap.en_attente;
   };
 
-  // ✅ Formater la date
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('fr-FR', {
@@ -171,30 +179,74 @@ const ReservationsHistory: React.FC = () => {
     });
   };
 
-  // ✅ Formater l'heure
   const formatTime = (timeString?: string): string => {
     return timeString || 'Non spécifié';
   };
 
-  // ✅ Filtrer les réservations
-  const getFilteredReservations = (): Reservation[] => {
-    if (filter === 'all_month') {
-      const currentDate = new Date();
-      return reservations.filter(reservation => {
-        const reservationDate = new Date(reservation.creneauDemande.date);
-        return (
-          reservationDate.getMonth() >= currentDate.getMonth() &&
-          reservationDate.getFullYear() === currentDate.getFullYear()
-        );
-      });
+  const filteredReservations = reservations;
+
+  // ✅ FIX: Composant Pagination avec meilleure logique
+  const Pagination = ({ currentPage, totalPages, onPageChange }: any) => {
+    // ✅ Ne pas afficher si moins de 2 pages
+    if (totalPages <= 1) {
+      console.log('🚫 Pagination masquée: totalPages =', totalPages);
+      return null;
     }
-    return reservations.filter(reservation => reservation.status === filter);
+
+    const pages = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        pages.push(i);
+      } else if (pages[pages.length - 1] !== '...') {
+        pages.push('...');
+      }
+    }
+
+    console.log('✅ Pagination affichée:', { currentPage, totalPages });
+
+    return (
+      <div className="flex items-center justify-center gap-2 mt-6">
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        >
+          Précédent
+        </button>
+
+        {pages.map((page, index) => (
+          page === '...' ? (
+            <span key={index} className="px-2">...</span>
+          ) : (
+            <button
+              key={index}
+              onClick={() => onPageChange(page)}
+              className={`px-4 py-2 rounded-lg ${currentPage === page
+                  ? 'bg-blue-600 text-white'
+                  : 'border hover:bg-gray-50'
+                }`}
+            >
+              {page}
+            </button>
+          )
+        ))}
+
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        >
+          Suivant
+        </button>
+      </div>
+    );
   };
 
-  const filteredReservations = getFilteredReservations();
-  const currentMonthCount = getCurrentMonthCount();
-
-  // ✅ Composant Loading
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -206,7 +258,6 @@ const ReservationsHistory: React.FC = () => {
     );
   }
 
-  // ✅ Composant Error
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -230,67 +281,87 @@ const ReservationsHistory: React.FC = () => {
   }
 
   return (
-        <div className="min-h-screen p-6">
-            <div className="max-w-7xl mx-auto">
-     
-                            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-                        <div className="flex items-center gap-4 mb-4">
-                            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-4 rounded-xl">
-                                <Building2 className="w-10 h-10 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-4xl font-bold text-gray-900">
-                                    Mes Réservations
-                                </h1>
-                                <p className="text-gray-600 text-lg mt-">
-                                    Consultez l'historique de vos rendez-vous
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+    <div className="min-h-screen p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-4 rounded-xl">
+              <Building2 className="w-10 h-10 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">
+                Mes Réservations
+              </h1>
+              <p className="text-gray-600 text-lg mt-1">
+                Consultez l'historique de vos rendez-vous
+              </p>
+            </div>
+          </div>
+        </div>
 
-        {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
           <div className="flex flex-wrap gap-2">
             <FilterButton
               active={filter === 'all_month'}
-              onClick={() => setFilter('all_month')}
+              onClick={() => {
+                setFilter('all_month');
+                setCurrentPage(1);
+              }}
               color="blue"
-              count={currentMonthCount}
             >
               Toutes
             </FilterButton>
+            
             <FilterButton
               active={filter === 'en_attente'}
-              onClick={() => setFilter('en_attente')}
+              onClick={() => {
+                setFilter('en_attente');
+                setCurrentPage(1);
+              }}
               color="yellow"
             >
               En attente
             </FilterButton>
+            
             <FilterButton
               active={filter === 'accepte'}
-              onClick={() => setFilter('accepte')}
+              onClick={() => {
+                setFilter('accepte');
+                setCurrentPage(1);
+              }}
               color="green"
             >
               Confirmées
             </FilterButton>
+            
             <FilterButton
               active={filter === 'contre_propose'}
-              onClick={() => setFilter('contre_propose')}
+              onClick={() => {
+                setFilter('contre_propose');
+                setCurrentPage(1);
+              }}
               color="orange"
             >
               Contre-proposées
             </FilterButton>
+            
             <FilterButton
               active={filter === 'annule'}
-              onClick={() => setFilter('annule')}
+              onClick={() => {
+                setFilter('annule');
+                setCurrentPage(1);
+              }}
               color="gray"
             >
               Annulées
             </FilterButton>
+            
             <FilterButton
               active={filter === 'refuse'}
-              onClick={() => setFilter('refuse')}
+              onClick={() => {
+                setFilter('refuse');
+                setCurrentPage(1);
+              }}
               color="red"
             >
               Refusées
@@ -298,29 +369,38 @@ const ReservationsHistory: React.FC = () => {
           </div>
         </div>
 
-        {/* Reservations List */}
         {filteredReservations.length === 0 ? (
           <EmptyState filter={filter} getStatusInfo={getStatusInfo} />
         ) : (
-          <div className="space-y-4">
-            {filteredReservations.map((reservation) => (
-              <ReservationCard
-                key={reservation._id}
-                reservation={reservation}
-                statusInfo={getStatusInfo(reservation.status)}
-                formatDate={formatDate}
-                formatTime={formatTime}
-                onCancel={handleCancelReservation}
+          <>
+            <div className="space-y-4">
+              {filteredReservations.map((reservation) => (
+                <ReservationCard
+                  key={reservation._id}
+                  reservation={reservation}
+                  statusInfo={getStatusInfo(reservation.status)}
+                  formatDate={formatDate}
+                  formatTime={formatTime}
+                  onCancel={handleCancelReservation}
+                />
+              ))}
+            </div>
+
+            {/* ✅ Pagination toujours visible si totalPages > 1 */}
+            <div className="bg-white rounded-lg shadow-sm p-4 mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page: number) => setCurrentPage(page)}
               />
-            ))}
-          </div>
+            </div>
+          </>
         )}
       </div>
     </div>
   );
 };
 
-// ✅ Composant FilterButton
 interface FilterButtonProps {
   active: boolean;
   onClick: () => void;
@@ -349,7 +429,6 @@ const FilterButton: React.FC<FilterButtonProps> = ({ active, onClick, color, cou
   );
 };
 
-// ✅ Composant EmptyState
 interface EmptyStateProps {
   filter: FilterType;
   getStatusInfo: (status: Reservation['status']) => { label: string };
@@ -367,7 +446,6 @@ const EmptyState: React.FC<EmptyStateProps> = ({ filter, getStatusInfo }) => (
   </div>
 );
 
-// ✅ Composant ReservationCard
 interface ReservationCardProps {
   reservation: Reservation;
   statusInfo: { label: string; color: string; icon: React.ReactNode };
@@ -385,7 +463,6 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
 }) => (
   <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-6">
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      {/* Left Section */}
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-3">
           <h3 className="text-xl font-semibold text-gray-900">
@@ -428,7 +505,6 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
         )}
       </div>
 
-      {/* Right Section - Actions */}
       {reservation.status === 'en_attente' && (
         <div className="flex flex-col gap-2 md:w-40">
           <button

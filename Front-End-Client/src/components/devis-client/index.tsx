@@ -16,6 +16,8 @@ const ClientDevisPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('tous'); // tous, brouillon, envoye, accepte, refuse
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const statusColors = {
     brouillon: 'bg-gray-100 text-gray-800',
@@ -81,12 +83,23 @@ const ClientDevisPage = () => {
       setLoading(true);
       setError('');
 
-      const response = await axios.get('http://localhost:5000/api/all-mes-devis', {
+      const params = new URLSearchParams({
+      page: currentPage.toString(),
+      limit: '10',
+      ...(filter !== 'tous' && { status: filter })
+      });
+
+      const response = await axios.get(`http://localhost:5000/api/all-mes-devis?${params}`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
 
       if (response.data.success) {
         setDevis(response.data.data);
+      }
+      if (response.data.pagination) {
+        setTotalPages(response.data.pagination.pages);
+        console.log('📄 Pages:', response.data.pagination.pages);
+        console.log('📝 Total:', response.data.pagination.total);
       }
     } catch (err:any) {
           if (err.response?.status === 401) {
@@ -126,12 +139,71 @@ const ClientDevisPage = () => {
   useEffect(() => {
     loadDevis();
     loadStats();
-  }, []);
+  }, [currentPage, filter]);
 
   // Filtrer les devis
   const filteredDevis = filter === 'tous'
     ? devis
     : devis.filter((d:any) => d.status === filter);
+
+
+
+
+    const Pagination = ({ currentPage, totalPages, onPageChange }: any) => {
+  if (!totalPages || totalPages === 0) return null;
+  
+  const pages = [];
+  
+  for (let i = 1; i <= totalPages; i++) {
+    if (
+      i === 1 || 
+      i === totalPages || 
+      (i >= currentPage - 1 && i <= currentPage + 1)
+    ) {
+      pages.push(i);
+    } else if (pages[pages.length - 1] !== '...') {
+      pages.push('...');
+    }
+  }
+
+  return (
+    <div className="flex items-center justify-center gap-2 mt-6">
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+      >
+        Précédent
+      </button>
+      
+      {pages.map((page, index) => (
+        page === '...' ? (
+          <span key={index} className="px-2">...</span>
+        ) : (
+          <button
+            key={index}
+            onClick={() => onPageChange(page)}
+            className={`px-4 py-2 rounded-lg ${
+              currentPage === page
+                ? 'bg-blue-600 text-white'
+                : 'border hover:bg-gray-50'
+            }`}
+          >
+            {page}
+          </button>
+        )
+      ))}
+      
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+      >
+        Suivant
+      </button>
+    </div>
+  );
+};
 
   return (
         <div className="min-h-screen p-6">
@@ -307,6 +379,16 @@ const ClientDevisPage = () => {
             </div>
           )}
         </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page: number) => setCurrentPage(page)}
+            />
+          </div>
+        )}
 
         {/* Modal Détails */}
         {selectedDevis && (
@@ -425,6 +507,7 @@ const ClientDevisPage = () => {
         )}
       </div>
     </div>
+    
   );
 };
 

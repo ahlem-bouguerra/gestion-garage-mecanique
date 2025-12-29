@@ -21,7 +21,7 @@ export const getAllMesOrdres = async (req, res) => {
         ordres: [],
         pagination: {
           page: 1,
-          limit: 10,
+          limit: 5,
           total: 0,
           pages: 0,
           hasMore: false
@@ -40,7 +40,7 @@ export const getAllMesOrdres = async (req, res) => {
 
     // Pagination
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
     // 🔍 ÉTAPE 2: Chercher les ordres avec les IDs des fiches clients

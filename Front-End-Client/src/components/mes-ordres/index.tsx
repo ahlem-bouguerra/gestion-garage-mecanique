@@ -69,6 +69,7 @@ const MesOrdresPage = () => {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedOrdre, setSelectedOrdre] = useState<Ordre | null>(null);
   const [ratings, setRatings] = useState<{ [key: string]: any }>({});
+  const [totalPages, setTotalPages] = useState(1);
 
   // Filtres et pagination
   const [filters, setFilters] = useState({
@@ -129,7 +130,7 @@ const MesOrdresPage = () => {
 
       const params = new URLSearchParams({
         page: filters.page.toString(),
-        limit: '10',
+        limit: '5',
         ...(filters.status !== 'tous' && { status: filters.status }),
         ...(filters.search && { search: filters.search })
       });
@@ -143,8 +144,16 @@ const MesOrdresPage = () => {
 
       const data = await response.data;
 
+      console.log('📊 Data reçue:', data);
+      console.log('📄 Pagination:', data.pagination);
+      console.log('🔢 Pages:', data.pagination?.pages);
+
       if (data.success) {
         setOrdres(data.ordres);
+
+        if (data.pagination) {
+          setTotalPages(data.pagination.pages);
+        }
 
         // Charger tous les ratings en parallèle
         const ratingsPromises = data.ordres
@@ -250,6 +259,60 @@ const MesOrdresPage = () => {
       </div>
     </div>
   );
+
+  const Pagination = ({ currentPage, totalPages, onPageChange }: any) => {
+  const pages = [];
+  
+  for (let i = 1; i <= totalPages; i++) {
+    if (
+      i === 1 || 
+      i === totalPages || 
+      (i >= currentPage - 1 && i <= currentPage + 1)
+    ) {
+      pages.push(i);
+    } else if (pages[pages.length - 1] !== '...') {
+      pages.push('...');
+    }
+  }
+
+  return (
+    <div className="flex items-center justify-center gap-2 mt-6">
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+      >
+        Précédent
+      </button>
+      
+      {pages.map((page, index) => (
+        page === '...' ? (
+          <span key={index} className="px-2">...</span>
+        ) : (
+          <button
+            key={index}
+            onClick={() => onPageChange(page)}
+            className={`px-4 py-2 rounded-lg ${
+              currentPage === page
+                ? 'bg-blue-600 text-white'
+                : 'border hover:bg-gray-50'
+            }`}
+          >
+            {page}
+          </button>
+        )
+      ))}
+      
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+      >
+        Suivant
+      </button>
+    </div>
+  );
+};
 
   if (loading) {
     return (
@@ -477,8 +540,18 @@ const MesOrdresPage = () => {
             ))
           )}
         </div>
-
+        <p className="text-center mt-4 text-gray-600">
+  Page {filters.page} sur {totalPages}
+</p>
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={filters.page}
+            totalPages={totalPages}
+            onPageChange={(page: number) => setFilters({ ...filters, page })}
+          />
+        )}
         {/* Modal de notation */}
+
         {showRatingModal && selectedOrdre && (
           <RatingModal
             ordre={selectedOrdre}
@@ -491,6 +564,7 @@ const MesOrdresPage = () => {
               fetchStats();
             }}
           />
+          
         )}
       </div>
     </div>
@@ -650,5 +724,6 @@ const RatingModal: React.FC<RatingModalProps> = ({ ordre, onClose, onSuccess }) 
     </div>
   );
 };
+
 
 export default MesOrdresPage;

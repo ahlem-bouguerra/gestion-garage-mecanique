@@ -18,13 +18,34 @@ export const getClientDevis = async (req, res) => {
       return res.json({
         success: true,
         message: 'Aucun véhicule trouvé',
-        data: []
+        data: [],
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 0,
+          pages: 0
+        }
       });
     }
 
     // 2️⃣ Extraire les IDs des véhicules
     const vehiculeIds = vehicules.map(v => v._id);
     console.log('🚗 Véhicules trouvés:', vehiculeIds.length);
+        // ✅ AJOUTER LA PAGINATION ICI
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Construire les filtres
+    const filters = { vehiculeId: { $in: vehiculeIds } };
+    
+    // Filtre par statut
+    if (req.query.status && req.query.status !== 'tous') {
+      filters.status = req.query.status;
+    }
+
+    // Compter le total AVANT de faire la requête paginée
+    const total = await Devis.countDocuments(filters);
 
     // 3️⃣ Trouver tous les devis liés à ces véhicules
     const devis = await Devis.find({ 
@@ -32,7 +53,9 @@ export const getClientDevis = async (req, res) => {
     })
     .populate('vehiculeId', 'marque modele immatriculation')
     .populate('garageId', 'nom  emailProfessionnel telephoneProfessionnel')
-    .sort({ createdAt: -1 }); // Plus récents en premier
+    .sort({ createdAt: -1 }) // Plus récents en premier
+    .skip(skip)        // ← Ajouter skip
+    .limit(limit);     // ← Ajouter limit
 
     console.log('📋 Devis trouvés:', devis.length);
 
@@ -55,7 +78,14 @@ export const getClientDevis = async (req, res) => {
     res.json({
       success: true,
       count: devisWithCalculations.length,
-      data: devisWithCalculations
+      data: devisWithCalculations,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+        hasMore: page * limit < total
+      }
     });
 
   } catch (error) {
