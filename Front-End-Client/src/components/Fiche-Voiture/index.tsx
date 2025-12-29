@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Car, Plus, Edit, Trash2, User, Building2, Search, X, Calendar, BookOpen, Phone, UserCheck, AlertTriangle, CheckCircle, Pen } from 'lucide-react';
 import axios from 'axios';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
 
 import { useSearchParams, useRouter } from 'next/navigation';
 
@@ -444,6 +446,8 @@ export default function VehiculeManagement() {
     const getAuthToken = () => {
         return localStorage.getItem('token') || sessionStorage.getItem('token');
     };
+    const { showAlert } = useGlobalAlert();
+    const { confirm } = useConfirm();
 
     useEffect(() => {
         if (!rechercheGlobale.trim()) {
@@ -546,17 +550,6 @@ export default function VehiculeManagement() {
     }, [vehiculeForm, existingImmatriculations, selectedVehicule, selectedCountry]);
 
 
-    const showError = (message: string) => {
-        console.error("❌ Erreur:", message);
-        setError(typeof message === 'string' ? message : 'Une erreur est survenue');
-        setTimeout(() => setError(""), 5000);
-    };
-
-    const showSuccess = (message: string) => {
-        console.log("✅ Succès:", message);
-        alert(typeof message === 'string' ? message : 'Opération réussie');
-    };
-
     const fetchVehicules = async () => {
         try {
             const token = getAuthToken();
@@ -578,7 +571,7 @@ export default function VehiculeManagement() {
                 return;
             }
             console.error("❌ Erreur lors du chargement des véhicules:", error);
-            showError(`Erreur chargement véhicules: ${error.response?.data?.error || error.message}`);
+            showAlert("error", "erreur chargement", `Erreur chargement véhicules: ${error.response?.data?.error || error.message}`);
         }
     };
 
@@ -709,7 +702,7 @@ export default function VehiculeManagement() {
 
         // ✅ VALIDATION FINALE AVANT SOUMISSION
         if (!isVehiculeFormValid()) {
-            showError("Veuillez corriger les erreurs dans le formulaire");
+            showAlert("error", "erreur formulaire", "Veuillez corriger les erreurs dans le formulaire");
             return;
         }
 
@@ -750,7 +743,7 @@ export default function VehiculeManagement() {
                 await axios.post(`${API_BASE_URL}/create-mes-vehicules`, submitData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                showSuccess("Véhicule ajouté avec succès!");
+                showAlert("success","vehicule ajouter","Véhicule ajouté avec succès!");
             } else if (modalType === "edit" && selectedVehicule) {
                 const token = getAuthToken();
 
@@ -761,7 +754,7 @@ export default function VehiculeManagement() {
                 await axios.put(`${API_BASE_URL}/update-mes-vehicules/${selectedVehicule._id}`, submitData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                showSuccess("Véhicule modifié avec succès!");
+                showAlert("success","vehicule modifie","Véhicule modifié avec succès!");
             }
 
             fetchVehicules();
@@ -775,14 +768,22 @@ export default function VehiculeManagement() {
             }
             console.error("❌ Erreur soumission véhicule:", error);
             const errorMessage = error.response?.data?.error || error.message;
-            showError(`Erreur: ${errorMessage}`);
+            showAlert("error", "erreur soumission", `Erreur: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
     };
 
     const deleteVehicule = async (vehicule: Vehicule) => {
-        if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ?`)) {
+            const isConfirmed = await confirm({
+    title: "Suppression du véhicule",
+    message: `Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ? Cette action est irréversible.`,
+    confirmText: "Supprimer",
+    cancelText: "Annuler",
+  });
+      if (!isConfirmed) {
+        return; // Annulation : on ne fait rien
+    } {
             try {
                 const token = getAuthToken();
 
@@ -794,7 +795,7 @@ export default function VehiculeManagement() {
                     headers: { Authorization: `Bearer ${token}` }
                 });;
                 fetchVehicules();
-                showSuccess("Véhicule supprimé avec succès!");
+                showAlert("success","vehicule supprime","Véhicule supprimé avec succès!");
             } catch (error: any) {
                 if (error.response?.status === 401) {
                     localStorage.removeItem('token');
@@ -804,7 +805,7 @@ export default function VehiculeManagement() {
                 }
                 console.error("❌ Erreur suppression:", error);
                 const errorMessage = error.response?.data?.error || error.message;
-                showError(`Erreur suppression: ${errorMessage}`);
+                showAlert("error", "erreur suppression", `Erreur suppression: ${errorMessage}`);
             }
         }
     };

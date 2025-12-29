@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Calendar, Clock, User, Phone, Mail, FileText, MapPin, ArrowLeft, Send } from 'lucide-react';
 import { useSearchParams } from "next/navigation";
 import axios from 'axios';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
 
 export interface Service {
   _id: string;
@@ -66,6 +67,7 @@ export interface FormErrors {
   clientName?: string;
   clientPhone?: string;
   clientEmail?: string;
+  vehiculeId?: string;
   serviceId?: string;
   date?: string;
   heureDebut?: string;
@@ -122,6 +124,7 @@ const ReservationForm = () => {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [success, setSuccess] = useState<boolean>(false);
+  const { showAlert } = useGlobalAlert();
 
     const getAuthToken = () => {
         return localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -254,6 +257,7 @@ const validateForm = (): boolean => {
     if (!formData.clientName.trim()) newErrors.clientName = 'Le nom est requis';
     if (!formData.clientPhone.trim()) newErrors.clientPhone = 'Le téléphone est requis';
     if (!formData.serviceId) newErrors.serviceId = 'Veuillez sélectionner un service';
+    if (!formData.vehiculeId) newErrors.vehiculeId = 'Veuillez sélectionner une voiture';
     if (!formData.date) newErrors.date = 'La date est requise';
     if (!formData.heureDebut) newErrors.heureDebut = 'L\'heure de début est requise';
     if (!formData.descriptionDepannage.trim()) newErrors.descriptionDepannage = 'La description est requise';
@@ -342,13 +346,16 @@ const validateForm = (): boolean => {
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
+            
 
             console.log("Réponse serveur :", response.data);
 
             if (response.data.success) {
                 setSuccess(true);
+                showAlert("success", "reservation envoyée", "Réservation envoyée avec succès !");
             } else {
                 setErrors({ submit: response.data.message || 'Erreur serveur' });
+                showAlert("error", "erreur", "Erreur lors de l'envoi de la réservation.");
             }
 
         } catch (error: any) {
@@ -527,15 +534,16 @@ const validateForm = (): boolean => {
 
 
 
-                                <div className="p-4">
-                                    <label htmlFor="voiture" className="block mb-2 font-semibold text-gray-700">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Sélectionner une voiture :
                                     </label>
                                     <select
                                         id="voiture"
                                         value={formData.vehiculeId}
                                         onChange={(e) => setFormData({ ...formData, vehiculeId: e.target.value })}
-                                        className="border border-gray-300 rounded-md p-2 w-full"
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.serviceId ? 'border-red-500' : 'border-gray-300'
+                                            }`}
                                     >
                                         <option value="">-- Choisir une voiture --</option>
 
@@ -545,6 +553,7 @@ const validateForm = (): boolean => {
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.vehiculeId && <p className="text-red-500 text-xs mt-1">{errors.vehiculeId}</p>}
                                 </div>
 
                                 <div className="grid md:grid-cols-2 gap-4">

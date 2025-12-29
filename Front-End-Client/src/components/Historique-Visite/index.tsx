@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Phone, MapPin, AlertCircle, CheckCircle, XCircle, Building2 } from 'lucide-react';
 import axios from 'axios';
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
 
 // Types
 interface Reservation {
@@ -32,6 +33,7 @@ const ReservationsHistory: React.FC = () => {
   const [filter, setFilter] = useState<FilterType>('all_month');
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+      const { confirm } = useConfirm();
 
   const getAuthToken = (): string | null => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -109,9 +111,12 @@ const ReservationsHistory: React.FC = () => {
   };
 
   const handleCancelReservation = async (reservationId: string) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
-      return;
-    }
+    const isConfirmed = await confirm({
+    title: "annulation de la réservation",
+    message: `Êtes-vous sûr de vouloir annuler cette réservation ?`,
+    confirmText: "Annuler",
+    cancelText: "Annuler",
+  });
 
     try {
       const token = getAuthToken();
