@@ -27,6 +27,12 @@ export type DevicesUsedData = {
   percentage: number;
 }[];
 
+export type CampaignVisitorsData = {
+  total_visitors: number;
+  performance: number;
+  chart: any;
+};
+
 // ✅ Aperçu des paiements
 export async function getPaymentsOverviewData(
   timeFrame: string = "monthly"
@@ -126,4 +132,14 @@ export async function getDevicesUsedData(): Promise<DevicesUsedData> {
       { device: "Partiellement payé", value: 20, percentage: 20 },
     ];
   }
+}
+
+// ✅ Campaign Visitors (données mockées pour le template)
+export async function getCampaignVisitorsData(): Promise<CampaignVisitorsData> {
+  // Données mockées pour le template
+  return {
+    total_visitors: 0,
+    performance: 0,
+    chart: []
+  };
 }

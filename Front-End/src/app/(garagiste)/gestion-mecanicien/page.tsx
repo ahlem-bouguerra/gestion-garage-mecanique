@@ -7,7 +7,7 @@ import AtelierManager from "@/components/gestion-atelier";
 import ServicesManager from "@/components/gestion-service";
 
 // Type definitions
-type TabType = 'employé' | 'ateliers';
+type TabType = 'employé' | 'ateliers' | 'service';
 
 interface TabConfig {
   id: TabType;
@@ -17,15 +17,7 @@ interface TabConfig {
   component: React.ComponentType<any>;
 }
 
-interface UnifiedManagementDashboardProps {
-  selectedTimeFrame?: string;
-  extractTimeFrame: any;
-}
-
-const UnifiedManagementDashboard: React.FC<UnifiedManagementDashboardProps> = ({ 
-  selectedTimeFrame, 
-  extractTimeFrame 
-}) => {
+const UnifiedManagementDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('employé');
 
   const tabs: TabConfig[] = [
@@ -94,10 +86,7 @@ const UnifiedManagementDashboard: React.FC<UnifiedManagementDashboardProps> = ({
         <div className="px-6 pb-8">
           <div className="transition-all duration-500 ease-in-out">
             <div className="col-span-12 xl:col-span-5">
-              <ActiveComponent 
-                selectedTimeFrame={selectedTimeFrame}
-                extractTimeFrame={extractTimeFrame}
-              />
+              <ActiveComponent />
             </div>
           </div>
         </div>

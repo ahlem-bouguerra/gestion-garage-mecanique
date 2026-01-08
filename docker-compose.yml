@@ -1,0 +1,82 @@
+services:
+  # Base de données MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: garage-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-admin123}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - garage-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./Back-End
+      dockerfile: Dockerfile
+    container_name: garage-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGO_URI=${MONGO_URI:-mongodb://admin:admin123@mongodb:27017/garage?authSource=admin}
+      - SESSION_SECRET=${SESSION_SECRET:-monSuperSecretUltraSecurise}
+      - JWT_SECRET=${JWT_SECRET:-votre_jwt_secret}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+    depends_on:
+      - mongodb
+    networks:
+      - garage-network
+
+  # Frontend Admin (port 3000)
+  frontend-admin:
+    build:
+      context: ./Front-End
+      dockerfile: Dockerfile
+    container_name: garage-frontend-admin
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5000}
+    depends_on:
+      - backend
+    networks:
+      - garage-network
+
+  # Frontend Client (port 3001)
+  frontend-client:
+    build:
+      context: ./Front-End-Client
+      dockerfile: Dockerfile
+    container_name: garage-frontend-client
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5000}
+    depends_on:
+      - backend
+    networks:
+      - garage-network
+
+networks:
+  garage-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+

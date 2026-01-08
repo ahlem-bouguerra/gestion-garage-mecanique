@@ -59,3 +59,8 @@ Front-End/node_modules/
 Front-End/.next/
 Front-End-Client/node_modules/
 Front-End-Client/.next/
+
+# Docker
+docker-compose.override.yml
+.docker/
+*.log

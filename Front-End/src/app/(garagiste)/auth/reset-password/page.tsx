@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import ResetPasswordForm from "@/components/Auth/ResetPassword";
 
 
@@ -31,7 +32,9 @@ export default function ForgotPassword() {
         <div>
           {/* Cadre principal englobant */}
           <div className="bg-slate-800/30 backdrop-blur-sm border-2 border-orange-500/40 rounded-3xl p-6 shadow-2xl shadow-orange-500/20">
-             <ResetPasswordForm/>
+             <Suspense fallback={<div>Chargement...</div>}>
+               <ResetPasswordForm/>
+             </Suspense>
           </div>
         </div>
       </div>
