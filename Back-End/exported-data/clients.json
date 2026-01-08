@@ -1,0 +1,45 @@
+[
+  {
+    "_id": "6911cb63ccd145adc6354d98",
+    "username": "gaffousa ras el fakrouna",
+    "email": "ahlembouguerra@outlook.fr",
+    "password": "$2b$10$qUTzDStezxvCC79QDgOlRuWdas/UEO1l2klBtXkaanRylhuVPP/5K",
+    "phone": "26541236",
+    "isVerified": true,
+    "googleId": null,
+    "resetPasswordToken": "$2b$10$OuexKT.OZjOeRbmJmaGwN.6fWzLdyWsLqj/cxJSvM/XE1rQQs.N62",
+    "resetPasswordExpires": "2025-11-16T10:50:20.127Z",
+    "createdAt": "2025-11-10T11:24:19.451Z",
+    "updatedAt": "2025-12-28T12:43:01.085Z",
+    "__v": 0,
+    "verificationToken": null,
+    "verificationTokenExpiry": null
+  },
+  {
+    "_id": "693be8f83cc266e4a6e9f18d",
+    "username": "bou ali mansour",
+    "email": "ahlembouguerra20@gmail.com",
+    "password": "$2b$10$xFK7rZtQxiCsLaFoUFpyhuaWVVehanTWe2Dl3raezP7eSKFSHTGS6",
+    "phone": "56321789",
+    "isVerified": false,
+    "googleId": null,
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "createdAt": "2025-12-12T10:05:44.743Z",
+    "updatedAt": "2025-12-12T10:05:44.743Z",
+    "__v": 0
+  },
+  {
+    "_id": "693be93e3cc266e4a6e9f193",
+    "username": "ahlembouguerra",
+    "email": "ahlembouguerra12@gmail.com",
+    "phone": "",
+    "isVerified": true,
+    "googleId": "118243487113723594629",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "createdAt": "2025-12-12T10:06:54.453Z",
+    "updatedAt": "2025-12-12T10:06:54.453Z",
+    "__v": 0
+  }
+]

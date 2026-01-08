@@ -17,18 +17,18 @@ export const getCarnetByVehiculeId = async (req, res) => {
     if (!vehicule) {
       return res.status(404).json({ error: 'Véhicule non trouvé' });
     }
-    console.log("   - garagisteId:", vehicule.garagisteId);
+    console.log("   - garageId:", vehicule.garageId);
     console.log("   - proprietaireId:", vehicule.proprietaireId);
     console.log("   - proprietaireModel:", vehicule.proprietaireModel);
 
     // ✅ VÉRIFIER L'ACCÈS DU GARAGE AU VÉHICULE
     const liaison = await FicheClientVehicule.findOne({
       vehiculeId: vehiculeId,
-      garageId: req.user._id
+      garageId: req.user.garageId
     });
     console.log("🔗 Liaison trouvée:", liaison ? "OUI" : "NON");
 
-    const estVehiculeGarage = vehicule.garagisteId?.toString() === req.user._id.toString();
+    const estVehiculeGarage = vehicule.garageId?.toString() === req.user.garageId.toString();
 
     if (!liaison && !estVehiculeGarage) {
       return res.status(403).json({ 
@@ -107,7 +107,7 @@ export const getCarnetByVehiculeId = async (req, res) => {
           typeEntretien: 'maintenance',
           statut: 'termine',
           totalTTC: totalTTC,
-          garagisteId: req.user._id,
+          garageId: req.user.garageId,
           kilometrageEntretien: null,
           notes: `Créé automatiquement depuis l'ordre ${ordre.numeroOrdre}`,
           services: ordre.taches ? ordre.taches.map(tache => ({
@@ -165,37 +165,51 @@ export const getCarnetByVehiculeId = async (req, res) => {
 
     console.log("📊 Total historique:", historique.length);
 
-    // ✅ RÉCUPÉRER LA FICHE CLIENT
-    let ficheClient = null;
-    if (liaison) {
-      ficheClient = await FicheClient.findById(liaison.ficheClientId);
-    } else if (vehicule.proprietaireModel === 'FicheClient') {
-      ficheClient = await FicheClient.findOne({
-        _id: vehicule.proprietaireId
-      });
-    }
+// ✅ RÉCUPÉRER LA FICHE CLIENT AVEC POPULATE
+let ficheClient = null;
+if (liaison) {
+  ficheClient = await FicheClient.findById(liaison.ficheClientId)
+    .populate('clientId', 'username email'); // ⭐ AJOUTER POPULATE
+} else if (vehicule.proprietaireModel === 'FicheClient') {
+  ficheClient = await FicheClient.findOne({
+    _id: vehicule.proprietaireId
+  })
+  .populate('clientId', 'username email'); // ⭐ AJOUTER POPULATE
+}
 
-    const vehiculeData = {
-      _id: vehicule._id,
-      marque: vehicule.marque,
-      modele: vehicule.modele,
-      immatriculation: vehicule.immatriculation,
-      annee: vehicule.annee,
-      typeCarburant: vehicule.typeCarburant,
-      kilometrage: vehicule.kilometrage,
-       carteGrise: vehicule.carteGrise || null,
-      proprietaire: ficheClient ? {
-        _id: ficheClient._id,
-        nom: ficheClient.nom,
-        type: ficheClient.type,
-        telephone: ficheClient.telephone
-      } : {
-        _id: 'unknown',
-        nom: 'Client inconnu',
-        type: 'particulier',
-        telephone: 'N/A'
-      }
-    };
+// ✅ CALCULER nomEffectif
+let nomEffectif = 'Client inconnu';
+if (ficheClient) {
+  if (ficheClient.clientId && ficheClient.clientId.username) {
+    nomEffectif = ficheClient.clientId.username;
+  } else {
+    nomEffectif = ficheClient.nom;
+  }
+}
+
+const vehiculeData = {
+  _id: vehicule._id,
+  marque: vehicule.marque,
+  modele: vehicule.modele,
+  immatriculation: vehicule.immatriculation,
+  annee: vehicule.annee,
+  typeCarburant: vehicule.typeCarburant,
+  kilometrage: vehicule.kilometrage,
+  carteGrise: vehicule.carteGrise || null,
+  proprietaire: ficheClient ? {
+    _id: ficheClient._id,
+    nom: ficheClient.nom,
+    nomEffectif: nomEffectif, // ⭐ AJOUTER CETTE LIGNE
+    type: ficheClient.type,
+    telephone: ficheClient.telephone
+  } : {
+    _id: 'unknown',
+    nom: 'Client inconnu',
+    nomEffectif: 'Client inconnu', // ⭐ AJOUTER CETTE LIGNE
+    type: 'particulier',
+    telephone: 'N/A'
+  }
+};
 
     res.json({
       vehicule: vehiculeData,
@@ -217,7 +231,7 @@ export const Statistiques = async (req, res) => {
 
     const carnets = await CarnetEntretien.find({ 
       vehiculeId, 
-      garagisteId: req.user._id 
+      garageId: req.user.garageId
     }).sort({ dateCommencement: -1 });
 
     if (carnets.length === 0) {
@@ -274,7 +288,7 @@ export const creerCarnetManuel = async (req, res) => {
     // ✅ MODIFICATION : Vérifier via la liaison, pas directement le véhicule
     const liaison = await FicheClientVehicule.findOne({
       vehiculeId: vehiculeId,
-      garageId: req.user._id
+      garageId: req.user.garageId
     });
 
     if (!liaison) {
@@ -289,7 +303,7 @@ export const creerCarnetManuel = async (req, res) => {
       dateCommencement: new Date(date),
       dateFinCompletion: new Date(date),
       typeEntretien: 'maintenance',
-      garagisteId: req.user._id,
+      garageId: req.user.garageId,
       statut: 'termine',
       totalTTC: parseFloat(cout),
       services: taches.map(tache => ({

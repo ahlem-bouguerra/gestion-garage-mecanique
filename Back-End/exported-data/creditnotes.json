@@ -1,0 +1,372 @@
+[
+  {
+    "_id": "691dc992f059c09f59b104e9",
+    "creditNumber": "AV-2025-000004",
+    "originalFactureId": "691db529807a8aa37603e19b",
+    "originalFactureNumber": "FAC-018",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "inspectionDate": "2025-11-19T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "eee",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "691db529807a8aa37603e19c"
+      }
+    ],
+    "maindoeuvre": 10,
+    "tvaRate": 20,
+    "totalHT": 110,
+    "totalTVA": 22,
+    "totalTTC": 132,
+    "totalRemise": 11.879999999999999,
+    "finalTotalTTC": 121.12,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-11-19T13:43:46.183Z",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-19T13:43:46.190Z",
+    "updatedAt": "2025-11-19T13:43:46.190Z",
+    "__v": 0
+  },
+  {
+    "_id": "69258217bc90c33f84d87e25",
+    "creditNumber": "AV-2025-000005",
+    "originalFactureId": "69256f2bd929346ef89b68dd",
+    "originalFactureNumber": "FAC-025",
+    "clientId": "691af6c0143c7678f8f10730",
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "inspectionDate": "2025-11-25T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "aa",
+        "quantity": 1,
+        "unitPrice": 10,
+        "total": 10,
+        "_id": "69256f2bd929346ef89b68de"
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "69256f2bd929346ef89b68df"
+      }
+    ],
+    "maindoeuvre": 1000,
+    "tvaRate": 20,
+    "totalHT": 1110,
+    "totalTVA": 222,
+    "totalTTC": 1332,
+    "totalRemise": 0,
+    "finalTotalTTC": 1333,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-11-25T10:16:55.444Z",
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-25T10:16:55.449Z",
+    "updatedAt": "2025-11-25T10:16:55.449Z",
+    "__v": 0
+  },
+  {
+    "_id": "6925823abc90c33f84d87f06",
+    "creditNumber": "AV-2025-000006",
+    "originalFactureId": "692579f2dcd8dc9aca73e57a",
+    "originalFactureNumber": "FAC-026",
+    "clientId": "691f78f8163a17aa79fb6995",
+    "clientInfo": {
+      "nom": "helmi"
+    },
+    "vehicleInfo": "ppp p1 - 52TUN77",
+    "inspectionDate": "2025-11-23T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "ulh",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "692579f2dcd8dc9aca73e57b"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalTTC": 240,
+    "totalRemise": 0,
+    "finalTotalTTC": 241,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-11-25T10:17:30.094Z",
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-25T10:17:30.096Z",
+    "updatedAt": "2025-11-25T10:17:30.096Z",
+    "__v": 0
+  },
+  {
+    "_id": "692582f3bc90c33f84d87fb9",
+    "creditNumber": "AV-2025-000007",
+    "originalFactureId": "69258217bc90c33f84d87e34",
+    "originalFactureNumber": "FAC-027",
+    "clientId": "691af6c0143c7678f8f10730",
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "inspectionDate": "2025-11-25T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "aa",
+        "quantity": 1,
+        "unitPrice": 10,
+        "total": 10,
+        "_id": "69258217bc90c33f84d87e35"
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "69258217bc90c33f84d87e36"
+      }
+    ],
+    "maindoeuvre": 1000,
+    "tvaRate": 20,
+    "totalHT": 1110,
+    "totalTVA": 222,
+    "totalTTC": 1332,
+    "totalRemise": 0,
+    "finalTotalTTC": 1333,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-11-25T10:20:35.345Z",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-11-25T10:20:35.347Z",
+    "updatedAt": "2025-11-25T10:20:35.347Z",
+    "__v": 0
+  },
+  {
+    "_id": "693879cae82dd096f2e3c624",
+    "creditNumber": "AV-2025-000008",
+    "originalFactureId": "692ebac769fc6f782e0c7dd4",
+    "originalFactureNumber": "FAC-031",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "w",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "692ebac769fc6f782e0c7dd5"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalTTC": 1440,
+    "totalRemise": 0,
+    "finalTotalTTC": 1441,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-09T19:34:34.300Z",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-09T19:34:34.305Z",
+    "updatedAt": "2025-12-09T19:34:34.305Z",
+    "__v": 0
+  },
+  {
+    "_id": "69394be691d04a21450b23fb",
+    "creditNumber": "AV-2025-000009",
+    "originalFactureId": "693879cae82dd096f2e3c630",
+    "originalFactureNumber": "FAC-032",
+    "clientId": "692eb4ed3158d0bba107e02c",
+    "clientInfo": {
+      "nom": "magher"
+    },
+    "vehicleInfo": "bys 20 - 15TUN45",
+    "inspectionDate": "2025-12-02T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "wc",
+        "quantity": 1,
+        "unitPrice": 1000,
+        "total": 1000,
+        "_id": "693879cae82dd096f2e3c631"
+      }
+    ],
+    "maindoeuvre": 200,
+    "tvaRate": 20,
+    "totalHT": 1200,
+    "totalTVA": 240,
+    "totalTTC": 1440,
+    "totalRemise": 0,
+    "finalTotalTTC": 1441,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-10T10:31:02.166Z",
+    "createdBy": "69392f0608a82f11cc52393e",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-10T10:31:02.186Z",
+    "updatedAt": "2025-12-10T10:31:02.186Z",
+    "__v": 0
+  },
+  {
+    "_id": "693ab10cf0a8819860196d57",
+    "creditNumber": "AV-2025-000010",
+    "originalFactureId": "691dc992f059c09f59b104f5",
+    "originalFactureNumber": "FAC-019",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "azer 123 - 123TUN12",
+    "inspectionDate": "2025-11-19T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "eee",
+        "quantity": 2,
+        "unitPrice": 100,
+        "total": 200,
+        "_id": "691dc992f059c09f59b104f6"
+      }
+    ],
+    "maindoeuvre": 10,
+    "tvaRate": 20,
+    "totalHT": 210,
+    "totalTVA": 42,
+    "totalTTC": 252,
+    "totalRemise": 22.68,
+    "finalTotalTTC": 230.32,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-11T11:54:52.256Z",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-11T11:54:52.260Z",
+    "updatedAt": "2025-12-11T11:54:52.260Z",
+    "__v": 0
+  },
+  {
+    "_id": "693ab1d1f0a8819860196ebd",
+    "creditNumber": "AV-2025-000011",
+    "originalFactureId": "692582f3bc90c33f84d87fc8",
+    "originalFactureNumber": "FAC-029",
+    "clientId": "691af6c0143c7678f8f10730",
+    "clientInfo": {
+      "nom": "ahlem bouguerra"
+    },
+    "vehicleInfo": "cc 10 - 11TUN12",
+    "inspectionDate": "2025-11-25T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "aa",
+        "quantity": 1,
+        "unitPrice": 10,
+        "total": 10,
+        "_id": "692582f3bc90c33f84d87fc9"
+      },
+      {
+        "piece": "bb",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "692582f3bc90c33f84d87fca"
+      }
+    ],
+    "maindoeuvre": 1000,
+    "tvaRate": 20,
+    "totalHT": 1110,
+    "totalTVA": 222,
+    "totalTTC": 1332,
+    "totalRemise": 0,
+    "finalTotalTTC": 1333,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-11T11:58:09.823Z",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-11T11:58:09.826Z",
+    "updatedAt": "2025-12-11T11:58:09.826Z",
+    "__v": 0
+  },
+  {
+    "_id": "69494bf3ce3188cdd4484d3d",
+    "creditNumber": "AV-2025-000012",
+    "originalFactureId": "6949229099b2638a309e417c",
+    "originalFactureNumber": "FAC-036",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "ccc cc - TUN544",
+    "inspectionDate": "2025-12-22T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "b",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "6949229099b2638a309e417d"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalTTC": 240,
+    "totalRemise": 24,
+    "finalTotalTTC": 217,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-22T13:47:31.915Z",
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-22T13:47:31.917Z",
+    "updatedAt": "2025-12-22T13:47:31.917Z",
+    "__v": 0
+  },
+  {
+    "_id": "694e5731a7c3f5573ba132ff",
+    "creditNumber": "AV-2025-000013",
+    "originalFactureId": "69494bf3ce3188cdd4484d49",
+    "originalFactureNumber": "FAC-038",
+    "clientId": "691af6f2143c7678f8f10755",
+    "clientInfo": {
+      "nom": "test"
+    },
+    "vehicleInfo": "ccc cc - TUN544",
+    "inspectionDate": "2025-12-22T00:00:00.000Z",
+    "services": [
+      {
+        "piece": "b",
+        "quantity": 1,
+        "unitPrice": 100,
+        "total": 100,
+        "_id": "69494bf3ce3188cdd4484d4a"
+      }
+    ],
+    "maindoeuvre": 100,
+    "tvaRate": 20,
+    "totalHT": 200,
+    "totalTVA": 40,
+    "totalTTC": 240,
+    "totalRemise": 24,
+    "finalTotalTTC": 217,
+    "reason": "Annulation suite à modification du devis",
+    "creditDate": "2025-12-26T09:36:49.625Z",
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "createdAt": "2025-12-26T09:36:49.627Z",
+    "updatedAt": "2025-12-26T09:36:49.627Z",
+    "__v": 0
+  }
+]

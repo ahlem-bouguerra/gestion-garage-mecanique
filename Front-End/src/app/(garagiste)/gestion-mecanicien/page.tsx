@@ -39,7 +39,7 @@ const UnifiedManagementDashboard: React.FC = () => {
       id: 'service',
       label: 'services',
       icon: Wrench,
-      description: 'Gestion des espaces de travail',
+      description: 'Gestion des services de travail',
       component: ServicesManager
     }
   ];
@@ -47,7 +47,7 @@ const UnifiedManagementDashboard: React.FC = () => {
   const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || (() => null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen ">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="px-6 py-8">

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const reservationSchema = new mongoose.Schema({
   garageId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Garage',
     required: true
   },
   

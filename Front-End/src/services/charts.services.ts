@@ -3,7 +3,11 @@ import axios from "axios";
 
 const getAuthToken = () => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem("token") || sessionStorage.getItem("token");
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    // Vérifier que le token existe et n'est pas "null" ou "undefined" en string
+    if (token && token !== "null" && token !== "undefined") {
+      return token;
+    }
   }
   return null;
 };
@@ -41,7 +45,7 @@ export async function getPaymentsOverviewData(
     const token = getAuthToken();
     
     if (!token) {
-      console.warn("Pas de token disponible");
+      console.log("Pas de token disponible");
       return { total: [], paid: [] };
     }
 
@@ -57,7 +61,7 @@ export async function getPaymentsOverviewData(
 
     return response.data.data;
   } catch (error) {
-    console.error("Erreur récupération données paiements:", error);
+    console.log("Erreur récupération données paiements:", error);
     return { total: [], paid: [] };
   }
 }
@@ -70,7 +74,7 @@ export async function getWeeksProfitData(
     const token = getAuthToken();
     
     if (!token) {
-      console.warn("Pas de token disponible");
+      console.log("Pas de token disponible");
       return [];
     }
 
@@ -86,7 +90,7 @@ export async function getWeeksProfitData(
 
     return response.data.data;
   } catch (error) {
-    console.error("Erreur récupération profit hebdomadaire:", error);
+    console.log("Erreur récupération profit hebdomadaire:", error);
     return [];
   }
 }
@@ -97,7 +101,7 @@ export async function getDevicesUsedData(): Promise<DevicesUsedData> {
     const token = getAuthToken();
     
     if (!token) {
-      console.warn("Pas de token disponible");
+      console.log("Pas de token disponible");
       return [
         { device: "Payé", value: 45, percentage: 45 },
         { device: "Non payé", value: 35, percentage: 35 },
@@ -124,7 +128,7 @@ export async function getDevicesUsedData(): Promise<DevicesUsedData> {
 
     return apiData;
   } catch (error) {
-    console.error("Erreur récupération données appareils:", error);
+    console.log("Erreur récupération données appareils:", error);
     // ✅ Données de fallback
     return [
       { device: "Payé", value: 45, percentage: 45 },

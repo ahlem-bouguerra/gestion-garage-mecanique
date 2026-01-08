@@ -2,6 +2,32 @@
 import React from 'react';
 import { X, User, MapPin, Wrench, UserCheck, Clock, FileText, Edit2, Play, CheckCircle } from 'lucide-react';
 import { ordresTravailAPI } from './services/ordresTravailAPI';
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
+import { useGlobalAlert } from '../ui-elements/AlertProvider';
+
+const getClientName = (ordre) => {
+  // Priorité 1 : clientInfo avec Client lié
+  if (ordre.clientInfo?.ClientId?.clientId?.username) {
+    return ordre.clientInfo.ClientId.clientId.username;
+  }
+  
+  // Priorité 2 : clientInfo direct
+  if (ordre.clientInfo?.ClientId?.nom) {
+    return ordre.clientInfo.ClientId.nom;
+  }
+  
+  // Priorité 3 : via devis avec Client lié
+  if (ordre.devisId?.clientId?.clientId?.username) {
+    return ordre.devisId.clientId.clientId.username;
+  }
+  
+  // Priorité 4 : via devis direct
+  if (ordre.devisId?.clientId?.nom) {
+    return ordre.devisId.clientId.nom;
+  }
+  
+  return 'N/A';
+};
 
 const DetailOrdreTravail = ({
   ordre,
@@ -19,6 +45,11 @@ const DetailOrdreTravail = ({
     'supprime': { label: 'supprime', color: 'bg-red-100 text-red-800', icon: X },
   };
 
+  const { confirm: openConfirm } = useConfirm();
+
+  const { showAlert } = useGlobalAlert();
+
+
   const prioriteOptions = {
     'faible': { label: 'Faible', color: 'bg-gray-100 text-gray-800' },
     'normale': { label: 'Normale', color: 'bg-blue-100 text-blue-800' },
@@ -27,39 +58,48 @@ const DetailOrdreTravail = ({
   };
 
   const demarrerOrdre = async () => {
-    const confirmation = window.confirm(
+  const isConfirmed = await openConfirm({
+    title: "Démarrer l'ordre de travail",
+    message:
       'Êtes-vous sûr de vouloir démarrer cet ordre de travail ?\n\n' +
-      'Cette action changera le statut à "En cours" et enregistrera la date de début réelle.'
-    );
+      'Cette action changera le statut à "En cours" et enregistrera la date de début réelle.',
+    confirmText: "Démarrer",
+    cancelText: "Annuler",
+  });
 
-    if (!confirmation) return;
+  if (!isConfirmed) return;
 
-    try {
-      await ordresTravailAPI.demarrerOrdre(ordre._id);
-      onSuccess('Ordre de travail démarré avec succès');
-      onOrdreUpdated();
-    } catch (error) {
-      onError(error.message || 'Erreur lors du démarrage de l\'ordre');
-    }
-  };
+  try {
+    await ordresTravailAPI.demarrerOrdre(ordre._id);
+    showAlert("success", "Succès", "Ordre de travail démarré avec succès");
+    onOrdreUpdated();
+  } catch (error) {
+    onError(error.message || "Erreur lors du démarrage de l'ordre");
+  }
+};
 
-  const terminerOrdre = async () => {
-    const confirmation = window.confirm(
+const terminerOrdre = async () => {
+  const isConfirmed = await openConfirm({
+    title: "Terminer l'ordre de travail",
+    message:
       'Êtes-vous sûr de vouloir terminer cet ordre de travail ?\n\n' +
       'Cette action changera le statut à "Terminé" et enregistrera la date de fin réelle.\n' +
-      'Une fois terminé, l\'ordre ne pourra plus être modifié.'
-    );
+      'Une fois terminé, l\'ordre ne pourra plus être modifié.',
+    confirmText: "Terminer",
+    cancelText: "Annuler",
+  });
 
-    if (!confirmation) return;
+  if (!isConfirmed) return;
 
-    try {
-      await ordresTravailAPI.terminerOrdre(ordre._id);
-      onSuccess('Ordre de travail terminé avec succès');
-      onOrdreUpdated();
-    } catch (error) {
-      onError(error.message || 'Erreur lors de la fin de l\'ordre');
-    }
-  };
+  try {
+    await ordresTravailAPI.terminerOrdre(ordre._id);
+    showAlert("success", "Succès", "Ordre de travail terminé avec succès");
+    onOrdreUpdated();
+  } catch (error) {
+    onError(error.message || "Erreur lors de la fin de l'ordre");
+  }
+};
+
 
   const StatusIcon = statusOptions[ordre.status]?.icon || Clock;
 
@@ -125,7 +165,7 @@ const DetailOrdreTravail = ({
                 Informations Client
               </h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Nom:</span> {ordre.clientInfo?.nom || 'N/A'}</p>
+                <p><span className="font-medium">Nom:</span>{getClientName(ordre)}</p>
                 <p><span className="font-medium">Véhicule:</span> {ordre.vehiculedetails?.nom || 'N/A'}</p>
                 <p><span className="font-medium">Devis N°:</span> {ordre.devisId || 'N/A'}</p>
               </div>

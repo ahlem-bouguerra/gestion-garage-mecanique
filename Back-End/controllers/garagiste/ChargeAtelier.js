@@ -4,92 +4,113 @@ export const getDashboardData = async (req, res) => {
   try {
     const { periode = 'jour', atelier } = req.query;
     
-    const chargeAtelier = await OrdreTravail.getChargeAtelier(atelier, periode);
-    const tempsMoyenInterventions = await OrdreTravail.getTempsMoyenInterventions(atelier, periode);
-    const chargeParMecanicien = await OrdreTravail.getChargeParMecanicien(atelier, periode);
+    // ✅ Vérification de sécurité améliorée
+    console.log('📊 Dashboard - req.user:', req.user);
     
-    // AJOUTER CETTE LIGNE :
-    const statutStats = await OrdreTravail.getStatutStats(atelier, periode);
+    if (!req.user) {
+      return res.status(401).json({ 
+        error: 'Utilisateur non authentifié' 
+      });
+    }
     
-    // Calculer les statistiques
+    const garageId = req.user.garageId;
+    
+    if (!garageId) {
+      return res.status(400).json({ 
+        error: 'Garage non identifié pour cet utilisateur' 
+      });
+    }
+    
+    console.log('📊 Dashboard demandé pour garage:', garageId);
+    
+    const chargeAtelier = await OrdreTravail.getChargeAtelier(atelier, periode, garageId);
+    const tempsMoyenInterventions = await OrdreTravail.getTempsMoyenInterventions(atelier, periode, garageId);
+    const chargeParMecanicien = await OrdreTravail.getChargeParMecanicien(atelier, periode, garageId);
+    const statutStats = await OrdreTravail.getStatutStats(atelier, periode, garageId);
+    
+    console.log('statutStats reçus:', statutStats);
+    
+    // ✅ Initialiser les statistiques
     let statistiques = {
       total: 0,
       enAttente: 0,
       enCours: 0, 
       termines: 0,
-      suspendus: 0,
+      Supprimés: 0,
       totalHeuresEstimees: 0,
-      totalOrdresTermines: 0  // ← AJOUTEZ CETTE LIGNE
+      totalOrdresTermines: 0
     };
     
-statutStats.forEach(stat => {
-  console.log('Traitement statut:', stat._id, 'count:', stat.count); // Pour débugger
-  
-  switch(stat._id) {
-    case 'en_attente': // ✅ Correspond à vos logs
-      statistiques.enAttente = stat.count;
-      break;
-    case 'en_cours': // ✅ Correspond à vos logs  
-      statistiques.enCours = stat.count;
-      break;
-    case 'termine': // ❓ Vérifiez si c'est le bon nom
-    case 'terminé': // Peut-être avec accent ?
-    case 'completed': // Ou en anglais ?
-    case 'fini': // Autre variante ?
-      statistiques.termines = stat.count;
-      statistiques.totalOrdresTermines = stat.count;
-      break;
-    case 'suspendu':
-      statistiques.suspendus = stat.count;
-      break;
-    default:
-      console.log('Statut non reconnu:', stat._id); // Pour identifier les statuts manqués
-  }
-});
-
-// Calculer le total depuis les statuts individuels pour être sûr
-statistiques.total = statistiques.enAttente + statistiques.enCours + 
-                    statistiques.termines + statistiques.suspendus;
+    // ✅ Traiter les statuts
+    statutStats.forEach(stat => {
+      console.log('Traitement statut:', stat._id, 'count:', stat.count);
+      
+      switch(stat._id) {
+        case 'en_attente':
+          statistiques.enAttente = stat.count;
+          break;
+        case 'en_cours':
+          statistiques.enCours = stat.count;
+          break;
+        case 'termine':
+          statistiques.termines = stat.count;
+          statistiques.totalOrdresTermines = stat.count;
+          break;
+        case 'suspendu':
+          statistiques.Supprimés = stat.count;
+          break;
+        default:
+          console.log('⚠️ Statut non reconnu:', stat._id);
+      }
+    });
     
+    // ✅ Calculer le total depuis les statuts individuels
+    statistiques.total = statistiques.enAttente + statistiques.enCours + 
+                        statistiques.termines + statistiques.Supprimés;
+    
+    // ✅ Ajouter les heures estimées depuis chargeAtelier
     if (chargeAtelier.length > 0) {
-      statistiques.total = chargeAtelier[0].nombreOrdres;
-      statistiques.totalHeuresEstimees = chargeAtelier[0].chargeEstimee;
+      statistiques.totalHeuresEstimees = chargeAtelier[0].chargeEstimee || 0;
     }
     
+    console.log('📊 Statistiques finales:', statistiques);
+    
+    // ✅ Retourner la réponse avec toutes les données
     res.json({
       periode,
       date: periode === 'jour' ? new Date().toISOString().split('T')[0] : null,
       statistiques,
       tempsMoyenInterventions: tempsMoyenInterventions[0] || {
-    tempsMoyenEstime: 0,
-    tempsMoyenReel: 0
-  },
-  chargeParMecanicien  // ← AJOUTEZ CETTE LIGNE
-
+        tempsMoyenEstime: 0,
+        tempsMoyenReel: 0
+      },
+      chargeParMecanicien
     });
-    console.log('statutStats:', statutStats);
-console.log('statistiques finales:', statistiques);
+    
   } catch (error) {
-    console.error('Erreur:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    console.error('❌ Erreur getDashboardData:', error);
+    res.status(500).json({ 
+      error: 'Erreur serveur',
+      message: error.message 
+    });
   }
 };
 
 export const getChargeMensuelle = async (req, res) => {
   try {
+    const garageId = req.user.garageId;
     const { mois, annee } = req.query;
     
     const startDate = new Date(annee, mois - 1, 1);
     const endDate = new Date(annee, mois, 0, 23, 59, 59);
     
     const matchFilter = {
-      garagisteId: req.user._id,
+      garageId: garageId,
       $or: [
         { dateCommence: { $lte: endDate }, dateFinPrevue: { $gte: startDate } },
         { dateCommence: { $gte: startDate, $lte: endDate } }
       ]
     };
-
     
     const ordres = await OrdreTravail.find(matchFilter).lean();
     
@@ -100,7 +121,6 @@ export const getChargeMensuelle = async (req, res) => {
       ordresActifs: new Set(),
       chargeEstimee: 0,
       chargeReelle: 0,
-      // 🆕 Détails par statut
       parStatut: {
         en_attente: { count: 0, ordres: [] },
         en_cours: { count: 0, ordres: [] },
@@ -109,7 +129,6 @@ export const getChargeMensuelle = async (req, res) => {
       }
     }));
     
-    // Répartir chaque ordre sur ses jours
     ordres.forEach(ordre => {
       const debut = new Date(Math.max(ordre.dateCommence, startDate));
       const fin = new Date(Math.min(ordre.dateFinPrevue || ordre.dateCommence, endDate));
@@ -123,11 +142,9 @@ export const getChargeMensuelle = async (req, res) => {
         if (jourIndex >= 0 && jourIndex < joursTotal) {
           const ordreId = ordre._id.toString();
           
-          // Éviter les doublons
           if (!resultats[jourIndex].ordresActifs.has(ordreId)) {
             resultats[jourIndex].ordresActifs.add(ordreId);
             
-            // 🆕 Ajouter les détails de l'ordre par statut
             const status = ordre.status || 'en_attente';
             if (resultats[jourIndex].parStatut[status]) {
               resultats[jourIndex].parStatut[status].count++;
@@ -150,13 +167,12 @@ export const getChargeMensuelle = async (req, res) => {
       }
     });
     
-    // Convertir le Set en nombre
     const donneesFinales = resultats.map(r => ({
       jour: r.jour,
       nombreOrdres: r.ordresActifs.size,
       chargeEstimee: r.chargeEstimee,
       chargeReelle: r.chargeReelle,
-      parStatut: r.parStatut // 🆕 Inclure les détails
+      parStatut: r.parStatut
     }));
     
     res.json({

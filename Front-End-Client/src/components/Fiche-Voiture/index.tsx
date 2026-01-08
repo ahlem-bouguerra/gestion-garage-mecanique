@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Car, Plus, Edit, Trash2, User, Building2, Search, X, Calendar, BookOpen, Phone, UserCheck, AlertTriangle, CheckCircle, Pen } from 'lucide-react';
 import axios from 'axios';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
 
 import { useSearchParams, useRouter } from 'next/navigation';
 
@@ -237,8 +239,6 @@ class FormValidator {
         return SmartImmatriculationValidator.detectCountryFromImmatriculation(immat);
     }
 
-
-
     // Validation longueur champs texte
     static validateTextLength(text: string, minLength: number, maxLength: number, fieldName: string): FieldValidation {
         const trimmedText = text.trim();
@@ -446,6 +446,8 @@ export default function VehiculeManagement() {
     const getAuthToken = () => {
         return localStorage.getItem('token') || sessionStorage.getItem('token');
     };
+    const { showAlert } = useGlobalAlert();
+    const { confirm } = useConfirm();
 
     useEffect(() => {
         if (!rechercheGlobale.trim()) {
@@ -455,7 +457,8 @@ export default function VehiculeManagement() {
 
         const termesRecherche = rechercheGlobale.toLowerCase().trim();
 
-        const vehiculesFiltrés = vehicules.filter(v => {isVehiculeFormValid
+        const vehiculesFiltrés = vehicules.filter(v => {
+            isVehiculeFormValid
             // Recherche dans l'immatriculation
             const matchImmat = v.immatriculation.toLowerCase().includes(termesRecherche);
 
@@ -470,7 +473,7 @@ export default function VehiculeManagement() {
             const matchCouleur = v.couleur ? v.couleur.toLowerCase().includes(termesRecherche) : false;
 
             // Retourner true si au moins un critère correspond
-            return matchImmat || matchMarque || matchModele  || matchCouleur;
+            return matchImmat || matchMarque || matchModele || matchCouleur;
         });
 
         setVehiculesFiltres(vehiculesFiltrés);
@@ -547,27 +550,28 @@ export default function VehiculeManagement() {
     }, [vehiculeForm, existingImmatriculations, selectedVehicule, selectedCountry]);
 
 
-    const showError = (message: string) => {
-        console.error("❌ Erreur:", message);
-        setError(typeof message === 'string' ? message : 'Une erreur est survenue');
-        setTimeout(() => setError(""), 5000);
-    };
-
-    const showSuccess = (message: string) => {
-        console.log("✅ Succès:", message);
-        alert(typeof message === 'string' ? message : 'Opération réussie');
-    };
-
     const fetchVehicules = async () => {
         try {
+            const token = getAuthToken();
+
+            if (!token || token === 'null' || token === 'undefined') {
+                window.location.href = '/auth/sign-in';
+                return;
+            }
             setError("");
             const response = await axios.get(`${API_BASE_URL}/get-all-mes-vehicules`, {
-                headers: { Authorization: `Bearer ${getAuthToken()}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
             setVehicules(response.data);
         } catch (error: any) {
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
+                window.location.href = '/auth/sign-in';
+                return;
+            }
             console.error("❌ Erreur lors du chargement des véhicules:", error);
-            showError(`Erreur chargement véhicules: ${error.response?.data?.error || error.message}`);
+            showAlert("error", "erreur chargement", `Erreur chargement véhicules: ${error.response?.data?.error || error.message}`);
         }
     };
 
@@ -698,7 +702,7 @@ export default function VehiculeManagement() {
 
         // ✅ VALIDATION FINALE AVANT SOUMISSION
         if (!isVehiculeFormValid()) {
-            showError("Veuillez corriger les erreurs dans le formulaire");
+            showAlert("error", "erreur formulaire", "Veuillez corriger les erreurs dans le formulaire");
             return;
         }
 
@@ -715,55 +719,93 @@ export default function VehiculeManagement() {
                 typeCarburant: vehiculeForm.typeCarburant,
                 kilometrage: vehiculeForm.kilometrage ? parseInt(vehiculeForm.kilometrage.replace(/\s/g, '')) : undefined,
                 carteGrise: vehiculeForm.carteGrise?.numeroCG || vehiculeForm.carteGrise?.numeroChassis ? {
-                numeroCG: vehiculeForm.carteGrise.numeroCG?.trim() || undefined,
-                numeroChassis: vehiculeForm.carteGrise.numeroChassis?.trim() || undefined,
-                dateMiseCirculation: vehiculeForm.carteGrise.dateMiseCirculation || undefined,
-                puissanceFiscale: vehiculeForm.carteGrise.puissanceFiscale ? parseInt(vehiculeForm.carteGrise.puissanceFiscale) : undefined,
-                genre: vehiculeForm.carteGrise.genre || undefined,
-                nombrePlaces: vehiculeForm.carteGrise.nombrePlaces ? parseInt(vehiculeForm.carteGrise.nombrePlaces) : undefined,
-                dateVisite: vehiculeForm.carteGrise.dateVisite || undefined,
-                dateProchaineVisite: vehiculeForm.carteGrise.dateProchaineVisite || undefined
-            } : undefined
+                    numeroCG: vehiculeForm.carteGrise.numeroCG?.trim() || undefined,
+                    numeroChassis: vehiculeForm.carteGrise.numeroChassis?.trim() || undefined,
+                    dateMiseCirculation: vehiculeForm.carteGrise.dateMiseCirculation || undefined,
+                    puissanceFiscale: vehiculeForm.carteGrise.puissanceFiscale ? parseInt(vehiculeForm.carteGrise.puissanceFiscale) : undefined,
+                    genre: vehiculeForm.carteGrise.genre || undefined,
+                    nombrePlaces: vehiculeForm.carteGrise.nombrePlaces ? parseInt(vehiculeForm.carteGrise.nombrePlaces) : undefined,
+                    dateVisite: vehiculeForm.carteGrise.dateVisite || undefined,
+                    dateProchaineVisite: vehiculeForm.carteGrise.dateProchaineVisite || undefined
+                } : undefined
             };
 
             console.log("📤 Données à envoyer:", submitData);
 
             if (modalType === "add") {
+                const token = getAuthToken();
+
+                if (!token || token === 'null' || token === 'undefined') {
+                    window.location.href = '/auth/sign-in';
+                    return;
+                }
                 submitData.proprietaireId = vehiculeForm.proprietaireId;
                 await axios.post(`${API_BASE_URL}/create-mes-vehicules`, submitData, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
+                    headers: { Authorization: `Bearer ${token}` }
                 });
-                showSuccess("Véhicule ajouté avec succès!");
+                showAlert("success","vehicule ajouter","Véhicule ajouté avec succès!");
             } else if (modalType === "edit" && selectedVehicule) {
+                const token = getAuthToken();
+
+                if (!token || token === 'null' || token === 'undefined') {
+                    window.location.href = '/auth/sign-in';
+                    return;
+                }
                 await axios.put(`${API_BASE_URL}/update-mes-vehicules/${selectedVehicule._id}`, submitData, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
+                    headers: { Authorization: `Bearer ${token}` }
                 });
-                showSuccess("Véhicule modifié avec succès!");
+                showAlert("success","vehicule modifie","Véhicule modifié avec succès!");
             }
 
             fetchVehicules();
             setShowVehiculeModal(false);
         } catch (error: any) {
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
+                window.location.href = '/auth/sign-in';
+                return;
+            }
             console.error("❌ Erreur soumission véhicule:", error);
             const errorMessage = error.response?.data?.error || error.message;
-            showError(`Erreur: ${errorMessage}`);
+            showAlert("error", "erreur soumission", `Erreur: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
     };
 
     const deleteVehicule = async (vehicule: Vehicule) => {
-        if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ?`)) {
+            const isConfirmed = await confirm({
+    title: "Suppression du véhicule",
+    message: `Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ? Cette action est irréversible.`,
+    confirmText: "Supprimer",
+    cancelText: "Annuler",
+  });
+      if (!isConfirmed) {
+        return; // Annulation : on ne fait rien
+    } {
             try {
+                const token = getAuthToken();
+
+                if (!token || token === 'null' || token === 'undefined') {
+                    window.location.href = '/auth/sign-in';
+                    return;
+                }
                 await axios.delete(`${API_BASE_URL}/delete-mes-vehicules/${vehicule._id}`, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
+                    headers: { Authorization: `Bearer ${token}` }
                 });;
                 fetchVehicules();
-                showSuccess("Véhicule supprimé avec succès!");
+                showAlert("success","vehicule supprime","Véhicule supprimé avec succès!");
             } catch (error: any) {
+                if (error.response?.status === 401) {
+                    localStorage.removeItem('token');
+                    sessionStorage.removeItem('token');
+                    window.location.href = '/auth/sign-in';
+                    return;
+                }
                 console.error("❌ Erreur suppression:", error);
                 const errorMessage = error.response?.data?.error || error.message;
-                showError(`Erreur suppression: ${errorMessage}`);
+                showAlert("error", "erreur suppression", `Erreur suppression: ${errorMessage}`);
             }
         }
     };
@@ -781,7 +823,7 @@ export default function VehiculeManagement() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -915,7 +957,7 @@ export default function VehiculeManagement() {
                                         </div>
                                     </div>
 
-                               
+
 
                                     {/* Détails du véhicule */}
                                     <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-4">
@@ -1005,7 +1047,7 @@ export default function VehiculeManagement() {
 
                                 <form onSubmit={handleVehiculeSubmit}>
                                     <div className="space-y-6">
-                                     
+
 
                                         {/* Pays d'immatriculation */}
                                         <div className="mb-4">

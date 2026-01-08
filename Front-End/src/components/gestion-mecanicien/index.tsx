@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Eye, Search, User, Calendar, Phone, Mail, Briefcase, AlertCircle, Check, X, Settings, Filter, Grid, List, MoreVertical } from 'lucide-react';
 import axios from 'axios';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
 
 // Service interface to match backend
 interface Service {
@@ -26,6 +28,8 @@ interface Mecanicien {
   permisConduire: 'A' | 'B' | 'C' | 'D' | 'E';
   createdAt: string;
   updatedAt: string;
+  roleId?: string;      // ⭐ AJOUTER
+  roleName?: string;
 }
 
 interface FormData {
@@ -41,12 +45,15 @@ interface FormData {
   services: Service[];
   experience: string;
   permisConduire: 'A' | 'B' | 'C' | 'D' | 'E';
+  roleId: string;
 }
 
 type ViewType = 'grid' | 'list' | 'create';
 type FilterStatus = 'all' | 'Actif' | 'Congé' | 'Arrêt maladie' | 'Suspendu' | 'Démissionné';
 
 const MecaniciensManager = () => {
+  const [availableRoles, setAvailableRoles] = useState<{ _id: string; name: string }[]>([]);
+  const [employeeType, setEmployeeType] = useState<'employe_bureau' | 'mecanicien'>('employe_bureau');
   const [activeView, setActiveView] = useState<ViewType>('grid');
   const [mecaniciens, setMecaniciens] = useState<Mecanicien[]>([]);
   const [selectedMecanicien, setSelectedMecanicien] = useState<Mecanicien | null>(null);
@@ -61,7 +68,8 @@ const MecaniciensManager = () => {
   const getAuthToken = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
-
+const { showAlert } = useGlobalAlert();
+const { confirm } = useConfirm();
   // Formulaire pour nouveau/modifier mécanicien
   const [formData, setFormData] = useState<FormData>({
     nom: '',
@@ -76,54 +84,185 @@ const MecaniciensManager = () => {
     services: [],
     experience: '',
     permisConduire: 'B',
+    roleId: '',
   });
 
   // API calls
   const API_BASE_URL = 'http://localhost:5000/api';
 
-  const mecaniciensApi = {
-    getAll: async (): Promise<Mecanicien[]> => {
-      const { data } = await axios.get(`${API_BASE_URL}/getAllMecaniciens`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+
+  const getAllRoles = async () => {
+    try {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      const { data } = await axios.get(`${API_BASE_URL}/getAllRoles/for/admin`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       return data;
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
+      console.error('Erreur chargement rôles:', error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const roles = await getAllRoles();
+        setAvailableRoles(roles);
+      } catch (error) {
+        console.error('Erreur chargement rôles:', error);
+        setAvailableRoles([]);
+      }
+    };
+    fetchRoles();
+  }, []);
+
+  const mecaniciensApi = {
+
+    getAll: async (): Promise<Mecanicien[]> => {
+      try {
+        const token = getAuthToken();
+        if (!token || token === 'null' || token === 'undefined') {
+          window.location.href = '/auth/sign-in';
+          throw new Error("Token invalide");
+        }
+        const { data } = await axios.get(`${API_BASE_URL}/getAllMecaniciens`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        return data;
+      } catch (error: any) {
+        // ⭐ AJOUTER la gestion 401/403
+        if (error.response?.status === 403) {
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission");
+          throw error;
+        }
+        if (error.response?.status === 401) {
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
+        throw error;
+      }
     },
 
     getById: async (id: string): Promise<Mecanicien> => {
-      const { data } = await axios.get(`${API_BASE_URL}/getMecanicienById/${id}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-      return data;
+      try {
+        const token = getAuthToken();
+        if (!token || token === 'null' || token === 'undefined') {
+          window.location.href = '/auth/sign-in';
+          throw new Error("Token invalide"); // ⭐ Au lieu de return
+        }
+        const { data } = await axios.get(`${API_BASE_URL}/getMecanicienById/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        return data;
+      } catch (error: any) {
+        // ⭐ AJOUTER la gestion 401/403
+        if (error.response?.status === 403) {
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission");
+          throw error;
+        }
+        if (error.response?.status === 401) {
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
+        throw error;
+      }
     },
 
     create: async (data: object): Promise<Mecanicien> => {
       try {
+        const token = getAuthToken();
+        if (!token || token === 'null' || token === 'undefined') {
+          window.location.href = '/auth/sign-in';
+          throw new Error("Token invalide"); // ⭐ Au lieu de return
+        }
         const res = await axios.post(`${API_BASE_URL}/createMecanicien`, data, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
+          headers: { Authorization: `Bearer ${token}` }
+        });
         return res.data;
       } catch (error: any) {
+        if (error.response?.status === 403) {
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission");
+          throw error;
+        }
+        if (error.response?.status === 401) {
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
         throw new Error(error.response?.data?.error || "Erreur lors de la création");
       }
     },
 
     update: async (id: string, data: object): Promise<Mecanicien> => {
       try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          throw new Error("Token invalide");
+        }
         const res = await axios.put(`${API_BASE_URL}/updateMecanicien/${id}`, data, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
+          headers: { Authorization: `Bearer ${token}` }
+        });
         return res.data;
       } catch (error: any) {
+        if (error.response?.status === 403) {
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission ");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
         throw new Error(error.response?.data?.error || "Erreur lors de la modification");
       }
     },
 
     delete: async (id: string): Promise<void> => {
       try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          throw new Error("Token invalide");
+        }
         await axios.delete(`${API_BASE_URL}/deleteMecanicien/${id}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
+          headers: { Authorization: `Bearer ${token}` }
+        });
       } catch (error: any) {
+        if (error.response?.status === 403) {
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission ");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
         throw new Error(error.response?.data?.error || "Erreur lors de la suppression");
       }
     }
@@ -137,7 +276,7 @@ const MecaniciensManager = () => {
       setMecaniciens(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
-      showError(errorMessage);
+      showAlert('error', 'Erreur', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -149,12 +288,50 @@ const MecaniciensManager = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/getAllServices', {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-        setAvailableServices(response.data);
-      } catch (error) {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
+
+        const response = await axios.get('http://localhost:5000/api/services/available-for-mechanics', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        // ⭐ CORRECTION : Gérer la structure de la réponse
+        console.log('📥 Services reçus:', response.data);
+
+        // Si la réponse est un objet avec une propriété "services"
+        if (response.data && Array.isArray(response.data.services)) {
+          setAvailableServices(response.data.services);
+        }
+        // Si la réponse est directement un tableau
+        else if (Array.isArray(response.data)) {
+          setAvailableServices(response.data);
+        }
+        // Sinon, initialiser avec un tableau vide
+        else {
+          console.warn('⚠️ Format de réponse inattendu:', response.data);
+          setAvailableServices([]);
+        }
+
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          showAlert("error", "Erreur", "❌ Accès refusé : Vous n'avez pas la permission");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          showAlert("error", "Erreur", "❌ Session expirée : Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
+
         console.error('Erreur lors du chargement des services:', error);
+        // ⭐ En cas d'erreur, initialiser avec un tableau vide
+        setAvailableServices([]);
       }
     };
     fetchServices();
@@ -177,7 +354,7 @@ const MecaniciensManager = () => {
       );
 
       if (isAlreadySelected) {
-        showError('Ce service a déjà été sélectionné');
+        showAlert('error', 'Erreur', 'Ce service a déjà été sélectionné');
         return;
       }
 
@@ -204,20 +381,20 @@ const MecaniciensManager = () => {
     try {
       setLoading(true);
 
-      if (!formData.nom || !formData.telephone || !formData.email) {
-        showError('Veuillez remplir tous les champs obligatoires');
+      if (!formData.nom || !formData.telephone || !formData.email || !formData.roleId) {
+        showAlert('error', 'Erreur', 'Veuillez remplir tous les champs obligatoires');
         return;
       }
 
       if (formData.services.length === 0) {
-        showError('Au moins un service doit être sélectionné');
+        showAlert('error', 'Erreur', 'Au moins un service doit être sélectionné');
         return;
       }
 
       // Validate that all services have both serviceId and name
       const invalidServices = formData.services.filter(service => !service.serviceId || !service.name);
       if (invalidServices.length > 0) {
-        showError('Veuillez sélectionner tous les services');
+        showAlert('error', 'Erreur', 'Veuillez sélectionner tous les services');
         return;
       }
 
@@ -229,10 +406,10 @@ const MecaniciensManager = () => {
 
       if (isEditMode && selectedMecanicien) {
         await mecaniciensApi.update(selectedMecanicien._id, apiData);
-        showSuccess('Employé modifié avec succès !');
+        showAlert('success', 'Succès', 'Employé modifié avec succès !');
       } else {
         await mecaniciensApi.create(apiData);
-        showSuccess('Employé créé avec succès !');
+        showAlert('success', 'Succès', 'Employé créé avec succès !');
       }
 
       resetForm();
@@ -241,7 +418,7 @@ const MecaniciensManager = () => {
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
-      showError(errorMessage);
+      showAlert('error', 'Erreur', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -249,16 +426,23 @@ const MecaniciensManager = () => {
 
   // Delete mécanicien
   const deleteMecanicien = async (id: string): Promise<void> => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce mécanicien ?')) return;
 
+    const isConfirmed = await confirm({
+  title: "Suppression du client",
+  message: "Êtes-vous sûr de vouloir supprimer ce mécanicien ?",
+  confirmText: "Supprimer",
+  cancelText: "Annuler",
+});
+
+if (!isConfirmed) return;
     try {
       setLoading(true);
       await mecaniciensApi.delete(id);
-      showSuccess('Employé supprimé avec succès');
+      showAlert('success', 'Succès', 'Employé supprimé avec succès');
       await loadMecaniciens();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
-      showError(errorMessage);
+      showAlert('error', 'Erreur', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -281,6 +465,7 @@ const MecaniciensManager = () => {
       services: mecanicien.services || [],
       experience: mecanicien.experience || '',
       permisConduire: mecanicien.permisConduire || 'B',
+      roleId: mecanicien.roleId || '',
     });
     setActiveView('create');
   };
@@ -300,21 +485,12 @@ const MecaniciensManager = () => {
       services: [],
       experience: '',
       permisConduire: 'B',
+      roleId: '',
     });
     setSelectedMecanicien(null);
     setIsEditMode(false);
   };
 
-  // Show messages
-  const showError = (message: string): void => {
-    setError(message);
-    setTimeout(() => setError(''), 5000);
-  };
-
-  const showSuccess = (message: string): void => {
-    setSuccess(message);
-    setTimeout(() => setSuccess(''), 3000);
-  };
 
   // Filter mécaniciens
   const filteredMecaniciens = mecaniciens.filter(mec => {
@@ -345,8 +521,9 @@ const MecaniciensManager = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen ">
       <div className="max-w-7xl mx-auto p-6">
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -356,6 +533,7 @@ const MecaniciensManager = () => {
               </h1>
               <p className="text-gray-600 mt-2">Gestion moderne du personnel mécanique</p>
             </div>
+
             <div className="flex items-center space-x-3">
               <div className="bg-white rounded-xl p-2 shadow-sm border border-gray-200">
                 <div className="flex items-center space-x-1">
@@ -460,7 +638,7 @@ const MecaniciensManager = () => {
                         <p className="text-sm text-gray-500">#{mecanicien.matricule}</p>
                       </div>
                     </div>
-                   
+
                   </div>
 
                   <div className="space-y-3">
@@ -469,6 +647,11 @@ const MecaniciensManager = () => {
                         }`}>
                         {mecanicien.poste}
                       </span>
+                      {mecanicien.roleName && (
+                        <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs font-medium">
+                          {mecanicien.roleName}
+                        </span>
+                      )}
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${statusColors[mecanicien.statut] || 'bg-gray-100 text-gray-800 border-gray-200'
                         }`}>
                         {mecanicien.statut}
@@ -556,6 +739,9 @@ const MecaniciensManager = () => {
                       Poste
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Rôle
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Statut
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -600,6 +786,11 @@ const MecaniciensManager = () => {
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${posteBadgeColors[mecanicien.poste] || 'bg-gray-100 text-gray-800 border-gray-200'
                           }`}>
                           {mecanicien.poste}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">
+                          {mecanicien.roleName || 'Non défini'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -671,6 +862,22 @@ const MecaniciensManager = () => {
                 {isEditMode ? 'Mettre à jour les informations' : 'Ajouter un nouveau membre à l\'équipe'}
               </p>
             </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Type d'employé *
+              </label>
+              <select
+                value={employeeType}
+                onChange={(e) => {
+                  setEmployeeType(e.target.value);
+                  // Réinitialiser les champs selon le type
+                }}
+                className="w-full border border-gray-300 rounded-xl px-4 py-3"
+              >
+                <option value="employe_bureau">Employé de Bureau</option>
+                <option value="mecanicien">Employé de Garage</option>
+              </select>
+            </div>
 
             <div className="p-8 space-y-8">
               {/* Informations personnelles */}
@@ -693,17 +900,19 @@ const MecaniciensManager = () => {
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Date de Naissance
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.dateNaissance}
-                      onChange={(e) => setFormData({ ...formData, dateNaissance: e.target.value })}
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    />
-                  </div>
+                  {employeeType === 'mecanicien' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Date de Naissance
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.dateNaissance}
+                        onChange={(e) => setFormData({ ...formData, dateNaissance: e.target.value })}
+                        className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      />
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Téléphone *
@@ -730,22 +939,24 @@ const MecaniciensManager = () => {
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Permis de Conduire
-                    </label>
-                    <select
-                      value={formData.permisConduire}
-                      onChange={(e) => setFormData({ ...formData, permisConduire: e.target.value })}
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    >
-                      <option value="A">Catégorie A (Moto)</option>
-                      <option value="B">Catégorie B (Voiture)</option>
-                      <option value="C">Catégorie C (Poids lourd)</option>
-                      <option value="D">Catégorie D (Transport)</option>
-                      <option value="E">Catégorie E (Remorque)</option>
-                    </select>
-                  </div>
+                  {employeeType === 'mecanicien' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Permis de Conduire
+                      </label>
+                      <select
+                        value={formData.permisConduire}
+                        onChange={(e) => setFormData({ ...formData, permisConduire: e.target.value })}
+                        className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      >
+                        <option value="A">Catégorie A (Moto)</option>
+                        <option value="B">Catégorie B (Voiture)</option>
+                        <option value="C">Catégorie C (Poids lourd)</option>
+                        <option value="D">Catégorie D (Transport)</option>
+                        <option value="E">Catégorie E (Remorque)</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -770,6 +981,25 @@ const MecaniciensManager = () => {
                       <option value="Carrossier">Carrossier</option>
                       <option value="Chef d'équipe">Chef d'équipe</option>
                       <option value="Apprenti">Apprenti</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Rôle *
+                    </label>
+                    <select
+                      value={formData.roleId}
+                      onChange={(e) => setFormData({ ...formData, roleId: e.target.value })}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      required
+                    >
+                      <option value="">Sélectionner un rôle</option>
+                      {availableRoles.map((role) => (
+                        <option key={role._id} value={role._id}>
+                          {role.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -925,7 +1155,7 @@ const MecaniciensManager = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-2xl font-bold text-white">Profil Détaillé</h2>
-                    <p className="text-gray-300 mt-1">{selectedMecanicien.nom}</p>
+                    <p className="text-gray-300 mt-1">Employé Nom : {selectedMecanicien.nom}</p>
                   </div>
                   <button
                     onClick={() => setShowModal(false)}
@@ -988,6 +1218,10 @@ const MecaniciensManager = () => {
                           }`}>
                           {selectedMecanicien.poste}
                         </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-gray-600">Rôle:</span>
+                        <span className="text-gray-900 font-semibold">{selectedMecanicien.roleName || 'Non défini'}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="font-medium text-gray-600">Statut:</span>

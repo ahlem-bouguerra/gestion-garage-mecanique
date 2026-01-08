@@ -368,7 +368,7 @@ const handleGarageSelect = (garageId: string) => {
     if (!selectedGarage) return; // pas de garage => pas de services
 
     try {
-      const res = await axios.get("http://localhost:5000/api/getAllServices");
+      const res = await axios.get("http://localhost:5000/api/services/available-for-mechanics");
       
       if (Array.isArray(res.data)) {
         setServices(res.data);

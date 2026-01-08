@@ -4,120 +4,240 @@ import { useRouter } from 'next/navigation';
 import { Calendar, Clock, User, Phone, Mail, FileText, MapPin, ArrowLeft, Send } from 'lucide-react';
 import { useSearchParams } from "next/navigation";
 import axios from 'axios';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
 
-interface Service {
+export interface Service {
   _id: string;
   name: string;
   statut: string;
   description?: string;
+  garageId?: string;
 }
 
+export interface Voiture {
+  _id: string;
+  marque: string;
+  modele: string;
+  immatriculation: string;
+  annee?: number;
+  couleur?: string;
+  numeroSerie?: string;
+}
 
+export interface CurrentUser {
+  _id: string;
+  username: string;
+  phone: string;
+  email?: string;
+  role?: string;
+  location?: {
+    type: string;
+    coordinates: [number, number];
+  };
+}
+
+export interface GarageData {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  governorate: string;
+  phone?: string;
+  email?: string;
+}
+
+export interface CreneauDemande {
+  date: string;
+  heureDebut: string;
+}
+
+export interface FormData {
+  clientId: string;
+  vehiculeId: string;
+  clientName: string;
+  clientPhone: string;
+  clientEmail: string;
+  serviceId: string;
+  date: string;
+  heureDebut: string;
+  descriptionDepannage: string;
+}
+
+export interface FormErrors {
+  clientName?: string;
+  clientPhone?: string;
+  clientEmail?: string;
+  vehiculeId?: string;
+  serviceId?: string;
+  date?: string;
+  heureDebut?: string;
+  descriptionDepannage?: string;
+  submit?: string;
+}
+
+export interface ReservationData {
+  garageId: string;
+  clientId: string;
+  vehiculeId: string | null;
+  clientName: string;
+  clientPhone: string;
+  clientEmail: string | null;
+  serviceId: string;
+  creneauDemande: CreneauDemande;
+  descriptionDepannage: string;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
+
+export const API_BASE_URL = 'http://localhost:5000/api';
 const ReservationForm = () => {
-    const [voitures, setVoitures] = useState([]); // Liste de voitures
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const [garageData, setGarageData] = useState<any>({});
-    const [services, setServices] = useState<Service[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
-    const [currentUser, setCurrentUser] = useState(null);
-    const [formData, setFormData] = useState({
-        clientID:'',
-        vehiculeId:'',
-        clientName: '',
-        clientPhone: '',
-        clientEmail: '',
-        serviceId: '',
-        date: '',
-        heureDebut: '',
-        descriptionDepannage: '',
-    });
-    const [errors, setErrors] = useState({});
-    const [success, setSuccess] = useState(false);
-    const [selectedGarage, setSelectedGarage] = useState<Garage | null>(null);
+   const [voitures, setVoitures] = useState<Voiture[]>([]);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [garageData, setGarageData] = useState<GarageData>({
+    id: '',
+    name: '',
+    address: '',
+    city: '',
+    governorate: '',
+    phone: '',
+    email: ''
+  });
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [formData, setFormData] = useState<FormData>({
+    clientId: '',
+    vehiculeId: '',
+    clientName: '',
+    clientPhone: '',
+    clientEmail: '',
+    serviceId: '',
+    date: '',
+    heureDebut: '',
+    descriptionDepannage: '',
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [success, setSuccess] = useState<boolean>(false);
+  const { showAlert } = useGlobalAlert();
+
     const getAuthToken = () => {
-    return localStorage.getItem('token') || sessionStorage.getItem('token');
+        return localStorage.getItem('token') || sessionStorage.getItem('token');
     };
 
-    useEffect(() => {
-        if (searchParams) {
-            setGarageData({
-                id: searchParams.get("garageId"),
-                name: searchParams.get("garageName"),
-                address: searchParams.get("garageAddress"),
-                city: searchParams.get("garageCity"),
-                governorate: searchParams.get("garageGovernorate"),
-                phone: searchParams.get("garagePhone"),
-                email: searchParams.get("garageEmail"),
-            });
-        }
-    }, [searchParams]);
-
-
+  useEffect(() => {
+    if (searchParams) {
+      setGarageData({
+        id: searchParams.get("garageId") || '',
+        name: searchParams.get("garageName") || '',
+        address: searchParams.get("garageAddress") || '',
+        city: searchParams.get("garageCity") || '',
+        governorate: searchParams.get("garageGovernorate") || '',
+        phone: searchParams.get("garagePhone") || '',
+        email: searchParams.get("garageEmail") || '',
+      });
+    }
+  }, [searchParams]);
     useEffect(() => {
         const fetchUserWithLocation = async () => {
             const token = localStorage.getItem("token");
-            if (!token) return;
+            if (!token) {
+                console.log("Pas de token, utilisateur non connecté");
+                return;
+            }
 
             try {
-                const response = await axios.get("http://localhost:5000/api/get-Client-profile", {
+                const token = getAuthToken();
+
+                if (!token || token === 'null' || token === 'undefined') {
+                    window.location.href = '/auth/sign-in';
+                    return;
+                }
+                const response = await axios.get(`${API_BASE_URL}/client/profile`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                setCurrentUser(response.data);
-            } catch (error) {
-                console.error("Erreur:", error);
+
+                // C'ÉTAIT ÇA LE BUG DEPUIS LE DÉBUT !!!
+                const user = response.data.data;  // ← .data.data, pas .data !
+
+                console.log("Profil chargé avec succès :", user);
+
+                setCurrentUser(user);
+
+                setFormData(prev => ({
+                    ...prev,
+                    clientId: user._id,
+                    clientName: user.username || '',
+                    clientPhone: user.phone || '',
+                    clientEmail: user.email || '',
+                }));
+
+            } catch (error: any) {
+                console.error("Erreur chargement profil:", error.response?.data || error.message);
             }
         };
 
         fetchUserWithLocation();
     }, []);
 
-      useEffect(() => {
-    const fetchVoitures = async () => {
-         const token = localStorage.getItem("token");
+    useEffect(() => {
+        const fetchVoitures = async () => {
+            const token = localStorage.getItem("token");
             if (!token) return;
-      try {
-        const res = await axios.get("http://localhost:5000/api/get-all-mes-vehicules",{
+            try {
+                const res = await axios.get(`${API_BASE_URL}/get-all-mes-vehicules`, {
                     headers: { Authorization: `Bearer ${token}` },
-                }); 
-        // ✅ adapte cette URL à ton API réelle
-        setVoitures(res.data);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des voitures :", error);
-      }
-    };
+                });
+                // ✅ adapte cette URL à ton API réelle
+                setVoitures(res.data);
+            } catch (error) {
+                console.error("Erreur lors de la récupération des voitures :", error);
+            }
+        };
 
-    fetchVoitures();
-  }, []);
+        fetchVoitures();
+    }, []);
 
-useEffect(() => {
-  const fetchServices = async () => {
-    if (!garageData.id) {  // ← Utilise garageData.id
-      setServices([]);
-      return;
-    }
+    useEffect(() => {
+        const fetchServices = async () => {
+            if (!garageData.id) {  // ← Utilise garageData.id
+                setServices([]);
+                return;
+            }
 
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/api/services/garage/${garageData.id}`  // ← ICI
-      );
-    
-    if (Array.isArray(res.data)) {
-      setServices(res.data);
-    } else if (res.data.success && Array.isArray(res.data.services)) {
-      setServices(res.data.services);
-    } else {
-      setServices([]);
-    }
-   } catch (err: any) {
-      console.error("❌ Erreur:", err.response?.data || err.message);
-      setServices([]);
-    }
-  };
+            try {
 
-  fetchServices();
-}, [garageData.id]);  
+                const token = getAuthToken();
+                if (!token || token === 'null' || token === 'undefined') {
+                    window.location.href = '/auth/sign-in';
+                    return;
+                }
+                const res = await axios.get(
+                    `${API_BASE_URL}/services/garage/${garageData.id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+                );
+
+                if (Array.isArray(res.data)) {
+                    setServices(res.data);
+                } else if (res.data.success && Array.isArray(res.data.services)) {
+                    setServices(res.data.services);
+                } else {
+                    setServices([]);
+                }
+            } catch (err: any) {
+                console.error("❌ Erreur:", err.response?.data || err.message);
+                setServices([]);
+            }
+        };
+
+        fetchServices();
+    }, [garageData.id]);
 
     // Générer les options d'heures (8h à 18h)
     const generateTimeOptions = () => {
@@ -131,59 +251,62 @@ useEffect(() => {
 
     const timeOptions = generateTimeOptions();
 
-    const validateForm = () => {
-        const newErrors = {};
+const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
 
-        if (!formData.clientName.trim()) newErrors.clientName = 'Le nom est requis';
-        if (!formData.clientPhone.trim()) newErrors.clientPhone = 'Le téléphone est requis';
-        if (!formData.serviceId) newErrors.serviceId = 'Veuillez sélectionner un service';
-        if (!formData.date) newErrors.date = 'La date est requise';
-        if (!formData.heureDebut) newErrors.heureDebut = 'L\'heure de début est requise';
-        if (!formData.descriptionDepannage.trim()) newErrors.descriptionDepannage = 'La description est requise';
+    if (!formData.clientName.trim()) newErrors.clientName = 'Le nom est requis';
+    if (!formData.clientPhone.trim()) newErrors.clientPhone = 'Le téléphone est requis';
+    if (!formData.serviceId) newErrors.serviceId = 'Veuillez sélectionner un service';
+    if (!formData.vehiculeId) newErrors.vehiculeId = 'Veuillez sélectionner une voiture';
+    if (!formData.date) newErrors.date = 'La date est requise';
+    if (!formData.heureDebut) newErrors.heureDebut = 'L\'heure de début est requise';
+    if (!formData.descriptionDepannage.trim()) newErrors.descriptionDepannage = 'La description est requise';
 
-        // Validation de la date (pas dans le passé)
-        if (formData.date && new Date(formData.date) < new Date().setHours(0, 0, 0, 0)) {
-            newErrors.date = 'La date ne peut pas être dans le passé';
+    // Validation de la date (pas dans le passé)
+    if (formData.date && new Date(formData.date) < new Date(new Date().setHours(0, 0, 0, 0))) {
+      newErrors.date = 'La date ne peut pas être dans le passé';
+    }
+
+    // Validation du téléphone (format tunisien basique)
+    const phoneRegex = /^(\+216|216)?[2-9][0-9]{7}$/;
+    if (formData.clientPhone && !phoneRegex.test(formData.clientPhone.replace(/\s/g, ''))) {
+      newErrors.clientPhone = 'Format de téléphone invalide (ex: +216 20 123 456)';
+    }
+
+    // Validation de l'email si fourni
+    if (formData.clientEmail && !/\S+@\S+\.\S+/.test(formData.clientEmail)) {
+      newErrors.clientEmail = 'Format d\'email invalide';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+    const handleSubmit = async () => {
+        console.log("Button cliqué !");
+
+        if (!validateForm()) {
+            console.log("Validation échouée", errors);
+            return;
         }
 
-        // Validation du téléphone (format tunisien basique)
-        const phoneRegex = /^(\+216|216)?[2-9][0-9]{7}$/;
-        if (formData.clientPhone && !phoneRegex.test(formData.clientPhone.replace(/\s/g, ''))) {
-            newErrors.clientPhone = 'Format de téléphone invalide (ex: +216 20 123 456)';
+        if (!formData.clientId) {
+            console.error("clientId manquant !", formData);
+            setErrors({ submit: "Utilisateur non connecté" });
+            return;
         }
 
-        // Validation de l'email si fourni
-        if (formData.clientEmail && !/\S+@\S+\.\S+/.test(formData.clientEmail)) {
-            newErrors.clientEmail = 'Format d\'email invalide';
-        }
+        setSubmitting(true);
+        setErrors({});
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+        const token = getAuthToken();
+        console.log("Token utilisé :", token ? "Présent" : "ABSENT");
 
-    useEffect(() => {
-    if (!currentUser) return;
-    setFormData((prev) => ({
-        ...prev,
-        clientName: currentUser.username || '',
-        clientPhone: currentUser.phone || '',
-        clientEmail: currentUser.email || '',
-    }));
-}, [currentUser]);
-
-
-const handleSubmit = async () => {
-    console.log("Button cliqué !");
-    if (!validateForm()) return;
-
-    setSubmitting(true);
-    setErrors({});
-
-    try {
         const reservationData = {
             garageId: garageData.id,
-            clientId: currentUser?._id,
-            vehiculeId: formData.vehiculeId,
+            clientId: formData.clientId,
+            vehiculeId: formData.vehiculeId || null,
             clientName: formData.clientName.trim(),
             clientPhone: formData.clientPhone.trim(),
             clientEmail: formData.clientEmail.trim() || null,
@@ -195,27 +318,58 @@ const handleSubmit = async () => {
             descriptionDepannage: formData.descriptionDepannage.trim(),
         };
 
-        // 🔹 Appel API POST réel
-        const response = await axios.post(
-            'http://localhost:5000/api/create-reservation',
-            reservationData,{
-      headers: { Authorization: `Bearer ${getAuthToken()}` }
-    }
-        );
+        console.log("Données envoyées :", reservationData);
 
-        if (response.data.success) {
-            setSuccess(true);
-        } else {
-            setErrors({ submit: 'Erreur lors de la création de la réservation.' });
+        try {
+            const token = getAuthToken();
+            if (!token || token === 'null' || token === 'undefined') {
+                window.location.href = '/auth/sign-in';
+                return;
+            }
+            const response = await axios.post(
+                 `${API_BASE_URL}/create-reservation`,
+                {
+                    garageId: garageData.id,
+                    clientId: formData.clientId,
+                    vehiculeId: formData.vehiculeId || null,
+                    clientName: formData.clientName.trim(),
+                    clientPhone: formData.clientPhone.trim(),
+                    clientEmail: formData.clientEmail.trim() || null,
+                    serviceId: formData.serviceId,
+                    creneauDemande: {
+                        date: formData.date,
+                        heureDebut: formData.heureDebut,
+                    },
+                    descriptionDepannage: formData.descriptionDepannage.trim(),
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            
+
+            console.log("Réponse serveur :", response.data);
+
+            if (response.data.success) {
+                setSuccess(true);
+                showAlert("success", "reservation envoyée", "Réservation envoyée avec succès !");
+            } else {
+                setErrors({ submit: response.data.message || 'Erreur serveur' });
+                showAlert("error", "erreur", "Erreur lors de l'envoi de la réservation.");
+            }
+
+        } catch (error: any) {
+            console.error("ERREUR COMPLÈTE :", error);
+            console.error("Response data:", error.response?.data);
+            console.error("Status:", error.response?.status);
+
+            setErrors({
+                submit: error.response?.data?.message || 'Erreur réseau ou serveur'
+            });
+        } finally {
+            setSubmitting(false);
         }
-
-    } catch (error: any) {
-        console.error('Erreur:', error.response?.data || error.message);
-        setErrors({ submit: 'Erreur de connexion. Veuillez réessayer.' });
-    } finally {
-        setSubmitting(false);
-    }
-};
+    };
 
 
     const handleGoBack = () => {
@@ -380,43 +534,27 @@ const handleSubmit = async () => {
 
 
 
-                                <div className="p-4">
-      <label htmlFor="voiture" className="block mb-2 font-semibold text-gray-700">
-        Sélectionner une voiture :
-      </label>
-      <select
-        id="voiture"
-        value={formData.vehiculeId}
-        onChange={(e) => setFormData({...formData, vehiculeId: e.target.value})}
-        className="border border-gray-300 rounded-md p-2 w-full"
-      >
-        <option value="">-- Choisir une voiture --</option>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Sélectionner une voiture :
+                                    </label>
+                                    <select
+                                        id="voiture"
+                                        value={formData.vehiculeId}
+                                        onChange={(e) => setFormData({ ...formData, vehiculeId: e.target.value })}
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.serviceId ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                    >
+                                        <option value="">-- Choisir une voiture --</option>
 
-        {voitures.map((voiture) => (
-  <option key={voiture._id} value={voiture._id}>
-            {voiture.marque} {voiture.modele} ({voiture.immatriculation})
-          </option>
-        ))}
-      </select>
-    </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                        {voitures.map((voiture) => (
+                                            <option key={voiture._id} value={voiture._id}>
+                                                {voiture.marque} {voiture.modele} ({voiture.immatriculation})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.vehiculeId && <p className="text-red-500 text-xs mt-1">{errors.vehiculeId}</p>}
+                                </div>
 
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <div>

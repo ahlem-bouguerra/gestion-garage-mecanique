@@ -1,8 +1,8 @@
 import nodemailer from 'nodemailer';
 import Devis from '../models/Devis.js';
 import FicheClient from '../models/FicheClient.js';
-import { User } from '../models/User.js';
-
+import { Garagiste } from '../models/Garagiste.js';
+import {Garage} from '../models/Garage.js'; // ⭐ AJOUT DU MODÈLE GARAGE
 
 // Configuration du transporteur email
 const transporter = nodemailer.createTransport({
@@ -16,52 +16,214 @@ const transporter = nodemailer.createTransport({
 export const sendDevisByEmail = async (req, res) => {
   try {
     const { devisId } = req.params;
+    const { garageId } = req.body;
 
-    // Récupérer l'utilisateur depuis le token
-    const user = req.user; // <-- ici req.user contient les infos décodées du token + l'objet complet User depuis la DB
-    console.log('👤 Utilisateur connecté:', user.username);
-    console.log('📱 Téléphone depuis token:', user.phone);
-    console.log('🆔 ID utilisateur depuis token:', user._id);
+    const user = req.user;
+    console.log('👤 Utilisateur connecté:', user);
 
-    const devis = await Devis.findOne({ id: devisId });
-    if (!devis) return res.status(404).json({ message: 'Devis non trouvé' });
+    // ✅ Récupérer le devis (avec _id OU id custom) et peupler clientId
+    let devis;
+     if (devisId.match(/^[0-9a-fA-F]{24}$/)) {
+      devis = await Devis.findById(devisId)
+        .populate({
+          path: 'clientId',
+          populate: {
+            path: 'clientId', // ⭐ Populate le Client lié à FicheClient
+            select: 'username email' // Sélectionner uniquement les champs nécessaires
+          }
+        });
+    } else {
+      devis = await Devis.findOne({ id: devisId })
+        .populate({
+          path: 'clientId',
+          populate: {
+            path: 'clientId', // ⭐ Populate le Client lié à FicheClient
+            select: 'username email'
+          }
+        });
+    }
 
-    const client = await FicheClient.findById(devis.clientId);
-    if (!client || !client.email)
+    if (!devis) {
+      return res.status(404).json({ message: 'Devis non trouvé' });
+    }
+
+
+    console.log('📋 Devis trouvé:', {
+      id: devis.id,
+      _id: devis._id,
+      garageId: devis.garageId,
+      clientId: devis.clientId,
+      clientIdType: devis.clientId?.constructor.name, // ⭐ Voir le type
+      hasClientId: !!devis.clientId?.clientId, // ⭐ Vérifier si clientId.clientId existe
+      clientIdUsername: devis.clientId?.clientId?.username // ⭐ Voir si username est accessible
+    });
+
+    const client = devis.clientId;
+    
+    if (!client || !client.email) {
       return res.status(400).json({ message: 'Email du client non trouvé' });
+    }
 
-    const emailContent = generateDevisHTML(devis, user);
+    // ⭐ NOUVEAU : Récupérer le nom du client avec logs détaillés
+    let clientDisplayName = '';
+    
+    console.log('🔍 Analyse de la structure client:', {
+      hasClient: !!client,
+      hasClientId: !!client.clientId,
+      clientIdUsername: client.clientId?.username,
+      clientNom: client.nom,
+      clientEmail: client.email
+    });
+
+    // Priorité 1 : Si clientId est un Client avec username (FicheClient -> Client)
+    if (client.clientId?.username) {
+      clientDisplayName = client.clientId.username;
+      console.log('✅ Nom du client trouvé via clientId.username:', clientDisplayName);
+    }
+    // Priorité 2 : Si clientId est une FicheClient avec nom
+    else if (client.nom) {
+      clientDisplayName = client.nom;
+      console.log('✅ Nom du client trouvé via nom:', clientDisplayName);
+    }
+    // Priorité 3 : Utiliser l'email comme fallback
+    else if (client.email) {
+      clientDisplayName = client.email.split('@')[0]; // Prendre la partie avant @
+      console.log('⚠️ Nom du client par défaut (email):', clientDisplayName);
+    }
+    // Priorité 4 : Par défaut
+    else {
+      clientDisplayName = 'Client';
+      console.log('⚠️ Nom du client par défaut: Client');
+    }
+
+    console.log('👤 Nom du client final déterminé:', clientDisplayName);
+
+    // ✅ Déterminer les infos du garage
+    let garageInfo = null;
+    let garagisteInfo = null;
+    let garageDisplayName = '';
+    
+    if (user.isSuperAdmin) {
+      console.log('👑 SuperAdmin - Analyse des garageId disponibles:');
+      console.log('   - garageId du body:', garageId);
+      console.log('   - garageId du devis:', devis.garageId);
+      
+      const targetGarageId = garageId || devis.garageId;
+      
+      if (!targetGarageId) {
+        console.error('❌ Aucun garageId trouvé');
+        return res.status(400).json({ 
+          message: 'garageId manquant',
+          details: 'Impossible de déterminer le garage pour cet envoi'
+        });
+      }
+
+      console.log('   ✅ garageId sélectionné:', targetGarageId);
+
+      garageInfo = await Garage.findById(targetGarageId);
+      
+      if (!garageInfo) {
+        console.error('❌ Garage non trouvé dans la collection Garage');
+        return res.status(404).json({ 
+          message: 'Garage non trouvé',
+          garageIdSearched: targetGarageId.toString()
+        });
+      }
+
+      if (garageInfo.garagisteAdmin) {
+        garagisteInfo = await Garagiste.findById(garageInfo.garagisteAdmin);
+      }
+
+      garageDisplayName = garageInfo.nom || garagisteInfo?.username || 'Atelier Mécanique';
+
+      console.log('✅ SuperAdmin envoie pour le garage:');
+      console.log('   🏢 Nom garage:', garageInfo.nom);
+      console.log('   👤 Nom garagiste:', garagisteInfo?.username);
+      console.log('   🏷️ Nom d\'affichage:', garageDisplayName);
+    } else {
+      console.log('👨‍🔧 Garagiste - Récupération des infos');
+      
+      garagisteInfo = await Garagiste.findById(user._id);
+      
+      if (!garagisteInfo) {
+        console.error('❌ Garagiste non trouvé avec ID:', user._id);
+        return res.status(404).json({ 
+          message: 'Informations du garagiste non trouvées' 
+        });
+      }
+
+      if (garagisteInfo.garage) {
+        garageInfo = await Garage.findById(garagisteInfo.garage);
+      }
+
+      garageDisplayName = garageInfo?.nom || garagisteInfo.username || 'Atelier Mécanique';
+      
+      console.log('✅ Garagiste envoie:');
+      console.log('   👤 Nom garagiste:', garagisteInfo.username);
+      console.log('   🏢 Nom garage:', garageInfo?.nom);
+      console.log('   🏷️ Nom d\'affichage:', garageDisplayName);
+    }
+
+    if (!garageDisplayName) {
+      console.error('❌ Impossible de déterminer le nom du garage');
+      return res.status(500).json({ 
+        message: 'Impossible de déterminer le nom du garage'
+      });
+    }
+
+    // ⭐ Préparer les données pour l'email
+    const emailData = {
+      username: garageDisplayName,
+      emailProfessionnel: garagisteInfo?.emailProfessionnel || garageInfo?.emailProfessionnel || process.env.EMAIL_USER,
+      telephoneProfessionnel: garagisteInfo?.telephoneProfessionnel || garageInfo?.telephoneProfessionnel || 'Non renseigné'
+    };
+
+    console.log('📧 Données email préparées:', emailData);
+
+    // ⭐ Générer l'email avec le nom du client récupéré
+    const emailContent = generateDevisHTML(devis, emailData, clientDisplayName);
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: client.email,
-      subject: `Devis ${devis.id} - Atelier Mécanique`,
+      subject: `Devis ${devis.id} - ${garageDisplayName}`,
       html: emailContent,
-      replyTo: user.email
+      replyTo: emailData.emailProfessionnel
     };
 
     await transporter.sendMail(mailOptions);
 
-    await Devis.findOneAndUpdate({ id: devisId }, { 
-      status: 'envoye',
-      sentBy: user._id,
-      sentAt: new Date()
-    });
+    // ✅ Mettre à jour le statut du devis
+    if (devisId.match(/^[0-9a-fA-F]{24}$/)) {
+      await Devis.findByIdAndUpdate(devisId, { 
+        status: 'envoye',
+        sentBy: user._id,
+        sentAt: new Date()
+      });
+    } else {
+      await Devis.findOneAndUpdate({ id: devisId }, { 
+        status: 'envoye',
+        sentBy: user._id,
+        sentAt: new Date()
+      });
+    }
 
     res.json({ 
       success: true, 
-      message: `Devis envoyé à ${client.email} par ${user.username}` 
+      message: `Devis envoyé à ${client.email}${user.isSuperAdmin ? ` au nom de ${garageDisplayName}` : ''}` 
     });
 
   } catch (error) {
-    console.error('Erreur envoi email:', error);
-    res.status(500).json({ success: false, message: 'Erreur lors de l\'envoi de l\'email' });
+    console.error('❌ Erreur envoi email:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erreur lors de l\'envoi de l\'email',
+      error: error.message
+    });
   }
 };
-
-
-
-const generateDevisHTML = (devis ,user) => {
+// ⭐ MODIFIER la fonction generateDevisHTML pour accepter clientDisplayName
+const generateDevisHTML = (devis, emailData, clientDisplayName) => { // ⭐ NOUVEAU PARAMÈTRE
   const servicesHTML = devis.services.map(service => `
     <tr>
       <td style="border: 1px solid #ddd; padding: 8px;">${service.piece}</td>
@@ -118,12 +280,12 @@ const generateDevisHTML = (devis ,user) => {
     <body>
       <div class="container">
         <div class="header">
-          <h1>🔧 Atelier Mécanique</h1>
+          <h1>🔧 ${emailData.username}</h1>
           <h2>Devis N° ${devis.id}</h2>
         </div>
 
         <div class="content">
-          <p><strong>👤 Client:</strong> ${devis.clientName}</p>
+          <p><strong>👤 Client:</strong> ${clientDisplayName}</p>
           <p><strong>🚗 Véhicule:</strong> ${devis.vehicleInfo}</p>
           <p><strong>📅 Date:</strong> ${new Date(devis.inspectionDate).toLocaleDateString("fr-FR")}</p>
 
@@ -146,7 +308,7 @@ const generateDevisHTML = (devis ,user) => {
             <p><strong>Main d'œuvre:</strong> ${(devis.maindoeuvre || 0).toFixed(3)} Dinnar</p>
             <p><strong>Total HT:</strong> ${devis.totalHT.toFixed(3)} Dinnar</p>
             <p><strong>TVA (${devis.tvaRate || 20}%):</strong> ${tvaAmount} Dinnar</p>
-            <p><strong>Temps Estimé </strong> ${devis.estimatedTime} </p>
+            <p><strong>Temps Estimé:</strong> ${devis.estimatedTime}</p>
             <p style="font-size: 20px; color: #2c3e50;"><strong>TOTAL TTC: ${devis.totalTTC.toFixed(3)} Dinnar</strong></p>
           </div>
 
@@ -157,7 +319,6 @@ const generateDevisHTML = (devis ,user) => {
 
           <div class="buttons">
             <h3>Que souhaitez-vous faire ?</h3>
-            <!-- ✅ URLS CORRIGÉES - correspond aux routes -->
             <a href="${baseURL}/api/devis/${devis._id}/accept" class="btn btn-accept">
               ✅ Accepter le devis
             </a>
@@ -165,22 +326,17 @@ const generateDevisHTML = (devis ,user) => {
               ❌ Refuser le devis
             </a>
           </div>
+          
           <div style="margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-  <p><strong>Contact :</strong></p>
-  ${user ? `
-    <p>📧 Email: ${user.email}</p>
-    <p>📱 Téléphone: ${user.phone || 'Non renseigné'}</p>
-
-  ` : ''}
-</div>
-
-
-        
+            <p><strong>Contact :</strong></p>
+            <p>🏢 Garage: ${emailData.username}</p>
+            <p>📧 Email: ${emailData.emailProfessionnel}</p>
+            <p>📱 Téléphone: ${emailData.telephoneProfessionnel}</p>
+          </div>
         </div>
       </div>
     </body>
     </html>
   `;
 };
-
 

@@ -22,6 +22,16 @@ const clientSchema = new mongoose.Schema({
       return !this.googleId;
     }
   },
+    verificationToken: {
+  type: String,
+  default: null
+  },
+  
+  verificationTokenExpiry: {
+    type: Date,
+    default: null
+  },
+
   isVerified: {
     type: Boolean,
     default: false
@@ -52,4 +62,4 @@ clientSchema.index({ location: '2dsphere' }, { sparse: true });
 // ✅ FORCER la création de l'index googleId avec sparse
 clientSchema.index({ googleId: 1 }, { unique: true, sparse: true });
 
-export const Client = mongoose.model("Client", clientSchema);
+export const Client = mongoose.model("Client", clientSchema , "clients");

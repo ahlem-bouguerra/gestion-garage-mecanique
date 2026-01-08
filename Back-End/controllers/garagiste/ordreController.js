@@ -2,81 +2,100 @@ import OrdreTravail from '../../models/Ordre.js';
 import Devis from '../../models/Devis.js';
 import Atelier from '../../models/Atelier.js';
 import Service from '../../models/Service.js';
-import Mecanicien from '../../models/Mecanicien.js';
 import mongoose from 'mongoose';
-
+import { Garagiste } from '../../models/Garagiste.js';
 
 export const createOrdreTravail = async (req, res) => {
   try {
-     console.log("📥 Données reçues pour ordre de travail:", req.body);
-    const { devisId, dateCommence, atelierId, priorite, description, taches } = req.body;
+    console.log("📥 Données reçues pour ordre de travail:", req.body);
 
-    // Validation des données requises
+    const { devisId, dateCommence, atelierId, priorite, description, taches } = req.body;
+    const { garageId } = req.query;
+
+    // ⭐ Détermination du garage
+    let targetGarageId;
+    if (req.user.isSuperAdmin && garageId) {
+      targetGarageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      targetGarageId = req.user.garageId || req.user.garage;
+    }
+
+    if (!targetGarageId) {
+      return res.status(400).json({ success: false, error: "garageId introuvable." });
+    }
+
+    // 🔎 Vérification des champs obligatoires
     if (!devisId || !dateCommence || !atelierId || !taches || taches.length === 0) {
       return res.status(400).json({
         success: false,
-        error: 'Données manquantes : devisId, dateCommence, atelierId et taches sont obligatoires'
+        error: 'Champs requis manquants : devisId, dateCommence, atelierId, taches'
       });
     }
 
-    // Vérifier que le devis existe
-    const devis = await Devis.findOne({ 
+    // 🔎 Vérifier que le devis existe
+    const devis = await Devis.findOne({
       id: devisId,
-      garagisteId: req.user._id 
+      garageId: targetGarageId
     });
+
     if (!devis) {
       return res.status(404).json({
         success: false,
-        error: `Devis ${devisId} non trouvé`
+        error: `Devis ${devisId} non trouvé dans ce garage`
       });
     }
 
-    // Vérifier si un ordre existe déjà pour ce devis
-    const existingOrdre = await OrdreTravail.findOne({ 
+    // 🚫 Vérifier si un OT existe déjà
+    const existingOrdre = await OrdreTravail.findOne({
       devisId,
-      garagisteId: req.user._id 
+      garageId: targetGarageId
     });
+
     if (existingOrdre) {
       return res.status(400).json({
         success: false,
-        error: `Un ordre de travail est déjà créé pour le devis ${devisId}`
+        error: `Un ordre de travail existe déjà pour le devis ${devisId}`
       });
     }
 
-    // Vérifier que l'atelier existe
-    const atelier = await Atelier.findById(atelierId);
+    // 🔎 Vérifier l’atelier
+    const atelier = await Atelier.findOne({
+      _id: atelierId,
+      garageId: targetGarageId
+    });
+
     if (!atelier) {
-      return res.status(404).json({
-        success: false,
-        error: 'Atelier non trouvé'
-      });
+      return res.status(404).json({ success: false, error: 'Atelier non trouvé dans ce garage' });
     }
 
-    // Valider et enrichir les tâches
+    // ✨ Valider et enrichir les tâches
     const tachesEnrichies = [];
+
     for (const tache of taches) {
       if (!tache.serviceId || !tache.mecanicienId) {
         return res.status(400).json({
           success: false,
-          error: 'Chaque tâche doit avoir un serviceId et mecanicienId'
+          error: 'Chaque tâche doit contenir serviceId et mecanicienId'
         });
       }
 
-      // Récupérer les informations du service
       const service = await Service.findById(tache.serviceId);
       if (!service) {
         return res.status(404).json({
           success: false,
-          error: `Service non trouvé pour la tâche: ${tache.description}`
+          error: `Service introuvable pour la tâche "${tache.description}"`
         });
       }
 
-      // Récupérer les informations du mécanicien
-      const mecanicien = await Mecanicien.findById(tache.mecanicienId);
+const mecanicien = await Garagiste.findOne({
+  _id: tache.mecanicienId,
+  garage: targetGarageId  // Correspond au schéma
+});
+
       if (!mecanicien) {
         return res.status(404).json({
           success: false,
-          error: `Mécanicien non trouvé pour la tâche: ${tache.description}`
+          error: `Mécanicien introuvable ou n'appartient pas à ce garage`
         });
       }
 
@@ -85,26 +104,25 @@ export const createOrdreTravail = async (req, res) => {
         quantite: tache.quantite || 1,
         serviceId: tache.serviceId,
         serviceNom: service.name,
-        mecanicienId: tache.mecanicienId,
-        mecanicienNom: mecanicien.nom,
+        mecanicienId: mecanicien._id,
+        mecanicienNom: mecanicien.username,
         estimationHeures: tache.estimationHeures || 1,
         notes: tache.notes || '',
         status: 'assignee'
       });
     }
 
-    // Calculer la date de fin prévue (estimation basée sur les heures)
-    const totalHeuresEstimees = tachesEnrichies.reduce((total, tache) => total + tache.estimationHeures, 0);
+    // ⏳ Calcul de la date de fin prévue
+    const totalHeures = tachesEnrichies.reduce((sum, t) => sum + t.estimationHeures, 0);
     const dateFinPrevue = new Date(dateCommence);
-    dateFinPrevue.setHours(dateFinPrevue.getHours() + totalHeuresEstimees);
+    dateFinPrevue.setHours(dateFinPrevue.getHours() + totalHeures);
 
-    // Créer l'ordre de travail avec le numéro généré
+    // 🆕 Création de l'ordre de travail
     const ordreTravail = new OrdreTravail({
       devisId: devis.id,
-      garagisteId: req.user._id,
+      garageId: targetGarageId,
       clientInfo: {
-        nom: devis.clientName,
-        ClientId : devis.clientId,
+        ClientId: devis.clientId,
         telephone: devis.clientPhone,
         email: devis.clientEmail,
         adresse: devis.clientAddress
@@ -113,8 +131,6 @@ export const createOrdreTravail = async (req, res) => {
         nom: devis.vehicleInfo,
         vehiculeId: devis.vehiculeId,
       },
-
- 
       dateCommence: new Date(dateCommence),
       dateFinPrevue,
       atelierId,
@@ -126,30 +142,53 @@ export const createOrdreTravail = async (req, res) => {
     });
 
     const ordreSauve = await ordreTravail.save();
-    console.log("📥 Données reçues pour ordre de travail:", ordreTravail);
 
-    // Populer les références pour la réponse
+    // 🔗 Populate des relations
     await ordreSauve.populate([
-      { path: 'devisId', select: 'id clientName vehicleInfo vehiculeId' },
+      { 
+        path: 'devisId', 
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      },
+      { 
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      },
       { path: 'atelierId', select: 'name localisation' },
       { path: 'taches.serviceId', select: 'name' },
-      { path: 'taches.mecanicienId', select: 'nom' }
+      { path: 'taches.mecanicienId', select: 'username email phone' }
     ]);
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'Ordre de travail créé avec succès',
       ordre: ordreSauve
     });
 
   } catch (error) {
-    console.error('Erreur création ordre de travail:', error);
+    console.error('❌ Erreur création ordre de travail:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Erreur serveur lors de la création de l\'ordre de travail'
+      error: error.message || 'Erreur serveur'
     });
   }
 };
+
 
 export const getOrdresTravail = async (req, res) => {
   try {
@@ -162,19 +201,24 @@ export const getOrdresTravail = async (req, res) => {
       dateDebut,
       dateFin,
       sortBy = 'createdAt',
-      sortOrder = 'desc'
+      sortOrder = 'desc',
+      garageId
     } = req.query;
 
-    // Construction du filtre
-    const filter = {
-      garagisteId: req.user._id  
-    };
+    const filter = {};
     
-    // ✅ AJOUT : Exclure les ordres supprimés
-    filter.status = { $ne: 'supprime' };
+    if (req.user.isSuperAdmin && garageId) {
+      filter.garageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      filter.garageId = req.user.garage || req.user.garageId;
+    }
     
-    // Si status est fourni ET différent de 'supprime', l'utiliser
-    if (status && status !== 'supprime') {
+    // ⭐ IMPORTANT : Exclure les ordres supprimés par défaut
+    if (!status || status !== 'supprime') {
+      filter.status = { $ne: 'supprime' };
+    }
+    
+    if (status && status !== 'all') {
       filter.status = status;
     }
     
@@ -188,26 +232,48 @@ export const getOrdresTravail = async (req, res) => {
       };
     }
 
-    // Options de tri
+    console.log('🔍 Filtre appliqué:', filter);
+
     const sortOptions = {};
     sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
-    // Calcul de pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const limitNum = parseInt(limit);
 
-    // Requête avec pagination
+    // ⭐ POPULATE CORRIGÉ
     const ordres = await OrdreTravail.find(filter)
-      .populate('devisId', 'id clientName vehicleInfo')
+      .populate({
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      })
+      .populate({
+        path: 'clientInfo.ClientId',  // ⭐ Populate direct de ClientId
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      })
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name')
-      .populate('taches.mecanicienId', 'nom')
+      .populate('taches.mecanicienId', 'username email phone')
       .sort(sortOptions)
       .skip(skip)
       .limit(limitNum)
       .lean();
 
-    // Compter le total pour la pagination
     const total = await OrdreTravail.countDocuments(filter);
     const totalPages = Math.ceil(total / limitNum);
 
@@ -233,32 +299,61 @@ export const getOrdresTravail = async (req, res) => {
   }
 };
 
+
 export const getOrdreTravailById = async (req, res) => {
   try {
     const { id } = req.params;
     
-    console.log('Recherche ordre avec ID:', id); // Debug
+    console.log('Recherche ordre avec ID:', id);
     
-    const ordre = await OrdreTravail.findOne({
-      _id: id,
-      garagisteId: req.user._id
-    })
-      .populate('devisId', 'id clientName vehicleInfo inspectionDate services')
+    // ⭐ Construction du filtre selon le rôle
+    const filter = { _id: id };
+    
+    // Si pas SuperAdmin, filtrer par garage
+    if (!req.user.isSuperAdmin) {
+      filter.garageId = req.user.garage || req.user.garageId;
+    }
+    
+    const ordre = await OrdreTravail.findOne(filter)
+      .populate({
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      })
+      .populate({
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      })
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name description')
-      .populate('taches.mecanicienId', 'nom telephone email')
-      .populate('createdBy', 'nom email')
-      .populate('updatedBy', 'nom email');
+      .populate('taches.mecanicienId', 'username phone email')
+      .populate('createdBy', 'username email')
+      .populate('updatedBy', 'username email');
 
     if (!ordre) {
-      console.log('Ordre non trouvé pour ID:', id); // Debug
+      console.log('Ordre non trouvé pour ID:', id);
       return res.status(404).json({
         success: false,
         error: 'Ordre de travail non trouvé'
       });
     }
 
-    console.log('Ordre trouvé:', ordre.numeroOrdre); // Debug
+    console.log('Ordre trouvé:', ordre.numeroOrdre);
     
     res.json({
       success: true,
@@ -274,60 +369,12 @@ export const getOrdreTravailById = async (req, res) => {
   }
 };
 
-export const updateStatusOrdreTravail = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
 
-    const statusValides = ['en_attente', 'en_cours', 'termine', 'suspendu'];
-    if (!statusValides.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Statut invalide'
-      });
-    }
-
-    const ordre = await OrdreTravail.findOneAndUpdate(
-      { 
-        _id: id,
-        garagisteId: req.user._id
-      },
-      { 
-        status, 
-        updatedBy: req.user?.id,
-        ...(status === 'termine' && { dateFinReelle: new Date() })
-      },
-      { new: true }
-    ).populate('atelierId', 'name');
-
-    if (!ordre) {
-      return res.status(404).json({
-        success: false,
-        error: 'Ordre de travail non trouvé'
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Statut mis à jour avec succès',
-      ordre
-    });
-
-  } catch (error) {
-    console.error('Erreur mise à jour statut:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Erreur serveur lors de la mise à jour du statut'
-    });
-  }
-};
-
-// Ajouter au controller backend
 export const demarrerOrdre = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const ordre = await OrdreTravail.findOne({_id: id,garagisteId: req.user._id})
+    const ordre = await OrdreTravail.findOne({_id: id,garageId: req.user.garageId})
     if (!ordre) {
       return res.status(404).json({
         success: false,
@@ -362,7 +409,7 @@ export const terminerOrdre = async (req, res) => {
 
     const ordre = await OrdreTravail.findOne({
       _id: id,
-      garagisteId: req.user._id
+     garageId: req.user.garageId
     });
     if (!ordre) {
       return res.status(404).json({
@@ -395,18 +442,36 @@ export const terminerOrdre = async (req, res) => {
 
 export const getStatistiques = async (req, res) => {
   try {
-    const { atelierId } = req.query;
+    const { atelierId, garageId } = req.query; // ⭐ AJOUT : garageId depuis query
 
-    const stats = await OrdreTravail.getStatistiques(atelierId, req.user._id);
+    // ⭐ Déterminer quel garageId utiliser
+    let targetGarageId;
+    if (req.user.isSuperAdmin && garageId) {
+      // SuperAdmin avec garageId spécifique
+      targetGarageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      // Garagiste : utiliser son propre garage
+      targetGarageId = req.user.garageId || req.user.garage;
+    }
+    // Si SuperAdmin sans garageId, targetGarageId reste undefined = stats globales
+
+    console.log('📊 Récupération stats pour garageId:', targetGarageId);
+
+    const stats = await OrdreTravail.getStatistiques(atelierId, targetGarageId);
 
     // Statistiques additionnelles
+    const matchFilter = {};
+    
+    if (targetGarageId) {
+      matchFilter.garageId = new mongoose.Types.ObjectId(targetGarageId);
+    }
+    
+    if (atelierId) {
+      matchFilter.atelierId = new mongoose.Types.ObjectId(atelierId);
+    }
+
     const statsParPriorite = await OrdreTravail.aggregate([
-      {
-        $match: {
-          garagisteId: new mongoose.Types.ObjectId(req.user._id),
-          ...(atelierId && { atelierId: new mongoose.Types.ObjectId(atelierId) })
-        }
-      },
+      { $match: matchFilter },
       {
         $group: {
           _id: '$priorite',
@@ -441,7 +506,7 @@ export const supprimerOrdreTravail = async (req, res) => {
 
     const ordre = await OrdreTravail.findOne({
       _id: id,
-      garagisteId: req.user._id
+      garageId: req.user.garageId
     });
     if (!ordre) {
       return res.status(404).json({
@@ -480,12 +545,29 @@ export const supprimerOrdreTravail = async (req, res) => {
 export const getOrdresParDevisId = async (req, res) => {
   try {
     const { devisId } = req.params;
+    const { garageId } = req.query; // ou req.params selon votre route
+    
+    // Déterminer le garageId à utiliser
+    let targetGarageId;
+    
+    if (req.user.role === 'Super Admin') {
+      // Super admin peut spécifier un garageId ou voir tous les garages
+      targetGarageId = garageId || null;
+    } else {
+      // Utilisateur normal utilise son propre garageId
+      targetGarageId = req.user.garageId;
+    }
+    
+    // Construire la requête
+    const query = { devisId: devisId };
+    
+    // Ajouter le filtre garageId seulement si nécessaire
+    if (targetGarageId) {
+      query.garageId = targetGarageId;
+    }
     
     // Chercher un ordre existant pour ce devis
-    const existingOrdre = await OrdreTravail.findOne({ 
-      devisId: devisId,
-      garagisteId: req.user._id 
-    });
+    const existingOrdre = await OrdreTravail.findOne(query);
     
     if (existingOrdre) {
       return res.json({
@@ -505,20 +587,22 @@ export const getOrdresParDevisId = async (req, res) => {
 export const getOrdresByStatus = async (req, res) => {
   try {
     const { status } = req.params;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, garageId } = req.query; // ⭐ NOUVEAU
 
-    // ✅ AJOUT : Si on cherche des ordres supprimés explicitement, les inclure
-    // Sinon, les exclure toujours
+    // ⭐ Construction du filtre
     const filter = status === 'supprime' 
-      ? { 
-          status: 'supprime',
-          garagisteId: req.user._id
-        }
+      ? { status: 'supprime' }
       : { 
-          status: status, 
-          garagisteId: req.user._id,
+          status: status,
           $and: [{ status: { $ne: 'supprime' } }] 
         };
+    
+    // ⭐ Ajouter le filtre garage selon le rôle
+    if (req.user.isSuperAdmin && garageId) {
+      filter.garageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      filter.garageId = req.user.garage || req.user.garageId;
+    }
 
     const options = {
       sort: { createdAt: -1 },
@@ -527,10 +611,33 @@ export const getOrdresByStatus = async (req, res) => {
     };
 
     const ordres = await OrdreTravail.find(filter)
-      .populate('devisId', 'id clientName vehicleInfo')
+      .populate({
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      })
+      .populate({
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      })
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name')
-      .populate('taches.mecanicienId', 'nom')
+      .populate('taches.mecanicienId', 'username email phone')
       .sort(options.sort)
       .skip(options.skip)
       .limit(options.limit)
@@ -552,17 +659,23 @@ export const getOrdresByStatus = async (req, res) => {
   }
 };
 
+
 export const getOrdresByAtelier = async (req, res) => {
   try {
     const { atelierId } = req.params;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, garageId } = req.query; // ⭐ NOUVEAU
 
-    // ✅ AJOUT : Exclure les ordres supprimés + filtrer par garagiste
     const filter = { 
       atelierId: atelierId,
-      garagisteId: req.user._id,
       status: { $ne: 'supprime' }
     };
+    
+    // ⭐ Ajouter le filtre garage selon le rôle
+    if (req.user.isSuperAdmin && garageId) {
+      filter.garageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      filter.garageId = req.user.garage || req.user.garageId;
+    }
 
     const options = {
       sort: { createdAt: -1 },
@@ -571,10 +684,33 @@ export const getOrdresByAtelier = async (req, res) => {
     };
 
     const ordres = await OrdreTravail.find(filter)
-      .populate('devisId', 'id clientName vehicleInfo')
+      .populate({
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      })
+      .populate({
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      })
       .populate('atelierId', 'name localisation')
       .populate('taches.serviceId', 'name')
-      .populate('taches.mecanicienId', 'nom')
+      .populate('taches.mecanicienId', 'username email phone')
       .sort(options.sort)
       .skip(options.skip)
       .limit(options.limit)
@@ -604,17 +740,52 @@ export const updateOrdreTravail = async (req, res) => {
       atelierId,
       priorite,
       description,
-      taches
+      taches,
+      garageId
     } = req.body;
 
-    console.log('Modification ordre ID:', id);
-    console.log('Données reçues:', req.body);
+    console.log('🔍 DEBUG UPDATE ORDRE:');
+    console.log('- Ordre ID:', id);
+    console.log('- req.user.role:', req.user?.role);
+    console.log('- req.user.isSuperAdmin:', req.user?.isSuperAdmin);
+    console.log('- garageId dans body:', garageId);
 
-    // Chercher l'ordre existant avec filtrage par garagiste
+    // Déterminer le garageId à utiliser
+    let targetGarageId;
+    
+    // ✅ CORRECTION : Vérifier aussi isSuperAdmin et rendre insensible à la casse
+    if (req.user.isSuperAdmin === true || req.user.role?.toLowerCase() === 'Super Admin') {
+      console.log('✅ SuperAdmin détecté');
+      
+      if (garageId) {
+        targetGarageId = garageId;
+        console.log('✅ GarageId fourni dans body:', targetGarageId);
+      } else {
+        // Si pas de garageId fourni, chercher l'ordre sans filtre garage
+        const ordreTemp = await OrdreTravail.findById(id);
+        if (!ordreTemp) {
+          return res.status(404).json({
+            success: false,
+            error: 'Ordre de travail non trouvé'
+          });
+        }
+        targetGarageId = ordreTemp.garageId;
+        console.log('✅ GarageId récupéré de l\'ordre existant:', targetGarageId);
+      }
+    } else {
+      // Pour les autres rôles, utiliser le garageId de l'utilisateur
+      targetGarageId = req.user.garageId;
+      console.log('✅ Admin Garage - targetGarageId:', targetGarageId);
+    }
+
+    console.log('🔍 Recherche ordre avec _id:', id, 'et garageId:', targetGarageId);
+    
+    // Chercher l'ordre existant avec le garageId approprié
     const ordre = await OrdreTravail.findOne({
       _id: id,
-      garagisteId: req.user._id
+      garageId: targetGarageId
     });
+    
     if (!ordre) {
       return res.status(404).json({
         success: false,
@@ -676,7 +847,7 @@ export const updateOrdreTravail = async (req, res) => {
         }
 
         const service = await Service.findById(tache.serviceId);
-        const mecanicien = await Mecanicien.findById(tache.mecanicienId)
+        const mecanicien = await Garagiste.findById(tache.mecanicienId)
 
         if (!service) {
           return res.status(404).json({
@@ -699,7 +870,7 @@ export const updateOrdreTravail = async (req, res) => {
           serviceId: tache.serviceId,
           serviceNom: service.name,
           mecanicienId: tache.mecanicienId,
-          mecanicienNom: mecanicien.nom,
+          mecanicienNom: mecanicien.username,
           estimationHeures: tache.estimationHeures || 1,
           notes: tache.notes || '',
           status: tache.status || 'assignee',
@@ -731,10 +902,34 @@ export const updateOrdreTravail = async (req, res) => {
     const ordreSauve = await ordre.save();
 
     // Populer les références pour la réponse
-    await ordreSauve.populate([
+   await ordreSauve.populate([
+      { 
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
+        }
+      },
+      {
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      },
       { path: 'atelierId', select: 'name localisation' },
       { path: 'taches.serviceId', select: 'name' },
-      { path: 'taches.mecanicienId', select: 'nom email telephone' }
+      { path: 'taches.mecanicienId', select: 'username email telephone' }
     ]);
 
     console.log('Ordre modifié avec succès:', ordreSauve.numeroOrdre);
@@ -762,7 +957,7 @@ export const getOrdresSupprimes = async (req, res) => {
 
     // Filtrer par garagiste connecté et statut supprimé
     const filter = {
-      garagisteId: req.user._id,
+      garageId: req.user.garageId,
       status: 'supprime'
     };
 
@@ -773,24 +968,46 @@ export const getOrdresSupprimes = async (req, res) => {
 
     // Récupérer les ordres supprimés avec pagination
     const ordres = await OrdreTravail.find(filter)
-      .populate([
-        { 
-          path: 'atelierId', 
-          select: 'name localisation' 
-        },
-        { 
-          path: 'taches.serviceId', 
-          select: 'name' 
-        },
-        { 
-          path: 'taches.mecanicienId', 
-          select: 'nom prenom' 
+      .populate({
+        path: 'devisId',
+        select: 'id clientId vehicleInfo vehiculeId',
+        populate: {
+          path: 'clientId',
+          model: 'FicheClient',
+          select: 'nom email telephone clientId',
+          populate: {
+            path: 'clientId',
+            model: 'Client',
+            select: 'username email phone'
+          }
         }
-      ])
-      .sort({ updatedAt: -1 }) // Trier par dernière modification (suppression)
+      })
+      .populate({
+        path: 'clientInfo.ClientId',
+        model: 'FicheClient',
+        select: 'nom email telephone clientId',
+        populate: {
+          path: 'clientId',
+          model: 'Client',
+          select: 'username email phone'
+        }
+      })
+      .populate({ 
+        path: 'atelierId', 
+        select: 'name localisation' 
+      })
+      .populate({ 
+        path: 'taches.serviceId', 
+        select: 'name' 
+      })
+      .populate({ 
+        path: 'taches.mecanicienId', 
+        select: 'username email phone' 
+      })
+      .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit)
-      .lean(); // Pour de meilleures performances
+      .lean();
 
     console.log(`📊 ${ordres.length} ordres supprimés trouvés sur ${total} total`);
 
@@ -812,6 +1029,62 @@ export const getOrdresSupprimes = async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message || 'Erreur serveur lors de la récupération des ordres supprimés'
+    });
+  }
+};
+
+
+export const deleteOrdreTravailDefinitif = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { garageId } = req.body;
+
+    console.log('🗑️ Suppression ordre ID:', id);
+
+    let targetGarageId;
+    
+    if (req.user.isSuperAdmin === true || req.user.role?.toLowerCase() === 'Super Admin') {
+      if (garageId) {
+        targetGarageId = garageId;
+      } else {
+        const ordreTemp = await OrdreTravail.findById(id);
+        if (!ordreTemp) {
+          return res.status(404).json({
+            success: false,
+            error: 'Ordre de travail non trouvé'
+          });
+        }
+        targetGarageId = ordreTemp.garageId;
+      }
+    } else {
+      targetGarageId = req.user.garageId;
+    }
+
+    // Supprimer directement
+    const ordre = await OrdreTravail.findOneAndDelete({
+      _id: id,
+      garageId: targetGarageId
+    });
+    
+    if (!ordre) {
+      return res.status(404).json({
+        success: false,
+        error: 'Ordre de travail non trouvé'
+      });
+    }
+
+    console.log('✅ Ordre supprimé définitivement:', ordre.numeroOrdre);
+
+    res.json({
+      success: true,
+      message: 'Ordre de travail supprimé définitivement'
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur suppression ordre de travail:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Erreur serveur lors de la suppression'
     });
   }
 };

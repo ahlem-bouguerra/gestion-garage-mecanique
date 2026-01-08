@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useGlobalAlert } from '../ui-elements/AlertProvider';
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -63,6 +64,7 @@ interface VehiculeInfo {
   proprietaire: {
     _id: string;
     nom: string;
+    nomEffectif:string;
     type: 'particulier' | 'professionnel';
     telephone?: string;
   };
@@ -98,6 +100,7 @@ const CarnetEntretien: React.FC = () => {
   // ✅ NOUVEAUX ÉTATS POUR LE FORMULAIRE
   const [showAddForm, setShowAddForm] = useState(false);
   const [saving, setSaving] = useState(false);
+   const { showAlert } = useGlobalAlert();
 
   // État pour le formulaire d'ajout
   const [formData, setFormData] = useState({
@@ -124,14 +127,32 @@ const CarnetEntretien: React.FC = () => {
 
   const fetchCarnetEntretien = async (vehiculeId: string) => {
     try {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+
       setLoading(true);
       setError("");
 
       const response = await axios.get(`${API_BASE_URL}/carnet-entretien/vehicule/${vehiculeId}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setData(response.data);
     } catch (error: any) {
+       if (error.response?.status === 403) {
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            showAlert("error", "Session expirée", "Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       console.error("Erreur chargement carnet d'entretien:", error);
       setError(error.response?.data?.error || "Erreur lors du chargement");
     } finally {
@@ -156,6 +177,13 @@ const CarnetEntretien: React.FC = () => {
     if (!vehiculeId) return;
 
     try {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       setSaving(true);
       
       const response = await axios.post(`${API_BASE_URL}/creer-manuel`, {
@@ -169,7 +197,7 @@ const CarnetEntretien: React.FC = () => {
         })),
         cout: formData.cout
         }, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
 
@@ -183,8 +211,19 @@ const CarnetEntretien: React.FC = () => {
         cout: 0
       });
       setShowAddForm(false);
+       showAlert("success", "Tache ajoutée", "Tache ajoutée avec succès !");
 
     } catch (error: any) {
+       if (error.response?.status === 403) {
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            showAlert("error", "Session expirée", "Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       console.error("Erreur ajout entretien:", error);
       setError(error.response?.data?.error || "Erreur lors de l'ajout");
     } finally {
@@ -198,6 +237,7 @@ const CarnetEntretien: React.FC = () => {
       ...prev,
       taches: [...prev.taches, { description: '', quantite: 1, prix: 0 }]
     }));
+    
   };
 
   // Supprimer une tâche du formulaire
@@ -286,8 +326,8 @@ const CarnetEntretien: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+        <div className="min-h-screen p-6">
+            <div className="max-w-7xl mx-auto">
         {/* Header avec bouton retour */}
         <div className="flex items-center mb-6">
           <button
@@ -334,7 +374,8 @@ const CarnetEntretien: React.FC = () => {
                 <User className="w-4 h-4 text-green-600" />
               )}
               <span className="font-medium text-gray-900">
-                {data.vehicule.proprietaire.nom}
+
+                {data.vehicule.proprietaire.nomEffectif || data.vehicule.proprietaire.nom}
               </span>
               <span className={`px-2 py-1 text-xs rounded-full ${data.vehicule.proprietaire.type === 'professionnel'
                   ? 'bg-blue-100 text-blue-800'

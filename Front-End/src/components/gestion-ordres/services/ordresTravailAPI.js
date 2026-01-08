@@ -2,223 +2,362 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
-// Fonction pour récupérer le token d'authentification
+// ========== HELPERS ==========
 const getAuthToken = () => {
   return localStorage.getItem('token') || sessionStorage.getItem('token');
 };
 
-// Fonction pour créer les headers d'authentification
-const getAuthHeaders = () => ({
-  headers: {
-    Authorization: `Bearer ${getAuthToken()}`
+const getAuthHeaders = () => {
+  const token = getAuthToken();
+  if (!token || token === 'null' || token === 'undefined') {
+    window.location.href = '/auth/sign-in';
+    throw new Error("Token invalide");
   }
-});
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
+};
 
+// ========== API ORDRES DE TRAVAIL ==========
 export const ordresTravailAPI = {
-  // Récupérer un devis par code avec vérification d'ordres existants
-  async getDevisByCode(devisId) {
-    const response = await axios.get(`${API_BASE_URL}/devis/code/${devisId}`, getAuthHeaders());
-    return response.data;
-  },
-
-  // Créer un nouvel ordre de travail
-  async createOrdre(ordreData) {
-    const response = await axios.post(`${API_BASE_URL}/createOrdre`, ordreData, getAuthHeaders());
-    return response.data;
-  },
-
-  // Récupérer tous les ordres avec pagination et filtres
+  // ✅ RÉCUPÉRER TOUS LES ORDRES
   async getOrdres({ page = 1, limit = 10, filters = {} }) {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      sortBy: 'createdAt',
-      sortOrder: 'desc'
-    });
-
-    let baseUrl = API_BASE_URL;
-    let response;
-
-    // Construire l'URL selon les filtres
-    if (filters.status) {
-      baseUrl = `${API_BASE_URL}/ordres/status/${filters.status}`;
-      const statusParams = new URLSearchParams({
+    try {
+      const params = {
         page: page.toString(),
-        limit: limit.toString()
-      });
-      response = await axios.get(`${baseUrl}?${statusParams}`, getAuthHeaders());
-    } else if (filters.atelier) {
-      baseUrl = `${API_BASE_URL}/ordres/atelier/${filters.atelier}`;
-      const atelierParams = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString()
-      });
-      response = await axios.get(`${baseUrl}?${atelierParams}`, getAuthHeaders());
-    } else {
-      response = await axios.get(`${baseUrl}?${params}`, getAuthHeaders());
-    }
+        limit: limit.toString(),
+        sortBy: 'createdAt',
+        sortOrder: 'desc'
+      };
 
-    // Normaliser la structure de réponse
-    if (response.data.ordres) {
+      if (filters.status) params.status = filters.status;
+      if (filters.atelier) params.atelier = filters.atelier;
+      if (filters.priorite) params.priorite = filters.priorite;
+      if (filters.garageId) params.garageId = filters.garageId;
+
+      // Route backend: router.get('/', ...) montée sur /api
+      const response = await axios.get(`${API_BASE_URL}/`, {
+        params,
+        ...getAuthHeaders()
+      });
+
       return {
-        ordres: response.data.ordres,
-        pagination: {
-          page: response.data.page || page,
-          limit: response.data.limit || limit,
-          total: response.data.total || 0,
-          totalPages: Math.ceil((response.data.total || 0) / limit)
+        ordres: response.data.ordres || [],
+        pagination: response.data.pagination || {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: 0,
+          totalPages: 0
         }
       };
-    } else {
-      // Si c'est un tableau direct
-      const ordres = Array.isArray(response.data) ? response.data : [];
-      return {
-        ordres,
-        pagination: {
-          page,
-          limit,
-          total: ordres.length,
-          totalPages: Math.ceil(ordres.length / limit)
-        }
-      };
+    } catch (error) {
+      console.error('❌ Erreur getOrdres:', error);
+      throw error;
     }
   },
 
-  // Récupérer les ordres par statut
-  async getOrdresByStatus(status, page = 1, limit = 10) {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString()
-    });
-
-    const response = await axios.get(`${API_BASE_URL}/ordres/status/${status}?${params}`, getAuthHeaders());
-    return response.data;
-  },
-
-  // Récupérer les ordres par atelier
-  async getOrdresByAtelier(atelierId, page = 1, limit = 10) {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString()
-    });
-
-    const response = await axios.get(`${API_BASE_URL}/ordres/atelier/${atelierId}?${params}`, getAuthHeaders());
-    return response.data;
-  },
-
-  // Récupérer les détails d'un ordre
+  // ✅ RÉCUPÉRER UN ORDRE PAR ID
   async getOrdreDetails(ordreId) {
-    const response = await axios.get(`${API_BASE_URL}/getOrdreTravailById/${ordreId}`, getAuthHeaders());
-    
-    // Normaliser la réponse - certaines APIs retournent { success: true, ordre: {} }
-    if (response.data.success && response.data.ordre) {
-      return response.data.ordre;
-    } else if (response.data.ordre) {
-      return response.data.ordre;
-    } else {
-      return response.data;
+    try {
+      // Route backend: router.get('/getOrdreTravailById/:id', ...)
+      const response = await axios.get(
+        `${API_BASE_URL}/getOrdreTravailById/${ordreId}`,
+        getAuthHeaders()
+      );
+      
+      if (response.data.success && response.data.ordre) {
+        return response.data.ordre;
+      }
+      return response.data.ordre || response.data;
+    } catch (error) {
+      console.error('❌ Erreur getOrdreDetails:', error);
+      throw error;
     }
   },
 
-  // Démarrer un ordre
-  async demarrerOrdre(ordreId) {
-    const response = await axios.put(`${API_BASE_URL}/ordre-travail/${ordreId}/demarrer`, {}, getAuthHeaders());
-    return response.data;
+  // ✅ CRÉER UN ORDRE
+  async createOrdre(ordreData) {
+    try {
+      // Route backend: router.post('/createOrdre', ...)
+      const response = await axios.post(
+        `${API_BASE_URL}/createOrdre`,
+        ordreData,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur createOrdre:', error);
+      throw error;
+    }
   },
 
-  // Terminer un ordre
-  async terminerOrdre(ordreId) {
-    const response = await axios.put(`${API_BASE_URL}/ordre-travail/${ordreId}/terminer`, {}, getAuthHeaders());
-    return response.data;
-  },
-
-  // Modifier le statut d'un ordre
-  async updateStatusOrdre(ordreId, status) {
-    const response = await axios.put(`${API_BASE_URL}/${ordreId}/status`, { status }, getAuthHeaders());
-    return response.data;
-  },
-
-  // Modifier un ordre
+  // ✅ MODIFIER UN ORDRE
   async updateOrdre(ordreId, updateData) {
-    const response = await axios.put(`${API_BASE_URL}/modifier/${ordreId}`, updateData, getAuthHeaders());
-    return response.data;
-  },
-
-  // Supprimer un ordre (soft delete)
-  async deleteOrdre(ordreId) {
-    const response = await axios.delete(`${API_BASE_URL}/${ordreId}`, getAuthHeaders());
-    return response.data;
-  },
-
-  // Récupérer les ordres supprimés
-  async getOrdresSupprimes(page = 1, limit = 10) {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString()
-    });
-
-    const response = await axios.get(`${API_BASE_URL}/ordres/status/supprime?${params}`, getAuthHeaders());
-    return response.data;
-  },
-
-  // Vérifier si un ordre existe pour un devis
-  async getOrdresParDevisId(devisId) {
-    const response = await axios.get(`${API_BASE_URL}/ordre-travail/by-devis/${devisId}`, getAuthHeaders());
-    return response.data;
-  },
-
-  // Récupérer les statistiques
-  async getStatistiques() {
-    const response = await axios.get(`${API_BASE_URL}/statistiques`, getAuthHeaders());
-    
-    // Normaliser la réponse
-    if (response.data.success && response.data.statistiques) {
-      return response.data.statistiques;
-    } else if (response.data.statistiques) {
-      return response.data.statistiques;
-    } else {
+    try {
+      // Route backend: router.put('/modifier/:id', ...)
+      const response = await axios.put(
+        `${API_BASE_URL}/modifier/${ordreId}`,
+        updateData,
+        getAuthHeaders()
+      );
       return response.data;
+    } catch (error) {
+      console.error('❌ Erreur updateOrdre:', error);
+      throw error;
     }
   },
 
-  // Services auxiliaires
+  // ✅ DÉMARRER UN ORDRE
+  async demarrerOrdre(ordreId) {
+    try {
+      // Route backend: router.put('/ordre-travail/:id/demarrer', ...)
+      const response = await axios.put(
+        `${API_BASE_URL}/ordre-travail/${ordreId}/demarrer`,
+        {},
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur demarrerOrdre:', error);
+      throw error;
+    }
+  },
+
+  // ✅ TERMINER UN ORDRE
+  async terminerOrdre(ordreId) {
+    try {
+      // Route backend: router.put('/ordre-travail/:id/terminer', ...)
+      const response = await axios.put(
+        `${API_BASE_URL}/ordre-travail/${ordreId}/terminer`,
+        {},
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur terminerOrdre:', error);
+      throw error;
+    }
+  },
+
+  // ✅ SUPPRIMER UN ORDRE
+  async deleteOrdre(ordreId) {
+    try {
+      // Route backend: router.delete('/:id', ...)
+      const response = await axios.delete(
+        `${API_BASE_URL}/${ordreId}`,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur deleteOrdre:', error);
+      throw error;
+    }
+  },
+
+  // ✅ RÉCUPÉRER LES STATISTIQUES
+  async getStatistiques(garageId = null) {
+    try {
+      const params = garageId ? { garageId } : {};
+      // Route backend: router.get('/statistiques', ...)
+      const response = await axios.get(`${API_BASE_URL}/statistiques`, {
+        params,
+        ...getAuthHeaders()
+      });
+      
+      if (response.data.success && response.data.statistiques) {
+        return response.data.statistiques;
+      }
+      return response.data.statistiques || response.data;
+    } catch (error) {
+      console.error('❌ Erreur getStatistiques:', error);
+      throw error;
+    }
+  },
+
+  // ✅ RÉCUPÉRER UN DEVIS PAR CODE
+  async getDevisByCode(devisId) {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/devis/code/${devisId}`,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur getDevisByCode:', error);
+      throw error;
+    }
+  },
+
+  // ✅ RÉCUPÉRER ORDRES PAR DEVIS ID
+  async getOrdresParDevisId(devisId) {
+    try {
+      // Route backend: router.get('/ordre-travail/by-devis/:devisId', ...)
+      const response = await axios.get(
+        `${API_BASE_URL}/ordre-travail/by-devis/${devisId}`,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur getOrdresParDevisId:', error);
+      throw error;
+    }
+  },
+
+  // ✅ RÉCUPÉRER ORDRES PAR STATUT
+  async getOrdresByStatus(status, page = 1, limit = 10) {
+    try {
+      const params = { page: page.toString(), limit: limit.toString() };
+      // Route backend: router.get("/ordres/status/:status", ...)
+      const response = await axios.get(
+        `${API_BASE_URL}/ordres/status/${status}`,
+        {
+          params,
+          ...getAuthHeaders()
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur getOrdresByStatus:', error);
+      throw error;
+    }
+  },
+
+  // ✅ RÉCUPÉRER ORDRES SUPPRIMÉS
+  async getOrdresSupprimes(page = 1, limit = 10) {
+    try {
+      const params = { page: page.toString(), limit: limit.toString() };
+      // Route backend: router.get('/ordres/status/supprime', ...)
+      const response = await axios.get(
+        `${API_BASE_URL}/ordres/status/supprime`,
+        {
+          params,
+          ...getAuthHeaders()
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur getOrdresSupprimes:', error);
+      throw error;
+    }
+  },
+
+  // ✅ RÉCUPÉRER ORDRES PAR ATELIER
+  async getOrdresByAtelier(atelierId, page = 1, limit = 10) {
+    try {
+      const params = { page: page.toString(), limit: limit.toString() };
+      // Route backend: router.get("/ordres/atelier/:atelierId", ...)
+      const response = await axios.get(
+        `${API_BASE_URL}/ordres/atelier/${atelierId}`,
+        {
+          params,
+          ...getAuthHeaders()
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur getOrdresByAtelier:', error);
+      throw error;
+    }
+  },
+
+  // ========== SERVICES AUXILIAIRES ==========
+
   async getServices() {
-    const response = await axios.get('http://localhost:5000/api/getAllServices', getAuthHeaders());
-    return response.data;
-  },
-
-  async getAteliers() {
-    const response = await axios.get('http://localhost:5000/api/getAllAteliers', getAuthHeaders());
-    return response.data;
-  },
-
-  async getMecaniciensByService(serviceId) {
-    if (!serviceId) {
-      return [];
+    try {
+      const response = await axios.get(
+        'http://localhost:5000/api/services/available-for-mechanics',
+        getAuthHeaders()
+      );
+      return response.data.services || response.data;
+    } catch (error) {
+      console.error('❌ Erreur getServices:', error);
+      throw error;
     }
-    const response = await axios.get(`http://localhost:5000/api/mecaniciens/by-service/${serviceId}`, getAuthHeaders());
-    return response.data;
+  },
+
+async getAteliers() {
+  try {
+    const response = await axios.get(
+      'http://localhost:5000/api/getAllAteliers',
+      getAuthHeaders()
+    );
+    // ✅ Retourner le tableau d'ateliers, pas l'objet complet
+    return response.data.ateliers || [];
+  } catch (error) {
+    console.error('❌ Erreur getAteliers:', error);
+    throw error;
+  }
+},
+
+// Dans ordresTravailAPI (services/ordresTravailAPI.js)
+
+ async getMecaniciensByService(serviceId) {
+    try {
+      if (!serviceId) {
+        console.warn('⚠️ ServiceId manquant');
+        return [];
+      }
+      
+      console.log('📥 Chargement mécaniciens pour service:', serviceId);
+      
+      const response = await axios.get(
+        `http://localhost:5000/api/mecaniciens/by-service/${serviceId}`,
+        getAuthHeaders()
+      );
+      
+      const mecaniciens = response.data.mecaniciens || [];
+      console.log(`✅ ${mecaniciens.length} mécaniciens trouvés`);
+      
+      return mecaniciens;
+      
+    } catch (error) {
+      console.error('❌ Erreur getMecaniciensByService:', error);
+      
+      if (error.response?.status === 404) {
+        console.warn('⚠️ Aucun mécanicien trouvé pour ce service');
+        return [];
+      }
+      
+      throw error;
+    }
   }
 };
 
-// Configuration par défaut d'Axios pour gérer les erreurs
+
+
+// ========== INTERCEPTEURS AXIOS ==========
+
+axios.interceptors.request.use(
+  (config) => {
+    const token = getAuthToken();
+    if (token && token !== 'null' && token !== 'undefined') {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('Erreur API:', error);
+    console.error('❌ Erreur API:', error);
     
-    // Gérer les erreurs d'authentification
     if (error.response?.status === 401) {
-      // Token expiré ou invalide - rediriger vers login
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
-      window.location.href = '/login';
+      window.location.href = '/auth/sign-in';
       return Promise.reject({ message: 'Session expirée, veuillez vous reconnecter' });
     }
     
-    // Personnaliser les messages d'erreur
     if (error.response) {
-      const message = error.response.data?.error || error.response.data?.message || 'Erreur serveur';
+      const message = error.response.data?.error || 
+                     error.response.data?.message || 
+                     'Erreur serveur';
       error.message = message;
     } else if (error.request) {
       error.message = 'Impossible de contacter le serveur';
@@ -228,16 +367,4 @@ axios.interceptors.response.use(
   }
 );
 
-// Intercepteur pour ajouter automatiquement le token à toutes les requêtes
-axios.interceptors.request.use(
-  (config) => {
-    const token = getAuthToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+export default ordresTravailAPI;

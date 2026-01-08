@@ -4,9 +4,9 @@ import { Search, Filter, FileText, DollarSign, Clock, AlertTriangle, X, User, Ca
 import axios from 'axios';
 
 interface GarageInfo {
-  username: string;
-  email: string;
-  phone: string;
+  nom: string;
+  emailProfessionnel: string;
+  telephoneProfessionnel: string;
   governorateName: string;
   cityName: string;
   streetAddress: string;
@@ -46,7 +46,7 @@ interface CreditNoteDetails {
 interface FactureDetails {
   _id: string;
   numeroFacture: number;
-  garagisteId: GarageInfo;
+  garageId: GarageInfo;
   clientInfo: {
     nom: string;
   };
@@ -64,7 +64,7 @@ interface FactureDetails {
   tvaRate: number;
   remiseRate: number;
   timbreFiscal: number;
-  paymentStatus: 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye' | 'annule';
+  paymentStatus: 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye' | 'annulee';
   invoiceDate: string;
   dueDate: string;
   paymentAmount: number;
@@ -89,7 +89,16 @@ interface Stats {
   totalImpaye: number;
   facturesEnRetard: number;
 }
+// Type pour le modal
+interface ModalState {
+  type: 'facture' | 'credit' | null;
+  data: FactureDetails | CreditNoteDetails | null;
+  isOpen: boolean;
+}
 
+// Type pour les filtres
+type StatusFilter = 'tous' | 'en_attente' | 'paye' | 'en_retard' | 'partiellement_paye';
+const API_BASE_URL = `http://localhost:5000/api`;
 const ClientFactures: React.FC = () => {
   const [factures, setFactures] = useState<FactureDetails[]>([]);
   const [filteredFactures, setFilteredFactures] = useState<FactureDetails[]>([]);
@@ -107,7 +116,9 @@ const ClientFactures: React.FC = () => {
   const [selectedFacture, setSelectedFacture] = useState<FactureDetails | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [creditNoteDetails, setCreditNoteDetails] = useState(null);
+  const [creditNoteDetails, setCreditNoteDetails] =
+  useState<CreditNoteDetails | null>(null);
+
   const [showCreditNoteModal, setShowCreditNoteModal] = useState(false);
   const itemsPerPage = 5;
 
@@ -133,14 +144,26 @@ const ClientFactures: React.FC = () => {
 
   const fetchFactures = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/client/factures', {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+
+      const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      const response = await axios.get(`${API_BASE_URL}/client/factures`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
         setFactures(response.data.data);
         setFilteredFactures(response.data.data);
       }
-    } catch (error) {
+    } catch (error :any) {
+      if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
       console.error('Erreur lors de la récupération des factures:', error);
     } finally {
       setLoading(false);
@@ -150,15 +173,26 @@ const ClientFactures: React.FC = () => {
   const fetchFactureDetails = async (factureId: string) => {
     setLoadingFactureId(factureId);
     try {
-      const response = await axios.get(`http://localhost:5000/api/client/factures/${factureId}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+       const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      const response = await axios.get(`${API_BASE_URL}/client/factures/${factureId}`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       const data = response.data;
       if (data.success) {
         setSelectedFacture(data.data);
         setShowDetailsModal(true);
       }
-    } catch (error) {
+    } catch (error : any) {
+      if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
       console.error('Erreur lors de la récupération des détails:', error);
     } finally {
       setLoadingFactureId(null);
@@ -168,11 +202,16 @@ const ClientFactures: React.FC = () => {
 
   const fetchCreditNoteDetails = async (creditNoteId: string) => {
     try {
+       const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       console.log('🚀 Appel API pour ID:', creditNoteId);
       console.log('🔑 Token:', getAuthToken());
 
-      const response = await axios.get(`http://localhost:5000/api/client/credit-note/${creditNoteId}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      const response = await axios.get(`${API_BASE_URL}/client/credit-note/${creditNoteId}`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       const data = response.data;
@@ -202,63 +241,28 @@ const ClientFactures: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/client/factures/stats', {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+       const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      const response = await axios.get(`${API_BASE_URL}/client/factures/stats`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
         setStats(response.data.data);
       }
-    } catch (error) {
+    } catch (error : any) {
+      if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/auth/sign-in';
+          return;
+        }
       console.error('Erreur lors de la récupération des stats:', error);
     }
   };
 
-  const handlePayment = async (factureId: string, paymentData: any) => {
-    try {
-      const token = getAuthToken();
-
-      if (!token) {
-        alert('❌ Erreur: Session expirée. Veuillez vous reconnecter.');
-        window.location.href = '/login';
-        return;
-      }
-
-      console.log('🔍 Tentative paiement client pour facture:', factureId);
-
-      const response = await axios.post(
-        `http://localhost:5000/api/client/factures/${factureId}/payment`,
-        paymentData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
-      if (response.data.success) {
-        alert('✅ Paiement enregistré avec succès !');
-        fetchFactures();
-        fetchStats();
-        setSelectedFacture(null);
-      }
-    } catch (error: any) {
-      console.error('❌ Erreur lors du paiement:', error);
-
-      if (error.response?.status === 401) {
-        alert('❌ Session expirée. Veuillez vous reconnecter.');
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-        return;
-      }
-
-      const errorMessage = error.response?.data?.message ||
-        error.response?.data?.error ||
-        'Erreur de connexion au serveur';
-
-      alert('❌ Erreur lors du paiement: ' + errorMessage);
-    }
-  };
 
   useEffect(() => {
     let filtered = factures;
@@ -267,7 +271,7 @@ const ClientFactures: React.FC = () => {
       filtered = filtered.filter(facture =>
         facture.numeroFacture.toString().includes(searchTerm) ||
         facture.vehicleInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        facture.garagisteId?.username.toLowerCase().includes(searchTerm.toLowerCase())
+        facture.garageId?.nom.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -328,11 +332,22 @@ const ClientFactures: React.FC = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Mes Factures</h1>
-        <p className="text-gray-600">Consultez et payez vos factures</p>
-      </div>
+
+            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-4 rounded-xl">
+              <DollarSign className="w-10 h-10 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">
+                Mes Factures
+              </h1>
+              <p className="text-gray-600 text-lg mt-">
+                Consultez et payez vos factures
+              </p>
+            </div>
+          </div>
+        </div>
 
       {/* Statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -462,10 +477,10 @@ const ClientFactures: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">
-                        {facture.garagisteId?.username || 'N/A'}
+                        {facture.garageId?.nom || 'N/A'}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {facture.garagisteId?.phone || 'N/A'}
+                        {facture.garageId?.telephoneProfessionnel || 'N/A'}
                       </div>
                     </div>
                   </td>
@@ -561,12 +576,12 @@ const ClientFactures: React.FC = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <h1 className="text-3xl font-bold text-blue-600">
-                      {selectedFacture.garagisteId?.username || 'Garage'}
+                      {selectedFacture.garageId?.nom || 'Garage'}
                     </h1>
                     <div className="mt-2 text-gray-600">
-                      <p>{selectedFacture.garagisteId?.governorateName} - {selectedFacture.garagisteId?.cityName}-{selectedFacture.garagisteId?.streetAddress}</p>
-                      <p>Tél: {selectedFacture.garagisteId?.phone}</p>
-                      <p>Email: {selectedFacture.garagisteId?.email}</p>
+                      <p>{selectedFacture.garageId?.governorateName} - {selectedFacture.garageId?.cityName}-{selectedFacture.garageId?.streetAddress}</p>
+                      <p>Tél: {selectedFacture.garageId?.telephoneProfessionnel}</p>
+                      <p>Email: {selectedFacture.garageId?.emailProfessionnel}</p>
                     </div>
                   </div>
 

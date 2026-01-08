@@ -1,0 +1,291 @@
+[
+  {
+    "_id": "691ae987b3a8dd8c3875e866",
+    "proprietaireId": "691ae952b3a8dd8c3875e817",
+    "proprietaireModel": "FicheClient",
+    "marque": "byd",
+    "modele": "202",
+    "immatriculation": "TUN123",
+    "annee": 2020,
+    "typeCarburant": "essence",
+    "kilometrage": 2123,
+    "statut": "actif",
+    "creePar": "garagiste",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [
+      {
+        "garageId": "69147724cb1b9aa1eaa81e3d",
+        "datePremiereVisite": "2025-11-17T09:23:19.904Z",
+        "_id": "691ae987b3a8dd8c3875e867"
+      }
+    ],
+    "carteGrise": {
+      "numeroCG": "123456987",
+      "numeroChassis": "DFGH45",
+      "dateMiseCirculation": "2020-11-02T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-11-06T00:00:00.000Z",
+      "dateProchaineVisite": "2028-11-17T00:00:00.000Z"
+    },
+    "createdAt": "2025-11-17T09:23:19.910Z",
+    "updatedAt": "2025-11-17T09:23:19.910Z",
+    "__v": 0
+  },
+  {
+    "_id": "691af813397350c205d81a70",
+    "proprietaireId": "691af6f2143c7678f8f10755",
+    "proprietaireModel": "FicheClient",
+    "marque": "tedt",
+    "modele": "102",
+    "immatriculation": "TUN128",
+    "annee": 2020,
+    "typeCarburant": "essence",
+    "kilometrage": 12311,
+    "statut": "actif",
+    "creePar": "garagiste",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [
+      {
+        "garageId": "69147724cb1b9aa1eaa81e3d",
+        "datePremiereVisite": "2025-11-17T10:25:23.327Z",
+        "_id": "691af813397350c205d81a71"
+      }
+    ],
+    "carteGrise": {
+      "numeroCG": "123654",
+      "numeroChassis": "AZERT456+",
+      "dateMiseCirculation": "2021-05-17T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-11-17T00:00:00.000Z",
+      "dateProchaineVisite": "2027-11-17T00:00:00.000Z"
+    },
+    "createdAt": "2025-11-17T10:25:23.335Z",
+    "updatedAt": "2025-11-17T10:25:23.335Z",
+    "__v": 0
+  },
+  {
+    "_id": "691af8fca7dcfc06162ccd16",
+    "proprietaireId": "691af6f2143c7678f8f10755",
+    "proprietaireModel": "FicheClient",
+    "marque": "azer",
+    "modele": "123",
+    "immatriculation": "123TUN12",
+    "typeCarburant": "essence",
+    "kilometrage": 1230,
+    "statut": "actif",
+    "creePar": "garagiste",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [
+      {
+        "garageId": "69147725cb1b9aa1eaa81e3f",
+        "datePremiereVisite": "2025-11-17T10:29:16.136Z",
+        "_id": "691af8fca7dcfc06162ccd17"
+      }
+    ],
+    "carteGrise": {
+      "numeroCG": "987845",
+      "numeroChassis": "WXCVB456",
+      "dateMiseCirculation": "2025-11-17T00:00:00.000Z",
+      "puissanceFiscale": 8,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-11-17T00:00:00.000Z",
+      "dateProchaineVisite": "2026-12-17T00:00:00.000Z"
+    },
+    "createdAt": "2025-11-17T10:29:16.145Z",
+    "updatedAt": "2025-12-22T10:04:02.192Z",
+    "__v": 0
+  },
+  {
+    "_id": "691b3a6269fbb0ac63fcc494",
+    "proprietaireId": "691af6c0143c7678f8f10730",
+    "proprietaireModel": "FicheClient",
+    "marque": "citroen",
+    "modele": "201",
+    "immatriculation": "TUN789",
+    "typeCarburant": "essence",
+    "kilometrage": 123456,
+    "statut": "actif",
+    "creePar": "garagiste",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [
+      {
+        "garageId": "69147725cb1b9aa1eaa81e3f",
+        "datePremiereVisite": "2025-11-17T15:08:18.265Z",
+        "_id": "691b3a6269fbb0ac63fcc495"
+      }
+    ],
+    "carteGrise": {
+      "numeroCG": "1111111111111178964H",
+      "numeroChassis": "123HD1111111111",
+      "dateMiseCirculation": "2025-11-17T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-11-17T00:00:00.000Z",
+      "dateProchaineVisite": "2026-10-17T00:00:00.000Z"
+    },
+    "createdAt": "2025-11-17T15:08:18.268Z",
+    "updatedAt": "2025-11-17T15:08:18.268Z",
+    "__v": 0
+  },
+  {
+    "_id": "691d9545807a8aa37603d048",
+    "proprietaireId": "691af6c0143c7678f8f10730",
+    "proprietaireModel": "FicheClient",
+    "marque": "cc",
+    "modele": "10",
+    "immatriculation": "11TUN12",
+    "annee": 2020,
+    "typeCarburant": "essence",
+    "kilometrage": 11110,
+    "statut": "actif",
+    "creePar": "garagiste",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [
+      {
+        "garageId": "69147725cb1b9aa1eaa81e3f",
+        "datePremiereVisite": "2025-11-19T10:00:37.017Z",
+        "_id": "691d9545807a8aa37603d049"
+      }
+    ],
+    "carteGrise": {
+      "numeroCG": "5587634",
+      "numeroChassis": "HJKI3621",
+      "dateMiseCirculation": "2020-11-19T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-11-19T00:00:00.000Z",
+      "dateProchaineVisite": "2027-03-08T00:00:00.000Z"
+    },
+    "createdAt": "2025-11-19T10:00:37.027Z",
+    "updatedAt": "2025-11-19T10:34:03.720Z",
+    "__v": 0
+  },
+  {
+    "_id": "691f7928163a17aa79fb6a0c",
+    "proprietaireId": "691f78f8163a17aa79fb6995",
+    "proprietaireModel": "FicheClient",
+    "marque": "ppp",
+    "modele": "p1",
+    "immatriculation": "52TUN77",
+    "typeCarburant": "essence",
+    "kilometrage": 12300,
+    "statut": "actif",
+    "creePar": "garagiste",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [
+      {
+        "garageId": "69147725cb1b9aa1eaa81e3f",
+        "datePremiereVisite": "2025-11-20T20:25:12.326Z",
+        "_id": "691f7928163a17aa79fb6a0d"
+      }
+    ],
+    "carteGrise": {
+      "numeroCG": "7777777",
+      "numeroChassis": "777O,J",
+      "dateMiseCirculation": "2000-11-04T00:00:00.000Z",
+      "puissanceFiscale": 8,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-11-20T00:00:00.000Z",
+      "dateProchaineVisite": "2028-11-02T00:00:00.000Z"
+    },
+    "createdAt": "2025-11-20T20:25:12.330Z",
+    "updatedAt": "2025-11-20T20:25:12.330Z",
+    "__v": 0
+  },
+  {
+    "_id": "692da677083a7057c997e20d",
+    "proprietaireId": "6911cb63ccd145adc6354d98",
+    "proprietaireModel": "Client",
+    "marque": "bys",
+    "modele": "20",
+    "immatriculation": "15TUN45",
+    "typeCarburant": "essence",
+    "kilometrage": 12350,
+    "statut": "actif",
+    "creePar": "client",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [],
+    "carteGrise": {
+      "numeroCG": "SDFBGBV",
+      "numeroChassis": "DFGB VC",
+      "dateMiseCirculation": "2025-12-01T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-12-01T00:00:00.000Z",
+      "dateProchaineVisite": "2026-02-01T00:00:00.000Z"
+    },
+    "createdAt": "2025-12-01T14:30:15.751Z",
+    "updatedAt": "2025-12-01T14:30:15.751Z",
+    "__v": 0
+  },
+  {
+    "_id": "692eb55a3158d0bba107e1e7",
+    "proprietaireId": "6911cb63ccd145adc6354d98",
+    "proprietaireModel": "Client",
+    "marque": "woles",
+    "modele": "20",
+    "immatriculation": "8TUN78",
+    "typeCarburant": "essence",
+    "kilometrage": 120,
+    "statut": "actif",
+    "creePar": "client",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [],
+    "carteGrise": {
+      "numeroCG": "SEDRTYGH",
+      "numeroChassis": "8754JK",
+      "dateMiseCirculation": "2025-12-02T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-12-02T00:00:00.000Z",
+      "dateProchaineVisite": "2027-11-04T00:00:00.000Z"
+    },
+    "createdAt": "2025-12-02T09:46:02.479Z",
+    "updatedAt": "2025-12-22T10:19:55.453Z",
+    "__v": 0
+  },
+  {
+    "_id": "69491b8599b2638a309e221b",
+    "proprietaireId": "691af6f2143c7678f8f10755",
+    "proprietaireModel": "FicheClient",
+    "marque": "ccc",
+    "modele": "cc",
+    "immatriculation": "TUN544",
+    "annee": 2020,
+    "typeCarburant": "essence",
+    "kilometrage": 21000,
+    "statut": "actif",
+    "creePar": "garagiste",
+    "paysImmatriculation": "tunisie",
+    "historique_garages": [
+      {
+        "garageId": "69147725cb1b9aa1eaa81e3f",
+        "datePremiereVisite": "2025-12-22T10:20:53.021Z",
+        "_id": "69491b8599b2638a309e221c"
+      }
+    ],
+    "carteGrise": {
+      "numeroCG": "OIPŶGYH",
+      "numeroChassis": "TYUIOPIUH",
+      "dateMiseCirculation": "2025-12-22T00:00:00.000Z",
+      "puissanceFiscale": 7,
+      "genre": "VP",
+      "nombrePlaces": 5,
+      "dateVisite": "2025-12-22T00:00:00.000Z",
+      "dateProchaineVisite": "2028-06-22T00:00:00.000Z"
+    },
+    "createdAt": "2025-12-22T10:20:53.029Z",
+    "updatedAt": "2025-12-22T10:20:53.029Z",
+    "__v": 0
+  }
+]

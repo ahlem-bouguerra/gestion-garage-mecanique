@@ -22,24 +22,46 @@ const AtelierManager = () => {
     fetchAteliers();
   }, []);
 
-
-    const fetchAteliers = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/getAllAteliers`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-      setAteliers(response.data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des services:', error);
-    } finally {
-      setLoading(false);
+const fetchAteliers = async () => {
+  try {
+    setLoading(true);
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
     }
-  };
+    const response = await axios.get(`${API_BASE_URL}/getAllAteliers`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    // ⭐ CORRECTION : Extraire ateliers de l'objet response
+    setAteliers(response.data.ateliers || []); // Au lieu de response.data
+    
+  } catch (error: any) {
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
+    console.error('Erreur lors du chargement des ateliers:', error);
+    setAteliers([]); // ⭐ Initialiser à tableau vide en cas d'erreur
+  } finally {
+    setLoading(false);
+  }
+};
 
 // Création d'un atelier
 const createAtelier = async (data) => {
   try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
     const response = await axios.post(
       `${API_BASE_URL}/createAtelier`,
       data,
@@ -55,9 +77,19 @@ const createAtelier = async (data) => {
     setAteliers([...ateliers, newAtelier]);
     return true;
 
-  } catch (err: any) {
-    setError(err.response?.data?.error || 'Erreur lors de la création');
-    console.error('Erreur:', err);
+  } catch (error: any) {
+    // ⭐ AJOUTER la gestion 401/403
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
+    setError(error.response?.data?.error || 'Erreur lors de la création');
+    console.error('Erreur:', error);
     return false;
   }
 };
@@ -65,6 +97,11 @@ const createAtelier = async (data) => {
 // Mise à jour d'un atelier
 const updateAtelier = async (id, data) => {
   try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
     const response = await axios.put(
       `${API_BASE_URL}/updateAtelier/${id}`,
       data,
@@ -80,9 +117,19 @@ const updateAtelier = async (id, data) => {
     setAteliers(ateliers.map(a => a._id === id ? updatedAtelier : a));
     return true;
 
-  } catch (err: any) {
-    setError(err.response?.data?.error || 'Erreur lors de la mise à jour');
-    console.error('Erreur:', err);
+  } catch (error: any) {
+    // ⭐ AJOUTER la gestion 401/403
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
+    setError(error.response?.data?.error || 'Erreur lors de la mise à jour');
+    console.error('Erreur:', error);
     return false;
   }
 };
@@ -92,6 +139,11 @@ const deleteAtelier = async (id) => {
   if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet atelier ?')) return;
 
   try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined') {
+      window.location.href = '/auth/sign-in';
+      throw new Error("Token invalide");
+    }
     await axios.delete(
       `${API_BASE_URL}/deleteAtelier/${id}`,
       {
@@ -103,9 +155,19 @@ const deleteAtelier = async (id) => {
 
     setAteliers(ateliers.filter(a => a._id !== id));
 
-  } catch (err: any) {
-    setError(err.response?.data?.error || 'Erreur lors de la suppression');
-    console.error('Erreur:', err);
+  }  catch(error: any) {
+    // ⭐ AJOUTER la gestion 401/403
+    if (error.response?.status === 403) {
+      alert("❌ Accès refusé : Vous n'avez pas la permission");
+      throw error;
+    }
+    if (error.response?.status === 401) {
+      alert("❌ Session expirée : Veuillez vous reconnecter");
+      window.location.href = '/auth/sign-in';
+      throw error;
+    }
+    setError(error.response?.data?.error || 'Erreur lors de la suppression');
+    console.error('Erreur:', error);
   }
 };
 
@@ -157,7 +219,7 @@ const deleteAtelier = async (id) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* En-tête */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">

@@ -56,12 +56,12 @@ export const NAV_DATA = [
           },
         ],
       },
-    /*  {
-        title: "Historique Services",
-        url: "/client/historique",
-        icon: Clock,
+      {
+        title: "Mes Ordres",
+        url: "/mes-ordres",
+        icon: Settings,
         items: [],
-      },*/
+      },
     ],
   },
   {
@@ -75,16 +75,5 @@ export const NAV_DATA = [
       },
     ],
   },
-  {
-    label: "COMPTE",
-    items: [
-      {
-        title: "Mon Profil",
-        url: "/profil",
-        icon: User,
-        items: [],
-      },
-
-    ],
-  },
+  
 ];

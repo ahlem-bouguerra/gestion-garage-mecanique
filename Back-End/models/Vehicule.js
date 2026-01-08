@@ -63,13 +63,9 @@ const vehiculeSchema = new mongoose.Schema({
     enum: ['client', 'garagiste'],
     required: true
   },
-  
-  // ✅ MODIFIÉ : garagisteId devient OPTIONNEL (seulement si créé par garage)
-  garagisteId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: false // ✅ Nullable si créé par client
-  },
+
+
+
   paysImmatriculation: {
   type: String,
   enum: ['tunisie', 'autre'],
@@ -80,7 +76,7 @@ const vehiculeSchema = new mongoose.Schema({
   historique_garages: [{
     garageId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
+      ref: "Garagiste"
     },
     datePremiereVisite: {
       type: Date,
@@ -110,5 +106,33 @@ const vehiculeSchema = new mongoose.Schema({
 // ✅ Index pour recherche rapide
 vehiculeSchema.index({ immatriculation: 1 });
 vehiculeSchema.index({ proprietaireId: 1 });
+
+
+// ✅ AJOUTER APRÈS LA DÉFINITION DU SCHÉMA, AVANT export default
+
+// Virtual pour obtenir le nom effectif du propriétaire
+vehiculeSchema.virtual('proprietaireNomEffectif').get(function() {
+  // Si proprietaireModel est 'Client' et que proprietaireId est populé
+  if (this.proprietaireModel === 'Client' && this.proprietaireId && this.proprietaireId.username) {
+    return this.proprietaireId.username;
+  }
+  
+  // Si proprietaireModel est 'FicheClient' et que proprietaireId est populé
+  if (this.proprietaireModel === 'FicheClient' && this.proprietaireId) {
+    // Si clientId existe dans FicheClient, utiliser Client.username
+    if (this.proprietaireId.clientId && this.proprietaireId.clientId.username) {
+      return this.proprietaireId.clientId.username;
+    }
+    // Sinon utiliser FicheClient.nom
+    return this.proprietaireId.nom;
+  }
+  
+  return 'Propriétaire inconnu';
+});
+
+// Pour que les virtuals apparaissent dans JSON
+vehiculeSchema.set('toJSON', { virtuals: true });
+vehiculeSchema.set('toObject', { virtuals: true });
+
 
 export default mongoose.model('Vehicule', vehiculeSchema);

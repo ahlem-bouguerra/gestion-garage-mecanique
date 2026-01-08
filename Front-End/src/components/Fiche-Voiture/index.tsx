@@ -4,6 +4,10 @@ import { Car, Plus, Edit, Trash2, User, Building2, Search, X, Calendar, BookOpen
 import axios from 'axios';
 
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
+
+
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -35,6 +39,7 @@ interface Vehicule {
 interface Client {
     _id: string;
     nom: string;
+    nomEffectif?: string; // ⭐ AJOUTER CETTE LIGNE
     type: "particulier" | "professionnel";
     telephone?: string;
     email?: string;
@@ -443,6 +448,10 @@ export default function VehiculeManagement() {
     const [visiteValidations, setVisiteValidations] = useState<{ [key: string]: FieldValidation }>({});
     const [rechercheGlobale, setRechercheGlobale] = useState("");
     const [vehiculesFiltres, setVehiculesFiltres] = useState<Vehicule[]>([]);
+    const { showAlert } = useGlobalAlert();
+    const { confirm } = useConfirm();
+
+
     const getAuthToken = () => {
         return localStorage.getItem('token') || sessionStorage.getItem('token');
     };
@@ -562,16 +571,22 @@ export default function VehiculeManagement() {
         setTimeout(() => setError(""), 5000);
     };
 
-    const showSuccess = (message: string) => {
-        console.log("✅ Succès:", message);
-        alert(typeof message === 'string' ? message : 'Opération réussie');
-    };
 
     const fetchClients = async () => {
         try {
+
+            const token = getAuthToken();
+      
+            // ⭐ VÉRIFICATION CRITIQUE
+            if (!token || token === 'null' || token === 'undefined') {
+                console.error('❌ Aucun token valide trouvé');
+                // Rediriger vers le login
+                window.location.href = '/auth/sign-in';
+                return;
+            }
             setError("");
             const response = await axios.get(`${API_BASE_URL}/clients/noms`, {
-                headers: { Authorization: `Bearer ${getAuthToken()}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
             console.log("🔍 Clients reçus:", response.data);
 
@@ -590,9 +605,18 @@ export default function VehiculeManagement() {
 
     const fetchVehicules = async () => {
         try {
+            const token = getAuthToken();
+      
+            // ⭐ VÉRIFICATION CRITIQUE
+            if (!token || token === 'null' || token === 'undefined') {
+                console.error('❌ Aucun token valide trouvé');
+                // Rediriger vers le login
+                window.location.href = '/auth/sign-in';
+                return;
+            }
             setError("");
             const response = await axios.get(`${API_BASE_URL}/vehicules`, {
-                headers: { Authorization: `Bearer ${getAuthToken()}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
             setVehicules(response.data);
         } catch (error: any) {
@@ -627,21 +651,23 @@ export default function VehiculeManagement() {
     }, [clients]);
 
 
-    const getClientName = (clientData: string | any) => {
-        console.log("🔍 Recherche client ID/Data:", clientData);
-        console.log("🔍 Clients disponibles:", clients.length);
+const getClientName = (clientData: string | any) => {
+    // Si c'est un objet avec nomEffectif, l'utiliser en priorité
+    if (typeof clientData === 'object' && clientData?.nomEffectif) {
+        return clientData.nomEffectif;
+    }
+    
+    // Sinon, fallback sur nom
+    if (typeof clientData === 'object' && clientData?.nom) {
+        return clientData.nom;
+    }
 
-        if (typeof clientData === 'object' && clientData?.nom) {
-            console.log("🔍 Client trouvé directement:", clientData.nom);
-            return clientData.nom;
-        }
-
-        const clientId = typeof clientData === 'object' ? clientData?._id : clientData;
-        const client = clients.find(c => c._id === clientId);
-        console.log("🔍 Client trouvé:", client?.nom || 'Non trouvé');
-
-        return client ? client.nom : "Client inconnu";
-    };
+    // Si c'est un ID, chercher dans clients
+    const clientId = typeof clientData === 'object' ? clientData?._id : clientData;
+    const client = clients.find(c => c._id === clientId);
+    
+    return client ? (client.nomEffectif || client.nom) : "Client inconnu";
+};
 
     const getClientType = (clientData: string | any) => {
         if (typeof clientData === 'object' && clientData?.type) {
@@ -757,28 +783,36 @@ export default function VehiculeManagement() {
         setShowVisiteModal(true);
     };
 
-    const handleVehiculeSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+const handleVehiculeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-        // ✅ VALIDATION FINALE AVANT SOUMISSION
-        if (!isVehiculeFormValid()) {
-            showError("Veuillez corriger les erreurs dans le formulaire");
+    // ✅ VALIDATION FINALE AVANT SOUMISSION
+    if (!isVehiculeFormValid()) {
+        showError("Veuillez corriger les erreurs dans le formulaire");
+        return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+            // Rediriger vers le login
+            window.location.href = '/auth/sign-in';
             return;
         }
-
-        setLoading(true);
-        setError("");
-
-        try {
-            const submitData = {
-                marque: vehiculeForm.marque.trim(),
-                modele: vehiculeForm.modele.trim(),
-                immatriculation: vehiculeForm.immatriculation.trim().toUpperCase(),
-                annee: vehiculeForm.annee ? parseInt(vehiculeForm.annee) : undefined,
-                couleur: vehiculeForm.couleur.trim() || undefined,
-                typeCarburant: vehiculeForm.typeCarburant,
-                kilometrage: vehiculeForm.kilometrage ? parseInt(vehiculeForm.kilometrage.replace(/\s/g, '')) : undefined,
-                carteGrise: vehiculeForm.carteGrise?.numeroCG || vehiculeForm.carteGrise?.numeroChassis ? {
+        
+        const submitData = {
+            marque: vehiculeForm.marque.trim(),
+            modele: vehiculeForm.modele.trim(),
+            immatriculation: vehiculeForm.immatriculation.trim().toUpperCase(),
+            annee: vehiculeForm.annee ? parseInt(vehiculeForm.annee) : undefined,
+            couleur: vehiculeForm.couleur.trim() || undefined,
+            typeCarburant: vehiculeForm.typeCarburant,
+            kilometrage: vehiculeForm.kilometrage ? parseInt(vehiculeForm.kilometrage.replace(/\s/g, '')) : undefined,
+            carteGrise: vehiculeForm.carteGrise?.numeroCG || vehiculeForm.carteGrise?.numeroChassis ? {
                 numeroCG: vehiculeForm.carteGrise.numeroCG?.trim() || undefined,
                 numeroChassis: vehiculeForm.carteGrise.numeroChassis?.trim() || undefined,
                 dateMiseCirculation: vehiculeForm.carteGrise.dateMiseCirculation || undefined,
@@ -788,49 +822,94 @@ export default function VehiculeManagement() {
                 dateVisite: vehiculeForm.carteGrise.dateVisite || undefined,
                 dateProchaineVisite: vehiculeForm.carteGrise.dateProchaineVisite || undefined
             } : undefined
-            };
+        };
 
-            console.log("📤 Données à envoyer:", submitData);
+        console.log("📤 Données à envoyer:", submitData);
 
-            if (modalType === "add") {
-                submitData.proprietaireId = vehiculeForm.proprietaireId;
-                await axios.post(`${API_BASE_URL}/vehicules`, submitData, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
-                });
-                showSuccess("Véhicule ajouté avec succès!");
-            } else if (modalType === "edit" && selectedVehicule) {
-                await axios.put(`${API_BASE_URL}/vehicules/${selectedVehicule._id}`, submitData, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
-                });
-                showSuccess("Véhicule modifié avec succès!");
+        if (modalType === "add") {
+            submitData.proprietaireId = vehiculeForm.proprietaireId;
+            await axios.post(`${API_BASE_URL}/vehicules`, submitData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            showAlert("success", "Véhicule ajouté", "Véhicule ajouté avec succès !");
+        } 
+        else if (modalType === "edit" && selectedVehicule) {
+            await axios.put(`${API_BASE_URL}/vehicules/${selectedVehicule._id}`, submitData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            showAlert("success", "Véhicule modifié", "Véhicule modifié avec succès !");
+        }
+
+        fetchVehicules();
+        setShowVehiculeModal(false);
+
+    } catch (error: any) {
+        
+        // ⭐ VÉRIFICATION DES ERREURS D'AUTORISATION
+        if (error.response?.status === 403) {
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+            return;
+        }
+        
+        if (error.response?.status === 401) {
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return;
+        }
+
+        
+        
+    } finally {
+        setLoading(false);
+    }
+};
+
+const deleteVehicule = async (vehicule: Vehicule) => {
+   
+    const isConfirmed = await confirm({
+    title: "Suppression du véhicule",
+    message: `Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ? Cette action est irréversible.`,
+    confirmText: "Supprimer",
+    cancelText: "Annuler",
+  });
+
+  if (!isConfirmed) return;
+        try {
+            const token = getAuthToken();
+  
+            // ⭐ VÉRIFICATION CRITIQUE
+            if (!token || token === 'null' || token === 'undefined') {
+                window.location.href = '/auth/sign-in';
+                return;
             }
-
+            
+            await axios.delete(`${API_BASE_URL}/vehicules/${vehicule._id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
             fetchVehicules();
-            setShowVehiculeModal(false);
+            showAlert("success", "Véhicule supprimé", "Véhicule supprimé avec succès!");
+            
         } catch (error: any) {
-            console.error("❌ Erreur soumission véhicule:", error);
-            const errorMessage = error.response?.data?.error || error.message;
-            showError(`Erreur: ${errorMessage}`);
-        } finally {
-            setLoading(false);
-        }
-    };
 
-    const deleteVehicule = async (vehicule: Vehicule) => {
-        if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${vehicule.marque} ${vehicule.modele} ?`)) {
-            try {
-                await axios.delete(`${API_BASE_URL}/vehicules/${vehicule._id}`, {
-                    headers: { Authorization: `Bearer ${getAuthToken()}` }
-                });;
-                fetchVehicules();
-                showSuccess("Véhicule supprimé avec succès!");
-            } catch (error: any) {
-                console.error("❌ Erreur suppression:", error);
-                const errorMessage = error.response?.data?.error || error.message;
-                showError(`Erreur suppression: ${errorMessage}`);
+            
+            // ⭐ VÉRIFICATION DES ERREURS D'AUTORISATION
+            if (error.response?.status === 403) {
+                showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+                return;
             }
+            
+            if (error.response?.status === 401) {
+                showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
+                window.location.href = '/auth/sign-in';
+                return;
+            }
+            
+            const errorMessage = error.response?.data?.error || error.message;
+            showError(`Erreur suppression: ${errorMessage}`);
         }
-    };
+    
+};
 
     const getVehiculeVisites = (vehiculeId: string) => {
         return visites.filter(v => v.vehiculeId === vehiculeId);
@@ -845,7 +924,7 @@ export default function VehiculeManagement() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -1103,7 +1182,7 @@ export default function VehiculeManagement() {
                                                     key={client._id}
                                                     value={client._id}
                                                 >
-                                                    {client.nom} ({client.type})
+                                                    {client.nomEffectif || client.nom} ({client.type})
                                                 </option>
                                             ))}
                                         </ValidatedField>

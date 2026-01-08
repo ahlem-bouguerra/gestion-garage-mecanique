@@ -132,13 +132,9 @@ const creditNoteSchema = new mongoose.Schema({
   // Métadonnées
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Garagiste'
   },
-  garagisteId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true
-  }
+garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true }
 }, {
   timestamps: true
 });

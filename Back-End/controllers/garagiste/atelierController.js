@@ -3,12 +3,40 @@ import Atelier from '../../models/Atelier.js';
 
 export const getAllAteliers = async (req, res) => {
   try {
-    const ateliers = await Atelier.find({garagisteId: req.user._id});
-    console.log("✅ aleliers récupérées:", ateliers.length);
-    res.json(ateliers);
+    const { garageId } = req.query; // ⭐ Récupérer garageId depuis query params
+    
+    // ⭐ Déterminer quel garageId utiliser
+    let targetGarageId;
+    
+    if (req.user.isSuperAdmin && garageId) {
+      // SuperAdmin avec garageId spécifique
+      targetGarageId = garageId;
+    } else if (!req.user.isSuperAdmin) {
+      // Garagiste : utiliser son propre garage
+      targetGarageId = req.user.garageId || req.user.garage;
+    }
+    // Si SuperAdmin sans garageId, targetGarageId reste undefined = tous les ateliers
+    
+    console.log('🔍 Recherche ateliers pour garage:', targetGarageId);
+    
+    // ⭐ Construire le filtre
+    const filter = targetGarageId ? { garageId: targetGarageId } : {};
+    
+    const ateliers = await Atelier.find(filter);
+    
+    console.log("✅ Ateliers récupérés:", ateliers.length);
+    
+    res.json({ 
+      success: true,
+      ateliers 
+    });
+    
   } catch (error) {
     console.error("❌ Erreur getAllAteliers:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
   }
 };
 
@@ -16,7 +44,7 @@ export const getAllAteliers = async (req, res) => {
 export const getAtelierById = async (req, res) => {
   try {
     const { id } = req.params;
-    const atelier = await Atelier.findOne({_id:id , garagisteId: req.user._id});
+    const atelier = await Atelier.findOne({_id:id , garageId: req.user.garageId});
 
     if (!atelier) {
       return res.status(404).json({ error: 'atelier non trouvée' });
@@ -42,7 +70,7 @@ export const createAtelier = async (req, res) => {
       });
     }
 
-    const atelier = new Atelier({ name ,localisation ,garagisteId: req.user._id });
+    const atelier = new Atelier({ name ,localisation ,garageId: req.user.garageId });
     await atelier.save();
 
     console.log("✅ Atelier créée:", atelier);
@@ -61,7 +89,7 @@ export const updateAtelier = async (req, res) => {
     const updateData = req.body;
 
     const atelierModifie = await Atelier.findOneAndUpdate(
-      { _id: id, garagisteId: req.user._id },
+      { _id: id, garageId: req.user.garageId},
       updateData,
       { new: true, runValidators: true }
     );
@@ -84,7 +112,7 @@ export const deleteAtelier = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const atelierSupprimee = await Atelier.findOneAndDelete({_id: id, garagisteId: req.user._id });
+    const atelierSupprimee = await Atelier.findOneAndDelete({_id: id, garageId: req.user.garageId });
 
     if (!atelierSupprimee) {
       return res.status(404).json({ error: 'atelier non trouvée' });

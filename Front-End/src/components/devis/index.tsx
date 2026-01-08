@@ -4,6 +4,8 @@ import { Plus, Edit2, Eye, Send, Check, X, Car, User, Calendar, FileText, Euro, 
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import jsPDF from 'jspdf';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
 
 
 const GarageQuoteSystem = () => {
@@ -24,14 +26,11 @@ const GarageQuoteSystem = () => {
   const [notifications, setNotifications] = useState([]);
   const [editingQuote, setEditingQuote] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [factureExists, setFactureExists] = useState({});
   const [selectedFacture, setSelectedFacture] = useState(null);
-  const [invoiceData, setInvoiceData] = useState(null);
   const router = useRouter();
   const [filters, setFilters] = useState({ status: '', clientName: '', dateDebut: '', dateFin: '' });
   const [newQuote, setNewQuote] = useState({ clientName: '', vehicleInfo: '', vehiculeId: '', inspectionDate: '', services: [{ piece: '', quantity: 1, unitPrice: 0 }] });
-  const [newquote, setNewquote] = useState({ services: [{ piece: '', quantity: 1, unitPrice: 0 }] });
   const statusColors = { brouillon: 'bg-gray-100 text-gray-800', envoye: 'bg-blue-100 text-blue-800', accepte: 'bg-green-100 text-green-800', refuse: 'bg-red-100 text-red-800' };
   const statusIcons = { brouillon: FileText, envoye: Send, accepte: Check, refuse: X };
   const [currentUser, setCurrentUser] = useState(null);
@@ -44,64 +43,88 @@ const GarageQuoteSystem = () => {
   const indexOfFirstDevis = indexOfLastDevis - itemsPerPage;
   const currentDevis = quotes.slice(indexOfFirstDevis, indexOfLastDevis);
   const totalPages = Math.ceil(quotes.length / itemsPerPage);
+  const { showAlert } = useGlobalAlert();
+  const { confirm } = useConfirm();
   const getAuthToken = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
 
-  const filteredClients = clients.filter(client =>
-    client.nom.toLowerCase().includes(searchClient.toLowerCase())
-  );
+  // Au début du composant, remplace le filteredClients par :
+  const filteredClients = clients.filter(client => {
+    const searchLower = searchClient.toLowerCase();
 
-  // Composant Alert personnalisé
-const Alert = ({ variant = 'info', title, description, onClose }) => {
-  const variants = {
-    warning: {
-      bg: 'bg-yellow-50 border-yellow-200',
-      icon: 'text-yellow-600',
-      title: 'text-yellow-800',
-      desc: 'text-yellow-700'
-    },
-    success: {
-      bg: 'bg-green-50 border-green-200',
-      icon: 'text-green-600',
-      title: 'text-green-800',
-      desc: 'text-green-700'
-    },
-    error: {
-      bg: 'bg-red-50 border-red-200',
-      icon: 'text-red-600',
-      title: 'text-red-800',
-      desc: 'text-red-700'
-    },
-    info: {
-      bg: 'bg-blue-50 border-blue-200',
-      icon: 'text-blue-600',
-      title: 'text-blue-800',
-      desc: 'text-blue-700'
+    // Chercher dans le nom direct
+    const matchNom = client.nom?.toLowerCase().includes(searchLower);
+
+    // Chercher dans le username si le client a un compte lié
+    const matchUsername = client.nomEffectif?.toLowerCase().includes(searchLower);
+
+    return matchNom || matchUsername;
+  });
+
+  // Ajoute cette fonction au début de ton composant
+  const getClientName = (devis) => {
+    // Si le client a un compte lié avec username
+    if (devis.clientId?.clientId?.username) {
+      return devis.clientId.clientId.username;
     }
+    // Sinon utilise le nom direct de la fiche
+    if (devis.clientId?.nom) {
+      return devis.clientId.nom;
+    }
+    return 'Client inconnu';
   };
 
-  const style = variants[variant] || variants.info;
+  // Composant Alert personnalisé
+  const Alert = ({ variant = 'info', title, description, onClose }) => {
+    const variants = {
+      warning: {
+        bg: 'bg-yellow-50 border-yellow-200',
+        icon: 'text-yellow-600',
+        title: 'text-yellow-800',
+        desc: 'text-yellow-700'
+      },
+      success: {
+        bg: 'bg-green-50 border-green-200',
+        icon: 'text-green-600',
+        title: 'text-green-800',
+        desc: 'text-green-700'
+      },
+      error: {
+        bg: 'bg-red-50 border-red-200',
+        icon: 'text-red-600',
+        title: 'text-red-800',
+        desc: 'text-red-700'
+      },
+      info: {
+        bg: 'bg-blue-50 border-blue-200',
+        icon: 'text-blue-600',
+        title: 'text-blue-800',
+        desc: 'text-blue-700'
+      }
+    };
 
-  return (
-    <div className={`${style.bg} border rounded-lg p-4 mb-6 flex items-start`}>
-      <AlertCircle className={`h-5 w-5 ${style.icon} mr-3 flex-shrink-0 mt-0.5`} />
-      <div className="flex-1">
-        {title && <h3 className={`font-semibold ${style.title} mb-1`}>{title}</h3>}
-        {description && <p className={`text-sm ${style.desc}`}>{description}</p>}
+    const style = variants[variant] || variants.info;
+
+    return (
+      <div className={`${style.bg} border rounded-lg p-4 mb-6 flex items-start`}>
+        <AlertCircle className={`h-5 w-5 ${style.icon} mr-3 flex-shrink-0 mt-0.5`} />
+        <div className="flex-1">
+          {title && <h3 className={`font-semibold ${style.title} mb-1`}>{title}</h3>}
+          {description && <p className={`text-sm ${style.desc}`}>{description}</p>}
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className={`${style.icon} hover:opacity-70 ml-3`}
+            aria-label="Fermer"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
-      {onClose && (
-        <button
-          onClick={onClose}
-          className={`${style.icon} hover:opacity-70 ml-3`}
-          aria-label="Fermer"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      )}
-    </div>
-  );
-};
+    );
+  };
 
   useEffect(() => {
     const fetchUserWithLocation = async () => {
@@ -113,7 +136,17 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCurrentUser(response.data);
-      } catch (error) {
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
         console.error("Erreur:", error);
       }
     };
@@ -136,12 +169,12 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
     const header = document.querySelector('header');
     if (!header) return;
 
-    if (selectedInvoice || selectedQuote || selectedQuote) {
+    if (selectedQuote || selectedQuote) {
       header.classList.add("hidden");
     } else {
       header.classList.remove("hidden");
     }
-  }, [selectedInvoice, selectedQuote, selectedQuote]);
+  }, [selectedQuote, selectedQuote]);
 
   useEffect(() => {
     const header = document.querySelector('header');
@@ -154,18 +187,6 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
     }
   }, [selectedFacture]);
 
-  const generateInvoice = (quote) => {
-    const invoice = {
-      ...quote,
-      invoiceNumber: `FAC-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
-      invoiceDate: new Date().toISOString().split('T')[0],
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 jours
-      type: 'facture'
-    };
-
-    setInvoiceData(invoice);
-    setSelectedInvoice(invoice);
-  };
 
   const printInvoice = async () => {
     setIsGeneratingPDF(true);
@@ -199,7 +220,7 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
       pdf.setFontSize(10);
 
       // Client (gauche)
-      pdf.text(`Nom: ${selectedQuote.clientName}`, 20, yPosition);
+      pdf.text(`Nom: ${getClientName(selectedQuote)}`, 20, yPosition);
       pdf.text(`Véhicule: ${selectedQuote.vehicleInfo}`, 20, yPosition + 6);
       pdf.text(`Date: ${selectedQuote.inspectionDate}`, 20, yPosition + 12);
 
@@ -397,7 +418,7 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
     } catch (error) {
       console.error('Erreur lors de la génération du PDF:', error);
       // Optionnel: Afficher une notification d'erreur à l'utilisateur
-      alert('Erreur lors de la génération du PDF. Veuillez réessayer.');
+      showAlert("error", "Erreur", 'Erreur lors de la génération du PDF. Veuillez réessayer.');
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -458,12 +479,12 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
     const finalTotalTTC = totalTTC - montantRemise;
 
     return {
-    totalHT,
-    totalTTC,
-    finalTotalTTC,
-    montantTVA,
-    montantRemise,
-    totalServicesHT
+      totalHT,
+      totalTTC,
+      finalTotalTTC,
+      montantTVA,
+      montantRemise,
+      totalServicesHT
     };
   };
 
@@ -510,11 +531,11 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
       setFactureExists(facturesCheck);
 
       if (Object.keys(filterParams).length > 0) {
-        showSuccess(`${devisWithCalculatedTotals.length} devis trouvé(s) avec les filtres appliqués`);
+        showAlert("success", "Filtres appliqués", `${devisWithCalculatedTotals.length} devis trouvé(s) avec les filtres appliqués`);
       }
 
-    } catch (err) {
-      showError(err.message);
+    } catch (err: any) {
+      showAlert("error", "Erreur", err.message);
     } finally {
       setLoading(false);
     }
@@ -527,18 +548,17 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
 
       // Validation (même code existant)
       if (!selectedClientId || !newQuote.vehicleInfo || !selectedVehiculeId || !newQuote.inspectionDate) {
-        showError('Veuillez remplir tous les champs obligatoires');
+        showAlert("error", "Erreur", 'Veuillez remplir tous les champs obligatoires');
         return;
       }
 
       if (newQuote.services.some(s => !s.piece || s.quantity <= 0 || s.unitPrice < 0)) {
-        showError('Veuillez vérifier les services (pièces, quantités, prix)');
+        showAlert("error", "Erreur", 'Veuillez vérifier les services (pièces, quantités, prix)');
         return;
       }
 
       const devisData = {
         clientId: selectedClientId,
-        clientName: newQuote.clientName,
         vehicleInfo: newQuote.vehicleInfo,
         vehiculeId: selectedVehiculeId,
         inspectionDate: newQuote.inspectionDate,
@@ -556,11 +576,11 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
       if (isEditMode && editingQuote) {
         // Mode édition
         await devisApi.update(editingQuote.id, devisData);
-        showSuccess('Devis modifié avec succès ! Statut remis à "brouillon".');
+        showAlert("success", "Devis modifié", "Devis modifié avec succès ! Statut remis à \"brouillon\".");
       } else {
         // Mode création
         await devisApi.create(devisData);
-        showSuccess('Devis créé avec succès !');
+        showAlert("success", "Devis créé", "Devis créé avec succès !");
       }
 
       // Reset du formulaire (même code existant)
@@ -585,8 +605,8 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
       await loadDevisWithFactures();
       setActiveTab('list');
 
-    } catch (err) {
-      showError(err.message);
+    } catch (err: any) {
+      showAlert("error", "Erreur", err.message);
     } finally {
       setLoading(false);
     }
@@ -597,7 +617,7 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
     try {
       await devisApi.updateStatus(quoteId, newStatus);
 
-      showSuccess(`Devis ${newStatus} avec succès`);
+      showAlert("success", `Devis ${newStatus} avec succès`, "");
 
       // Mettre à jour localement
       setQuotes(quotes.map(quote =>
@@ -609,19 +629,23 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
         setSelectedQuote({ ...selectedQuote, status: newStatus });
       }
 
-    } catch (err) {
-      showError(err.message);
+    } catch (err: any) {
+      showAlert("error", "Erreur", err.message);
     }
   };
 
   const deleteQuote = async (quoteId) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce devis ?')) {
-      return;
-    }
+    const isConfirmed = await confirm({
+      title: "Suppression du véhicule",
+      message: `Êtes-vous sûr de vouloir supprimer ? Cette action est irréversible.`,
+      confirmText: "Supprimer",
+      cancelText: "Annuler",
+    });
 
+    if (!isConfirmed) return;
     try {
       await devisApi.delete(quoteId);
-      showSuccess('Devis supprimé avec succès');
+      showAlert("success", "Devis supprimé", "Devis supprimé avec succès");
 
       // Supprimer localement
       setQuotes(quotes.filter(quote => quote.id !== quoteId));
@@ -632,16 +656,21 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
       }
 
     } catch (err) {
-      showError(err.message);
+      showAlert("error", "Erreur", err.message);
     }
   };
 
 
   const sendDevisByEmail = async (devisId) => {
     try {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       setLoading(true);
-
-      const token = localStorage.getItem("token"); // ou Cookies.get("token")
 
       // 1. Envoyer l'email avec token dans headers
       const response = await axios.post(
@@ -659,15 +688,25 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
         // 2. Mettre à jour le statut
         await devisApi.updateStatus(devisId, 'envoye');
 
-        showSuccess(`Devis envoyé par email avec succès`);
+        showAlert("success", "Devis envoyé", "Devis envoyé par email avec succès");
 
         // 3. Mettre à jour localement
         setQuotes(quotes.map(quote =>
           quote.id === devisId ? { ...quote, status: 'envoye' } : quote
         ));
       }
-    } catch (error) {
-      showError(error.response?.data?.message || 'Erreur lors de l\'envoi');
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
+      showAlert("error", "Erreur", error.response?.data?.message || 'Erreur lors de l\'envoi');
     } finally {
       setLoading(false);
     }
@@ -675,66 +714,94 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
 
   const fetchClients = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/clients/noms', {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
+      const response = await axios.get('http://localhost:5000/api/clients/noms', {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
-      const data = await response.json();
+      const data = response.data;
       // Puisque l'API retourne directement le tableau, pas besoin de data.data
       setClients(data);
 
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
       console.error('Erreur lors de la récupération des clients:', error);
       setClients([]); // En cas d'erreur, initialiser avec un tableau vide
     }
   };
 
   const loadVehiculesByClient = async (clientId) => {
-    if (!clientId) {
+    // ✅ PROTECTION : Extraire l'ID si c'est un objet
+    const actualId = typeof clientId === 'object' ? clientId._id : clientId;
+
+    if (!actualId) {
       setVehicules([]);
       return;
     }
 
     setLoadingVehicules(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/vehicules/proprietaire/${clientId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+      const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return;
       }
 
-      const vehiculesData = await response.json();
+      // ✅ Utilise actualId au lieu de clientId
+      const response = await axios.get(
+        `http://localhost:5000/api/vehicules/proprietaire/${actualId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      const vehiculesData = response.data;
       setVehicules(vehiculesData);
 
       console.log(`✅ ${vehiculesData.length} véhicules chargés pour le client`);
     } catch (error) {
+      if (error.response?.status === 403) {
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
       console.error('❌ Erreur lors du chargement des véhicules:', error);
       setVehicules([]);
-      // Optionnel: afficher une notification d'erreur à l'utilisateur
     } finally {
       setLoadingVehicules(false);
     }
   };
 
 
-  const handleClientChange = async (e: { target: { value: any; }; }) => {
-    const clientId = e.target.value;
-    const selectedClient = clients.find(c => c._id === clientId);
-
-
-
+  const handleClientChange = async (clientId) => {
     setSelectedClientId(clientId);
+
     setNewQuote({
       ...newQuote,
-      clientName: selectedClient ? selectedClient.nom : '',
       vehicleInfo: '' // Reset véhicule quand on change de client
     });
 
-    // Charger les véhicules pour ce client
     await loadVehiculesByClient(clientId);
     setSelectedVehiculeId('');
-
   };
 
   // Fonction pour mettre à jour un service
@@ -777,9 +844,15 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
 
 
   const devisApi = {
-    create: async (devisData, token) => {
+    create: async (devisData) => {
       try {
-        const token = localStorage.getItem("token");
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
         const response = await axios.post(
           "http://localhost:5000/api/createdevis",
           devisData,
@@ -793,66 +866,145 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
         console.log("TOKEN envoyé :", token);
 
         return response.data;
-      } catch (error) {
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
         throw new Error(error.response?.data?.message || "Erreur lors de la création du devis");
       }
     },
-
-
-
     getAll: async (filters = {}) => {
       try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
         const response = await axios.get("http://localhost:5000/api/Devis", {
           params: filters,
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         return response.data;
-      } catch (error) {
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
         throw new Error(error.response?.data?.message || "Erreur lors de la récupération des devis");
       }
     },
-
     updateStatus: async (devisId, status) => {
       try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
         const response = await axios.put(`http://localhost:5000/api/Devis/${devisId}/status`,
           { status },
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         return response.data;
-      } catch (error) {
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
         throw new Error(error.response?.data?.message || "Erreur lors du changement de statut");
       }
     },
     update: async (devisId, devisData) => {
       try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
         const response = await axios.put(`http://localhost:5000/api/Devis/${devisId}`,
           devisData,
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         return response.data;
-      } catch (error) {
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
         throw new Error(error.response?.data?.message || "Erreur lors de la mise à jour du devis");
       }
     },
-
     delete: async (devisId) => {
       try {
+        const token = getAuthToken();
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+          // Rediriger vers le login
+          window.location.href = '/auth/sign-in';
+          return;
+        }
         const response = await axios.delete(`http://localhost:5000/api/Devis/${devisId}`,
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         return response.data;
-      } catch (error) {
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+          throw error;
+        }
+
+        if (error.response?.status === 401) {
+          showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+          window.location.href = '/auth/sign-in';
+          throw error;
+        }
         throw new Error(error.response?.data?.message || "Erreur lors de la suppression");
       }
     }
   };
 
-  const startEditQuote = (quote) => {
+  const startEditQuote = async (quote) => {
     // Vérifier si le devis peut être modifié
-    if (quote.status === 'accepte' || quote.status === 'refuse') {
-      if (!confirm('Ce devis a déjà été accepté/refusé. Voulez-vous vraiment le modifier ? Il repassera en statut "brouillon".')) {
-        return;
-      }
+    if (quote.status === "accepte" || quote.status === "refuse") {
+      const isConfirmed = await confirm({
+        title: "Modifier un devis validé",
+        message:
+          'Ce devis a déjà été accepté/refusé. Voulez-vous vraiment le modifier ? Il repassera en statut "brouillon".',
+        confirmText: "Oui, modifier",
+        cancelText: "Annuler",
+      });
+
+      if (!isConfirmed) return;
     }
 
     setEditingQuote(quote);
@@ -860,7 +1012,6 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
 
     // Pré-remplir le formulaire avec les données existantes
     setNewQuote({
-      clientName: quote.clientName,
       vehicleInfo: quote.vehicleInfo,
       inspectionDate: quote.inspectionDate,
       services: quote.services.map(service => ({
@@ -879,35 +1030,30 @@ const Alert = ({ variant = 'info', title, description, onClose }) => {
 
     // Charger les véhicules du client
     if (quote.clientId) {
-      loadVehiculesByClient(quote.clientId);
+      const clientIdValue = typeof quote.clientId === 'object' ? quote.clientId._id : quote.clientId;
+      loadVehiculesByClient(clientIdValue);
     }
 
     setActiveTab('create');
   };
 
 
-
-const showError = (message) => {
-  const id = Date.now();
-  setNotifications(prev => [...prev, { id, variant: 'error', title: 'Erreur', description: message }]);
-  setTimeout(() => removeNotification(id), 5000);
-};
-
-const showSuccess = (message) => {
-  const id = Date.now();
-  setNotifications(prev => [...prev, { id, variant: 'success', title: 'Succès', description: message }]);
-  setTimeout(() => removeNotification(id), 3000);
-};
-
-const removeNotification = (id) => {
-  setNotifications(prev => prev.filter(notif => notif.id !== id));
-};
+  const removeNotification = (id) => {
+    setNotifications(prev => prev.filter(notif => notif.id !== id));
+  };
 
   const createWorkOrder = async (quote) => {
     try {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       // Vérifier si un ordre existe déjà pour ce devis
       const response = await axios.get(`http://localhost:5000/api/ordre-travail/by-devis/${quote.id}`,
-        { headers: { Authorization: `Bearer ${getAuthToken()}` } });
+        { headers: { Authorization: `Bearer ${token}` } });
 
       if (response.data.exists) {
         // Ordre existe déjà - rediriger vers les détails
@@ -918,7 +1064,17 @@ const removeNotification = (id) => {
         localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
         router.push('/gestion-ordres');
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
       // En cas d'erreur, procéder comme avant (création)
       localStorage.setItem('selectedQuoteForOrder', JSON.stringify(quote));
       router.push('/gestion-ordres');
@@ -934,10 +1090,27 @@ const removeNotification = (id) => {
 
   const checkFactureExists = async (devisId) => {
     try {
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       const response = await axios.get(`http://localhost:5000/api/devis/${devisId}`,
-        { headers: { Authorization: `Bearer ${getAuthToken()}` } });
+        { headers: { Authorization: `Bearer ${token}` } });
       return response.data.success ? response.data.data : null;
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
       if (error.response?.status === 404) {
         return null; // Pas de facture trouvée
       }
@@ -948,26 +1121,30 @@ const removeNotification = (id) => {
 
   const createFactureFromDevis = async (devis) => {
     try {
+      // ⭐ VÉRIFIER LE TOKEN DÈS LE DÉBUT
+      const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        return; // ⭐ Arrêter immédiatement
+      }
+
       setLoading(true);
 
       const devisId = devis._id || devis.id;
       console.log('🔍 Création facture pour devis:', devisId);
 
-      // Vérifier si une facture active existe déjà
       const existingFacture = await checkActiveFactureExists(devisId);
 
       if (existingFacture) {
-        // Vérifier si le devis a été modifié
         const isDevisModified = checkIfDevisModified(devis, existingFacture);
 
         if (isDevisModified) {
-          // Proposer les options à l'utilisateur
           const userChoice = await showImprovedFactureModal(existingFacture, devis);
 
           switch (userChoice) {
             case 'view_existing':
               setSelectedFacture(existingFacture);
-              showSuccess('Facture existante affichée');
+              showAlert("success", "Facture existante affichée", "");
               return;
 
             case 'replace_with_credit':
@@ -978,19 +1155,21 @@ const removeNotification = (id) => {
               return;
           }
         } else {
-          // Pas de modification - afficher la facture existante
           setSelectedFacture(existingFacture);
-          showSuccess('Facture existante affichée');
+          showAlert("success", "Facture existante affichée", "");
           return;
         }
       } else {
-        // Créer nouvelle facture (première fois)
         await createNewFacture(devis);
       }
 
     } catch (error) {
       console.error('❌ Erreur:', error);
-      showError(error.response?.data?.message || 'Erreur lors de la gestion de facture');
+
+      // ⭐ NE PAS afficher d'erreur si c'est 401/403 (déjà géré)
+      if (error.response?.status !== 403 && error.response?.status !== 401) {
+        showAlert("error", "Erreur", error.response?.data?.message || 'Erreur lors de la gestion de facture');
+      }
     } finally {
       setLoading(false);
     }
@@ -1082,7 +1261,13 @@ const removeNotification = (id) => {
   // ✅ Fonction pour remplacer une facture avec avoir (utilise votre endpoint existant)
   const replaceFactureWithCredit = async (devis, oldFacture) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
 
       // ✅ Utilise votre endpoint existant avec createCreditNote: true
       const response = await axios.post(
@@ -1103,9 +1288,7 @@ const removeNotification = (id) => {
 
         setSelectedFacture(newFacture);
 
-        showSuccess(
-          `✅ Remplacement effectué ! Avoir N°${creditNote.creditNumber} créé, nouvelle facture N°${newFacture.numeroFacture} générée.`
-        );
+        showAlert("success", "Remplacement effectué", `✅ Remplacement effectué ! Avoir N°${creditNote.creditNumber} créé, nouvelle facture N°${newFacture.numeroFacture} générée.`);
 
         // Mettre à jour l'état local
         setFactureExists(prev => ({
@@ -1113,16 +1296,32 @@ const removeNotification = (id) => {
           [devis.id]: newFacture
         }));
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
       console.error('❌ Erreur:', error);
-      showError(error.response?.data?.message || 'Erreur lors du remplacement de la facture');
+      showAlert("error", "Erreur", error.response?.data?.message || 'Erreur lors du remplacement de la facture');
     }
   };
 
   // ✅ Créer une nouvelle facture (première fois) - utilise votre endpoint simple
   const createNewFacture = async (devis) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        throw new Error("Token invalide");
+      }
 
       // ✅ Utilise l'endpoint simple pour première création
       const response = await axios.post(
@@ -1141,60 +1340,86 @@ const removeNotification = (id) => {
 
         setSelectedFacture(newFacture);
 
-        showSuccess(`✅ Facture créée avec succès (N°${newFacture.numeroFacture}) !`);
+        showAlert("success", "Facture créée", `✅ Facture créée avec succès (N°${newFacture.numeroFacture}) !`);
 
         setFactureExists(prev => ({
           ...prev,
           [devis.id]: newFacture
         }));
       }
-    } catch (error) {
-      console.error('❌ Erreur:', error);
-      showError(error.response?.data?.message || 'Erreur lors de la création de facture');
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission ");
+        throw error;
+      }
+
+      if (error.response?.status === 401) {
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error;
+      }
+      const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de la création de facture';
+      showAlert("error", "Erreur", errorMessage);
+      throw error; // ⭐ IMPORTANT: Propager l'erreur pour arrêter l'exécution
     }
   };
 
   // ✅ Fonction pour vérifier facture active (exclut les factures annulées)
   const checkActiveFactureExists = async (devisId) => {
     try {
+      const token = getAuthToken();
+      if (!token || token === 'null' || token === 'undefined') {
+        window.location.href = '/auth/sign-in';
+        throw new Error("Token invalide"); // ⭐ Propager l'erreur
+      }
       const response = await axios.get(`http://localhost:5000/api/factureByDevis/${devisId}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
-      // Vérifier que la facture est active (pas annulée)
       const facture = response.data;
       return facture && facture.status !== 'cancelled' ? facture : null;
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+        throw error; // ⭐ Propager l'erreur au lieu de retourner null
+      }
+
+      if (error.response?.status === 401) {
+        showAlert("error", "Session expirée", " Veuillez vous reconnecter");
+        window.location.href = '/auth/sign-in';
+        throw error; // ⭐ Propager l'erreur
+      }
+
       if (error.response?.status === 404) {
         return null;
       }
+
       console.error('Erreur vérification facture:', error);
-      return null;
+      throw error; // ⭐ Propager toute autre erreur
     }
   };
 
 
-
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen  p-6">
+      <div className="max-w-20xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Devis</h1>
           <p className="text-gray-600">Système de devis pour atelier mécanique</p>
         </div>
         {/* Notifications */}
-<div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
-  {notifications.map(notif => (
-    <Alert
-      key={notif.id}
-      variant={notif.variant}
-      title={notif.title}
-      description={notif.description}
-      onClose={() => removeNotification(notif.id)}
-    />
-  ))}
-</div>
+        <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+          {notifications.map(notif => (
+            <Alert
+              key={notif.id}
+              variant={notif.variant}
+              title={notif.title}
+              description={notif.description}
+              onClose={() => removeNotification(notif.id)}
+            />
+          ))}
+        </div>
 
         {/* Navigation Tabs */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
@@ -1436,7 +1661,7 @@ const removeNotification = (id) => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <User className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm text-gray-900">{quote.clientName}</span>
+                              <span className="text-sm text-gray-900"> {getClientName(quote)}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -1567,8 +1792,8 @@ const removeNotification = (id) => {
                               key={pageNumber}
                               onClick={() => setCurrentPage(pageNumber)}
                               className={`px-3 py-2 text-sm font-medium rounded-md ${isCurrentPage
-                                  ? 'bg-blue-600 text-white'
-                                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
                                 }`}
                             >
                               {pageNumber}
@@ -1623,20 +1848,28 @@ const removeNotification = (id) => {
                           key={client._id}
                           onClick={() => {
                             setSelectedClientId(client._id);
-                            setSearchClient(client.nom);
+                            setSearchClient(client.nomEffectif || client.nom);
                             setNewQuote({
                               ...newQuote,
-                              clientName: client.nom,
                               vehicleInfo: ''
                             });
+
+                            // ✅ Passe directement l'ID, pas l'objet
                             loadVehiculesByClient(client._id);
                             setSelectedVehiculeId('');
                             setShowClientDropdown(false);
                           }}
                           className="px-4 py-2 hover:bg-blue-50 cursor-pointer transition-colors"
                         >
-                          <div className="font-medium">{client.nom}</div>
-                          <div className="text-xs text-gray-500">{client.type}</div>
+                          <div className="font-medium">
+                            {client.nomEffectif || client.nom}
+                          </div>
+                          <div className="text-xs text-gray-500 flex items-center justify-between">
+                            <span>{client.type}</span>
+                            {client.nomEffectif && client.nomEffectif !== client.nom && (
+                              <span className="text-green-600 text-xs">✓ Compte</span>
+                            )}
+                          </div>
                         </div>
                       ))
                     ) : (
@@ -1808,34 +2041,34 @@ const removeNotification = (id) => {
                 ))}
               </div>
             </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Main D’œuvre
-                </label>
-                <input
-                  type="number"
-                  value={maindoeuvre}
-                  className="w-100 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onChange={(e) => setMaindoeuvre(parseFloat(e.target.value) || 0)}
-                />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Main D’œuvre
+              </label>
+              <input
+                type="number"
+                value={maindoeuvre}
+                className="w-100 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(e) => setMaindoeuvre(parseFloat(e.target.value) || 0)}
+              />
 
-              </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Remise (%) *
-                </label>
-                <input
-                  type="number"
-                  step="1"
-                  min="0"
-                  max="100"
-                  value={remiseRate}
-                  onChange={(e) => setRemiseRate(parseFloat(e.target.value) || 0)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="20"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Remise (%) *
+              </label>
+              <input
+                type="number"
+                step="1"
+                min="0"
+                max="100"
+                value={remiseRate}
+                onChange={(e) => setRemiseRate(parseFloat(e.target.value) || 0)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="20"
+              />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div>
@@ -1996,7 +2229,7 @@ const removeNotification = (id) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <h3 className="font-medium text-gray-900 mb-2">Informations Client</h3>
-                    <p className="text-gray-600">Nom: {selectedQuote.clientName}</p>
+                    <p className="text-gray-600">Nom: {getClientName(selectedQuote)}</p>
                     <p className="text-gray-600">Véhicule: {selectedQuote.vehicleInfo}</p>
                     <p className="text-gray-600">Date d'inspection: {selectedQuote.inspectionDate}</p>
                     <p className="text-gray-600">
@@ -2064,7 +2297,7 @@ const removeNotification = (id) => {
                       <span>TVA ({selectedQuote.tvaRate || 20}%):</span>
                       <span>
                         {(
-                          ((selectedQuote.montantTVA || 0) ) 
+                          ((selectedQuote.montantTVA || 0))
                         ).toFixed(3)} Dinnar
                       </span>
                     </div>
@@ -2073,7 +2306,7 @@ const removeNotification = (id) => {
                       <span>REMISE ({selectedQuote.remiseRate || 0}%):</span>
                       <span>
                         {(
-                          ((selectedQuote.montantRemise || 0) )
+                          ((selectedQuote.montantRemise || 0))
                         ).toFixed(3)} Dinnar
                       </span>
                     </div>
@@ -2085,7 +2318,7 @@ const removeNotification = (id) => {
                         {(
                           (selectedQuote.totalServicesHT || 0) +
                           (selectedQuote.maindoeuvre || 0) +
-                          ((selectedQuote.montantTVA || 0)) 
+                          ((selectedQuote.montantTVA || 0))
                         ).toFixed(3)} Dinnar
                       </span>
                     </div>
@@ -2094,7 +2327,7 @@ const removeNotification = (id) => {
                       <span>Total TTC aprés remise :</span>
                       <span>
                         {(
-                          ((selectedQuote.totalTTC || 0) - ((selectedQuote.montantRemise || 0)) )
+                          ((selectedQuote.totalTTC || 0) - ((selectedQuote.montantRemise || 0)))
                         ).toFixed(3)} Dinnar
                       </span>
                     </div>

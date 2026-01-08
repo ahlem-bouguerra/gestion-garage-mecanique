@@ -7,11 +7,9 @@ import passportGarage from "./config/passportGarage.js";
 import passportClient from "./config/passportClient.js";
 import authGarageRoutes from "./routes/authGarage.js";
 import authClientRoutes from "./routes/authClient.js";
+import authSuperAdminRoutes from "./routes/authSuperAdmin.js";
 import session from "express-session";
-// ❌ SUPPRIMEZ cette ligne qui charge l'ancien passport
-// import "./config/passport.js";
-// ❌ SUPPRIMEZ aussi cet import
-// import passport from "passport";
+
 
 dotenv.config();
 
@@ -21,6 +19,7 @@ app.use(cors({
   origin: [
     "http://localhost:3000", 
     "http://localhost:3001",
+    "http://localhost:3002",
     "http://frontend-admin:3000",
     "http://frontend-client:3001"
   ],
@@ -55,6 +54,9 @@ app.use(passportClient.initialize());
 //app.use('/api', authRoutes);
 app.use("/api", authGarageRoutes);
 app.use("/api", authClientRoutes);
+app.use("/api", authSuperAdminRoutes);
+
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

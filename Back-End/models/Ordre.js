@@ -24,7 +24,7 @@ const TacheSchema = new Schema({
   },
   mecanicienId: {
     type: Schema.Types.ObjectId,
-    ref: 'Mecanicien',
+    ref: 'Garagiste',
     required: true
   },
   mecanicienNom: {
@@ -67,27 +67,27 @@ const TacheSchema = new Schema({
 const OrdreTravailSchema = new Schema({
   numeroOrdre: {
     type: String,
-    unique: true,
+    // ⭐ RETIRÉ: unique: true (car nous utilisons un index composite)
   },
   devisId: {
-    type: String, // Au lieu de Schema.Types.ObjectId
+    type: String,
     required: true,
     unique: true, 
   },
-  // Informations client (dénormalisées pour performance)
-  clientInfo: {
-    nom: { type: String, required: true },
-    ClientId: { type: Object, required: true },
-    telephone: String,
-    email: String,
-    adresse: String
+clientInfo: {
+  ClientId: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'FicheClient',  // ⭐ Ajustez selon le nom de votre modèle Client
+    required: true 
   },
-  // Informations véhicule (dénormalisées)
+  telephone: String,
+  email: String,
+  adresse: String
+},
   vehiculedetails: {
     nom: { type: String, required: true },
     vehiculeId: { type: Object, required: true },
   },
-  // Dates importantes
   dateCommence: {
     type: Date,
     required: true
@@ -98,7 +98,6 @@ const OrdreTravailSchema = new Schema({
   dateFinReelle: {
     type: Date
   },
-  // Atelier assigné
   atelierId: {
     type: Schema.Types.ObjectId,
     ref: 'Atelier',
@@ -108,7 +107,6 @@ const OrdreTravailSchema = new Schema({
     type: String,
     required: true
   },
-  // Priorité et statut
   priorite: {
     type: String,
     enum: ['faible', 'normale', 'elevee', 'urgente'],
@@ -119,23 +117,19 @@ const OrdreTravailSchema = new Schema({
     enum: ['en_attente', 'en_cours', 'termine', 'suspendu','supprime'],
     default: 'en_attente'
   },
-  // Description générale
   description: {
     type: String,
     trim: true
   },
-  // Liste des tâches
   taches: [TacheSchema],
-  // Métadonnées
   createdBy: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Garagiste'
   },
   updatedBy: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Garagiste'
   },
-  // Statistiques calculées
   totalHeuresEstimees: {
     type: Number,
     default: 0
@@ -152,12 +146,11 @@ const OrdreTravailSchema = new Schema({
     type: Number,
     default: 0
   },
-  garagisteId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+  garageId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Garage', 
+    required: true 
   },
-  // Notes et commentaires additionnels
   notes: [{
     contenu: String,
     auteur: String,
@@ -165,13 +158,30 @@ const OrdreTravailSchema = new Schema({
       type: Date,
       default: Date.now
     }
-  }]
+  }],
+  canBeRated: {
+  type: Boolean,
+  default: false
+},
+ratedAt: {
+  type: Date,
+  default: null
+},
+ratingId: {
+  type: Schema.Types.ObjectId,
+  ref: 'Rating',
+  default: null
+}
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
 
+// ⭐ INDEX COMPOSITE : numeroOrdre unique PAR garage
+OrdreTravailSchema.index({ numeroOrdre: 1, garageId: 1 }, { unique: true });
+
+// Virtuals
 OrdreTravailSchema.virtual('progressionPourcentage').get(function() {
   if (this.nombreTaches === 0) return 0;
   return Math.round((this.nombreTachesTerminees / this.nombreTaches) * 100);
@@ -182,10 +192,46 @@ OrdreTravailSchema.virtual('enRetard').get(function() {
   return new Date() > this.dateFinPrevue;
 });
 
+// ⭐ PRE-SAVE HOOK avec logique de retry robuste
 OrdreTravailSchema.pre('save', async function(next) {
   if (this.isNew && !this.numeroOrdre) {
-    const count = await this.constructor.countDocuments();
-    this.numeroOrdre = `ORD-${String(count + 1).padStart(4, '0')}`;
+    let numeroGenere = false;
+    let tentatives = 0;
+    const maxTentatives = 10;
+    
+    while (!numeroGenere && tentatives < maxTentatives) {
+      try {
+        // Trouver le dernier numéro utilisé pour ce garage
+        const dernierOrdre = await this.constructor
+          .findOne({ garageId: this.garageId })
+          .sort({ numeroOrdre: -1 })
+          .select('numeroOrdre')
+          .lean();
+        
+        let prochainNumero = 1;
+        
+        if (dernierOrdre && dernierOrdre.numeroOrdre) {
+          // Extraire le numéro du format ORD-XXXX
+          const match = dernierOrdre.numeroOrdre.match(/ORD-(\d+)/);
+          if (match) {
+            prochainNumero = parseInt(match[1], 10) + 1;
+          }
+        }
+        
+        this.numeroOrdre = `ORD-${String(prochainNumero).padStart(4, '0')}`;
+        numeroGenere = true;
+        
+      } catch (error) {
+        tentatives++;
+        if (tentatives >= maxTentatives) {
+          // Fallback: utiliser timestamp pour garantir l'unicité
+          const timestamp = Date.now().toString().slice(-6);
+          this.numeroOrdre = `ORD-${timestamp}`;
+          numeroGenere = true;
+        }
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+    }
   }
   
   // Calculer les statistiques
@@ -194,7 +240,7 @@ OrdreTravailSchema.pre('save', async function(next) {
   this.totalHeuresEstimees = this.taches.reduce((total, tache) => total + tache.estimationHeures, 0);
   this.totalHeuresReelles = this.taches.reduce((total, tache) => total + tache.heuresReelles, 0);
   
-  // Mettre à jour le statut global basé sur les tâches
+  // Mettre à jour le statut global
   if (this.nombreTaches > 0) {
     if (this.nombreTachesTerminees === this.nombreTaches) {
       this.status = 'termine';
@@ -207,6 +253,7 @@ OrdreTravailSchema.pre('save', async function(next) {
   next();
 });
 
+// Methods
 OrdreTravailSchema.methods.demarrerTache = function(tacheId, userId) {
   const tache = this.taches.id(tacheId);
   if (tache && tache.status === 'assignee') {
@@ -230,10 +277,10 @@ OrdreTravailSchema.methods.terminerTache = function(tacheId, heuresReelles, user
   throw new Error('Tâche non trouvée ou non en cours');
 };
 
+// Statics
 OrdreTravailSchema.statics.findByStatus = function(status, options = {}) {
   const query = status ? { status } : {};
   return this.find(query)
-    .populate('devisId', 'id clientName vehicleInfo')
     .populate('atelierId', 'name localisation')
     .populate('taches.serviceId', 'name')
     .populate('taches.mecanicienId', 'nom')
@@ -244,7 +291,6 @@ OrdreTravailSchema.statics.findByStatus = function(status, options = {}) {
 
 OrdreTravailSchema.statics.findByAtelier = function(atelierId, options = {}) {
   return this.find({ atelierId })
-    .populate('devisId', 'id clientName vehicleInfo')
     .populate('taches.serviceId', 'name')
     .populate('taches.mecanicienId', 'nom')
     .sort(options.sort || { createdAt: -1 })
@@ -252,17 +298,17 @@ OrdreTravailSchema.statics.findByAtelier = function(atelierId, options = {}) {
     .skip(options.skip || 0);
 };
 
-OrdreTravailSchema.statics.getStatistiques = async function(atelierId = null, garagisteId = null) {
-    const match = {};
-    
-    if (garagisteId) {
-      match.garagisteId = new mongoose.Types.ObjectId(garagisteId);
-    }
-    
-    if (atelierId) {
-      match.atelierId = new mongoose.Types.ObjectId(atelierId);
-    }
+OrdreTravailSchema.statics.getStatistiques = async function(atelierId = null, garageId = null) {
+  const match = {};
   
+  if (garageId) {
+    match.garageId = new mongoose.Types.ObjectId(garageId);
+  }
+  
+  if (atelierId) {
+    match.atelierId = new mongoose.Types.ObjectId(atelierId);
+  }
+
   const stats = await this.aggregate([
     { $match: match },
     {
@@ -272,7 +318,7 @@ OrdreTravailSchema.statics.getStatistiques = async function(atelierId = null, ga
         enAttente: { $sum: { $cond: [{ $eq: ['$status', 'en_attente'] }, 1, 0] } },
         enCours: { $sum: { $cond: [{ $eq: ['$status', 'en_cours'] }, 1, 0] } },
         termines: { $sum: { $cond: [{ $eq: ['$status', 'termine'] }, 1, 0] } },
-        suspendus: { $sum: { $cond: [{ $eq: ['$status', 'suspendu'] }, 1, 0] } },
+        Supprimés: { $sum: { $cond: [{ $eq: ['$status', 'supprime'] }, 1, 0] } },
         totalHeuresEstimees: { $sum: '$totalHeuresEstimees' },
         totalHeuresReelles: { $sum: '$totalHeuresReelles' }
       }
@@ -284,17 +330,17 @@ OrdreTravailSchema.statics.getStatistiques = async function(atelierId = null, ga
     enAttente: 0,
     enCours: 0,
     termines: 0,
-    suspendus: 0,
+    Supprimés: 0,
     totalHeuresEstimees: 0,
     totalHeuresReelles: 0
   };
 };
 
-OrdreTravailSchema.statics.getTempsMoyenInterventions = async function(atelierId, periode = 'jour', garagisteId = null) {
+OrdreTravailSchema.statics.getTempsMoyenInterventions = async function(atelierId, periode = 'jour', garageId = null) {
   const match = {};
   
-  if (garagisteId) {
-    match.garagisteId = new mongoose.Types.ObjectId(garagisteId);
+  if (garageId) {
+    match.garageId = new mongoose.Types.ObjectId(garageId);
   }
   
   if (atelierId) {
@@ -303,7 +349,6 @@ OrdreTravailSchema.statics.getTempsMoyenInterventions = async function(atelierId
   
   let dateFilter = {};
   
-  // Si la période est 'jour', filtrer pour aujourd'hui seulement
   if (periode === 'jour') {
     const aujourdhui = new Date();
     const debutJour = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate());
@@ -331,11 +376,11 @@ OrdreTravailSchema.statics.getTempsMoyenInterventions = async function(atelierId
   ]);
 };
 
-OrdreTravailSchema.statics.getChargeParMecanicien = async function(atelierId, periode = 'jour', garagisteId = null) {
-    const match = {};
-  
-  if (garagisteId) {
-    match.garagisteId = new mongoose.Types.ObjectId(garagisteId);
+OrdreTravailSchema.statics.getChargeParMecanicien = async function(atelierId, periode = 'jour', garageId = null) {
+  const match = {};
+
+  if (garageId) {
+    match.garageId = new mongoose.Types.ObjectId(garageId);
   }
   
   if (atelierId) {
@@ -344,7 +389,6 @@ OrdreTravailSchema.statics.getChargeParMecanicien = async function(atelierId, pe
   
   let dateFilter = {};
   
-  // Si la période est 'jour', filtrer pour aujourd'hui seulement
   if (periode === 'jour') {
     const aujourdhui = new Date();
     const debutJour = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate());
@@ -376,12 +420,11 @@ OrdreTravailSchema.statics.getChargeParMecanicien = async function(atelierId, pe
   ]);
 };
 
-
-OrdreTravailSchema.statics.getStatutStats = async function(atelierId, periode = 'jour' , garagisteId = null) {
+OrdreTravailSchema.statics.getStatutStats = async function(atelierId, periode = 'jour', garageId = null) {
   const match = {};
   
-  if (garagisteId) {
-    match.garagisteId = new mongoose.Types.ObjectId(garagisteId);
+  if (garageId) {
+    match.garageId = new mongoose.Types.ObjectId(garageId);
   }
   
   if (atelierId) {
@@ -390,7 +433,6 @@ OrdreTravailSchema.statics.getStatutStats = async function(atelierId, periode = 
   
   let dateFilter = {};
   
-  // Si la période est 'jour', filtrer pour aujourd'hui seulement
   if (periode === 'jour') {
     const aujourdhui = new Date();
     const debutJour = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate());
@@ -410,24 +452,24 @@ OrdreTravailSchema.statics.getStatutStats = async function(atelierId, periode = 
     { $match: finalMatch },
     {
       $group: {
-        _id: '$status', // Remplacez par le nom exact de votre champ statut
+        _id: '$status',
         count: { $sum: 1 }
       }
     }
   ]);
 };
 
+OrdreTravailSchema.statics.getChargeAtelier = async function(atelierId, periode = 'jour', garageId = null) {
+  const match = {};
 
-OrdreTravailSchema.statics.getChargeAtelier = async function(atelierId, periode = 'jour', garagisteId = null) {
-    const match = {};
-  
-  if (garagisteId) {
-    match.garagisteId = new mongoose.Types.ObjectId(garagisteId);
+  if (garageId) {
+    match.garageId = new mongoose.Types.ObjectId(garageId);
   }
   
   if (atelierId) {
     match.atelierId = new mongoose.Types.ObjectId(atelierId);
   }
+  
   let dateFilter = {};
   let groupBy;
   
@@ -435,7 +477,6 @@ OrdreTravailSchema.statics.getChargeAtelier = async function(atelierId, periode 
   
   switch(periode) {
     case 'jour':
-      // Aujourd'hui seulement
       const debutJour = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate());
       const finJour = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate() + 1);
       
@@ -446,10 +487,9 @@ OrdreTravailSchema.statics.getChargeAtelier = async function(atelierId, periode 
       break;
       
     case 'semaine':
-      // Cette semaine seulement (lundi à dimanche)
       const debutSemaine = new Date(maintenant);
-      const jourSemaine = maintenant.getDay(); // 0 = dimanche, 1 = lundi...
-      const joursARetirer = jourSemaine === 0 ? 6 : jourSemaine - 1; // Calculer depuis lundi
+      const jourSemaine = maintenant.getDay();
+      const joursARetirer = jourSemaine === 0 ? 6 : jourSemaine - 1;
       debutSemaine.setDate(maintenant.getDate() - joursARetirer);
       debutSemaine.setHours(0, 0, 0, 0);
       
@@ -466,7 +506,6 @@ OrdreTravailSchema.statics.getChargeAtelier = async function(atelierId, periode 
       break;
       
     case 'mois':
-      // Ce mois seulement
       const debutMois = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
       const finMois = new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 1);
       
@@ -494,6 +533,5 @@ OrdreTravailSchema.statics.getChargeAtelier = async function(atelierId, periode 
     { $sort: { '_id': 1 } }
   ]);
 };
-
 
 export default mongoose.model('OrdreTravail', OrdreTravailSchema);

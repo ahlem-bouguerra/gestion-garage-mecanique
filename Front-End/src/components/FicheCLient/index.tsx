@@ -4,6 +4,10 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Filter, Plus, User, Building2, Calendar, Car, Phone, Mail, MapPin, Eye, Edit, Trash2, History, Clock, Wrench } from 'lucide-react';
 import axios from "axios";
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
+
+
 
 interface HistoriqueVisite {
   id: string;
@@ -32,6 +36,12 @@ interface Client {
   _id: string;
   id?: string | number;
   nom: string;
+  nomEffectif?: string;
+  clientId?: { // ⭐ Ajouter cette propriété
+    _id: string;
+    username: string;
+    email: string;
+  };
   type: "particulier" | "professionnel";
   adresse: string;
   telephone: string;
@@ -39,6 +49,10 @@ interface Client {
   derniereVisite?: string;
   contactsSecondaires?: ContactSecondaire[];
   historiqueVisites?: HistoriqueVisite[];
+  nomSociete?: string;
+  telephoneSociete?: string;
+  emailSociete?: string;
+  adresseSociete?: string;
 }
 interface FormData {
   nom: string;
@@ -95,6 +109,10 @@ export default function ClientForm() {
   const [clientVehicules, setClientVehicules] = useState<{ [clientId: string]: Vehicule[] }>({});
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [dateFilter, setDateFilter] = useState("tous");
+  const { showAlert } = useGlobalAlert();
+  const { confirm } = useConfirm();
+
+
   const getAuthToken = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
@@ -110,6 +128,12 @@ export default function ClientForm() {
     }
   }, [clients]);
 
+      const showError = (message: string) => {
+        console.error("❌ Erreur:", message);
+        setError(typeof message === 'string' ? message : 'Une erreur est survenue');
+        setTimeout(() => setError(""), 5000);
+    };
+
 
   useEffect(() => {
     const header = document.querySelector('header');
@@ -122,45 +146,72 @@ export default function ClientForm() {
     }
   }, [loadingHistory, selectedClient]);
 
-  const fetchAllVehicules = async (): Promise<void> => {
+const fetchAllVehicules = async (): Promise<void> => {
     try {
-      console.log("🚗 Chargement de tous les véhicules...");
-      const response = await axios.get(`${API_BASE_URL}/vehicules`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-      setVehicules(response.data);
-
-      const vehiculesParClient: { [clientId: string]: Vehicule[] } = {};
-      response.data.forEach((vehicule: any) => {
-        let clientId: string;
-
-        if (typeof vehicule.proprietaireId === 'string') {
-          clientId = vehicule.proprietaireId;
-        } else if (vehicule.proprietaireId && vehicule.proprietaireId._id) {
-          clientId = vehicule.proprietaireId._id;
-        } else {
-          console.warn("Structure proprietaireId inattendue:", vehicule.proprietaireId);
-          return;
+        const token = getAuthToken();
+      
+        // ⭐ VÉRIFICATION CRITIQUE
+        if (!token || token === 'null' || token === 'undefined') {
+            // Rediriger vers le login
+            window.location.href = '/auth/sign-in';
+            return;
         }
+        
+        console.log("🚗 Chargement de tous les véhicules...");
+        const response = await axios.get(`${API_BASE_URL}/vehicules`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        setVehicules(response.data);
 
-        if (!vehiculesParClient[clientId]) {
-          vehiculesParClient[clientId] = [];
+        const vehiculesParClient: { [clientId: string]: Vehicule[] } = {};
+        response.data.forEach((vehicule: any) => {
+            let clientId: string;
+
+            if (typeof vehicule.proprietaireId === 'string') {
+                clientId = vehicule.proprietaireId;
+            } else if (vehicule.proprietaireId && vehicule.proprietaireId._id) {
+                clientId = vehicule.proprietaireId._id;
+            } else {
+                console.warn("Structure proprietaireId inattendue:", vehicule.proprietaireId);
+                return;
+            }
+
+            if (!vehiculesParClient[clientId]) {
+                vehiculesParClient[clientId] = [];
+            }
+
+            const vehiculePropre = {
+                ...vehicule,
+                proprietaireId: clientId
+            };
+
+            vehiculesParClient[clientId].push(vehiculePropre);
+        });
+
+        setClientVehicules(vehiculesParClient);
+        console.log("✅ Véhicules organisés par client:", vehiculesParClient);
+        
+    } catch (error: any) {
+        console.error("❌ Erreur chargement véhicules:", error);
+        
+        // ⭐ VÉRIFICATION DES ERREURS D'AUTORISATION
+        if (error.response?.status === 403) {
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+            return;
         }
-
-        const vehiculePropre = {
-          ...vehicule,
-          proprietaireId: clientId
-        };
-
-        vehiculesParClient[clientId].push(vehiculePropre);
-      });
-
-      setClientVehicules(vehiculesParClient);
-      console.log("✅ Véhicules organisés par client:", vehiculesParClient);
-    } catch (error) {
-      console.error("❌ Erreur lors du chargement des véhicules:", error);
+        
+        if (error.response?.status === 401) {
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return;
+        }
+        
+        // Autres erreurs
+        const errorMessage = error.response?.data?.error || error.message;
+        showError(`Erreur chargement véhicules: ${errorMessage}`);
     }
-  };
+};
 
   const validateTunisianPhone = (phone: string) => {
     const cleaned = phone.replace(/[\s\-]/g, '');
@@ -234,31 +285,49 @@ export default function ClientForm() {
     }
   };
 
-  // 3. Modifiez votre useMemo comme ceci :
-  const filteredClients = useMemo(() => {
-    return clients.filter(client => {
-      const vehiculeInfo = getClientVehicules(client._id);
-      const matchesSearch = client.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehiculeInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.email.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = filterType === "tous" || client.type === filterType;
-      const matchesDate = filterByDate(client);
-      return matchesSearch && matchesType && matchesDate;
-    });
-  }, [clients, searchTerm, filterType, dateFilter, clientVehicules, clientsResume]);
+const filteredClients = useMemo(() => {
+  return clients.filter(client => {
+    const vehiculeInfo = getClientVehicules(client._id);
+    const nomRecherche = client.nomEffectif || client.nom;
+    
+    const matchesSearch = nomRecherche.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehiculeInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filterType === "tous" || client.type === filterType;
+    const matchesDate = filterByDate(client);
+    return matchesSearch && matchesType && matchesDate;
+  }); // ⭐ Cette accolade était présente
+}, [clients, searchTerm, filterType, dateFilter, clientVehicules, clientsResume]); // ⭐ Cette accolade aussi
 
 
   const fetchAllClients = async (): Promise<void> => {
     setLoading(true);
     try {
+      const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       const response = await axios.get(`${API_BASE_URL}/GetAll`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setClients(response.data);
       setError("");
-    } catch (error) {
-      console.error("Erreur lors de la récupération des clients:", error);
+    } catch (error:any) {
       setError("Erreur lors du chargement des clients");
+        if (error.response?.status === 403) {
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+            return;
+        }
+        
+        if (error.response?.status === 401) {
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return;
+        }
     } finally {
       setLoading(false);
     }
@@ -266,14 +335,31 @@ export default function ClientForm() {
 
   const fetchClientById = async (id: string | number): Promise<Client | null> => {
     try {
+            const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return null;
+      }
       console.log("🔍 Récupération du client avec ID:", id);
       const response = await axios.get(`${API_BASE_URL}/GetOne/${id}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       console.log("📥 Client récupéré:", response.data);
       return response.data;
-    } catch (error) {
-      console.error("Erreur lors de la récupération du client:", error);
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+            return null;
+        }
+        
+        if (error.response?.status === 401) {
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return null;
+        }
       setError("Erreur lors du chargement du client");
       return null;
     }
@@ -281,8 +367,16 @@ export default function ClientForm() {
 
   const fetchClientResume = async (clientId: string) => {
     try {
+            const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/visites-resume`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.data.success) {
@@ -294,7 +388,17 @@ export default function ClientForm() {
           }
         }));
       }
-    } catch (error: any) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+            return null;
+        }
+        
+        if (error.response?.status === 401) {
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return null;
+        }
       if (error.response?.status !== 404) {
         console.error("❌ Erreur lors du chargement du résumé:", error);
       }
@@ -310,10 +414,18 @@ export default function ClientForm() {
 
   const fetchClientHistorique = async (clientId: string): Promise<HistoriqueVisite[]> => {
     try {
+            const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return[];
+      }
       console.log("📋 Chargement historique pour client:", clientId);
       setLoadingHistory(true);
-      const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/historique`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+      const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/historique`, 
+         { headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.data.success) {
@@ -327,7 +439,17 @@ export default function ClientForm() {
         return historique;
       }
       return [];
-    } catch (error: any) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+            return [];
+        }
+        
+        if (error.response?.status === 401) {
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return [];
+        }
       if (error.response?.status === 404) {
         setError("Routes d'historique non configurées dans le backend");
       } else {
@@ -384,11 +506,29 @@ export default function ClientForm() {
 
   const createClient = async (clientData: any): Promise<any> => {
     try {
+            const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       const response = await axios.post(`${API_BASE_URL}/Creation`, clientData, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
-    } catch (error: any) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission ");
+            throw error;
+        }
+        
+        if (error.response?.status === 401) {
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            throw error;
+        }
       if (error.response && error.response.data && error.response.data.error) {
         throw new Error(error.response.data.error);
       }
@@ -396,49 +536,119 @@ export default function ClientForm() {
     }
   };
 
-  const updateClient = async (id: string | number, clientData: FormData): Promise<any> => {
-    try {
-      console.log("🔄 Frontend updateClient - ID reçu:", id);
-      console.log("🔄 Frontend updateClient - Données:", clientData);
+const updateClient = async (id: string | number, clientData: FormData): Promise<any> => {
+  try {
+    const token = getAuthToken();
 
-      if (!id) {
-        throw new Error("ID du client non défini");
-      }
+    if (!token || token === "null" || token === "undefined") {
+      window.location.href = "/auth/sign-in";
+      return;
+    }
 
-      const response = await axios.put(`${API_BASE_URL}/updateOne/${id}`, clientData, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-      console.log("✅ Réponse serveur:", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("❌ Erreur dans updateClient:", error);
+    if (!id) throw new Error("ID du client non défini");
+
+    const response = await axios.put(`${API_BASE_URL}/updateOne/${id}`, clientData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    const status = error?.response?.status;
+    const data = error?.response?.data;
+
+    // 403
+    if (status === 403) {
+      showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
       throw error;
     }
-  };
+
+    // 401
+    if (status === 401) {
+      showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
+      window.location.href = "/auth/sign-in";
+      throw error;
+    }
+
+    // ✅ Conflit (email/téléphone déjà utilisés)
+    if (status === 409) {
+      const field = data?.field; // "email" | "telephone"
+      const message = data?.message || "Valeur déjà utilisée.";
+
+      // Affichage global
+      showAlert("error", "Conflit", message);
+
+      // Optionnel: afficher l’erreur au bon endroit
+      if (field === "telephone") {
+        setTelephoneError(message);
+      } else if (field === "email") {
+        setError(message); // ou setEmailError si tu veux créer un state emailError
+      }
+
+      // Stop ici, pas besoin de "veuillez réessayer"
+      throw error;
+    }
+
+    // Autres erreurs
+    const message =
+      data?.message ||
+      data?.error ||
+      error?.message ||
+      "Erreur lors de la mise à jour du client.";
+
+    console.error("❌ Erreur updateClient:", { status, data, error });
+
+    showAlert("error", "Erreur", message);
+    throw error;
+  }
+};
+
 
   const deleteClient = async (id: string | number): Promise<void> => {
     console.log("🗑️ Frontend - Suppression du client avec ID:", id);
 
     if (!id) {
-      console.error("❌ ID undefined dans deleteClient");
-      alert("Erreur: ID du client non défini");
+      showAlert("error", "Erreur", "ID du client non défini");
       return;
     }
 
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce client ?")) {
-      return;
-    }
+    const isConfirmed = await confirm({
+  title: "Suppression du client",
+  message: "Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible.",
+  confirmText: "Supprimer",
+  cancelText: "Annuler",
+});
+
+if (!isConfirmed) return;
+
 
     try {
+            const token = getAuthToken();
+      
+      // ⭐ VÉRIFICATION CRITIQUE
+      if (!token || token === 'null' || token === 'undefined') {
+        // Rediriger vers le login
+        window.location.href = '/auth/sign-in';
+        return;
+      }
       await axios.delete(`${API_BASE_URL}/deleteOne/${id}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setClients(clients.filter(client => client._id !== id && client.id !== id));
-      alert("Client supprimé avec succès !");
-    } catch (error) {
-      console.error("Erreur lors de la suppression:", error);
+      showAlert("success", "Client supprimé", "Client supprimé avec succès !");
+
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission ");
+            return ;
+        }
+        
+        if (error.response?.status === 401) {
+            showAlert("warning", "Session expirée", "Veuillez vous reconnecter");
+            window.location.href = '/auth/sign-in';
+            return ;
+        }
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      alert("Erreur lors de la suppression : " + errorMessage);
+      showAlert("error", "Erreur lors de la suppression", errorMessage);
     }
   };
 
@@ -462,7 +672,7 @@ export default function ClientForm() {
           if (type === "edit") {
             console.log("✏️ Remplissage du formulaire avec:", fullClient);
             setFormData({
-              nom: fullClient.nom,
+              nom: fullClient.nomEffectif || fullClient.nom,
               type: fullClient.type,
               adresse: fullClient.adresse,
               telephone: fullClient.telephone,
@@ -522,18 +732,22 @@ export default function ClientForm() {
       if (modalType === "add") {
         console.log("➕ Création d'un nouveau client:", formData);
         await createClient(formData);
-        alert("Client ajouté avec succès !");
+        showAlert("success", "Client ajouté", "Client ajouté avec succès !");
       } else if (modalType === "edit" && selectedClient) {
         const clientId = selectedClient._id;
         console.log("✏️ Modification du client avec ID:", clientId);
         await updateClient(clientId, formData);
-        alert("Client modifié avec succès !");
+        showAlert("success", "Client modifié", "Client modifié avec succès !");
       }
 
       await fetchAllClients();
       await fetchAllVehicules();
       closeModal();
-    } catch (error) {
+    } catch (error:any) {
+        if (error.response?.status === 403) {
+            showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+            return ;
+        }
       console.error("Erreur lors de la soumission:", error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       setError("Erreur : " + errorMessage);
@@ -542,108 +756,107 @@ export default function ClientForm() {
     }
   };
 
-  const renderHistoryModal = () => {
-    if (!selectedClient) return null;
+const renderHistoryModal = () => {
+  if (!selectedClient) return null;
 
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xl font-semibold text-gray-900">
-            Historique des visites - {selectedClient.nom}
-          </h3>
-          <div className="text-sm text-gray-600">
-            {historiqueDetails.length} visite(s) effectuée(s)
-          </div>
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-semibold text-gray-900">
+          Historique des visites - {selectedClient.nomEffectif || selectedClient.nom}
+        </h3>
+        <div className="text-sm text-gray-600">
+          {historiqueDetails.length} visite(s) effectuée(s)
         </div>
+      </div>
 
-        {loadingHistory ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-500">Chargement de l'historique...</p>
-          </div>
-        ) : historiqueDetails.length === 0 ? (
-          <div className="text-center py-8">
-            <History className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune visite enregistrée</h3>
-            <p className="text-gray-500">Ce client n'a pas encore d'historique de visites terminées.</p>
-          </div>
-        ) : (
-          <div className="space-y-4 max-h-96 overflow-y-auto">
-            {historiqueDetails.map((visite, index) => (
-              <div key={visite.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-semibold text-gray-900">{visite.numeroOrdre}</span>
-                      <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                        Terminé
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      <Calendar className="w-4 h-4 inline mr-1" />
-                      {new Date(visite.dateVisite).toLocaleDateString('fr-FR', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </div>
+      {loadingHistory ? (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Chargement de l'historique...</p>
+        </div>
+      ) : historiqueDetails.length === 0 ? (
+        <div className="text-center py-8">
+          <History className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune visite enregistrée</h3>
+          <p className="text-gray-500">Ce client n'a pas encore d'historique de visites terminées.</p>
+        </div>
+      ) : (
+        <div className="space-y-4 max-h-96 overflow-y-auto">
+          {historiqueDetails.map((visite, index) => (
+            <div key={visite.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-semibold text-gray-900">{visite.numeroOrdre}</span>
+                    <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      Terminé
+                    </span>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm text-gray-600">
-                      <Clock className="w-4 h-4 inline mr-1" />
-                      {visite.dureeHeures}h de travail
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      <MapPin className="w-4 h-4 inline mr-1" />
-                      {visite.atelier}
-                    </div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    <Calendar className="w-4 h-4 inline mr-1" />
+                    {new Date(visite.dateVisite).toLocaleDateString('fr-FR', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
                   </div>
                 </div>
-
-                <div className="mb-3">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Car className="w-4 h-4 text-blue-600" />
-                    <span className="font-medium text-gray-900">{visite.vehicule}</span>
+                <div className="text-right">
+                  <div className="text-sm text-gray-600">
+                    <Clock className="w-4 h-4 inline mr-1" />
+                    {visite.dureeHeures}h de travail
                   </div>
                   <div className="text-sm text-gray-600">
-                    <Wrench className="w-4 h-4 inline mr-1" />
-                    Services: {visite.servicesEffectues}
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-300 pt-3">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">
-                    Tâches effectuées ({visite.taches.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {visite.taches.map((tache, tacheIndex) => (
-                      <div key={tacheIndex} className="bg-white p-2 rounded border border-gray-200">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">{tache.description}</p>
-                            <p className="text-xs text-gray-600">
-                              Service: {tache.service} | Mécanicien: {tache.mecanicien}
-                            </p>
-                          </div>
-                          <div className="text-xs text-gray-500 text-right">
-                            {tache.heuresReelles}h
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                    <MapPin className="w-4 h-4 inline mr-1" />
+                    {visite.atelier}
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
 
+              <div className="mb-3">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Car className="w-4 h-4 text-blue-600" />
+                  <span className="font-medium text-gray-900">{visite.vehicule}</span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <Wrench className="w-4 h-4 inline mr-1" />
+                  Services: {visite.servicesEffectues}
+                </div>
+              </div>
+
+              <div className="border-t border-gray-300 pt-3">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">
+                  Tâches effectuées ({visite.taches.length})
+                </h4>
+                <div className="space-y-2">
+                  {visite.taches.map((tache, tacheIndex) => (
+                    <div key={tacheIndex} className="bg-white p-2 rounded border border-gray-200">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">{tache.description}</p>
+                          <p className="text-xs text-gray-600">
+                            Service: {tache.service} | Mécanicien: {tache.mecanicien}
+                          </p>
+                        </div>
+                        <div className="text-xs text-gray-500 text-right">
+                          {tache.heuresReelles}h
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen  p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -732,11 +945,16 @@ export default function ClientForm() {
                         <User className="w-8 h-8 text-green-600" />
                       )}
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{client.nom}</h3>
-                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${client.type === "professionnel"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-green-100 text-green-800"
-                          }`}>
+                        
+                           <h3 className="text-lg font-semibold text-gray-900">
+                            {client.nomEffectif || client.nom}
+                           </h3>
+                          
+                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                          client.type === "professionnel"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                        }`}>
                           {client.type === "professionnel" ? "Professionnel" : "Particulier"}
                         </span>
                       </div>
@@ -767,7 +985,7 @@ export default function ClientForm() {
                         onClick={() => {
                           sessionStorage.setItem('preselectedClient', JSON.stringify({
                             id: client._id,
-                            nom: client.nom
+                            nom: client.nomEffectif || client.nom
                           }));
                           router.push("/fiche-voiture");
                         }}
@@ -846,7 +1064,6 @@ export default function ClientForm() {
         )}
       </div>
 
-      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
@@ -880,7 +1097,7 @@ export default function ClientForm() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                      <p className="text-gray-900">{selectedClient?.nom}</p>
+                      <p className="text-gray-900">{selectedClient?.nomEffectif || selectedClient?.nom}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
@@ -1203,5 +1420,6 @@ export default function ClientForm() {
         </div>
       )}
     </div>
+    
   );
 }

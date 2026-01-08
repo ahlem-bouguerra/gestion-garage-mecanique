@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { User, Car, Calendar, Save, UserCheck, Clock } from 'lucide-react';
 import { ordresTravailAPI } from './services/ordresTravailAPI';
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+
 
 const AjoutOrdreTravail = ({
   services,
@@ -15,6 +17,7 @@ const AjoutOrdreTravail = ({
 }) => {
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [quoteData, setQuoteData] = useState(null);
+  const { showAlert } = useGlobalAlert();
   const [ordreTravail, setOrdreTravail] = useState({
     devisId: '',
     dateCommence: '',
@@ -87,12 +90,15 @@ const AjoutOrdreTravail = ({
         taches: tachesFromServices
       });
 
-    } catch (err) {
-      onError(`Erreur lors du chargement du devis: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+} catch (error) {
+  if (error.response?.status === 403) {
+    showAlert("error", "Accès refusé", "Vous n'avez pas la permission")
+  }
+  onError(`Erreur lors du chargement du devis: ${error.message}`); // ⭐ "error", pas "err"
+} finally {
+  setLoading(false);
+}
+};
 
   const assignServiceToTache = (tacheId, serviceId) => {
     const service = services.find(s => s._id === serviceId);
@@ -137,16 +143,16 @@ const AjoutOrdreTravail = ({
 
       // Validations
       if (!ordreTravail.dateCommence) {
-        throw new Error('La date de commencement est obligatoire');
+        showAlert("error", "date de commencement", "La date de commencement est obligatoire");
       }
       if (!ordreTravail.atelier) {
-        throw new Error('Veuillez sélectionner un atelier');
+        showAlert("error", "atelier", "Veuillez sélectionner un atelier");
       }
       if (ordreTravail.taches.some(t => !t.serviceId)) {
-        throw new Error('Toutes les tâches doivent avoir un service assigné');
+        showAlert("error", "service", "Toutes les tâches doivent avoir un service assigné");
       }
       if (ordreTravail.taches.some(t => !t.mecanicienId)) {
-        throw new Error('Toutes les tâches doivent avoir un mécanicien assigné');
+        showAlert("error", "mecanicien", "Toutes les tâches doivent avoir un mécanicien assigné");
       }
 
       const ordreData = {
@@ -181,11 +187,14 @@ const AjoutOrdreTravail = ({
 
       onOrdreSaved();
 
-    } catch (err) {
-      onError(err.message || 'Erreur lors de la sauvegarde');
-    } finally {
-      setLoading(false);
-    }
+} catch (error) {  // ⭐ La variable s'appelle "error"
+  if (error.response?.status === 403) {
+    showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
+  }
+  onError(error.message || 'Erreur lors de la sauvegarde'); // ⭐ Utiliser "error", pas "err"
+} finally {
+  setLoading(false);
+}
   };
 
   const resetForm = () => {
@@ -236,7 +245,12 @@ const AjoutOrdreTravail = ({
                 <User className="h-5 w-5 text-gray-500" />
                 <div>
                   <p className="font-medium">Client</p>
-                  <p className="text-gray-600">{quoteData.clientName}</p>
+                  <p className="text-gray-600">
+  {quoteData?.clientId?.clientId?.username || 
+   quoteData?.clientId?.nom || 
+   quoteData?.clientName || 
+   'N/A'}
+</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">

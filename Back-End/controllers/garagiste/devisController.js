@@ -1,14 +1,41 @@
 import Devis from "../../models/Devis.js";
 import OrdreTravail from '../../models/Ordre.js'; 
+import FicheClient from "../../models/FicheClient.js";
+
 
 export const createDevis = async (req, res) => {
   try {
     console.log('📥 Données reçues:', req.body);
+    console.log('👤 Utilisateur:', req.user);
 
-    const { clientId, clientName, vehicleInfo,vehiculeId, inspectionDate, services,montantTVA,montantRemise, tvaRate,remiseRate, maindoeuvre,estimatedTime } = req.body;
+    const { clientId,vehicleInfo, vehiculeId, inspectionDate, services, montantTVA, montantRemise, tvaRate, remiseRate, maindoeuvre, estimatedTime, garageId } = req.body;
+
+    // ⭐ Détermine le garageId selon le rôle
+    let finalGarageId;
+    
+    if (req.user.isSuperAdmin) {
+      // SuperAdmin : doit fournir le garageId dans le body
+      if (!garageId) {
+        return res.status(400).json({
+          success: false,
+          message: 'SuperAdmin doit spécifier un garageId'
+        });
+      }
+      finalGarageId = garageId;
+      console.log('👑 SuperAdmin crée un devis pour le garage:', finalGarageId);
+    } else {
+      // Garagiste : utilise son propre garageId
+      if (!req.user.garage) {
+        return res.status(400).json({
+          success: false,
+          message: 'Garagiste non associé à un garage'
+        });
+      }
+      finalGarageId = req.user.garage;
+      console.log('🔧 Garagiste crée un devis pour son garage:', finalGarageId);
+    }
 
     // ✅ CALCUL CORRECT DES TOTAUX
-    // 1. Total des services (pièces seulement)
     let totalServicesHT = 0;
     const processedServices = services.map(service => {
       const serviceTotal = service.quantity * service.unitPrice;
@@ -16,12 +43,8 @@ export const createDevis = async (req, res) => {
       return { ...service, total: serviceTotal };
     });
 
-    // 2. Total HT = services + main d'œuvre
     const totalHT = totalServicesHT + (maindoeuvre || 0);
-
-    // 3. Total TTC = Total HT + TVA
     const totalTTC = totalHT + montantTVA;
-
     const finalTotalTTC = totalTTC - montantRemise;
 
     console.log('🔢 Calculs:');
@@ -39,8 +62,7 @@ export const createDevis = async (req, res) => {
     const newDevis = new Devis({
       id: devisId,
       clientId,
-      clientName,
-      garagisteId: req.user._id,
+      garageId: finalGarageId,
       vehicleInfo,
       vehiculeId,
       inspectionDate,
@@ -50,8 +72,8 @@ export const createDevis = async (req, res) => {
       totalTTC,
       finalTotalTTC,
       remiseRate: remiseRate || 0,
-      montantTVA : montantTVA || 0,
-      montantRemise : montantRemise  || 0,
+      montantTVA: montantTVA || 0,
+      montantRemise: montantRemise || 0,
       tvaRate: tvaRate || 20,
       maindoeuvre: maindoeuvre || 0,
       status: 'brouillon',
@@ -85,30 +107,82 @@ export const getAllDevis = async (req, res) => {
   try {
     const { status, clientName, dateDebut, dateFin } = req.query;
     const filters = {};
-    filters.garagisteId = req.user._id;
+    filters.garageId = req.user.garage;
 
     if (status && status !== 'tous') filters.status = status.toLowerCase();
-    if (clientName) filters.clientName = { $regex: clientName, $options: 'i' };
 
-    if (dateDebut || dateFin) {
-      filters.inspectionDate = {}; // ✅ Changé de 'date' à 'inspectionDate'
+    // 🔍 Si recherche par nom de client
+    if (clientName) {
+      const clientsAvecCompte = await FicheClient.find({
+        garageId: req.user.garage
+      })
+      .populate({
+        path: 'clientId',
+        match: { username: { $regex: clientName, $options: 'i' } }
+      });
       
-      if (dateDebut) {
-        // ✅ Comme c'est un String, on compare directement les strings au format ISO
-        filters.inspectionDate.$gte = dateDebut; // Pas besoin de new Date()
-      }
-      if (dateFin) {
-        filters.inspectionDate.$lte = dateFin;
+      const idsClientsAvecCompte = clientsAvecCompte
+        .filter(c => c.clientId)
+        .map(c => c._id);
+      
+      const clientsSansCompte = await FicheClient.find({
+        garageId: req.user.garage,
+        nom: { $regex: clientName, $options: 'i' }
+      }).select('_id');
+      
+      const idsClientsSansCompte = clientsSansCompte.map(c => c._id);
+      const allClientIds = [...idsClientsAvecCompte, ...idsClientsSansCompte];
+      
+      if (allClientIds.length > 0) {
+        filters.clientId = { $in: allClientIds };
+      } else {
+        return res.json({ success: true, data: [] });
       }
     }
 
+    if (dateDebut || dateFin) {
+      filters.inspectionDate = {};
+      if (dateDebut) filters.inspectionDate.$gte = dateDebut;
+      if (dateFin) filters.inspectionDate.$lte = dateFin;
+    }
+
     console.log('🔍 Filtres appliqués:', JSON.stringify(filters, null, 2));
-    const devis = await Devis.find(filters).sort({ createdAt: -1 });
+    
+    const devis = await Devis.find(filters)
+      .populate({
+        path: 'clientId',
+        select: 'nom type clientId',
+        populate: {
+          path: 'clientId',
+          select: 'username email phone'
+        }
+      })
+      .sort({ createdAt: -1 })
+      .lean(); // ✅ Ajouter .lean()
+      
     console.log('📊 Nombre de résultats:', devis.length);
+
+    // ✅ Enrichir chaque devis avec clientName
+    const devisEnrichis = devis.map(d => {
+      let clientName = 'Client inconnu';
+      
+      if (d.clientId) {
+        if (d.clientId.clientId?.username) {
+          clientName = d.clientId.clientId.username;
+        } else {
+          clientName = d.clientId.nom;
+        }
+      }
+      
+      return {
+        ...d,
+        clientName
+      };
+    });
 
     res.json({
       success: true,
-      data: devis
+      data: devisEnrichis
     });
   } catch (error) {
     res.status(500).json({
@@ -120,40 +194,124 @@ export const getAllDevis = async (req, res) => {
 };
 
 
-// GET /api/vehicules/:id - Récupérer un véhicule spécifique
-// Version corrigée de getDevisById
 export const getDevisById = async (req, res) => {
   try {
     const { id } = req.params;
     
     let devis;
     
-    // Vérifier si l'ID ressemble à un ObjectId MongoDB (24 caractères hex)
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      // C'est un ObjectId MongoDB
-      devis = await Devis.findById(id).where({ garagisteId: req.user._id });
+      devis = await Devis.findById(id)
+        .populate({
+          path: 'clientId',
+          select: 'nom type clientId',
+          populate: {
+            path: 'clientId',
+            select: 'username email phone'
+          }
+        })
+        .lean(); // ✅ Ajouter .lean()
     } else {
-      // C'est un ID personnalisé (DEV001, DEV002, etc.)
-      devis = await Devis.findOne({ id: id, garagisteId: req.user._id });
+      devis = await Devis.findOne({ id: id })
+        .populate({
+          path: 'clientId',
+          select: 'nom type clientId',
+          populate: {
+            path: 'clientId',
+            select: 'username email phone'
+          }
+        })
+        .lean(); // ✅ Ajouter .lean()
     }
     
     if (!devis) {
       return res.status(404).json({ error: 'Devis non trouvé' });
     }
+
+    // ✅ Enrichir avec clientName
+    let clientName = 'Client inconnu';
+    if (devis.clientId) {
+      if (devis.clientId.clientId?.username) {
+        clientName = devis.clientId.clientId.username;
+      } else {
+        clientName = devis.clientId.nom;
+      }
+    }
     
-    res.json(devis);
+    res.json({
+      ...devis,
+      clientName
+    });
   } catch (error) {
     console.error("❌ Erreur getDevisById:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
+export const getAllDevisByGarage = async (req, res) => {
+  try {
+    const { garageId } = req.params;
+
+    const devis = await Devis.find({ garageId })
+      .populate({
+        path: 'clientId',
+        select: 'nom type clientId',
+        populate: {
+          path: 'clientId',
+          select: 'username email phone'
+        }
+      })
+      .sort({ createdAt: -1 })
+      .lean(); // ✅ Ajouter .lean() pour pouvoir modifier les objets
+
+    if (!devis || devis.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    // ✅ Enrichir chaque devis avec clientName
+    const devisEnrichis = devis.map(d => {
+      let clientName = 'Client inconnu';
+      
+      // Si clientId (FicheClient) existe et est populé
+      if (d.clientId) {
+        // Si clientId.clientId (Client) existe, utiliser username
+        if (d.clientId.clientId?.username) {
+          clientName = d.clientId.clientId.username;
+        } else {
+          // Sinon utiliser nom de FicheClient
+          clientName = d.clientId.nom;
+        }
+      }
+      
+      return {
+        ...d,
+        clientName  // ✅ Ajouter le nom effectif
+      };
+    });
+
+    return res.json(devisEnrichis);
+
+  } catch (error) {
+    console.error("❌ Erreur getAllDevisByGarage:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 export const getDevisByNum = async (req, res) => {
   try {
     const { id } = req.params; // ex: "DEV017"
 
     // 🔎 Recherche du devis via le champ "id" (pas _id)
-    const devis = await Devis.findOne({ id: id, garagisteId: req.user._id });
+    const devis = await Devis.findOne({ id: id, garageId: req.user.garage })  
+    .populate({
+      path: 'clientId',
+      select: 'nom type clientId',
+      populate: {
+        path: 'clientId',
+        select: 'username email phone'
+      }
+    });
 
     if (!devis) {
       return res.status(404).json({ error: `Devis avec id ${id} non trouvé` });
@@ -173,14 +331,13 @@ export const getDevisByNum = async (req, res) => {
   }
 };
 
-
 export const updateDevisStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
     const updatedDevis = await Devis.findOneAndUpdate(
-      { id, garagisteId: req.user._id }, 
+      { id, garageId: req.user.garage }, 
       { status },
       { new: true }
     );
@@ -209,21 +366,64 @@ export const updateDevisStatus = async (req, res) => {
 export const updateDevis = async (req, res) => {
   try {
     const { id } = req.params;
-    const { clientId, clientName, vehicleInfo, inspectionDate, services, tvaRate,remiseRate,montantTVA,montantRemise, maindoeuvre ,estimatedTime} = req.body;
+    const { 
+      clientId, 
+      vehicleInfo, 
+      inspectionDate, 
+      services, 
+      tvaRate,
+      remiseRate,
+      montantTVA,
+      montantRemise, 
+      maindoeuvre,
+      estimatedTime,
+      garageId
+    } = req.body;
 
-    console.log('🔄 Mise à jour devis:', id);
-    console.log('📥 Nouvelles données:', req.body);
+    console.log('🔄 Mise à jour devis ID:', id);
 
-    // Vérifier que le devis existe
-    const existingDevis = await Devis.findOne({ id, garagisteId: req.user._id });
+    const targetGarageId = garageId || req.user?.garage;
+
+    if (!targetGarageId) {
+      return res.status(400).json({
+        success: false,
+        message: 'garageId manquant'
+      });
+    }
+
+    console.log('🏢 Garage cible:', targetGarageId);
+
+    // ✅ Déterminer le critère de recherche
+    const isMongoId = id.match(/^[0-9a-fA-F]{24}$/);
+    const searchCriteria = {
+      ...(isMongoId ? { _id: id } : { id: id }),
+      garageId: targetGarageId
+    };
+
+    console.log('🔍 Critères de recherche:', searchCriteria);
+
+    // Vérifier l'existence
+    const existingDevis = await Devis.findOne(searchCriteria)
+    .populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+});
+
     if (!existingDevis) {
+      console.log('❌ Devis non trouvé');
       return res.status(404).json({
         success: false,
         message: 'Devis non trouvé'
       });
     }
 
-    // ✅ RECALCULER LES TOTAUX (même logique que create)
+    console.log('✅ Devis trouvé:', existingDevis.id);
+
+    // Recalculer les totaux
     let totalServicesHT = 0;
     const processedServices = services.map(service => {
       const serviceTotal = service.quantity * service.unitPrice;
@@ -235,37 +435,31 @@ export const updateDevis = async (req, res) => {
     const totalTTC = totalHT + montantTVA;
     const finalTotalTTC = totalTTC - montantRemise;
 
-    console.log('🔢 Nouveaux calculs:');
-    console.log('- Total services HT:', totalServicesHT);
-    console.log('- Main d\'œuvre:', maindoeuvre || 0);
-    console.log('- Total HT:', totalHT);
-    console.log('- Total TTC:', totalTTC);
-    console.log('- Total TTC après remise:', finalTotalTTC);
+    console.log('🔢 Calculs:', { totalHT, totalTTC, finalTotalTTC });
 
-    // Mettre à jour le devis
+    // Mettre à jour
     const updatedDevis = await Devis.findOneAndUpdate(
-      { id, garagisteId: req.user._id },
+      searchCriteria,
       {
         clientId,
-        clientName,
         vehicleInfo,
         inspectionDate,
         services: processedServices,
-        totalServicesHT: totalServicesHT,
-        totalHT: totalHT,
+        totalServicesHT,
+        totalHT,
         totalTTC,
         finalTotalTTC,
         remiseRate: remiseRate || 0,
-        tvaRate: tvaRate || 20,
-        montantRemise : montantRemise || 0,
-        montantTVA : montantTVA || 0,
+        tvaRate: tvaRate || 19,
+        montantRemise: montantRemise || 0,
+        montantTVA: montantTVA || 0,
         maindoeuvre: maindoeuvre || 0,
-        status: 'brouillon', // ✅ Remettre en brouillon après modification
+        status: 'brouillon',
         estimatedTime,
       },
       {
-        new: true, // Retourner le document mis à jour
-        runValidators: true // Valider les données
+        new: true,
+        runValidators: true
       }
     );
 
@@ -290,7 +484,6 @@ export const updateDevis = async (req, res) => {
   }
 };
 
-
 export const updateFactureId = async (req, res) => {
   try {
     const { id } = req.params;
@@ -299,7 +492,15 @@ export const updateFactureId = async (req, res) => {
     console.log('🔄 Mise à jour devis:', id);
     console.log('📥 Nouvelles données:', updateData);
 
-    const existingDevis = await Devis.findById(id).where({ garagisteId: req.user._id });
+    const existingDevis = await Devis.findById(id).where({ garageId: req.user.garage })
+    .populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+})
     if (!existingDevis) {
       return res.status(404).json({ success: false, message: 'Devis non trouvé' });
     }
@@ -325,7 +526,7 @@ export const updateFactureId = async (req, res) => {
     }
 
     const updatedDevis = await Devis.findOneAndUpdate(
-      { _id: id, garagisteId: req.user._id }, 
+      { _id: id, garageId: req.user.garage }, 
       updateData, 
       { new: true, runValidators: true }
     );
@@ -342,7 +543,14 @@ export const deleteDevis = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const devis = await Devis.findOne({ id, garagisteId: req.user._id });
+    const devis = await Devis.findOne({ id, garageId: req.user.garage}).populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+});
     if (!devis) {
       return res.status(404).json({
         success: false,
@@ -357,7 +565,7 @@ export const deleteDevis = async (req, res) => {
       });
     }
 
-    await Devis.findOneAndDelete({ id, garagisteId: req.user._id });
+    await Devis.findOneAndDelete({ id, garageId: req.user.garage });
 
     res.json({
       success: true,
@@ -372,8 +580,6 @@ export const deleteDevis = async (req, res) => {
   }
 };
 
-
-
 export const acceptDevis = async (req, res) => {
   try {
     const { devisId } = req.params;
@@ -381,7 +587,15 @@ export const acceptDevis = async (req, res) => {
       devisId, 
       { status: 'accepte' }, 
       { new: true }
-    );
+    )
+    .populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+});
     
     if (!devis) {
       return res.status(404).send(`
@@ -418,8 +632,15 @@ export const refuseDevis = async (req, res) => {
       devisId, 
       { status: 'refuse' }, 
       { new: true }
-    );
-    
+    )
+    .populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+});
     if (!devis) {
       return res.status(404).send(`
         <html><body><h1>❌ Devis non trouvé</h1></body></html>
@@ -448,3 +669,33 @@ export const refuseDevis = async (req, res) => {
     res.status(500).send(`<html><body><h1>❌ Erreur technique</h1></body></html>`);
   }
 };
+
+
+export const deleteDevisForSuperAdmin = async (req,res) =>{
+
+  try {
+    const { id } = req.params;
+
+    const devis = await Devis.findById(id)
+    .populate({
+  path: 'clientId',
+  select: 'nom type clientId',
+  populate: {
+    path: 'clientId',
+    select: 'username email phone'
+  }
+});
+
+    if (!devis) {
+      return res.status(404).json({ error: 'Devis non trouvé' });
+    }
+
+    await Devis.findByIdAndDelete(id);
+    res.json({ message: 'Devis supprimé avec succès' });
+
+  } catch (error) {
+    console.error('❌ Erreur deleteDevisById:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+

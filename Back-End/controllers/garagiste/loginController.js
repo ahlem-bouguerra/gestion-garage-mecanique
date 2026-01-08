@@ -1,68 +1,96 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User } from '../../models/User.js';
-
+import { Garagiste } from '../../models/Garagiste.js';
+import { Garage } from '../../models/Garage.js';
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
   
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: "Utilisateur non trouvé" });
+    // ✅ 1. Trouver le garagiste et peupler les infos du garage
+    const garagiste = await Garagiste.findOne({ email })
+      .populate('garage', 'nom matriculeFiscal governorateName cityName streetAddress location  horaires services isActive');
     
-    if (!user.isVerified) {
-      return res.status(403).json({ message: "Compte non vérifié. Vérifiez votre email." });
+    if (!garagiste) {
+      return res.status(401).json({ message: "Utilisateur non trouvé" });
     }
     
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) return res.status(401).json({ message: "Mot de passe incorrect" });
-    const isProfileComplete = !!(
-      user.username && 
-      user.garagenom && 
-      user.matriculefiscal && 
-      user.phone && 
-      user.governorateId && 
-      user.cityId &&
-      user.location?.coordinates
-    );
+    // ✅ 2. Vérifier si le compte est vérifié
+    if (!garagiste.isVerified) {
+      return res.status(403).json({ 
+        message: "Compte non vérifié. Vérifiez votre email." 
+      });
+    }
 
+     if (!garagiste.isActive) {
+      return res.status(403).json({ 
+        message: "Compte non Active. Contacter votre admin." 
+      });
+    }
     
+    // ✅ 3. Vérifier le mot de passe
+    const passwordMatch = await bcrypt.compare(password, garagiste.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: "Mot de passe incorrect" });
+    }
+
+    // ✅ 4. Vérifier si le garage est actif
+    if (garagiste.garage && !garagiste.garage.isActive) {
+      return res.status(403).json({ 
+        message: "Votre garage est actuellement désactivé. Contactez l'administrateur." 
+      });
+    }
+
+
+
+    // ✅ 6. Créer le token JWT
     const token = jwt.sign(
       { 
-        userId: user._id,
-        email: user.email,
-        phone: user.phone,
-        username: user.username,
-        garagenom: user.garagenom,
-        matriculefiscal: user.matriculefiscal
+        userId: garagiste._id,
+        email: garagiste.email,
+        garageId: garagiste.garage?._id || null,
+        garagenom: garagiste.garage?.nom || null,
+        matriculefiscal: garagiste.garage?.matriculeFiscal || null
       },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
     
-    console.log(`Utilisateur connecté : ${user.email}`);
+    console.log(`✅ Utilisateur connecté : ${garagiste.email} `);
     
-    // ✅ Renvoyer le token ET l'objet user
+    // ✅ 7. Renvoyer la réponse avec token et infos utilisateur
     res.json({ 
       message: "Connexion réussie", 
       token,
-      isProfileComplete,
+    
       user: {
-        id: user._id,
-        name: user.username,
-        email: user.email,
-        phone: user.phone,
-        username: user.username,
-        garagenom: user.garagenom,
-        matriculefiscal: user.matriculefiscal,
-        img: user.img || "/images/user/user-03.png"
+        id: garagiste._id,
+        username: garagiste.username,
+        email: garagiste.email,
+        phone: garagiste.phone,
+        img: garagiste.img || "/images/user/user-03.png",
+        
+        // Infos du garage
+        garage: garagiste.garage ? {
+          id: garagiste.garage._id,
+          nom: garagiste.garage.nom,
+          matriculeFiscal: garagiste.garage.matriculeFiscal,
+          governorateName: garagiste.garage.governorateName,
+          cityName: garagiste.garage.cityName,
+          streetAddress: garagiste.garage.streetAddress,
+          location: garagiste.garage.location,
+          horaires: garagiste.garage.horaires,
+          services: garagiste.garage.services,
+          isActive: garagiste.garage.isActive
+        } : null
       }
     });
   } catch (error) {
-    console.error('Erreur login:', error);
+    console.error('❌ Erreur login:', error);
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
+
 export const logout = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
@@ -81,7 +109,7 @@ export const logout = async (req, res) => {
       });
     }
 
-    // Vérification du token (optionnelle ici)
+    // ✅ Vérification du token
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       console.log("✅ Token valide pour utilisateur:", decoded.userId);
@@ -92,14 +120,14 @@ export const logout = async (req, res) => {
       });
     }
 
-    // Réponse au client → il doit supprimer le token côté frontend
+    // ✅ Réponse au client
     res.status(200).json({
       success: true,
       message: "Déconnexion réussie. Supprimez le token côté client.",
     });
 
   } catch (error) {
-    console.error("💥 Erreur dans logout:", error);
+    console.error("❌ Erreur dans logout:", error);
     res.status(500).json({
       success: false,
       message: "Erreur serveur lors de la déconnexion",

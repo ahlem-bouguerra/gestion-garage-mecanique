@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto"; // ✅ Ajouter cet import
 import jwt from "jsonwebtoken";
-import { User } from "../../models/User.js";
+import { Garagiste } from "../../models/Garagiste.js";
 import { sendVerificationEmail } from "../../utils/mailer.js";
 
 
@@ -15,7 +16,7 @@ export const register = async (req, res) => {
   }
 
   try {
-    const existing = await User.findOne({ email });
+    const existing = await Garagiste.findOne({ email });
     if (existing) {
       console.warn("⚠️ Email déjà utilisé :", email);
       return res.status(400).json({ message: "Email déjà utilisé." });
@@ -37,7 +38,7 @@ export const register = async (req, res) => {
 
     console.log("📦 Données utilisateur à créer:", userData);
 
-    const user = await User.create(userData);
+    const user = await Garagiste.create(userData);
 
     console.log("✅ Utilisateur créé:", {
       id: user._id,
@@ -46,11 +47,18 @@ export const register = async (req, res) => {
     });
 
     // Token pour vérification email
-    const verificationToken = jwt.sign(
+  /*  const verificationToken = jwt.sign(
       { userId: user._id, purpose: 'email_verification' }, 
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
-    );
+    );*/
+
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+
+      // Sauvegarder le token dans l'utilisateur
+      user.verificationToken = verificationToken;
+      user.verificationTokenExpiry = Date.now() + 3600000; // 1 heure
+      await user.save();
 
     await sendVerificationEmail(email, verificationToken);
     console.log("📧 Email de vérification envoyé à :", email);

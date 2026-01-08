@@ -2,16 +2,47 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
+import GarageReservationManagement from '../gestion-reservations-garage'
+import { Button } from '../ui-elements/button';
+import GarageRatingsDisplay from '../GarageRatingsDisplay';
+
 
 export default function GarageDashboard() {
   const [reservations, setReservations] = useState([]);
   const [todayReservations, setTodayReservations] = useState([]);
   const [upcomingReservations, setUpcomingReservations] = useState([]);
   const [pendingCount, setPendingCount] = useState(0);
+  const [showChatModal, setShowChatModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [garageId, setGarageId] = useState(null);
       const getAuthToken = () => {
       return localStorage.getItem('token') || sessionStorage.getItem('token');
     };
+
+    useEffect(() => {
+  const header = document.querySelector('header');
+  if (!header) return;
+
+  if (showChatModal) {
+    header.classList.add("hidden");
+  } else {
+    header.classList.remove("hidden");
+  }
+}, [showChatModal]);
+
+
+useEffect(() => {
+  const token = getAuthToken();
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      setGarageId(payload.id || payload._id || payload.garageId);
+    } catch (err) {
+      console.error("Erreur décodage token:", err);
+    }
+  }
+}, []);
+
 
   // Fonction pour filtrer les réservations
   const filterReservations = (allReservations) => {
@@ -42,12 +73,16 @@ export default function GarageDashboard() {
   };
 
   // Fonction pour filtrer les dates non passées
-  const isDatePassed = (dateString) => {
-    const reservationDate = new Date(dateString);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return reservationDate < today;
-  };
+const isDatePassed = (dateString) => {
+  const reservationDate = new Date(dateString);
+  reservationDate.setHours(0, 0, 0, 0);
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Retourne true si la date est passée (avant aujourd'hui)
+  return reservationDate < today;
+};
 
   useEffect(() => {
     const fetchReservations = async () => {
@@ -117,10 +152,11 @@ export default function GarageDashboard() {
       {/* Header */}
 
 <div className="flex justify-end p-6">
-  <Link 
-    href="/reservation-cote-garage"
-    className="relative flex items-center gap-3 px-6 py-4 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 transition-all duration-200 shadow-lg hover:shadow-xl"
-  >
+  <button 
+  onClick={() => setShowChatModal(true)}
+  className="relative flex items-center gap-3 px-6 py-4 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 transition-all duration-200 shadow-lg hover:shadow-xl"
+>
+  
     {/* Icône */}
     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -137,7 +173,7 @@ export default function GarageDashboard() {
         !
       </span>
     )}
-  </Link>
+  </button>
 </div>
 
       {/* Contenu principal */}
@@ -349,19 +385,37 @@ export default function GarageDashboard() {
                   <p className="text-amber-700">Des clients attendent votre réponse pour leurs demandes de réservation</p>
                 </div>
               </div>
-              <Link 
-                href="/reservation-cote-garage"
-                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center gap-2"
+              <button 
+                onClick={() => setShowChatModal(true)}
+                  className="relative flex items-center gap-3 px-6 py-4 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 Répondre aux demandes
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </Link>
+              </button>
             </div>
           </div>
         )}
       </div>
+{showChatModal && (
+  <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="w-[95vw] max-w-[1900px] h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden relative">
+      {/* Bouton de fermeture */}
+      <button
+        onClick={() => setShowChatModal(false)}
+        className="absolute top-4 right-4 z-[10000] w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+      >
+        <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      
+      <GarageReservationManagement onClose={() => setShowChatModal(false)} />
+    </div>
+  </div>
+)}
+{garageId && <GarageRatingsDisplay garageId={garageId} />}
     </div>
   );
 }

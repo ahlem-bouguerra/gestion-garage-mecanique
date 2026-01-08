@@ -33,10 +33,6 @@ const devisSchema = new mongoose.Schema({
     ref: 'FicheClient', // Référence vers votre modèle Client
     required: true
   },
-  clientName: {
-    type: String,
-    required: true
-  },
   vehicleInfo: {
     type: String,
     required: true
@@ -141,11 +137,7 @@ montantRemise: {
     enum: ['brouillon', 'envoye', 'accepte', 'refuse'],
     default: 'brouillon'
   },
-  garagisteId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true
-  }
+garageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Garage', required: true }
 }, {
   timestamps: true
 });

@@ -2,6 +2,33 @@
 import React from 'react';
 import { X,Play, Eye, Edit2, Trash2, CheckCircle, Clock, Wrench, AlertCircle } from 'lucide-react';
 import { ordresTravailAPI } from './services/ordresTravailAPI';
+import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
+import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
+
+const getClientName = (ordre) => {
+  // Priorité 1 : clientInfo avec Client lié
+  if (ordre.clientInfo?.ClientId?.clientId?.username) {
+    return ordre.clientInfo.ClientId.clientId.username;
+  }
+  
+  // Priorité 2 : clientInfo direct
+  if (ordre.clientInfo?.ClientId?.nom) {
+    return ordre.clientInfo.ClientId.nom;
+  }
+  
+  // Priorité 3 : via devis avec Client lié
+  if (ordre.devisId?.clientId?.clientId?.username) {
+    return ordre.devisId.clientId.clientId.username;
+  }
+  
+  // Priorité 4 : via devis direct
+  if (ordre.devisId?.clientId?.nom) {
+    return ordre.devisId.clientId.nom;
+  }
+  
+  return 'N/A';
+};
+
 
 const ListeOrdresTravail = ({
   ordresTravail,
@@ -19,11 +46,13 @@ const ListeOrdresTravail = ({
   onEditOrdre,
   onOrdresSupprimes
 }) => {
+  const { confirm: openConfirm } = useConfirm();
+const { showAlert } = useGlobalAlert();
   const statusOptions = {
     'en_attente': { label: 'En attente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
     'en_cours': { label: 'En cours', color: 'bg-blue-100 text-blue-800', icon: Wrench },
     'termine': { label: 'Terminé', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-    'suspendu': { label: 'Suspendu', color: 'bg-red-100 text-red-800', icon: AlertCircle },
+    'supprime': { label: 'supprime', color: 'bg-red-100 text-red-800', icon: AlertCircle },
     'supprime': { label: 'supprime', color: 'bg-red-100 text-red-800', icon: X },
 
   };
@@ -35,81 +64,95 @@ const ListeOrdresTravail = ({
     'urgente': { label: 'Urgente', color: 'bg-red-100 text-red-800' }
   };
 
-  const demarrerOrdre = async (ordreId) => {
-    const confirmation = window.confirm(
+const demarrerOrdre = async (ordreId) => {
+  const isConfirmed = await openConfirm({
+    title: "Démarrer l'ordre de travail",
+    message:
       'Êtes-vous sûr de vouloir démarrer cet ordre de travail ?\n\n' +
-      'Cette action changera le statut à "En cours" et enregistrera la date de début réelle.'
-    );
+      'Cette action changera le statut à "En cours" et enregistrera la date de début réelle.',
+    confirmText: "Démarrer",
+    cancelText: "Annuler",
+  });
 
-    if (!confirmation) return;
+  if (!isConfirmed) return;
 
-    try {
-      await ordresTravailAPI.demarrerOrdre(ordreId);
-      onSuccess('Ordre de travail démarré avec succès');
-      onLoadOrdres();
-    } catch (error) {
-      onError(error.message || 'Erreur lors du démarrage de l\'ordre');
-    }
-  };
+  try {
+    await ordresTravailAPI.demarrerOrdre(ordreId);
+    showAlert("success", "Succès", "Ordre de travail démarré avec succès");
+    onLoadOrdres();
+  } catch (error) {
+    showAlert("error", "Erreur", error?.message || "Erreur lors du démarrage de l'ordre");
+    onError(error?.message || "Erreur lors du démarrage de l'ordre");
+  }
+};
 
-  const terminerOrdre = async (ordreId) => {
-    const confirmation = window.confirm(
+const terminerOrdre = async (ordreId) => {
+  const isConfirmed = await openConfirm({
+    title: "Terminer l'ordre de travail",
+    message:
       'Êtes-vous sûr de vouloir terminer cet ordre de travail ?\n\n' +
       'Cette action changera le statut à "Terminé" et enregistrera la date de fin réelle.\n' +
-      'Une fois terminé, l\'ordre ne pourra plus être modifié.'
-    );
+      'Une fois terminé, l\'ordre ne pourra plus être modifié.',
+    confirmText: "Terminer",
+    cancelText: "Annuler",
+  });
 
-    if (!confirmation) return;
+  if (!isConfirmed) return;
 
-    try {
-      await ordresTravailAPI.terminerOrdre(ordreId);
-      onSuccess('Ordre de travail terminé avec succès');
-      onLoadOrdres();
-    } catch (error) {
-      onError(error.message || 'Erreur lors de la fin de l\'ordre');
-    }
-  };
+  try {
+    await ordresTravailAPI.terminerOrdre(ordreId);
+    showAlert("success", "Succès", "Ordre de travail terminé avec succès");
+    onLoadOrdres();
+  } catch (error) {
+    showAlert("error", "Erreur", error?.message || "Erreur lors de la fin de l'ordre");
+    onError(error?.message || "Erreur lors de la fin de l'ordre");
+  }
+};
 
-  const supprimerOrdre = async (ordreId) => {
-    const ordre = ordresTravail.find(o => o._id === ordreId);
-    const numeroOrdre = ordre?.numeroOrdre || ordreId;
 
-    const confirmation = window.confirm(
+const supprimerOrdre = async (ordreId) => {
+  const ordre = ordresTravail.find(o => o._id === ordreId);
+  const numeroOrdre = ordre?.numeroOrdre || ordreId;
+
+  const isConfirmed = await openConfirm({
+    title: "Suppression d'un ordre",
+    message:
       `⚠️ ATTENTION ⚠️\n\n` +
       `Êtes-vous sûr de vouloir supprimer l'ordre de travail ${numeroOrdre} ?\n\n` +
       `Cette action marquera l'ordre comme supprimé et il ne sera plus visible dans la liste principale.\n\n` +
-      `Cette action est réversible uniquement par un administrateur.`
-    );
+      `Cette action est réversible uniquement par un administrateur.`,
+    confirmText: "Supprimer",
+    cancelText: "Annuler",
+  });
 
-    if (!confirmation) return;
+  if (!isConfirmed) return;
 
-    try {
-      await ordresTravailAPI.deleteOrdre(ordreId);
-      onSuccess(`Ordre de travail ${numeroOrdre} supprimé avec succès`);
-      onOrdreDeleted();
-    } catch (error) {
-      onError(error.message || 'Erreur lors de la suppression');
-    }
-  };
+  try {
+    await ordresTravailAPI.deleteOrdre(ordreId);
+    showAlert("success", "Succès", `Ordre ${numeroOrdre} supprimé avec succès`);
+    onOrdreDeleted();
+  } catch (error) {
+    showAlert("error", "Erreur", error?.message || "Erreur lors de la suppression");
+    onError(error?.message || "Erreur lors de la suppression");
+  }
+};
 
 const loadOrdresSupprimes = async () => {
-    try {
-      console.log('Appel API getOrdresSupprimes...');
-      const data = await ordresTravailAPI.getOrdresSupprimes();
-      console.log('Données reçues:', data);
-      
-      if (data.success && data.ordres) {
-        // ✅ APPELER la fonction pour mettre à jour l'affichage
-        onOrdresSupprimes(data.ordres, data.pagination);
-        onSuccess(`${data.ordres.length} ordre(s) supprimé(s) chargé(s)`);
-      } else {
-        onSuccess('Aucun ordre supprimé trouvé');
-      }
-    } catch (error) {
-      console.error('Erreur complète:', error);
-      onError(`Erreur: ${error.message}`);
+  try {
+    const data = await ordresTravailAPI.getOrdresSupprimes();
+
+    if (data?.success && data?.ordres) {
+      onOrdresSupprimes(data.ordres, data.pagination);
+      showAlert("success", "Succès", `${data.ordres.length} ordre(s) supprimé(s) chargé(s)`);
+    } else {
+      showAlert("info", "Info", "Aucun ordre supprimé trouvé");
     }
-  };
+  } catch (error) {
+    showAlert("error", "Erreur", error?.message || "Erreur lors du chargement");
+    onError(error?.message || "Erreur lors du chargement");
+  }
+};
+
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -135,8 +178,8 @@ const loadOrdresSupprimes = async () => {
               <div className="text-sm text-gray-600">En Cours</div>
             </div>
             <div className="bg-red-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-red-600">{statistiques.suspendus}</div>
-              <div className="text-sm text-gray-600">Suspendus</div>
+              <div className="text-2xl font-bold text-red-600">{statistiques.supprime}</div>
+              <div className="text-sm text-gray-600">Supprimés</div>
             </div>
           </div>
         </div>
@@ -237,7 +280,7 @@ const loadOrdresSupprimes = async () => {
                         {ordre.numeroOrdre}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {ordre.clientInfo?.nom || 'N/A'}
+                        {getClientName(ordre)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {ordre.vehiculedetails?.nom || 'N/A'}
@@ -299,13 +342,14 @@ const loadOrdresSupprimes = async () => {
                             </button>
                           )}
 
-                          <button
+                          {ordre.status !== 'supprime' && ordre.status !== 'termine' &&(
+                            <button
                             onClick={() => supprimerOrdre(ordre._id)}
                             className="text-red-600 hover:text-red-900"
                             title="Supprimer"
                           >
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </button>)}
                         </div>
                       </td>
                     </tr>

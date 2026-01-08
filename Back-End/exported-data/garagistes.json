@@ -1,0 +1,246 @@
+[
+  {
+    "_id": "6913a4f97e5136d4d9e06ca7",
+    "username": "Ahmed Ben Salem",
+    "email": "ahmed@elitemotors.tn",
+    "password": "$2b$10$qGiiXD.JpsymQyedGI3siefDcfZZ0vY6YxMZwQWglRBrL9t9cjjqS",
+    "phone": "+216 98 765 432",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": false,
+    "garage": "6913a4f97e5136d4d9e06ca9",
+    "isActive": false,
+    "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
+    "createdAt": "2025-11-11T21:04:57.825Z",
+    "updatedAt": "2025-11-11T21:04:57.841Z",
+    "__v": 0
+  },
+  {
+    "_id": "6913a53f7e5136d4d9e06caf",
+    "username": "Ahmed Ben Salem",
+    "email": "ahlembouguerra@outlook.fr",
+    "password": "$2b$10$jOaY7rXnx/IDYScxbSctNelRq0vHhLEUDFJNIXkF9RigRzMN93Ely",
+    "phone": "+216 98 765 432",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": true,
+    "garage": "6913a53f7e5136d4d9e06cb1",
+    "isActive": false,
+    "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
+    "createdAt": "2025-11-11T21:06:07.589Z",
+    "updatedAt": "2025-11-12T11:02:29.400Z",
+    "__v": 0
+  },
+  {
+    "_id": "691471f2a2104f13503bf7a3",
+    "username": "admin_test",
+    "email": "test@garage.com",
+    "password": "$2b$10$NM44GxYrHCevtJvgtw0WqeyEuhOjaWpuyIiak6yQAYXmdzdFyYMQm",
+    "phone": "55123456",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": false,
+    "garage": "691471f2a2104f13503bf7a5",
+    "isActive": false,
+    "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
+    "createdAt": "2025-11-12T11:39:30.903Z",
+    "updatedAt": "2025-11-12T11:39:30.911Z",
+    "__v": 0
+  },
+  {
+    "_id": "69147724cb1b9aa1eaa81e3d",
+    "username": "Ahmed Ben Salem (Responsable)",
+    "email": "ahlembouguerra20@gmail.com",
+    "password": "$2b$10$NIvxd3/LGLiq7yXtPfJ2OO4AG4Sg/r6xew7d7TnhjwBu8YcZF2aG2",
+    "phone": "+216 98 111 222",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": true,
+    "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": true,
+    "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
+    "createdAt": "2025-11-12T12:01:40.999Z",
+    "updatedAt": "2025-12-23T09:58:53.603Z",
+    "__v": 0,
+    "verificationToken": null,
+    "verificationTokenExpiry": null
+  },
+  {
+    "_id": "69172c691fd203ef3d3f1c38",
+    "username": "rim",
+    "email": "rim@exemple.com",
+    "password": "$2b$10$IIICWirGAfrsceuN9dZea.1puNLoB9kwd/lPzt4YgzuQDDhQC9VGK",
+    "phone": "21939809",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": false,
+    "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": false,
+    "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": [
+        {
+          "serviceId": "692d98a1a8353948763487db",
+          "name": "entretien",
+          "_id": "692d98fba83539487634891b"
+        }
+      ],
+      "dateEmbauche": null,
+      "dateNaissance": null,
+      "experience": "",
+      "permisConduire": "B",
+      "poste": "Mécanicien",
+      "typeContrat": "CDI"
+    },
+    "createdAt": "2025-11-14T13:19:37.954Z",
+    "updatedAt": "2025-12-22T13:53:15.875Z",
+    "__v": 0
+  },
+  {
+    "_id": "691733589b5729f0dbd904a7",
+    "username": "bassem bouguerra",
+    "email": "bassembougurra@exemple.com",
+    "password": "$2b$10$1fwJK7BEb48DirvtAAgH7.Knwp9kW3O.omzQ5e5WxfAB0vCCLKZii",
+    "phone": "26541789",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": false,
+    "garage": "691733369b5729f0dbd904a1",
+    "isActive": false,
+    "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
+    "createdAt": "2025-11-14T13:49:12.805Z",
+    "updatedAt": "2025-11-14T13:49:12.805Z",
+    "__v": 0
+  },
+  {
+    "_id": "691aeaeeb3a8dd8c3875e974",
+    "username": "ahlembouguerra(employe)",
+    "email": "ahlembouguerra12@gmail.com",
+    "password": "$2b$10$/d3V7qlIU187Z22Dpkbs3OyxC6Ym2pNvbkUaSdzmSA6zuXNDypIdy",
+    "phone": "21939809",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": true,
+    "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": true,
+    "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": [
+        {
+          "serviceId": "692d988fa8353948763487cf",
+          "name": "climatisation",
+          "_id": "69392b105b53b8561865ea92"
+        },
+        {
+          "serviceId": "692d98a1a8353948763487db",
+          "name": "entretien",
+          "_id": "69392b1b5b53b8561865eab9"
+        }
+      ],
+      "dateEmbauche": null,
+      "dateNaissance": null,
+      "experience": "",
+      "permisConduire": "B",
+      "poste": "Mécanicien",
+      "typeContrat": "CDI"
+    },
+    "createdAt": "2025-11-17T09:29:18.809Z",
+    "updatedAt": "2025-12-22T13:49:13.578Z",
+    "__v": 0
+  },
+  {
+    "_id": "6920d6467867b5e6be4e3bd2",
+    "username": "tesy",
+    "email": "testt@gmail.com",
+    "password": "$2b$10$.FuHNqSuwkuN7dhWzGrxu.4gjfgHD48mMNhG/2tjKMFG1jrR6g34K",
+    "phone": "+216 21 939 809",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": false,
+    "garage": "6920cb4f69f0734e2ffd2296",
+    "isActive": false,
+    "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
+    "createdAt": "2025-11-21T21:14:46.379Z",
+    "updatedAt": "2025-12-11T13:16:34.866Z",
+    "__v": 0
+  },
+  {
+    "_id": "692d981539a56cf2278c3c3a",
+    "username": "test",
+    "email": "testbg@gmail.com",
+    "password": "temp1764595733058",
+    "phone": "45321789",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": true,
+    "garage": "69147725cb1b9aa1eaa81e3f",
+    "isActive": true,
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "mecanicienData": {
+      "dateNaissance": "2001-01-01T00:00:00.000Z",
+      "poste": "Mécanicien",
+      "dateEmbauche": "2025-12-01T00:00:00.000Z",
+      "typeContrat": "CDI",
+      "statut": "Actif",
+      "services": [
+        {
+          "serviceId": "692d988fa8353948763487cf",
+          "name": "climatisation",
+          "_id": "692d98e8a8353948763488d2"
+        }
+      ],
+      "experience": "ez",
+      "permisConduire": "B",
+      "matricule": "MEC-1764595733058"
+    },
+    "createdAt": "2025-12-01T13:28:53.064Z",
+    "updatedAt": "2025-12-01T13:32:24.043Z",
+    "__v": 0
+  },
+  {
+    "_id": "69369ebeda23168f8ea75bad",
+    "username": "test",
+    "email": "aal54@gmail.com",
+    "password": "$2b$10$qMGYiC1bj8xUU5asFIljo.rFgpbtqjRjVvR0orfNMnXmBsKeqEW9.",
+    "phone": "78456321",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "isVerified": false,
+    "garage": "6920cb4f69f0734e2ffd2296",
+    "isActive": false,
+    "createdBy": null,
+    "mecanicienData": {
+      "statut": "Actif",
+      "services": []
+    },
+    "createdAt": "2025-12-08T09:47:42.284Z",
+    "updatedAt": "2025-12-11T13:16:24.201Z",
+    "__v": 0
+  }
+]

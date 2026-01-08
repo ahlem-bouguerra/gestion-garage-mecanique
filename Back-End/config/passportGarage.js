@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { User } from "../models/User.js";
+import { Garagiste } from "../models/Garagiste.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -26,7 +26,7 @@ passportGarage.serializeUser((user, done) => {
 
 passportGarage.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findById(id);
+    const user = await Garagiste.findById(id);
     done(null, user);
   } catch (err) {
     done(err, null);
@@ -45,11 +45,11 @@ passportGarage.use(
       try {
         console.log("🔍 Google Auth GARAGE - Email:", profile.emails[0].value);
 
-        let user = await User.findOne({ googleId: profile.id });
+        let user = await Garagiste.findOne({ googleId: profile.id });
 
         if (!user) {
           // Vérifier si un utilisateur existe déjà avec cet email
-          user = await User.findOne({ email: profile.emails[0].value });
+          user = await Garagiste.findOne({ email: profile.emails[0].value });
 
           if (user) {
             // Lier le compte Google existant
@@ -59,7 +59,7 @@ passportGarage.use(
             console.log("🔗 Compte Google lié à un utilisateur existant");
           } else {
             // Créer un nouvel utilisateur
-            user = await User.create({
+            user = await Garagiste.create({
               username: profile.displayName.replace(/\s+/g, '').toLowerCase(),
               email: profile.emails[0].value,
               googleId: profile.id,

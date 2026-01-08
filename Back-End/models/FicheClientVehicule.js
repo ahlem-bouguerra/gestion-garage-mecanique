@@ -23,7 +23,7 @@ const ficheClientVehiculeSchema = new mongoose.Schema({
   // ✅ Pour éviter les doublons
   garageId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Garagiste',
     required: true
   }
 }, {

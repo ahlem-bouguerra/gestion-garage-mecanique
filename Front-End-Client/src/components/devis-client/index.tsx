@@ -4,7 +4,7 @@ import { Eye, Calendar, Car, FileText, AlertCircle, CheckCircle, XCircle, Clock 
 import axios from 'axios';
 
 const ClientDevisPage = () => {
-  const [devis, setDevis] = useState([]);
+  const [devis, setDevis] = useState<any[]>([]);
   const [stats, setStats] = useState({
     total: 0,
     brouillon: 0,
@@ -12,10 +12,12 @@ const ClientDevisPage = () => {
     accepte: 0,
     refuse: 0
   });
-  const [selectedDevis, setSelectedDevis] = useState(null);
+  const [selectedDevis, setSelectedDevis] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('tous'); // tous, brouillon, envoye, accepte, refuse
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const statusColors = {
     brouillon: 'bg-gray-100 text-gray-800',
@@ -64,7 +66,13 @@ const ClientDevisPage = () => {
       if (response.data.success) {
         setStats(response.data.stats);
       }
-    } catch (err) {
+    } catch (err :any) {
+          if (err.response?.status === 401) {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    window.location.href = '/auth/sign-in';
+    return;
+  }
       console.error('Erreur chargement stats:', err);
     }
   };
@@ -75,14 +83,31 @@ const ClientDevisPage = () => {
       setLoading(true);
       setError('');
 
-      const response = await axios.get('http://localhost:5000/api/all-mes-devis', {
+      const params = new URLSearchParams({
+      page: currentPage.toString(),
+      limit: '10',
+      ...(filter !== 'tous' && { status: filter })
+      });
+
+      const response = await axios.get(`http://localhost:5000/api/all-mes-devis?${params}`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
 
       if (response.data.success) {
         setDevis(response.data.data);
       }
-    } catch (err) {
+      if (response.data.pagination) {
+        setTotalPages(response.data.pagination.pages);
+        console.log('📄 Pages:', response.data.pagination.pages);
+        console.log('📝 Total:', response.data.pagination.total);
+      }
+    } catch (err:any) {
+          if (err.response?.status === 401) {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    window.location.href = '/auth/sign-in';
+    return;
+  }
       setError(err.response?.data?.message || 'Erreur lors du chargement des devis');
       console.error('Erreur:', err);
     } finally {
@@ -91,7 +116,7 @@ const ClientDevisPage = () => {
   };
 
   // 🔍 Charger un devis spécifique
-  const loadDevisDetails = async (devisId) => {
+  const loadDevisDetails = async (devisId:string) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/mes-devis/${devisId}`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
@@ -100,7 +125,13 @@ const ClientDevisPage = () => {
       if (response.data.success) {
         setSelectedDevis(response.data.data);
       }
-    } catch (err) {
+    } catch (err : any) {
+          if (err.response?.status === 401) {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    window.location.href = '/auth/sign-in';
+    return;
+  }
       setError(err.response?.data?.message || 'Erreur lors du chargement du devis');
     }
   };
@@ -108,16 +139,75 @@ const ClientDevisPage = () => {
   useEffect(() => {
     loadDevis();
     loadStats();
-  }, []);
+  }, [currentPage, filter]);
 
   // Filtrer les devis
   const filteredDevis = filter === 'tous'
     ? devis
-    : devis.filter(d => d.status === filter);
+    : devis.filter((d:any) => d.status === filter);
+
+
+
+
+    const Pagination = ({ currentPage, totalPages, onPageChange }: any) => {
+  if (!totalPages || totalPages === 0) return null;
+  
+  const pages = [];
+  
+  for (let i = 1; i <= totalPages; i++) {
+    if (
+      i === 1 || 
+      i === totalPages || 
+      (i >= currentPage - 1 && i <= currentPage + 1)
+    ) {
+      pages.push(i);
+    } else if (pages[pages.length - 1] !== '...') {
+      pages.push('...');
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="flex items-center justify-center gap-2 mt-6">
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+      >
+        Précédent
+      </button>
+      
+      {pages.map((page, index) => (
+        page === '...' ? (
+          <span key={index} className="px-2">...</span>
+        ) : (
+          <button
+            key={index}
+            onClick={() => onPageChange(page)}
+            className={`px-4 py-2 rounded-lg ${
+              currentPage === page
+                ? 'bg-blue-600 text-white'
+                : 'border hover:bg-gray-50'
+            }`}
+          >
+            {page}
+          </button>
+        )
+      ))}
+      
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+      >
+        Suivant
+      </button>
+    </div>
+  );
+};
+
+  return (
+        <div className="min-h-screen p-6">
+            <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Mes Devis</h1>
@@ -198,7 +288,7 @@ const ClientDevisPage = () => {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
               >
-                {status === 'tous' ? 'Tous' : statusLabels[status]}
+                {status === 'tous' ? 'Tous' : statusLabels[status as keyof typeof statusLabels]}
               </button>
             ))}
           </div>
@@ -239,14 +329,14 @@ const ClientDevisPage = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredDevis.map(d => {
-                    const StatusIcon = statusIcons[d.status];
+                    const StatusIcon = statusIcons[d.status as keyof typeof statusIcons];
                     return (
                       <tr key={d._id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {d.id}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {d.garagisteId?.garagenom || d.garagisteId?.username || 'N/A'}
+                          {d.garageId?.nom || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -267,9 +357,9 @@ const ClientDevisPage = () => {
                           {d.finalTotalTTC?.toFixed(3) || '0.000'} DT
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[d.status]}`}>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[d.status as keyof typeof statusColors]}`}>
                             <StatusIcon className="h-3 w-3 mr-1" />
-                            {statusLabels[d.status]}
+                            {statusLabels[d.status as keyof typeof statusLabels]}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -289,6 +379,16 @@ const ClientDevisPage = () => {
             </div>
           )}
         </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page: number) => setCurrentPage(page)}
+            />
+          </div>
+        )}
 
         {/* Modal Détails */}
         {selectedDevis && (
@@ -311,9 +411,9 @@ const ClientDevisPage = () => {
                 <div>
                   <h3 className="font-medium text-gray-900 mb-3">Informations Garage</h3>
                   <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                    <p><strong>Nom:</strong> {selectedDevis.garagisteId?.garagenom || 'N/A'}</p>
-                    <p><strong>Email:</strong> {selectedDevis.garagisteId?.email || 'N/A'}</p>
-                    <p><strong>Téléphone:</strong> {selectedDevis.garagisteId?.phone || 'N/A'}</p>
+                    <p><strong>Nom:</strong> {selectedDevis.garageId?.nom || 'N/A'}</p>
+                    <p><strong>Email:</strong> {selectedDevis.garageId?.emailProfessionnel || 'N/A'}</p>
+                    <p><strong>Téléphone:</strong> {selectedDevis.garageId?.telephoneProfessionnel || 'N/A'}</p>
                   </div>
                 </div>
 
@@ -339,7 +439,7 @@ const ClientDevisPage = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {selectedDevis.services.map((s, i) => (
+                      {selectedDevis.services.map((s : any, i : number) => (
                         <tr key={i}>
                           <td className="px-4 py-2 text-sm">{s.piece}</td>
                           <td className="px-4 py-2 text-sm">{s.quantity}</td>
@@ -407,6 +507,7 @@ const ClientDevisPage = () => {
         )}
       </div>
     </div>
+    
   );
 };
 

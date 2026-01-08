@@ -1,0 +1,913 @@
+[
+  {
+    "_id": "691b03aff15086b702a4695e",
+    "numeroOrdre": "ORD-0002",
+    "devisId": "DEV014",
+    "clientInfo": {
+      "nom": "test",
+      "ClientId": "691af6f2143c7678f8f10755"
+    },
+    "vehiculedetails": {
+      "nom": "azer 123 - 123TUN12",
+      "vehiculeId": "691af8fca7dcfc06162ccd16"
+    },
+    "dateCommence": "2025-11-17T11:15:00.000Z",
+    "dateFinPrevue": "2025-11-17T12:15:00.000Z",
+    "dateFinReelle": "2025-11-23T10:02:51.454Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV014",
+    "taches": [
+      {
+        "description": "ggg",
+        "quantite": 1,
+        "serviceId": "691b0347f15086b702a468d0",
+        "serviceNom": "Pneumatiques et suspension",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "691b03aff15086b702a4695f",
+        "createdAt": "2025-11-17T11:14:55.312Z",
+        "updatedAt": "2025-11-17T11:14:55.312Z"
+      }
+    ],
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-17T11:14:55.313Z",
+    "updatedAt": "2025-11-23T12:06:33.932Z",
+    "__v": 0
+  },
+  {
+    "_id": "691d89c54e4c9efa40807097",
+    "numeroOrdre": "ORD-0003",
+    "devisId": "DEV015",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "citroen 201 - TUN789",
+      "vehiculeId": "691b3a6269fbb0ac63fcc494"
+    },
+    "dateCommence": "2025-11-19T09:11:00.000Z",
+    "dateFinPrevue": "2025-11-19T10:11:00.000Z",
+    "dateFinReelle": "2025-11-23T12:14:26.183Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV015",
+    "taches": [
+      {
+        "description": "q<sdfg",
+        "quantite": 1,
+        "serviceId": "691b0347f15086b702a468d0",
+        "serviceNom": "Pneumatiques et suspension",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "691d89c54e4c9efa40807098",
+        "createdAt": "2025-11-19T09:11:33.873Z",
+        "updatedAt": "2025-11-19T09:11:33.873Z"
+      }
+    ],
+    "updatedBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-19T09:11:33.873Z",
+    "updatedAt": "2025-11-23T12:14:51.577Z",
+    "__v": 0
+  },
+  {
+    "_id": "691dbdbe807a8aa37603e700",
+    "numeroOrdre": "ORD-0004",
+    "devisId": "DEV016",
+    "clientInfo": {
+      "nom": "test",
+      "ClientId": "691af6f2143c7678f8f10755"
+    },
+    "vehiculedetails": {
+      "nom": "azer 123 - 123TUN12",
+      "vehiculeId": "691af8fca7dcfc06162ccd16"
+    },
+    "dateCommence": "2025-11-23T12:53:00.000Z",
+    "dateFinPrevue": "2025-11-23T13:53:00.000Z",
+    "dateFinReelle": "2025-11-23T12:14:23.337Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "termine",
+    "description": "Ordre de travail généré depuis le devis DEV016",
+    "taches": [
+      {
+        "description": "eee",
+        "quantite": 1,
+        "serviceId": "691b0347f15086b702a468d0",
+        "serviceNom": "Pneumatiques et suspension",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "691dbdbe807a8aa37603e701",
+        "createdAt": "2025-11-19T12:53:18.267Z",
+        "updatedAt": "2025-11-19T12:53:18.267Z"
+      }
+    ],
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-19T12:53:18.268Z",
+    "updatedAt": "2025-11-23T12:14:23.339Z",
+    "__v": 0
+  },
+  {
+    "_id": "6922db237b31481af93643a8",
+    "numeroOrdre": "ORD-0005",
+    "devisId": "DEV020",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "cc 10 (11TUN12)",
+      "vehiculeId": "691d9545807a8aa37603d048"
+    },
+    "dateCommence": "2025-11-23T07:59:00.000Z",
+    "dateFinPrevue": "2025-11-23T09:59:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV020",
+    "taches": [
+      {
+        "description": "aaa",
+        "quantite": 1,
+        "serviceId": "6911db6a227f68139eab73bf",
+        "serviceNom": "Entretien et révision",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6922db237b31481af93643a9",
+        "createdAt": "2025-11-23T12:14:31.989Z",
+        "updatedAt": "2025-11-23T12:14:31.989Z"
+      },
+      {
+        "description": "bb",
+        "quantite": 1,
+        "serviceId": "691cd9fab41d0eb4e4469726",
+        "serviceNom": "Électricité et électronique",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6922db237b31481af93643aa",
+        "createdAt": "2025-11-23T12:14:31.990Z",
+        "updatedAt": "2025-11-23T12:14:31.990Z"
+      }
+    ],
+    "updatedBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 2,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 2,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T10:00:03.373Z",
+    "updatedAt": "2025-12-22T13:00:37.554Z",
+    "__v": 0,
+    "canBeRated": false,
+    "dateFinReelle": "2025-12-22T13:00:23.167Z"
+  },
+  {
+    "_id": "6922faf1dd9115eea286b1bf",
+    "numeroOrdre": "ORD-0007",
+    "devisId": "DEV021",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "cc 10 (11TUN12)",
+      "vehiculeId": "691d9545807a8aa37603d048"
+    },
+    "dateCommence": "2025-11-23T11:15:00.000Z",
+    "dateFinPrevue": "2025-11-23T12:15:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "urgente",
+    "status": "termine",
+    "description": "Ordre de travail généré depuis le devis DEV021",
+    "taches": [
+      {
+        "description": "aaaaa",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "dateDebut": null,
+        "dateFin": null,
+        "_id": "6922faf1dd9115eea286b1c0",
+        "createdAt": "2025-12-12T08:35:11.242Z",
+        "updatedAt": "2025-12-12T08:35:11.242Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T12:15:45.011Z",
+    "updatedAt": "2025-12-22T12:27:56.316Z",
+    "__v": 1,
+    "updatedBy": "691398cf7412d3ea832a4af6",
+    "canBeRated": false,
+    "dateFinReelle": "2025-12-22T12:27:56.314Z"
+  },
+  {
+    "_id": "6923127809a5989674a26dc1",
+    "numeroOrdre": "ORD-0008",
+    "devisId": "DEV018",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "cc 10 - 11TUN12",
+      "vehiculeId": "691d9545807a8aa37603d048"
+    },
+    "dateCommence": "2025-11-23T13:56:00.000Z",
+    "dateFinPrevue": "2025-11-23T14:56:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "termine",
+    "description": "Ordre de travail généré depuis le devis DEV018",
+    "taches": [
+      {
+        "description": "rt",
+        "quantite": 1,
+        "serviceId": "6911db6a227f68139eab73bf",
+        "serviceNom": "Entretien et révision",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6923127809a5989674a26dc2",
+        "createdAt": "2025-11-23T13:56:08.580Z",
+        "updatedAt": "2025-11-23T13:56:08.580Z"
+      }
+    ],
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T13:56:08.581Z",
+    "updatedAt": "2025-12-23T09:25:26.989Z",
+    "__v": 0,
+    "canBeRated": false,
+    "dateFinReelle": "2025-12-23T09:25:26.979Z"
+  },
+  {
+    "_id": "692312aa09a5989674a26e73",
+    "numeroOrdre": "ORD-0009",
+    "devisId": "DEV017",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "cc 10 - 11TUN12",
+      "vehiculeId": "691d9545807a8aa37603d048"
+    },
+    "dateCommence": "2025-11-23T13:56:00.000Z",
+    "dateFinPrevue": "2025-11-23T14:56:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV017",
+    "taches": [
+      {
+        "description": "qss",
+        "quantite": 1,
+        "serviceId": "691b0347f15086b702a468d0",
+        "serviceNom": "Pneumatiques et suspension",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "692312aa09a5989674a26e74",
+        "createdAt": "2025-11-23T13:56:58.333Z",
+        "updatedAt": "2025-11-23T13:56:58.333Z"
+      }
+    ],
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T13:56:58.334Z",
+    "updatedAt": "2025-12-12T08:38:15.851Z",
+    "__v": 0,
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "6923278e0a8695033342b845",
+    "numeroOrdre": "ORD-0010",
+    "devisId": "DEV022",
+    "clientInfo": {
+      "nom": "helmi",
+      "ClientId": "691f78f8163a17aa79fb6995"
+    },
+    "vehiculedetails": {
+      "nom": "ppp p1 - 52TUN77",
+      "vehiculeId": "691f7928163a17aa79fb6a0c"
+    },
+    "dateCommence": "2025-11-23T15:22:00.000Z",
+    "dateFinPrevue": "2025-11-23T16:22:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail pour devis undefined",
+    "taches": [
+      {
+        "description": "RWTXH",
+        "quantite": 1,
+        "serviceId": "691b0347f15086b702a468d0",
+        "serviceNom": "Pneumatiques et suspension",
+        "mecanicienId": "691b039cf15086b702a46920",
+        "mecanicienNom": "mecanicien",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6923278e0a8695033342b846",
+        "createdAt": "2025-11-23T15:26:06.852Z",
+        "updatedAt": "2025-11-23T15:26:06.852Z"
+      }
+    ],
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-11-23T15:26:06.853Z",
+    "updatedAt": "2025-12-22T12:47:14.048Z",
+    "__v": 0,
+    "canBeRated": false,
+    "dateFinReelle": "2025-12-22T12:24:48.586Z",
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "693c0ca673d1e38fa2f86f80",
+    "devisId": "DEV026",
+    "clientInfo": {
+      "nom": "magher",
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "bys 20 - 15TUN45",
+      "vehiculeId": "692da677083a7057c997e20d"
+    },
+    "dateCommence": "2025-12-12T12:37:00.000Z",
+    "dateFinPrevue": "2025-12-12T13:37:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV026",
+    "taches": [
+      {
+        "description": "wc",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "693c0ca673d1e38fa2f86f81",
+        "createdAt": "2025-12-12T12:37:58.948Z",
+        "updatedAt": "2025-12-12T12:37:58.948Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "notes": [],
+    "createdAt": "2025-12-12T12:37:58.948Z",
+    "updatedAt": "2025-12-22T12:49:21.345Z",
+    "numeroOrdre": "ORD-0011",
+    "__v": 0,
+    "dateFinReelle": "2025-12-12T12:38:06.501Z",
+    "ratedAt": "2025-12-18T10:21:12.157Z",
+    "ratingId": "6943d598f68fee5a2429afd0",
+    "canBeRated": false,
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "6941a791eb4e2ff1220c944a",
+    "devisId": "DEV030",
+    "clientInfo": {
+      "nom": "magher",
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "woles 20 - 8TUN78",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-19T08:00:00.000Z",
+    "dateFinPrevue": "2025-12-19T09:00:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV030",
+    "taches": [
+      {
+        "description": "phare",
+        "quantite": 2,
+        "serviceId": "692d98a1a8353948763487db",
+        "serviceNom": "entretien",
+        "mecanicienId": "69392f0608a82f11cc52393e",
+        "mecanicienNom": "testeur",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6941a791eb4e2ff1220c944b",
+        "createdAt": "2025-12-16T18:40:17.980Z",
+        "updatedAt": "2025-12-16T18:40:17.980Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": true,
+    "notes": [],
+    "createdAt": "2025-12-16T18:40:17.980Z",
+    "updatedAt": "2025-12-22T13:43:37.753Z",
+    "numeroOrdre": "ORD-0015",
+    "__v": 0,
+    "dateFinReelle": "2025-12-16T18:40:24.489Z",
+    "ratedAt": "2025-12-18T10:21:00.654Z",
+    "ratingId": "6943d58cf68fee5a2429afb4",
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "6941cc5bdb9498032b27cd8f",
+    "devisId": "DEV032",
+    "clientInfo": {
+      "nom": "magher",
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "woles 20 - 8TUN78",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-17T09:09:00.000Z",
+    "dateFinPrevue": "2025-12-17T10:09:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "supprime",
+    "description": "Ordre de travail généré depuis le devis DEV032",
+    "taches": [
+      {
+        "description": "aaa",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6941cc5bdb9498032b27cd90",
+        "createdAt": "2025-12-16T21:17:15.051Z",
+        "updatedAt": "2025-12-16T21:17:15.051Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": true,
+    "notes": [],
+    "createdAt": "2025-12-16T21:17:15.052Z",
+    "updatedAt": "2025-12-22T13:43:43.850Z",
+    "numeroOrdre": "ORD-0017",
+    "__v": 0,
+    "dateFinReelle": "2025-12-16T21:17:20.786Z",
+    "ratedAt": "2025-12-18T10:20:51.286Z",
+    "ratingId": "6943d583f68fee5a2429af9b",
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "69493ea9ce3188cdd4483a69",
+    "devisId": "DEV033",
+    "clientInfo": {
+      "nom": "ahlem bouguerra",
+      "ClientId": "691af6c0143c7678f8f10730"
+    },
+    "vehiculedetails": {
+      "nom": "citroen 201 - TUN789",
+      "vehiculeId": "691b3a6269fbb0ac63fcc494"
+    },
+    "dateCommence": "2025-12-22T16:40:00.000Z",
+    "dateFinPrevue": "2025-12-22T17:40:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_cours",
+    "description": "Ordre de travail généré depuis le devis DEV033",
+    "taches": [
+      {
+        "description": "xxxxxx",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "69493ea9ce3188cdd4483a6a",
+        "createdAt": "2025-12-22T13:40:25.392Z",
+        "updatedAt": "2025-12-22T13:40:25.392Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
+    "notes": [],
+    "createdAt": "2025-12-22T12:50:49.195Z",
+    "updatedAt": "2025-12-22T13:40:25.392Z",
+    "numeroOrdre": "ORD-0018",
+    "__v": 8,
+    "updatedBy": "69147724cb1b9aa1eaa81e3d"
+  },
+  {
+    "_id": "69493f8ece3188cdd4483f26",
+    "devisId": "DEV031",
+    "clientInfo": {
+      "nom": "magher",
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "bys 20 - 15TUN45",
+      "vehiculeId": "692da677083a7057c997e20d"
+    },
+    "dateCommence": "2025-12-22T14:54:00.000Z",
+    "dateFinPrevue": "2025-12-22T15:54:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "termine",
+    "description": "Ordre de travail généré depuis le devis DEV031",
+    "taches": [
+      {
+        "description": "pneu",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "69493f8ece3188cdd4483f27",
+        "createdAt": "2025-12-22T12:54:38.936Z",
+        "updatedAt": "2025-12-22T12:54:38.936Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": "2025-12-24T20:47:12.404Z",
+    "ratingId": "694c515050b13e2a22e6b1d1",
+    "notes": [],
+    "createdAt": "2025-12-22T12:54:38.936Z",
+    "updatedAt": "2025-12-24T20:47:12.404Z",
+    "numeroOrdre": "ORD-0019",
+    "__v": 0,
+    "dateFinReelle": "2025-12-22T13:00:13.588Z"
+  },
+  {
+    "_id": "694e5eafa7ef27c5bda4a6ce",
+    "devisId": "DEV036",
+    "clientInfo": {
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "bys 20 - 15TUN45",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-26T10:10:00.000Z",
+    "dateFinPrevue": "2025-12-26T11:10:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_attente",
+    "description": "Ordre de travail généré depuis le devis DEV036",
+    "taches": [
+      {
+        "description": "join",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "694e5eafa7ef27c5bda4a6cf",
+        "createdAt": "2025-12-26T10:08:47.636Z",
+        "updatedAt": "2025-12-26T10:08:47.636Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
+    "notes": [],
+    "createdAt": "2025-12-26T10:08:47.637Z",
+    "updatedAt": "2025-12-26T10:08:47.637Z",
+    "numeroOrdre": "ORD-0020",
+    "__v": 0
+  },
+  {
+    "_id": "694e715c3a7c2133481df4b4",
+    "devisId": "DEV037",
+    "clientInfo": {
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "bys 20 - 15TUN45",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-26T10:30:00.000Z",
+    "dateFinPrevue": "2025-12-26T11:30:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "termine",
+    "description": "Ordre de travail généré depuis le devis DEV037",
+    "taches": [
+      {
+        "description": "wwww",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "694e715c3a7c2133481df4b5",
+        "createdAt": "2025-12-26T11:28:38.006Z",
+        "updatedAt": "2025-12-26T11:28:38.006Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
+    "notes": [],
+    "createdAt": "2025-12-26T11:28:28.272Z",
+    "updatedAt": "2025-12-26T11:28:46.417Z",
+    "numeroOrdre": "ORD-0021",
+    "__v": 1,
+    "updatedBy": "69147724cb1b9aa1eaa81e3d",
+    "dateFinReelle": "2025-12-26T11:28:46.416Z"
+  },
+  {
+    "_id": "6951275302aeaa79e0cffe12",
+    "devisId": "DEV041",
+    "clientInfo": {
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "woles 20 (8TUN78)",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-28T11:49:00.000Z",
+    "dateFinPrevue": "2025-12-28T12:49:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_attente",
+    "description": "Ordre de travail pour devis DEV041",
+    "taches": [
+      {
+        "description": "sd",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "dateDebut": null,
+        "dateFin": null,
+        "_id": "6951275302aeaa79e0cffe13",
+        "createdAt": "2025-12-28T12:56:27.961Z",
+        "updatedAt": "2025-12-28T12:56:27.961Z"
+      }
+    ],
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
+    "notes": [],
+    "createdAt": "2025-12-28T12:49:23.649Z",
+    "updatedAt": "2025-12-28T12:56:27.961Z",
+    "numeroOrdre": "ORD-0022",
+    "__v": 1,
+    "updatedBy": "691398cf7412d3ea832a4af6"
+  },
+  {
+    "_id": "6951292e02aeaa79e0d00013",
+    "devisId": "DEV040",
+    "clientInfo": {
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "woles 20 - 8TUN78",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-28T12:57:00.000Z",
+    "dateFinPrevue": "2025-12-28T13:57:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_attente",
+    "description": "Ordre de travail pour devis DEV040",
+    "taches": [
+      {
+        "description": "xxx",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "6951292e02aeaa79e0d00014",
+        "createdAt": "2025-12-28T12:57:18.186Z",
+        "updatedAt": "2025-12-28T12:57:18.186Z"
+      }
+    ],
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
+    "notes": [],
+    "createdAt": "2025-12-28T12:57:18.186Z",
+    "updatedAt": "2025-12-28T12:57:18.186Z",
+    "numeroOrdre": "ORD-0023",
+    "__v": 0
+  },
+  {
+    "_id": "695129e402aeaa79e0d00761",
+    "devisId": "DEV043",
+    "clientInfo": {
+      "ClientId": "692eb4ed3158d0bba107e02c"
+    },
+    "vehiculedetails": {
+      "nom": "woles 20 - 8TUN78",
+      "vehiculeId": "692eb55a3158d0bba107e1e7"
+    },
+    "dateCommence": "2025-12-28T13:00:00.000Z",
+    "dateFinPrevue": "2025-12-28T14:00:00.000Z",
+    "atelierId": "691b0336f15086b702a468c5",
+    "atelierNom": "atelier A",
+    "priorite": "normale",
+    "status": "en_attente",
+    "description": "Ordre de travail généré depuis le devis DEV043",
+    "taches": [
+      {
+        "description": "vbhjk",
+        "quantite": 1,
+        "serviceId": "692d988fa8353948763487cf",
+        "serviceNom": "climatisation",
+        "mecanicienId": "692d981539a56cf2278c3c3a",
+        "mecanicienNom": "test",
+        "estimationHeures": 1,
+        "heuresReelles": 0,
+        "notes": "",
+        "status": "assignee",
+        "_id": "695129e402aeaa79e0d00762",
+        "createdAt": "2025-12-28T13:00:20.853Z",
+        "updatedAt": "2025-12-28T13:00:20.853Z"
+      }
+    ],
+    "createdBy": "69147724cb1b9aa1eaa81e3d",
+    "totalHeuresEstimees": 1,
+    "totalHeuresReelles": 0,
+    "nombreTaches": 1,
+    "nombreTachesTerminees": 0,
+    "garageId": "69147725cb1b9aa1eaa81e3f",
+    "canBeRated": false,
+    "ratedAt": null,
+    "ratingId": null,
+    "notes": [],
+    "createdAt": "2025-12-28T13:00:20.853Z",
+    "updatedAt": "2025-12-28T13:00:20.853Z",
+    "numeroOrdre": "ORD-0024",
+    "__v": 0
+  }
+]

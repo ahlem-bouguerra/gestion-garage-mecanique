@@ -1,18 +1,17 @@
 import FicheClient from "../../models/FicheClient.js";
 import OrdreTravail from "../../models/Ordre.js";
-import { validateTunisianPhone, validatePhoneMiddleware } from '../../utils/phoneValidator.js';
+import { validateTunisianPhone } from '../../utils/phoneValidator.js';
 import mongoose from "mongoose";
+
+
 
 export const createFicheClient = async (req, res) => {
   try {
-    // Vérifier que le garagiste est authentifié
-    if (!req.user) {
-      return res.status(401).json({ error: "Garagiste non authentifié" });
+    if (!req.user || !req.user.garageId) {
+      return res.status(401).json({ error: "Utilisateur non authentifié ou garage manquant" });
     }
-    const garagisteId = req.user._id || req.user.userId; // <-- la clé qui existe
-    if (!garagisteId) {
-      return res.status(401).json({ error: "Garagiste non authentifié" });
-    }
+
+    const garageId = req.user.garageId;
 
     // Valider le téléphone
     const phoneValidation = validateTunisianPhone(req.body.telephone);
@@ -20,11 +19,10 @@ export const createFicheClient = async (req, res) => {
       return res.status(400).json({ error: phoneValidation.message });
     }
 
-    // Normaliser le numéro
     req.body.telephone = phoneValidation.cleanNumber;
 
-    // Associer le garagiste connecté
-    req.body.garagisteId = garagisteId;
+    // Associer le CLIENT AU GARAGE
+    req.body.garageId = garageId;
 
     const fiche = new FicheClient(req.body);
     await fiche.save();
@@ -34,142 +32,230 @@ export const createFicheClient = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({ error: "Téléphone ou email ou nom déjà utilisé" });
     }
-    res.status(500).json({ error: error.message }); // 500 car erreur serveur
+    res.status(500).json({ error: error.message });
   }
 };
 
 export const getFicheClients = async (req, res) => {
   try {
-    // ✅ Filtrer par garagisteId
-    const fiches = await FicheClient.find({ 
-      garagisteId: req.user._id 
-    });
-    res.json(fiches);
+    let clients;
+    
+    // ⭐ Cas 1 : SuperAdmin avec garageId dans query params
+    if (req.user.isSuperAdmin) {
+      const { garageId } = req.query;
+      
+      if (!garageId) {
+        return res.status(400).json({ 
+          error: 'SuperAdmin doit spécifier un garageId en query parameter' 
+        });
+      }
+      
+      console.log('👑 SuperAdmin récupère les clients du garage:', garageId);
+      clients = await FicheClient.find({ garageId })
+      .populate('clientId', 'username email'); 
+    } 
+    // ⭐ Cas 2 : Garagiste - utilise son propre garage
+    else {
+      if (!req.user.garage) {
+        return res.status(400).json({ 
+          error: 'Garagiste non associé à un garage' 
+        });
+      }
+      
+      console.log('🔧 Garagiste récupère ses clients');
+      clients = await FicheClient.find({ garageId: req.user.garage })
+      .populate('clientId', 'username email'); 
+    }
+
+    res.json(clients);
+    
   } catch (error) {
+    console.error('❌ Erreur getFicheClients:', error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 export const getFicheClientById = async (req, res) => {
   try {
-    console.log("🔍 Recherche client avec ID:", req.params._id);
-    
-    // ✅ Filtrer par garagisteId ET par _id
     const fiche = await FicheClient.findOne({
       _id: req.params._id,
-      garagisteId: req.user._id
-    });
-    
+      garageId: req.user.garageId
+    }).populate('clientId', 'username email phone'); 
+
     if (!fiche) {
       return res.status(404).json({ error: "Client non trouvé ou non autorisé" });
     }
-    
-    console.log("📋 Client trouvé:", fiche.nom);
+
     res.json(fiche);
   } catch (error) {
-    console.error("❌ Erreur:", error.message);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 export const getFicheClientNoms = async (req, res) => {
   try {
-    // ✅ Filtrer par garagisteId
+    // ✅ Récupérer les fiches clients avec populate
     const clients = await FicheClient.find(
-      { garagisteId: req.user._id }, 
-      { nom: 1, type: 1, _id: 1 }
-    ); 
-    
-    res.json(clients);
+      { garageId: req.user.garageId }
+    )
+    .populate('clientId', 'username email') // ⭐ AJOUTER POPULATE
+    .select('nom type _id clientId') // ⭐ INCLURE clientId dans select
+    .lean(); // Pour pouvoir modifier les objets
+
+    // ✅ Ajouter nomEffectif à chaque client
+    const clientsAvecNomEffectif = clients.map(client => {
+      let nomEffectif;
+      
+      // Si clientId existe et est populé avec username
+      if (client.clientId && client.clientId.username) {
+        nomEffectif = client.clientId.username;
+      } else {
+        nomEffectif = client.nom;
+      }
+      
+      return {
+        _id: client._id,
+        nom: client.nom,
+        nomEffectif: nomEffectif,
+        type: client.type
+      };
+    });
+
+    res.json(clientsAvecNomEffectif);
   } catch (error) {
-    console.error("❌ Erreur:", error.message);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 export const updateFicheClient = async (req, res) => {
   try {
-    console.log("✏️ Mise à jour client avec ID:", req.params._id);
-    console.log("📝 Données:", req.body);
-    
-    // ✅ Filtrer par garagisteId ET par _id
-    const fiche = await FicheClient.findOneAndUpdate(
-      { 
-        _id: req.params._id,
-        garagisteId: req.user._id
-      },
-      req.body,
-      { new: true }
-    );
-    
-    if (!fiche) {
-      return res.status(404).json({ error: "Client non trouvé ou non autorisé" });
+    const clientId = req.params._id; // ou req.params.id selon ta route
+    const garageId = req.user.garageId;
+
+    const { email, telephone } = req.body;
+
+    // 1) Vérifier email déjà utilisé (par un autre client du même garage)
+    if (email) {
+      const existsEmail = await FicheClient.findOne({
+        garageId,
+        email,
+        _id: { $ne: clientId },
+      });
+
+      if (existsEmail) {
+        return res.status(409).json({
+          success: false,
+          field: "email",
+          message: "Cet email est déjà utilisé par un autre client.",
+        });
+      }
     }
-    
-    console.log("✅ Client mis à jour:", fiche.nom);
-    res.json(fiche);
+
+    // 2) Vérifier téléphone déjà utilisé (par un autre client du même garage)
+    if (telephone) {
+      const existsTel = await FicheClient.findOne({
+        garageId,
+        telephone,
+        _id: { $ne: clientId },
+      });
+
+      if (existsTel) {
+        return res.status(409).json({
+          success: false,
+          field: "telephone",
+          message: "Ce numéro de téléphone est déjà utilisé par un autre client.",
+        });
+      }
+    }
+
+    // 3) Update
+    const fiche = await FicheClient.findOneAndUpdate(
+      { _id: clientId, garageId },
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!fiche) {
+      return res.status(404).json({
+        success: false,
+        message: "Client non trouvé ou non autorisé",
+      });
+    }
+
+    return res.json({ success: true, data: fiche });
   } catch (error) {
-    console.error("❌ Erreur:", error.message);
-    res.status(400).json({ error: error.message });
+    // 4) Mongo duplicate key error (si index unique sur email/tel)
+    if (error?.code === 11000) {
+      const field = Object.keys(error.keyValue || {})[0] || "unknown";
+      return res.status(409).json({
+        success: false,
+        field,
+        message:
+          field === "email"
+            ? "Cet email est déjà utilisé par un autre client."
+            : field === "telephone"
+            ? "Ce numéro de téléphone est déjà utilisé par un autre client."
+            : "Valeur déjà utilisée.",
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Erreur lors de la mise à jour",
+      error: error.message,
+    });
   }
 };
 
+
 export const deleteFicheClient = async (req, res) => {
   try {
-    console.log("🗑️ Suppression client avec ID:", req.params._id);
-    
-    // ✅ Filtrer par garagisteId ET par _id
+
+  
     const fiche = await FicheClient.findOneAndDelete({
       _id: req.params._id,
-      garagisteId: req.user._id
+      garageId: req.user.garageId
     });
-    
+
     if (!fiche) {
       return res.status(404).json({ error: "Client non trouvé ou non autorisé" });
     }
-    
-    console.log("✅ Client supprimé:", fiche.nom);
+
     res.json({ message: "Client supprimé avec succès" });
   } catch (error) {
-    console.error("❌ Erreur:", error.message);
     res.status(500).json({ error: error.message });
   }
 };
 
+
 export const getHistoriqueVisiteByIdClient = async (req, res) => {
   try {
-    const { clientId } = req.params;
-    
-    console.log('🔍 Recherche historique pour client:', clientId);
 
-    // ✅ Vérifier que le client existe ET appartient au garagiste
+    const { clientId } = req.params;
+
     const client = await FicheClient.findOne({
       _id: clientId,
-      garagisteId: req.user._id
+      garageId: req.user.garageId
     });
-    
+
     if (!client) {
-      return res.status(404).json({
-        success: false,
-        error: 'Client non trouvé ou non autorisé'
-      });
+      return res.status(404).json({ success: false, error: "Client non trouvé ou non autorisé" });
     }
 
-    // ✅ Rechercher les ordres terminés pour ce client ET ce garagiste
     const ordresTermines = await OrdreTravail.find({
-      'clientInfo.ClientId': new mongoose.Types.ObjectId(clientId),
-      garagisteId: req.user._id, // ✅ Ajouter cette ligne
-      status: 'termine'
+      "clientInfo.ClientId": new mongoose.Types.ObjectId(clientId),
+      garageId: req.user.garageId,
+      status: "termine"
     })
-    .populate('atelierId', 'name localisation')
-    .populate('taches.serviceId', 'name')
-    .populate('taches.mecanicienId', 'nom')
-    .sort({ dateFinPrevue: -1 })
-    .select('numeroOrdre dateCommence dateFinPrevue atelierNom taches vehiculedetails totalHeuresEstimees');
+      .populate('atelierId', 'name localisation')
+      .populate('taches.serviceId', 'name')
+      .populate('taches.mecanicienId', 'nom')
+      .sort({ dateFinPrevue: -1 })
+      .select('numeroOrdre dateCommence dateFinPrevue atelierNom taches vehiculedetails totalHeuresEstimees');
 
-    console.log(`✅ Trouvé ${ordresTermines.length} ordres terminés`);
-
-    // Formater les données pour l'affichage
     const historiqueVisites = ordresTermines.map(ordre => ({
       id: ordre._id,
       numeroOrdre: ordre.numeroOrdre,
@@ -187,80 +273,63 @@ export const getHistoriqueVisiteByIdClient = async (req, res) => {
       servicesEffectues: [...new Set(ordre.taches.map(t => t.serviceNom))].join(', ')
     }));
 
-    // Calculer quelques statistiques
     const statistiques = {
       nombreVisites: historiqueVisites.length,
-      derniereVisite: historiqueVisites.length > 0 ? historiqueVisites[0].dateVisite : null,
-      totalHeuresTravail: historiqueVisites.reduce((total, visite) => total + visite.dureeHeures, 0),
+      derniereVisite: historiqueVisites[0]?.dateVisite || null,
+      totalHeuresTravail: historiqueVisites.reduce((t, v) => t + v.dureeHeures, 0),
       servicesUniques: [...new Set(historiqueVisites.flatMap(v => v.taches.map(t => t.service)))].length
     };
 
     res.json({
       success: true,
-      client: {
-        id: client._id,
-        nom: client.nom,
-        type: client.type
-      },
+      client: { id: client._id, nom: client.nom, type: client.type },
       historiqueVisites,
       statistiques
     });
 
   } catch (error) {
-    console.error('❌ Erreur récupération historique client:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Erreur lors de la récupération de l\'historique client'
-    });
+    res.status(500).json({ success: false, error: "Erreur lors de la récupération de l'historique" });
   }
 };
+
 
 export const getHistoryVisite = async (req, res) => {
   try {
     const { clientId } = req.params;
-    
-    // ✅ Vérifier que le client appartient au garagiste
+
     const client = await FicheClient.findOne({
       _id: clientId,
-      garagisteId: req.user._id
+      garageId: req.user.garageId
     });
-    
+
     if (!client) {
       return res.status(404).json({
         success: false,
         error: 'Client non trouvé ou non autorisé'
       });
     }
-    
-    // ✅ Compter les ordres terminés pour ce garagiste
+
     const nombreVisites = await OrdreTravail.countDocuments({
-      'clientInfo.ClientId': new mongoose.Types.ObjectId(clientId),
-      garagisteId: req.user._id, // ✅ Ajouter cette ligne
-      status: 'termine'
+      "clientInfo.ClientId": new mongoose.Types.ObjectId(clientId),
+      garageId: req.user.garageId,
+      status: "termine"
     });
 
-    // ✅ Trouver la dernière visite pour ce garagiste
     const derniereVisite = await OrdreTravail.findOne({
-      'clientInfo.ClientId': new mongoose.Types.ObjectId(clientId),
-      garagisteId: req.user._id, // ✅ Ajouter cette ligne
-      status: 'termine'
+      "clientInfo.ClientId": new mongoose.Types.ObjectId(clientId),
+      garageId: req.user.garageId,
+      status: "termine"
     })
-    .sort({ dateFinPrevue: -1 })
-    .select('dateFinPrevue numeroOrdre');
+      .sort({ dateFinPrevue: -1 })
+      .select("dateFinPrevue numeroOrdre");
 
     res.json({
       success: true,
       nombreVisites,
-      derniereVisite: derniereVisite ? {
-        date: derniereVisite.dateFinPrevue,
-      } : null
+      derniereVisite: derniereVisite ? { date: derniereVisite.dateFinPrevue } : null
     });
 
   } catch (error) {
-    console.error('❌ Erreur résumé visites:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Erreur lors de la récupération du résumé'
-    });
+    res.status(500).json({ success: false, error: "Erreur lors du résumé des visites" });
   }
 };

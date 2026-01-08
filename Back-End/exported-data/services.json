@@ -1,0 +1,24 @@
+[
+  {
+    "_id": "692d988fa8353948763487cf",
+    "id": "SERV001",
+    "name": "climatisation",
+    "description": "ce service permet de .....",
+    "statut": "Actif",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "createdAt": "2025-12-01T13:30:55.536Z",
+    "updatedAt": "2025-12-01T13:30:55.536Z",
+    "__v": 0
+  },
+  {
+    "_id": "692d98a1a8353948763487db",
+    "id": "SERV002",
+    "name": "entretien",
+    "description": "ce service permet de .......\n",
+    "statut": "Actif",
+    "createdBy": "691398cf7412d3ea832a4af6",
+    "createdAt": "2025-12-01T13:31:13.279Z",
+    "updatedAt": "2025-12-01T13:31:13.279Z",
+    "__v": 0
+  }
+]
