@@ -76,6 +76,12 @@ const permissions = [
   { name: 'demarrer_ordre', description: 'Démarrer un ordre de travail' },
   { name: 'terminer_ordre', description: 'Terminer un ordre de travail' },
   { name: 'delete_ordre', description: 'Supprimer (soft delete) un ordre de travail' },
+
+  //reservations
+  { name: 'view_reservation', description: 'Voir les réservations' },
+  { name: 'create_reservation', description: 'Créer des réservations' },
+  { name: 'update_reservation', description: 'Modifier des réservations' },
+  { name: 'delete_reservation', description: 'Supprimer des réservations' },
 ];
 
 

@@ -522,7 +522,7 @@ if (!isConfirmed) return;
 
   return (
     <div className="min-h-screen ">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
 
         {/* Header */}
         <div className="mb-8">
@@ -585,7 +585,7 @@ if (!isConfirmed) return;
 
         {/* Search and Filters */}
         {activeView !== 'create' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
               <div className="flex-1 max-w-lg">
                 <div className="relative">
@@ -624,10 +624,10 @@ if (!isConfirmed) return;
 
         {/* Grid View */}
         {activeView === 'grid' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredMecaniciens.map((mecanicien) => (
               <div key={mecanicien._id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
                       <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
@@ -881,12 +881,12 @@ if (!isConfirmed) return;
 
             <div className="p-8 space-y-8">
               {/* Informations personnelles */}
-              <div className="bg-gray-50 rounded-xl p-6">
+              <div className="bg-gray-50 rounded-xl p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                   <User className="h-5 w-5 mr-2 text-blue-600" />
                   Informations Personnelles
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nom complet *
@@ -961,12 +961,12 @@ if (!isConfirmed) return;
               </div>
 
               {/* Informations professionnelles */}
-              <div className="bg-gray-50 rounded-xl p-6">
+              <div className="bg-gray-50 rounded-xl p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                   <Briefcase className="h-5 w-5 mr-2 text-green-600" />
                   Informations Professionnelles
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Poste
@@ -1071,7 +1071,7 @@ if (!isConfirmed) return;
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-6">
+              <div className="bg-gray-50 rounded-xl p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                   <Settings className="h-5 w-5 mr-2 text-purple-600" />
                   Services *

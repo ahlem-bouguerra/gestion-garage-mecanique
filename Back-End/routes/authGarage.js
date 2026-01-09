@@ -592,11 +592,11 @@ router.post('/creer-manuel', authMiddleware,hasAny({
   }),creerCarnetManuel);
 
 // ========== DASHBOARD ==========
-router.get('/dashboard/charge-atelier',authMiddleware,hasAny({
-    roles: ['Admin Garage']
+router.get('/dashboard/charge-atelier',authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage', 'Super Admin']
   }),getDashboardData);
-router.get('/dashboard/charge-mensuelle', authMiddleware,hasAny({
-    roles: ['Admin Garage']
+router.get('/dashboard/charge-mensuelle', authGaragisteOuSuperAdmin,hasAny({
+    roles: ['Admin Garage', 'Super Admin']
   }),getChargeMensuelle);
 
 

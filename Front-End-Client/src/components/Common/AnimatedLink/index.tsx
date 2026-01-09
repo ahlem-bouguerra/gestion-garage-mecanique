@@ -1,20 +1,9 @@
 'use client';
 import { useState } from 'react';
 import { Div, Word, Span, AbsoluteContainer } from './styles';
+import { Variants } from 'framer-motion';
 
-type AnimationProps = {
-  rest: {
-    y: number;
-  };
-  hover: {
-    y: number;
-    transition: {
-      duration: number;
-      ease: number[];
-      type: string;
-    };
-  };
-};
+type AnimationProps = Variants;
 
 const titleAnimation = {
   rest: {
@@ -29,7 +18,7 @@ const titleAnimation = {
   },
 };
 
-const letterAnimation = {
+const letterAnimation: Variants = {
   rest: {
     y: 0,
   },
@@ -38,12 +27,12 @@ const letterAnimation = {
     transition: {
       duration: 0.3,
       ease: [0.6, 0.01, 0.05, 0.95],
-      type: 'tween',
+      type: 'tween' as const,
     },
   },
 };
 
-const letterAnimationTwo = {
+const letterAnimationTwo: Variants = {
   rest: {
     y: 25,
   },
@@ -52,7 +41,7 @@ const letterAnimationTwo = {
     transition: {
       duration: 0.3,
       ease: [0.6, 0.01, 0.05, 0.95],
-      type: 'tween',
+      type: 'tween' as const,
     },
   },
 };

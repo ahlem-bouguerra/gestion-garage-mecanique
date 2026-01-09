@@ -6,14 +6,22 @@ import { Garage } from '../../models/Garage.js';
 export const login = async (req, res) => {
   const { email, password } = req.body;
   
+  console.log("🔐 Tentative de connexion - Email:", email);
+  console.log("🔐 Password reçu:", password ? "***" : "VIDE");
+  
   try {
     // ✅ 1. Trouver le garagiste et peupler les infos du garage
     const garagiste = await Garagiste.findOne({ email })
       .populate('garage', 'nom matriculeFiscal governorateName cityName streetAddress location  horaires services isActive');
     
     if (!garagiste) {
+      console.log("❌ Garagiste non trouvé pour:", email);
       return res.status(401).json({ message: "Utilisateur non trouvé" });
     }
+    
+    console.log("✅ Garagiste trouvé:", garagiste.email);
+    console.log("   isVerified:", garagiste.isVerified);
+    console.log("   isActive:", garagiste.isActive);
     
     // ✅ 2. Vérifier si le compte est vérifié
     if (!garagiste.isVerified) {
@@ -29,10 +37,21 @@ export const login = async (req, res) => {
     }
     
     // ✅ 3. Vérifier le mot de passe
+    if (!password) {
+      console.log("❌ Mot de passe manquant");
+      return res.status(401).json({ message: "Mot de passe requis" });
+    }
+    
     const passwordMatch = await bcrypt.compare(password, garagiste.password);
     if (!passwordMatch) {
+      console.log("❌ Mot de passe incorrect pour:", email);
+      console.log("   Longueur password reçu:", password?.length);
+      console.log("   Premiers caractères:", password?.substring(0, 3));
+      // Ne pas exposer le hash complet pour sécurité
       return res.status(401).json({ message: "Mot de passe incorrect" });
     }
+    
+    console.log("✅ Mot de passe correct");
 
     // ✅ 4. Vérifier si le garage est actif
     if (garagiste.garage && !garagiste.garage.isActive) {

@@ -151,95 +151,93 @@ const isDatePassed = (dateString) => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
 
-<div className="flex justify-end p-6">
-  <button 
-  onClick={() => setShowChatModal(true)}
-  className="relative flex items-center gap-3 px-6 py-4 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 transition-all duration-200 shadow-lg hover:shadow-xl"
->
-  
-    {/* Icône */}
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-    </svg>
-    
-    {/* Texte explicite */}
-    <span className="font-medium text-sm">
-      {pendingCount > 0 ? `${pendingCount} Demande${pendingCount > 1 ? 's' : ''}` : 'Demades'}
-    </span>
-    
-    {/* Badge de notification */}
-    {pendingCount > 0 && (
-      <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
-        !
-      </span>
-    )}
-  </button>
-</div>
+      {/* Bouton flottant en bas à droite */}
+      <button 
+        onClick={() => setShowChatModal(true)}
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
+      >
+        {/* Icône */}
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        
+        {/* Texte explicite */}
+        <span className="font-medium text-sm">
+          {pendingCount > 0 ? `${pendingCount} Demande${pendingCount > 1 ? 's' : ''}` : 'Demandes'}
+        </span>
+        
+        {/* Badge de notification */}
+        {pendingCount > 0 && (
+          <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
+            !
+          </span>
+        )}
+      </button>
 
       {/* Contenu principal */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 sm:p-5 lg:p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-full flex items-center justify-center shadow-sm">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Aujourd'hui</p>
-                <p className="text-2xl font-bold text-gray-900">{todayReservations.length}</p>
+              <div className="ml-3 sm:ml-4 flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Aujourd'hui</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">{todayReservations.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 sm:p-5 lg:p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">À venir (7j)</p>
-                <p className="text-2xl font-bold text-gray-900">{upcomingReservations.length}</p>
+              <div className="ml-3 sm:ml-4 flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">À venir (7j)</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">{upcomingReservations.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 sm:p-5 lg:p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-500 rounded-full flex items-center justify-center shadow-sm">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">En attente</p>
-                <p className="text-2xl font-bold text-gray-900">{pendingCount}</p>
+              <div className="ml-3 sm:ml-4 flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">En attente</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">{pendingCount}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 sm:p-5 lg:p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-500 rounded-full flex items-center justify-center shadow-sm">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total actif</p>
-                <p className="text-2xl font-bold text-gray-900">{reservations.length}</p>
+              <div className="ml-3 sm:ml-4 flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Total actif</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">{reservations.length}</p>
               </div>
             </div>
           </div>
@@ -249,9 +247,9 @@ const isDatePassed = (dateString) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Réservations d'aujourd'hui */}
           <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Rendez-vous d'aujourd'hui</h2>
+            <div className="p-4 sm:p-6 border-b border-gray-200">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Rendez-vous d'aujourd'hui</h2>
                 <div className="flex items-center text-green-600">
                   <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -261,32 +259,32 @@ const isDatePassed = (dateString) => {
               </div>
             </div>
             
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {todayReservations.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {todayReservations
                     .sort((a, b) => a.creneauDemande.heureDebut.localeCompare(b.creneauDemande.heureDebut))
                     .map((reservation, index) => (
-                    <div key={reservation._id} className="flex items-center gap-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div key={reservation._id} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-green-50 rounded-lg border border-green-200">
                       <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">
                           {reservation.clientName.charAt(0).toUpperCase()}
                         </div>
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
                             {reservation.clientName}
                           </h3>
-                          <span className="text-lg font-bold text-green-700">
+                          <span className="text-base sm:text-lg font-bold text-green-700">
                             {reservation.creneauDemande.heureDebut}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 truncate">
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">
                           Service: {reservation.serviceId?.name}
                         </p>
-                        <p className="text-sm text-gray-500 truncate">
+                        <p className="text-xs sm:text-sm text-gray-500 truncate">
                           Tel: {reservation.clientPhone}
                         </p>
                       </div>
@@ -311,9 +309,9 @@ const isDatePassed = (dateString) => {
 
           {/* Réservations à venir */}
           <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Prochains rendez-vous</h2>
+            <div className="p-4 sm:p-6 border-b border-gray-200">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Prochains rendez-vous</h2>
                 <div className="flex items-center text-blue-600">
                   <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -323,7 +321,7 @@ const isDatePassed = (dateString) => {
               </div>
             </div>
             
-            <div className="p-6 max-h-96 overflow-y-auto">
+            <div className="p-4 sm:p-6 max-h-96 overflow-y-auto">
               {upcomingReservations.length > 0 ? (
                 <div className="space-y-3">
                   {upcomingReservations

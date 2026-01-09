@@ -13,7 +13,5 @@ type PropsType = {
 };
 
 export default async function Page(props: PropsType) {
-  const { id } = await props.params;
-  
-  return <OrdreDetailsPage ordreId={id} />;
+  return <OrdreDetailsPage />;
 }

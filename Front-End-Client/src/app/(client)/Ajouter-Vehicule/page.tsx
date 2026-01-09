@@ -1,7 +1,7 @@
 
 import { createTimeFrameExtractor } from "@/utils/timeframe-extractor";
 import { Metadata } from "next";
-import AjouterVehicule from "@/components/AjouterVehicule";
+import MesVehicules from "@/components/Fiche-Voiture";
 
 
 
@@ -25,7 +25,7 @@ export default async function Page(props: PropsType) {
       <div>
 
         <div className="col-span-12 xl:col-span-5">
-          <AjouterVehicule />
+          <MesVehicules />
         </div>
       </div>
     </>

@@ -761,7 +761,7 @@ const renderHistoryModal = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
         <h3 className="text-xl font-semibold text-gray-900">
           Historique des visites - {selectedClient.nomEffectif || selectedClient.nom}
         </h3>
@@ -859,13 +859,13 @@ const renderHistoryModal = () => {
     <div className="min-h-screen  p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Gestion des Clients</h1>
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestion des Clients</h1>
             <button
               onClick={() => openModal("add")}
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors text-sm sm:text-base"
             >
               <Plus className="w-4 h-4" />
               <span>Nouveau Client</span>
@@ -880,7 +880,7 @@ const renderHistoryModal = () => {
           )}
 
           {/* Search and Filters */}
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -932,11 +932,11 @@ const renderHistoryModal = () => {
         )}
 
         {/* Clients List */}
-        <div className="grid gap-6 lg:grid-cols-1 xl:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
           {filteredClients.map((client) => {
             return (
               <div key={client._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
                       {client.type === "professionnel" ? (
@@ -1066,8 +1066,8 @@ const renderHistoryModal = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
-            <div className="p-6">
+          <div className="bg-white rounded-lg w-full sm:max-w-2xl max-h-[95vh] sm:max-h-screen overflow-y-auto">
+            <div className="p-4 sm:p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900">
                   {modalType === "add" && "Nouveau Client"}

@@ -6,8 +6,7 @@ const RatingSchema = new mongoose.Schema({
   ordreId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'OrdreTravail',
-    required: true,
-    unique: true // Un ordre ne peut avoir qu'une seule évaluation
+    required: true
   },
 
   // Client qui évalue (utilisateur authentifié)
@@ -90,7 +89,7 @@ const RatingSchema = new mongoose.Schema({
 // Index pour recherche rapide
 RatingSchema.index({ garageId: 1, createdAt: -1 });
 RatingSchema.index({ clientId: 1, createdAt: -1 });
-RatingSchema.index({ ordreId: 1 });
+RatingSchema.index({ ordreId: 1 }, { unique: true }); // Un ordre ne peut avoir qu'une seule évaluation
 RatingSchema.index({ rating: 1 });
 
 // Méthode pour mettre à jour la moyenne du garage

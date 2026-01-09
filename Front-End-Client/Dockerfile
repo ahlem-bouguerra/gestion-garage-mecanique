@@ -25,14 +25,17 @@ ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3001
 
-# Copier les fichiers standalone depuis le builder
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+# Copier package.json pour installer les dépendances de production
+COPY --from=builder /app/package*.json ./
+RUN npm ci --only=production
+
+# Copier les fichiers build depuis le builder
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.mjs ./
 
 # Exposer le port
 EXPOSE 3001
 
 # Commande de démarrage
-CMD ["node", "server.js"]
-
+CMD ["npx", "next", "start", "-p", "3001"]

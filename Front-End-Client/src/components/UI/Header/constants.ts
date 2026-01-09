@@ -1,10 +1,12 @@
-export const menu = {
+import { Variants } from 'framer-motion';
+
+export const menu: Variants = {
   open: {
     width: '250px',
     height: '300px',
     top: '-25px',
     right: '-25px',
-    transition: { duration: 0.75, type: 'tween', ease: [0.76, 0, 0.24, 1] },
+    transition: { duration: 0.75, type: 'tween' as const, ease: [0.76, 0, 0.24, 1] as const },
   },
 
   closed: {
@@ -15,8 +17,8 @@ export const menu = {
     transition: {
       duration: 0.75,
       delay: 0.35,
-      type: 'tween',
-      ease: [0.76, 0, 0.24, 1],
+      type: 'tween' as const,
+      ease: [0.76, 0, 0.24, 1] as const,
     },
   },
 };

@@ -65,6 +65,7 @@ export interface Rating {
   reponseGarage?: string;
   ficheClientId?: FicheClient;
   ordreSnapshot?: OrdreSnapshot;
+  clientNom?: string;
   createdAt: string;
   updatedAt?: string;
 }

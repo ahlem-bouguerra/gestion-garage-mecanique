@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSidebarContext } from "./sidebar-context";
 
 const menuItemBaseStyles = cva(
-  "rounded-lg px-3.5 font-medium text-dark-4 transition-all duration-200 dark:text-dark-6",
+  "rounded-lg px-3.5 font-medium text-dark-4 transition-all duration-200 dark:text-dark-6 overflow-hidden",
   {
     variants: {
       isActive: {

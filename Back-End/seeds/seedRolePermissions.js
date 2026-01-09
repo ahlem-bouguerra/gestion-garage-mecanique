@@ -97,6 +97,12 @@ async function seedRolePermissions() {
         'demarrer_ordre',
         'terminer_ordre',
         'delete_ordre',
+        
+        // Réservations
+        'view_reservation',
+        'create_reservation',
+        'update_reservation',
+        'delete_reservation',
       ],
 
       'Employé Garage': [
@@ -135,6 +141,10 @@ async function seedRolePermissions() {
         'create_ordre',
         'get_ordres',
         'update_ordre',
+        
+        // Réservations
+        'view_reservation',
+        'update_reservation',
       ],
 
       'Mécanicien': [

@@ -1,7 +1,7 @@
 'use client';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import styled from 'styled-components';
-const variant = {
+const variant: Variants = {
   hidden: {
     width: '100%',
   },
@@ -9,7 +9,7 @@ const variant = {
     width: '0%',
     transition: {
       duration: 1.4,
-      ease: [0.6, 0.05, -0.01, 0.9],
+      ease: [0.6, 0.05, -0.01, 0.9] as const,
     },
   },
 };

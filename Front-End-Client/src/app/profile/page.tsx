@@ -4,10 +4,18 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
+interface Profile {
+  username?: string;
+  email?: string;
+  phone?: string;
+  isActive?: boolean;
+  [key: string]: any;
+}
+
 const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'edit', 'password', 'security'
 
   // États pour le formulaire d'édition
@@ -43,7 +51,7 @@ const ProfilePage = () => {
         email: response.data.data.email,
         phone: response.data.data.phone || ''
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur chargement profil:', error);
       toast.error(error.response?.data?.message || 'Erreur lors du chargement');
     } finally {
@@ -51,7 +59,7 @@ const ProfilePage = () => {
     }
   };
 
-  const handleUpdateProfile = async (e) => {
+  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     try {
@@ -67,7 +75,7 @@ const ProfilePage = () => {
       setProfile(response.data.data);
       toast.success('Profil mis à jour avec succès !');
       setActiveTab('overview');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur mise à jour profil:', error);
       toast.error(error.response?.data?.message || 'Erreur lors de la mise à jour');
     } finally {
@@ -75,7 +83,7 @@ const ProfilePage = () => {
     }
   };
 
-  const handleChangePassword = async (e) => {
+  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -100,7 +108,7 @@ const ProfilePage = () => {
         confirmPassword: ''
       });
       setActiveTab('overview');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur changement mot de passe:', error);
       toast.error(error.response?.data?.message || 'Erreur lors du changement');
     } finally {
@@ -108,7 +116,7 @@ const ProfilePage = () => {
     }
   };
 
-  const formatDate = (date) => {
+  const formatDate = (date: string | Date | null | undefined) => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('fr-FR', {
       day: '2-digit',
@@ -487,14 +495,14 @@ const ProfilePage = () => {
 };
 
 // Composants auxiliaires
-const InfoCard = ({ label, value, icon }) => (
+const InfoCard = ({ label, value, icon }: { label: string; value: string | number | React.ReactNode | undefined; icon: React.ReactNode }) => (
   <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
     <p className="text-sm font-medium text-gray-500 mb-1">{icon} {label}</p>
     <p className="text-lg font-semibold text-gray-900">{value}</p>
   </div>
 );
 
-const StatusCard = ({ label, status, icon }) => (
+const StatusCard = ({ label, status, icon }: { label: string; status: boolean | undefined; icon: React.ReactNode }) => (
   <div className={`rounded-lg p-4 border-2 ${
     status 
       ? 'bg-green-50 border-green-200' 

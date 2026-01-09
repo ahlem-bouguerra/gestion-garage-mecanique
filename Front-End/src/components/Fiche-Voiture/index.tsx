@@ -927,12 +927,12 @@ const deleteVehicule = async (vehicule: Vehicule) => {
         <div className="min-h-screen p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-3xl font-bold text-gray-900">Gestion des Véhicules</h1>
+                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestion des Véhicules</h1>
                         <button
                             onClick={() => openVehiculeModal("add")}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center space-x-2 text-sm sm:text-base"
                         >
                             <Plus className="w-4 h-4" />
                             <span>Nouveau Véhicule</span>
@@ -1013,7 +1013,7 @@ const deleteVehicule = async (vehicule: Vehicule) => {
                 )}
 
                 {/* Liste des Véhicules */}
-                <div className="grid gap-6 lg:grid-cols-1 xl:grid-cols-2">
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
                     {vehiculesFiltres.map((vehicule) => {
                         const vehiculeVisites = getVehiculeVisites(vehicule._id);
                         const derniereVisite = vehiculeVisites.sort((a, b) =>
@@ -1022,7 +1022,7 @@ const deleteVehicule = async (vehicule: Vehicule) => {
 
                         return (
                             <div key={vehicule._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                                <div className="p-6">
+                                <div className="p-4 sm:p-6">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center space-x-3">
                                             <Car className="w-8 h-8 text-blue-600" />
@@ -1079,7 +1079,7 @@ const deleteVehicule = async (vehicule: Vehicule) => {
                                     </div>
 
                                     {/* Détails du véhicule */}
-                                    <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600 mb-4">
                                         {vehicule.annee && (
                                             <div>
                                                 <span className="font-medium">Année:</span> {String(vehicule.annee)}
@@ -1105,7 +1105,7 @@ const deleteVehicule = async (vehicule: Vehicule) => {
                                     {vehicule.carteGrise && (
                                         <div className="mt-4 pt-4 border-t border-gray-200">
                                             <h4 className="text-sm font-medium text-gray-700 mb-2">📄 Carte Grise</h4>
-                                            <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-600">
                                                 <div><span className="font-medium">N° CG:</span> {vehicule.carteGrise.numeroCG}</div>
                                                 <div><span className="font-medium">Châssis:</span> {vehicule.carteGrise.numeroChassis}</div>
                                                 <div><span className="font-medium">Mise en circ.:</span> {new Date(vehicule.carteGrise.dateMiseCirculation).toLocaleDateString('fr-FR')}</div>
@@ -1130,8 +1130,8 @@ const deleteVehicule = async (vehicule: Vehicule) => {
                 {/* ✅ MODAL VÉHICULE AVEC VALIDATION */}
                 {showVehiculeModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-lg max-w-3xl w-full max-h-screen overflow-y-auto">
-                            <div className="p-6">
+                        <div className="bg-white rounded-lg w-[95vw] sm:w-full sm:max-w-3xl max-h-[95vh] sm:max-h-screen overflow-y-auto">
+                            <div className="p-4 sm:p-6">
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-xl font-bold text-gray-900">
                                         {modalType === "add" ? "Nouveau Véhicule" : "Modifier Véhicule"}
@@ -1206,7 +1206,7 @@ const deleteVehicule = async (vehicule: Vehicule) => {
 
 
                                         {/* Première ligne : Marque, Modèle, Kilométrage */}
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                             <ValidatedField
                                                 label="Marque"
                                                 value={vehiculeForm.marque}
@@ -1268,7 +1268,7 @@ const deleteVehicule = async (vehicule: Vehicule) => {
                                         />
 
                                         {/* Deuxième ligne : Année, Couleur, Carburant */}
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                             <ValidatedField
                                                 label="Année"
                                                 type="number"
@@ -1321,7 +1321,7 @@ const deleteVehicule = async (vehicule: Vehicule) => {
                                                 <span>Informations Carte Grise</span>
                                             </h3>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                                 {/* Numéro CG */}
                                                 <ValidatedField
                                                     label="Numéro Carte Grise"

@@ -28,33 +28,25 @@ export default function SignIn() {
 
       {/* Animated Background Elements */}
 
-
       {/* Main Container - Plus grand cadre */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-[95vw] xl:max-w-[1400px]">
-          {/* Cadre principal englobant */}
-       
+          {/* Section Formulaire - Plus grande */}
+          <div className="flex items-center justify-center">
+            <div className="w-full max-w-lg">
+              {/* Cadre du formulaire */}
+              <div className="relative backdrop-blur-xl bg-slate-800/60 border-2 border-orange-500/50 rounded-3xl p-10 lg:p-12 shadow-2xl shadow-orange-500/20">
+                {/* Metal Border Effect */}
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-orange-500/30 via-yellow-500/30 to-red-500/30 opacity-40 blur-sm"></div>
 
-              {/* Section Formulaire - Plus grande */}
-              <div className="flex items-center justify-center">
-                <div className="w-full max-w-lg">
-                  {/* Cadre du formulaire */}
-                  <div className="relative backdrop-blur-xl bg-slate-800/60 border-2 border-orange-500/50 rounded-3xl p-10 lg:p-12 shadow-2xl shadow-orange-500/20">
-                    {/* Metal Border Effect */}
-                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-orange-500/30 via-yellow-500/30 to-red-500/30 opacity-40 blur-sm"></div>
-
-
-                    <div className="relative z-10">
-                      <SigninForm />
-                    </div>
-                  </div>
+                <div className="relative z-10">
+                  <SigninForm />
                 </div>
               </div>
-
-         
             </div>
           </div>
         </div>
-  
+      </div>
+    </div>
   );
 }

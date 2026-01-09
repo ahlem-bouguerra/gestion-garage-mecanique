@@ -67,14 +67,14 @@ interface VehiculeFormData {
     couleur: string;
     typeCarburant: string;
     carteGrise?: {
-        numeroCG: string;
-        numeroChassis: string;
-        dateMiseCirculation: string;
-        puissanceFiscale: string;
-        genre: string;
-        nombrePlaces: string;
-        dateVisite: string;
-        dateProchaineVisite: string;
+        numeroCG?: string;
+        numeroChassis?: string;
+        dateMiseCirculation?: string;
+        puissanceFiscale?: string;
+        genre?: string;
+        nombrePlaces?: string;
+        dateVisite?: string;
+        dateProchaineVisite?: string;
     };
 }
 
@@ -231,7 +231,9 @@ class FormValidator {
 
 
     static validateImmatriculation(immat: string, selectedCountry?: 'TN' | 'FR' | 'OTHER'): FieldValidation {
-        return SmartImmatriculationValidator.validateImmatriculationFlexible(immat, selectedCountry);
+        // Convertir 'FR' en 'OTHER' car validateImmatriculationFlexible n'accepte que 'TN' | 'OTHER'
+        const countryCode = selectedCountry === 'FR' ? 'OTHER' : selectedCountry;
+        return SmartImmatriculationValidator.validateImmatriculationFlexible(immat, countryCode);
     }
 
     // ✅ AJOUTER CETTE NOUVELLE MÉTHODE
@@ -661,7 +663,7 @@ export default function VehiculeManagement() {
             const initialProprietaireId = preselectedClientId;
 
             setVehiculeForm({
-                proprietaireId: initialProprietaireId,
+                proprietaireId: initialProprietaireId || '',
                 marque: "",
                 modele: "",
                 kilometrage: "",
@@ -710,7 +712,7 @@ export default function VehiculeManagement() {
         setError("");
 
         try {
-            const submitData = {
+            const submitData: any = {
                 marque: vehiculeForm.marque.trim(),
                 modele: vehiculeForm.modele.trim(),
                 immatriculation: vehiculeForm.immatriculation.trim().toUpperCase(),

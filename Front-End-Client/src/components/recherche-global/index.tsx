@@ -13,16 +13,16 @@ const MapView = dynamic(() => import('./MapView'), {
 
 const GarageSearchGLobal = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [garages, setGarages] = useState([]);
+  const [garages, setGarages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [userLocation, setUserLocation] = useState(null);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [userAddress, setUserAddress] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [selectedGarage, setSelectedGarage] = useState(null);
+  const [selectedGarage, setSelectedGarage] = useState<any | null>(null);
   const [services, setServices] = useState([]);
-  const [ratings, setRatings] = useState([]);
-  const [ratingStats, setRatingStats] = useState(null);
+  const [ratings, setRatings] = useState<any[]>([]);
+  const [ratingStats, setRatingStats] = useState<any | null>(null);
   const [currentRatingIndex, setCurrentRatingIndex] = useState(0);
 
   const [filters, setFilters] = useState({
@@ -126,8 +126,8 @@ const GarageSearchGLobal = () => {
   }, [searchTerm, filters]);
 
   // Sélectionner garage
-  const handleGarageSelect = async (garageId) => {
-    const garage = garages.find(g => g._id === garageId);
+  const handleGarageSelect = async (garageId: string) => {
+    const garage = garages.find((g: any) => g._id === garageId);
     if (!garage) return;
 
     setSelectedGarage(garage);
@@ -155,7 +155,7 @@ const GarageSearchGLobal = () => {
     setShowAuthModal(true);
   };
 
-  const getDirections = (garage) => {
+  const getDirections = (garage: any) => {
     if (!garage.location?.coordinates) return;
     const [lng, lat] = garage.location.coordinates;
     const url = userLocation
@@ -218,7 +218,7 @@ const GarageSearchGLobal = () => {
                   onChange={(e) => setFilters({ ...filters, governorate: e.target.value, city: '' })}
                 >
                   <option value="">Tous les gouvernorats</option>
-                  {governorates.map((gov) => (
+                  {governorates.map((gov: any) => (
                     <option key={gov._id} value={gov._id}>{gov.name}</option>
                   ))}
                 </select>
@@ -230,7 +230,7 @@ const GarageSearchGLobal = () => {
                   disabled={!filters.governorate}
                 >
                   <option value="">Toutes les villes</option>
-                  {cities.map((city) => (
+                  {cities.map((city: any) => (
                     <option key={city._id} value={city._id}>{city.name}</option>
                   ))}
                 </select>
@@ -274,7 +274,7 @@ const GarageSearchGLobal = () => {
               <h2 className="font-bold text-lg text-gray-800">Garages disponibles</h2>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {garages.map((garage) => (
+              {garages.map((garage: any) => (
                 <div
                   key={garage._id}
                   onClick={() => handleGarageSelect(garage._id)}
@@ -369,7 +369,7 @@ const GarageSearchGLobal = () => {
                 <h3 className="font-bold text-gray-800 mb-3">Services proposés</h3>
                 {services.length > 0 ? (
                   <div className="space-y-2">
-                    {services.map((service) => (
+                    {services.map((service: any) => (
                       <div key={service._id} className="bg-gray-50 rounded-xl p-3">
                         <div className="flex justify-between items-center">
                           <span className="font-semibold text-gray-800">{service.name}</span>

@@ -42,34 +42,41 @@ export const authMiddleware = async (req, res, next) => {
 
     console.log('🔍 Garage chargé:', user.garage); // ⭐ Debug
 
-    // ✅ Vérifier si le garage existe et est actif
+    // ✅ Déterminer le garageId (peut venir du populate ou directement du champ garage)
+    let garageId = null;
     if (user.garage) {
-      if (!user.garage.isActive) {
+      // Si le populate a fonctionné, user.garage est un objet
+      garageId = user.garage._id || user.garage;
+      // Vérifier si le garage est actif
+      if (user.garage.isActive === false) {
         console.log('⚠️ Garage désactivé pour:', user.email);
         return res.status(403).json({
           message: "Votre garage est désactivé. Contactez l'administrateur."
         });
       }
-    } else {
-      console.log('⚠️ Aucun garage associé pour:', user.email);
-      // ⭐ Décide si c'est une erreur ou non
-      // return res.status(400).json({ message: "Aucun garage associé" });
+    } else if (user.garage) {
+      // Si le populate n'a pas fonctionné mais que le champ garage existe (ObjectId)
+      garageId = user.garage;
     }
-const permissions = await getUserPermissions(user._id);
-    // ✅ Attacher l'utilisateur complet à req.user
-    // ⭐ APRÈS (ajoute garageId explicitement)
-req.user = {
-  ...user,
-  garageId: user.garage?._id || null,  // ← Ajoute cette ligne
-  permissions
 
-};
+    console.log('🔍 garageId déterminé:', garageId);
+
+    const permissions = await getUserPermissions(user._id);
+    
+    // ✅ Attacher l'utilisateur complet à req.user
+    req.user = {
+      ...user,
+      garageId: garageId,  // ← Utilise le garageId déterminé
+      permissions
+    };
     
     console.log('✅ Garagiste authentifié:', {
       id: user._id,
       email: user.email,
       garage: user.garage?.nom || 'Aucun garage',
-      garageId: req.user.garageId,  // ← Utilise req.user.garageId maintenant
+      garageId: req.user.garageId,
+      garageField: user.garage,  // Debug: voir ce que contient le champ garage
+      garageType: typeof user.garage
     });
     
     next();

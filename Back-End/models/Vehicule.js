@@ -29,7 +29,6 @@ const vehiculeSchema = new mongoose.Schema({
   immatriculation: {
     type: String,
     required: true,
-    unique: true, // ✅ GLOBAL : une immatriculation = unique dans tout le système
     uppercase: true,
     trim: true
   },
@@ -104,7 +103,7 @@ const vehiculeSchema = new mongoose.Schema({
 });
 
 // ✅ Index pour recherche rapide
-vehiculeSchema.index({ immatriculation: 1 });
+vehiculeSchema.index({ immatriculation: 1 }, { unique: true }); // ✅ GLOBAL : une immatriculation = unique dans tout le système
 vehiculeSchema.index({ proprietaireId: 1 });
 
 

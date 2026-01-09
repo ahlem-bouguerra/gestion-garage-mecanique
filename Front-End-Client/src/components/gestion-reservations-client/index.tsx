@@ -3,9 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
-export default function ClientReservationManagement({ onClose }) {
-  const [reservations, setReservations] = useState([]);
-  const [selectedReservation, setSelectedReservation] = useState(null);
+export default function ClientReservationManagement({ onClose }: { onClose?: () => void }) {
+  const [reservations, setReservations] = useState<any[]>([]);
+  const [selectedReservation, setSelectedReservation] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [responseData, setResponseData] = useState({
@@ -35,12 +35,12 @@ export default function ClientReservationManagement({ onClose }) {
   }, []);
 
 
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const isDatePassed = (dateString) => {
+  const isDatePassed = (dateString: string) => {
     const reservationDate = new Date(dateString);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -84,7 +84,7 @@ export default function ClientReservationManagement({ onClose }) {
         const filteredReservations = res.data.reservations;
 
         // Détecter nouveaux messages
-        const hasNew = filteredReservations.some(r => r.status === 'contre_propose');
+        const hasNew = filteredReservations.some((r: any) => r.status === 'contre_propose');
         setHasNewMessages(hasNew);
 
         setReservations(filteredReservations);
@@ -106,11 +106,11 @@ export default function ClientReservationManagement({ onClose }) {
     return () => clearInterval(interval);
   }, []);
 
-  const handleReservationClick = (reservation) => {
+  const handleReservationClick = (reservation: any) => {
     setSelectedReservation(reservation);
     setError(''); // Clear any previous errors
 
-    const formatDate = (dateInput) => {
+    const formatDate = (dateInput: string | Date | null | undefined) => {
       if (!dateInput) return '';
       const date = new Date(dateInput);
       return date.toISOString().split('T')[0];
@@ -172,14 +172,14 @@ export default function ClientReservationManagement({ onClose }) {
       const res = await axios.get("http://localhost:5000/api/client-reservations/", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const filteredReservations = res.data.reservations.filter(reservation =>
+      const filteredReservations = res.data.reservations.filter((reservation: any) =>
         !isDatePassed(reservation.creneauDemande.date)
       );
 
       setReservations(filteredReservations);
 
       // Mettre à jour la réservation sélectionnée avec les nouvelles données
-      const updatedReservation = filteredReservations.find(r => r._id === selectedReservation._id);
+      const updatedReservation = filteredReservations.find((r: any) => r._id === selectedReservation._id);
       if (updatedReservation) {
         setSelectedReservation(updatedReservation);
       } else {
@@ -210,7 +210,7 @@ export default function ClientReservationManagement({ onClose }) {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'en_attente': return 'bg-amber-100 border-amber-200 text-amber-800';
       case 'accepte': return 'bg-emerald-100 border-emerald-200 text-emerald-800';
@@ -221,7 +221,7 @@ export default function ClientReservationManagement({ onClose }) {
     }
   };
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'en_attente': return '⏳';
       case 'accepte': return '✅';
@@ -257,7 +257,7 @@ export default function ClientReservationManagement({ onClose }) {
   };
 
   const timeOptions = generateTimeOptions();
-  const canClientAct = (reservation) => reservation.status === 'contre_propose';
+  const canClientAct = (reservation: any) => reservation.status === 'contre_propose';
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -326,7 +326,7 @@ export default function ClientReservationManagement({ onClose }) {
           {/* Liste des réservations */}
           <div className="flex-1 overflow-y-auto">
             <div className="p-4 space-y-3">
-              {reservations.map(reservation => {
+              {reservations.map((reservation: any) => {
                 const isActive = selectedReservation?._id === reservation._id;
                 const hasAction = canClientAct(reservation);
 
@@ -623,7 +623,7 @@ export default function ClientReservationManagement({ onClose }) {
                               className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
                               disabled={loading}
                             >
-                              {timeOptions.map(time => (
+                              {timeOptions.map((time: string) => (
                                 <option key={time} value={time}>{time}</option>
                               ))}
                             </select>

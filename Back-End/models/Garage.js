@@ -4,7 +4,7 @@ const garageSchema = new mongoose.Schema({
 
     nom: { type: String, required: true },
 
-    matriculeFiscal: { type: String, required: true, unique: true },
+    matriculeFiscal: { type: String, required: true },
 
     // Localisation
     governorateId: {

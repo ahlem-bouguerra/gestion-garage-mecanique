@@ -11,7 +11,16 @@
     "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
     "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
     "test:model": "NODE_OPTIONS='--experimental-vm-modules' jest garage.test.js",
-    "test:routes": "NODE_OPTIONS='--experimental-vm-modules' jest garage.routes.test.js"
+    "test:routes": "NODE_OPTIONS='--experimental-vm-modules' jest garage.routes.test.js",
+    "view-db": "node scripts/viewDB.js",
+    "activate-account": "node scripts/activateAccount.js",
+    "reset-password": "node scripts/resetPassword.js",
+    "create-garagiste": "node scripts/createGaragiste.js",
+    "migrate:all": "node scripts/migrateAll.js",
+    "migrate:roles": "node seeds/seedRoles.js",
+    "migrate:permissions": "node seeds/seedPermissions.js",
+    "migrate:role-permissions": "node seeds/seedRolePermissions.js",
+    "migrate:import": "node seeds/import-data.js"
   },
   "keywords": [],
   "author": "",

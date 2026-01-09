@@ -7,7 +7,9 @@ import companies_image from '../../../../public/images/companies.png';
 import { Wrapper, Inner, ImageContainer, ParallaxImages, Div } from './styles';
 import RevealCover from '@/components/Common/RevealCover';
 import { useIsMobile } from '../../../../libs/useIsMobile';
-export const imageVariants = {
+import { Variants } from 'framer-motion';
+
+export const imageVariants: Variants = {
   hidden: {
     scale: 1.6,
   },
@@ -15,7 +17,7 @@ export const imageVariants = {
     scale: 1,
     transition: {
       duration: 1.4,
-      ease: [0.6, 0.05, -0.01, 0.9],
+      ease: [0.6, 0.05, -0.01, 0.9] as const,
       delay: 0.2,
     },
   },

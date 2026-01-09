@@ -10,7 +10,7 @@ COPY package*.json ./
 # Installer les dépendances
 RUN npm ci --only=production
 
-# Copier le reste du code
+# Copier le reste du code (inclut le dossier shared si copié localement)
 COPY . .
 
 # Exposer le port

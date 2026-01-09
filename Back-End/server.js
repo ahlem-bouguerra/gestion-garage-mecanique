@@ -2,7 +2,6 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-//import authRoutes from "./routes/auth.js";
 import passportGarage from "./config/passportGarage.js";
 import passportClient from "./config/passportClient.js";
 import authGarageRoutes from "./routes/authGarage.js";
@@ -42,21 +41,14 @@ app.use(
   })
 );
 
-// ❌ SUPPRIMEZ ces deux lignes (ancien passport)
-// app.use(passport.initialize());
-// app.use(passport.session());
-
 // ✅ Garder uniquement les nouvelles instances Passport
 app.use(passportGarage.initialize());
 app.use(passportClient.initialize());
 
 // Routes
-//app.use('/api', authRoutes);
 app.use("/api", authGarageRoutes);
 app.use("/api", authClientRoutes);
 app.use("/api", authSuperAdminRoutes);
-
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

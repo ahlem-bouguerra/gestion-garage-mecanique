@@ -2,7 +2,7 @@ import OrdreTravail from '../../models/Ordre.js';
 
 export const getDashboardData = async (req, res) => {
   try {
-    const { periode = 'jour', atelier } = req.query;
+    const { periode = 'jour', atelier, garageId: queryGarageId } = req.query;
     
     // ✅ Vérification de sécurité améliorée
     console.log('📊 Dashboard - req.user:', req.user);
@@ -13,12 +13,35 @@ export const getDashboardData = async (req, res) => {
       });
     }
     
-    const garageId = req.user.garageId;
+    // ✅ Gérer le cas SuperAdmin (peut spécifier un garageId dans la query)
+    let garageId = null;
     
-    if (!garageId) {
-      return res.status(400).json({ 
-        error: 'Garage non identifié pour cet utilisateur' 
-      });
+    if (req.user.isSuperAdmin) {
+      // SuperAdmin peut spécifier un garageId dans la query
+      if (queryGarageId) {
+        garageId = queryGarageId;
+      } else {
+        return res.status(400).json({ 
+          error: 'GarageId requis',
+          message: 'En tant que SuperAdmin, vous devez spécifier un garageId dans la requête (paramètre ?garageId=...)'
+        });
+      }
+    } else {
+      // Garagiste utilise son garage associé
+      garageId = req.user.garageId || req.user.garage;
+      
+      if (!garageId) {
+        console.error('❌ Garage non identifié - req.user:', {
+          userId: req.user._id,
+          email: req.user.email,
+          garageId: req.user.garageId,
+          garage: req.user.garage
+        });
+        return res.status(400).json({ 
+          error: 'Garage non identifié pour cet utilisateur',
+          message: 'Votre compte n\'est pas associé à un garage. Contactez l\'administrateur.'
+        });
+      }
     }
     
     console.log('📊 Dashboard demandé pour garage:', garageId);

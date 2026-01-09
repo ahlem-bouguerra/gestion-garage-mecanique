@@ -1,16 +1,16 @@
 'use client';
 import { Body, LineMask } from './styles';
-import { useInView, motion } from 'framer-motion';
+import { useInView, motion, Variants } from 'framer-motion';
 import { useRef } from 'react';
 
 const MaskText = ({ phrases, tag }: { phrases: string[]; tag: string }) => {
-  const animate = {
+  const animate: Variants = {
     initial: {
       y: '100%',
     },
     open: (i: number) => ({
       y: '0%',
-      transition: { duration: 1, delay: 0.1 * i, ease: [0.33, 1, 0.68, 1] },
+      transition: { duration: 1, delay: 0.1 * i, ease: [0.33, 1, 0.68, 1] as const },
     }),
   };
   const body = useRef(null);

@@ -19,14 +19,8 @@ export default async function Page(props: PropsType) {
   const extractTimeFrame = createTimeFrameExtractor(selected_time_frame);
 
   return (
-    <>
-
-      <div>
-
-        <div className="col-span-12 xl:col-span-5">
-          <GarageQuoteSystem />
-        </div>
-      </div>
-    </>
+    <div className="w-full overflow-x-hidden">
+      <GarageQuoteSystem />
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import Vehicule from '../../models/Vehicule.js';
-import immValidator from "../../../shared/immatriculationValidator.mjs";
+import immValidator from "../../shared/immatriculationValidator.mjs";
 const { validateImmatriculation } = immValidator;
 
 

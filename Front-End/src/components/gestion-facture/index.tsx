@@ -494,70 +494,71 @@ const { showAlert } = useGlobalAlert();
   }
 
   return (
-    <div className="p-6 max-w-20xl mx-auto">
+    <div className="min-h-screen w-full overflow-x-hidden p-6">
+      <div className="max-w-7xl mx-auto w-full overflow-x-hidden">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Factures</h1>
-        <p className="text-gray-600">Gérez vos factures et suivez les paiements</p>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Gestion des Factures</h1>
+        <p className="text-sm sm:text-base text-gray-600">Gérez vos factures et suivez les paiements</p>
       </div>
 
       {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="flex items-center">
-            <FileText className="h-8 w-8 text-blue-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Factures</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalFactures}</p>
+            <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0" />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Total Factures</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalFactures}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="flex items-center">
-            <DollarSign className="h-8 w-8 text-green-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Chiffre d'Affaires</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.finalTotalTTC)}</p>
+            <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 flex-shrink-0" />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Chiffre d'Affaires</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{formatCurrency(stats.finalTotalTTC)}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="flex items-center">
-            <DollarSign className="h-8 w-8 text-blue-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Encaissé</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalEncaisse)}</p>
+            <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0" />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Encaissé</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{formatCurrency(stats.totalEncaisse)}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="flex items-center">
-            <Clock className="h-8 w-8 text-yellow-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">En Attente</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalImpaye)}</p>
+            <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500 flex-shrink-0" />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">En Attente</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{formatCurrency(stats.totalImpaye)}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <div className="flex items-center">
-            <AlertTriangle className="h-8 w-8 text-red-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">En Retard</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.facturesEnRetard}</p>
+            <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-red-500 flex-shrink-0" />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">En Retard</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.facturesEnRetard}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filtres et Actions */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row gap-4">
+      <div className="bg-white rounded-lg shadow mb-6 overflow-x-hidden">
+        <div className="p-4 sm:p-6 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             {/* Recherche */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -589,35 +590,36 @@ const { showAlert } = useGlobalAlert();
         </div>
 
         {/* Liste des factures */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <div className="inline-block min-w-full align-middle sm:px-0">
+            <table className="w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   N° Facture
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Client
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden md:table-cell">
                   Véhicule
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">
                   Montant
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden xl:table-cell">
                   Crédit
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">
                   Date d'échéance
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Statut
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap hidden xl:table-cell">
                   Avoir
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Actions
                 </th>
               </tr>
@@ -633,27 +635,27 @@ const { showAlert } = useGlobalAlert();
                     }`}
                 >
 
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                     {facture.numeroFacture.toString().padStart(4, '0')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900"> <p>{getFactureClientName(facture)}</p></div>
+                  <td className="px-3 sm:px-6 py-4 max-w-[150px] sm:max-w-[200px]">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-gray-900 truncate"> <p>{getFactureClientName(facture)}</p></div>
 
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm text-gray-900">
+                  <td className="px-3 sm:px-6 py-4 hidden md:table-cell max-w-[150px] sm:max-w-[200px]">
+                    <div className="min-w-0">
+                      <div className="text-sm text-gray-900 truncate">
                         {facture.vehicleInfo}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-3 sm:px-6 py-4 hidden lg:table-cell text-sm font-medium text-gray-900 whitespace-nowrap">
                     {formatCurrency(facture.finalTotalTTC)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    <div className="space-y-1">
+                  <td className="px-3 sm:px-6 py-4 hidden xl:table-cell text-sm font-medium text-gray-900 max-w-[150px]">
+                    <div className="space-y-1 min-w-0">
                       {facture.paymentAmount > 0 && (
                         <p className="text-xs text-blue-600">
                           Payé: {formatCurrency(facture.paymentAmount)}
@@ -695,13 +697,13 @@ const { showAlert } = useGlobalAlert();
                     </div>
                   </td>
 
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-3 sm:px-6 py-4 hidden lg:table-cell text-sm text-gray-500 whitespace-nowrap">
                     {formatDate(facture.dueDate)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(facture.paymentStatus)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-3 sm:px-6 py-4 hidden xl:table-cell text-sm whitespace-nowrap">
                     {facture.creditNoteId ? (
                       <button
                         onClick={() => fetchCreditNoteDetails(facture.creditNoteId)}
@@ -713,13 +715,13 @@ const { showAlert } = useGlobalAlert();
                       <span className="text-gray-400 text-xs">-</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
+                  <td className="px-3 sm:px-6 py-4 text-sm font-medium whitespace-nowrap">
+                    <div className="flex items-center space-x-1 sm:space-x-2">
 
                       <button
                         onClick={() => fetchFactureDetails(facture._id)}
                         disabled={loadingDetails || facture.paymentStatus === "annule"}
-                        className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed p-1 sm:p-0"
                       >
                         {loadingDetails ? "Chargement..." : "Voir"}
                       </button>
@@ -744,6 +746,7 @@ const { showAlert } = useGlobalAlert();
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
         {filteredFactures.length === 0 && (
@@ -762,8 +765,8 @@ const { showAlert } = useGlobalAlert();
 
       {/* Modal de paiement */}
       {showPaymentModal && selectedFacture && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60] p-4">
+          <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full sm:w-96 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900 mb-4">
               Enregistrer le paiement
             </h3>
@@ -842,7 +845,10 @@ const { showAlert } = useGlobalAlert();
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
-                  onClick={() => setShowPaymentModal(false)}
+                  onClick={() => {
+                    setShowPaymentModal(false);
+                    setSelectedFacture(null);
+                  }}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
                 >
                   Annuler
@@ -859,15 +865,18 @@ const { showAlert } = useGlobalAlert();
         </div>
       )}
       {showDetailsModal && factureDetails && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-5 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60] p-2 sm:p-4">
+          <div className="relative top-2 sm:top-5 mx-auto p-4 sm:p-5 border w-full sm:max-w-4xl shadow-lg rounded-md bg-white max-h-[95vh] overflow-y-auto">
             {/* Header avec boutons d'action */}
             <div className="flex justify-between items-center mb-6 no-print">
               <h3 className="text-xl font-bold text-gray-900">
                 Facture N° {factureDetails.numeroFacture.toString().padStart(4, '0')}
               </h3>
               <button
-                onClick={() => setShowDetailsModal(false)}
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  setFactureDetails(null);
+                }}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1134,7 +1143,7 @@ const { showAlert } = useGlobalAlert();
         </div>
       )}
       {showCreditNoteModal && creditNoteDetails && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60]">
           <div className="relative top-5 mx-auto p-6 border w-full max-w-4xl shadow-lg rounded-md bg-white">
             {/* Header */}
             <div className="flex justify-between items-center mb-6 border-b pb-4">
@@ -1147,7 +1156,10 @@ const { showAlert } = useGlobalAlert();
                 </p>
               </div>
               <button
-                onClick={() => setShowCreditNoteModal(false)}
+                onClick={() => {
+                  setShowCreditNoteModal(false);
+                  setCreditNoteDetails(null);
+                }}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="h-6 w-6" />
@@ -1325,7 +1337,7 @@ const { showAlert } = useGlobalAlert();
       )}
 
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0 mt-6">
         <button
           onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
@@ -1345,6 +1357,7 @@ const { showAlert } = useGlobalAlert();
         >
           Suivant
         </button>
+      </div>
       </div>
     </div>
   );

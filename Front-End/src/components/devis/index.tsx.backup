@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Eye, Send, Check, X, Car, User, Calendar, FileText, Euro, AlertCircle, Trash2 } from 'lucide-react';
 import axios from 'axios';
@@ -7,75 +7,14 @@ import jsPDF from 'jspdf';
 import { useGlobalAlert } from "@/components/ui-elements/AlertProvider";
 import { useConfirm } from "@/components/ui-elements/ConfirmProvider";
 
-// Composant Alert extrait
-const Alert: React.FC<{ variant?: string; title?: string; description?: string; onClose?: () => void }> = ({ variant = 'info', title, description, onClose }) => {
-  const variants = {
-    warning: {
-      bg: 'bg-yellow-50 border-yellow-200',
-      icon: 'text-yellow-600',
-      title: 'text-yellow-800',
-      desc: 'text-yellow-700'
-    },
-    success: {
-      bg: 'bg-green-50 border-green-200',
-      icon: 'text-green-600',
-      title: 'text-green-800',
-      desc: 'text-green-700'
-    },
-    error: {
-      bg: 'bg-red-50 border-red-200',
-      icon: 'text-red-600',
-      title: 'text-red-800',
-      desc: 'text-red-700'
-    },
-    info: {
-      bg: 'bg-blue-50 border-blue-200',
-      icon: 'text-blue-600',
-      title: 'text-blue-800',
-      desc: 'text-blue-700'
-    }
-  };
-
-  const style = variants[variant as keyof typeof variants] || variants.info;
-
-  return (
-    <div className={`${style.bg} border rounded-lg p-4 mb-6 flex items-start`}>
-      <AlertCircle className={`h-5 w-5 ${style.icon} mr-3 flex-shrink-0 mt-0.5`} />
-      <div className="flex-1">
-        {title && <h3 className={`font-semibold ${style.title} mb-1`}>{title}</h3>}
-        {description && <p className={`text-sm ${style.desc}`}>{description}</p>}
-      </div>
-      {onClose && (
-        <button
-          onClick={onClose}
-          className={`${style.icon} hover:opacity-70 ml-3`}
-          aria-label="Fermer"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      )}
-    </div>
-  );
-};
-
-// Fonction utilitaire extraite (exportée comme dans gestion-facture)
-export const getClientName = (devis: any): string => {
-  if (devis.clientId?.clientId?.username) {
-    return devis.clientId.clientId.username;
-  }
-  if (devis.clientId?.nom) {
-    return devis.clientId.nom;
-  }
-  return 'Client inconnu';
-};
 
 const GarageQuoteSystem: React.FC = () => {
   const [activeTab, setActiveTab] = useState('list');
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [selectedQuote, setSelectedQuote] = useState<any | null>(null);
-  const [quotes, setQuotes] = useState<any[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
-  const [vehicules, setVehicules] = useState<any[]>([]);
+  const [selectedQuote, setSelectedQuote] = useState(null);
+  const [quotes, setQuotes] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [vehicules, setVehicules] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState('');
   const [selectedVehiculeId, setSelectedVehiculeId] = useState('');
   const [loadingVehicules, setLoadingVehicules] = useState(false);
@@ -84,17 +23,17 @@ const GarageQuoteSystem: React.FC = () => {
   const [maindoeuvre, setMaindoeuvre] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState({ days: 0, hours: 0, minutes: 0 });
   const [loading, setLoading] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [editingQuote, setEditingQuote] = useState<any | null>(null);
+  const [notifications, setNotifications] = useState([]);
+  const [editingQuote, setEditingQuote] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [factureExists, setFactureExists] = useState<any>({});
-  const [selectedFacture, setSelectedFacture] = useState<any | null>(null);
+  const [factureExists, setFactureExists] = useState({});
+  const [selectedFacture, setSelectedFacture] = useState(null);
   const router = useRouter();
   const [filters, setFilters] = useState({ status: '', clientName: '', dateDebut: '', dateFin: '' });
   const [newQuote, setNewQuote] = useState({ clientName: '', vehicleInfo: '', vehiculeId: '', inspectionDate: '', services: [{ piece: '', quantity: 1, unitPrice: 0 }] });
   const statusColors = { brouillon: 'bg-gray-100 text-gray-800', envoye: 'bg-blue-100 text-blue-800', accepte: 'bg-green-100 text-green-800', refuse: 'bg-red-100 text-red-800' };
   const statusIcons = { brouillon: FileText, envoye: Send, accepte: Check, refuse: X };
-  const [currentUser, setCurrentUser] = useState<any | null>(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [searchClient, setSearchClient] = useState('');
@@ -106,14 +45,12 @@ const GarageQuoteSystem: React.FC = () => {
   const totalPages = Math.ceil(quotes.length / itemsPerPage);
   const { showAlert } = useGlobalAlert();
   const { confirm } = useConfirm();
-
-  // Fonction getAuthToken définie à l'intérieur du composant (comme dans gestion-facture)
-  const getAuthToken = (): string | null => {
+  const getAuthToken = () => {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
 
   // Au début du composant, remplace le filteredClients par :
-  const filteredClients = clients.filter((client: any) => {
+  const filteredClients = clients.filter(client => {
     const searchLower = searchClient.toLowerCase();
 
     // Chercher dans le nom direct
@@ -124,6 +61,70 @@ const GarageQuoteSystem: React.FC = () => {
 
     return matchNom || matchUsername;
   });
+
+  // Ajoute cette fonction au début de ton composant
+  const getClientName = (devis) => {
+    // Si le client a un compte lié avec username
+    if (devis.clientId?.clientId?.username) {
+      return devis.clientId.clientId.username;
+    }
+    // Sinon utilise le nom direct de la fiche
+    if (devis.clientId?.nom) {
+      return devis.clientId.nom;
+    }
+    return 'Client inconnu';
+  };
+
+  // Composant Alert personnalisé
+  const Alert = ({ variant = 'info', title, description, onClose }) => {
+    const variants = {
+      warning: {
+        bg: 'bg-yellow-50 border-yellow-200',
+        icon: 'text-yellow-600',
+        title: 'text-yellow-800',
+        desc: 'text-yellow-700'
+      },
+      success: {
+        bg: 'bg-green-50 border-green-200',
+        icon: 'text-green-600',
+        title: 'text-green-800',
+        desc: 'text-green-700'
+      },
+      error: {
+        bg: 'bg-red-50 border-red-200',
+        icon: 'text-red-600',
+        title: 'text-red-800',
+        desc: 'text-red-700'
+      },
+      info: {
+        bg: 'bg-blue-50 border-blue-200',
+        icon: 'text-blue-600',
+        title: 'text-blue-800',
+        desc: 'text-blue-700'
+      }
+    };
+
+    const style = variants[variant] || variants.info;
+
+    return (
+      <div className={`${style.bg} border rounded-lg p-4 mb-6 flex items-start`}>
+        <AlertCircle className={`h-5 w-5 ${style.icon} mr-3 flex-shrink-0 mt-0.5`} />
+        <div className="flex-1">
+          {title && <h3 className={`font-semibold ${style.title} mb-1`}>{title}</h3>}
+          {description && <p className={`text-sm ${style.desc}`}>{description}</p>}
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className={`${style.icon} hover:opacity-70 ml-3`}
+            aria-label="Fermer"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+    );
+  };
 
   useEffect(() => {
     const fetchUserWithLocation = async () => {
@@ -154,7 +155,7 @@ const GarageQuoteSystem: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event) => {
       if (!event.target.closest('.relative')) {
         setShowClientDropdown(false);
       }
@@ -311,7 +312,7 @@ const GarageQuoteSystem: React.FC = () => {
       pdf.setFont('helvetica', 'normal');
 
       // Lignes du tableau
-      selectedQuote.services.forEach((service: any, index: number) => {
+      selectedQuote.services.forEach((service, index) => {
         if (yPosition > 250) {
           pdf.addPage();
           yPosition = 20;
@@ -423,7 +424,7 @@ const GarageQuoteSystem: React.FC = () => {
     }
   };
 
-  const handleFilterChange = (field: string, value: any) => {
+  const handleFilterChange = (field, value) => {
     setFilters(prev => ({
       ...prev,
       [field]: value
@@ -466,8 +467,8 @@ const GarageQuoteSystem: React.FC = () => {
     loadDevisWithFactures(apiFilters);
   };
 
-  const calculateTotal = (services: any[], maindoeuvre = 0) => {
-    const totalServicesHT = services.reduce((sum: number, service: any) => {
+  const calculateTotal = (services, maindoeuvre = 0) => {
+    const totalServicesHT = services.reduce((sum, service) => {
       return sum + (service.quantity * service.unitPrice);
     }, 0);
 
@@ -487,18 +488,18 @@ const GarageQuoteSystem: React.FC = () => {
     };
   };
 
-  const loadDevisWithFactures = async (filterParams: any = {}) => {
+  const loadDevisWithFactures = async (filterParams = {}) => {
     try {
       setLoading(true);
       const response = await devisApi.getAll(filterParams);
 
-      const devisWithCalculatedTotals = (response.data || []).map((devis: any) => {
-        const servicesWithTotal = (devis.services || []).map((service: any) => ({
+      const devisWithCalculatedTotals = (response.data || []).map(devis => {
+        const servicesWithTotal = (devis.services || []).map(service => ({
           ...service,
           total: (service.quantity || 0) * (service.unitPrice || 0)
         }));
 
-        const totalServicesHT = servicesWithTotal.reduce((sum: number, service: any) => {
+        const totalServicesHT = servicesWithTotal.reduce((sum, service) => {
           return sum + ((service.quantity || 0) * (service.unitPrice || 0));
         }, 0);
 
@@ -612,14 +613,14 @@ const GarageQuoteSystem: React.FC = () => {
   };
 
 
-  const changeQuoteStatus = async (quoteId: string, newStatus: string) => {
+  const changeQuoteStatus = async (quoteId, newStatus) => {
     try {
       await devisApi.updateStatus(quoteId, newStatus);
 
       showAlert("success", `Devis ${newStatus} avec succès`, "");
 
       // Mettre à jour localement
-      setQuotes(quotes.map((quote: any) =>
+      setQuotes(quotes.map(quote =>
         quote.id === quoteId ? { ...quote, status: newStatus } : quote
       ));
 
@@ -633,7 +634,7 @@ const GarageQuoteSystem: React.FC = () => {
     }
   };
 
-  const deleteQuote = async (quoteId: string) => {
+  const deleteQuote = async (quoteId) => {
     const isConfirmed = await confirm({
       title: "Suppression du véhicule",
       message: `Êtes-vous sûr de vouloir supprimer ? Cette action est irréversible.`,
@@ -647,7 +648,7 @@ const GarageQuoteSystem: React.FC = () => {
       showAlert("success", "Devis supprimé", "Devis supprimé avec succès");
 
       // Supprimer localement
-      setQuotes(quotes.filter((quote: any) => quote.id !== quoteId));
+      setQuotes(quotes.filter(quote => quote.id !== quoteId));
 
       // Fermer le modal si c'est le devis affiché
       if (selectedQuote && selectedQuote.id === quoteId) {
@@ -660,7 +661,7 @@ const GarageQuoteSystem: React.FC = () => {
   };
 
 
-  const sendDevisByEmail = async (devisId: string) => {
+  const sendDevisByEmail = async (devisId) => {
     try {
       const token = getAuthToken();
       // ⭐ VÉRIFICATION CRITIQUE
@@ -690,7 +691,7 @@ const GarageQuoteSystem: React.FC = () => {
         showAlert("success", "Devis envoyé", "Devis envoyé par email avec succès");
 
         // 3. Mettre à jour localement
-        setQuotes(quotes.map((quote: any) =>
+        setQuotes(quotes.map(quote =>
           quote.id === devisId ? { ...quote, status: 'envoye' } : quote
         ));
       }
@@ -743,7 +744,7 @@ const GarageQuoteSystem: React.FC = () => {
     }
   };
 
-  const loadVehiculesByClient = async (clientId: any) => {
+  const loadVehiculesByClient = async (clientId) => {
     // ✅ PROTECTION : Extraire l'ID si c'est un objet
     const actualId = typeof clientId === 'object' ? clientId._id : clientId;
 
@@ -772,7 +773,7 @@ const GarageQuoteSystem: React.FC = () => {
       setVehicules(vehiculesData);
 
       console.log(`✅ ${vehiculesData.length} véhicules chargés pour le client`);
-    } catch (error: any) {
+    } catch (error) {
       if (error.response?.status === 403) {
         showAlert("error", "Accès refusé", "Vous n'avez pas la permission");
         throw error;
@@ -791,7 +792,7 @@ const GarageQuoteSystem: React.FC = () => {
   };
 
 
-  const handleClientChange = async (clientId: any) => {
+  const handleClientChange = async (clientId) => {
     setSelectedClientId(clientId);
 
     setNewQuote({
@@ -804,7 +805,7 @@ const GarageQuoteSystem: React.FC = () => {
   };
 
   // Fonction pour mettre à jour un service
-  const updateService = (index: number, field: string, value: any) => {
+  const updateService = (index, field, value) => {
     const updatedServices = [...newQuote.services];
     updatedServices[index] = {
       ...updatedServices[index],
@@ -818,8 +819,8 @@ const GarageQuoteSystem: React.FC = () => {
   };
 
   // Fonction pour supprimer un service
-  const removeService = (index: number) => {
-    const updatedServices = newQuote.services.filter((_: any, i: number) => i !== index);
+  const removeService = (index) => {
+    const updatedServices = newQuote.services.filter((_, i) => i !== index);
     setNewQuote({
       ...newQuote,
       services: updatedServices
@@ -843,7 +844,7 @@ const GarageQuoteSystem: React.FC = () => {
 
 
   const devisApi = {
-    create: async (devisData: any) => {
+    create: async (devisData) => {
       try {
         const token = getAuthToken();
         // ⭐ VÉRIFICATION CRITIQUE
@@ -879,7 +880,7 @@ const GarageQuoteSystem: React.FC = () => {
         throw new Error(error.response?.data?.message || "Erreur lors de la création du devis");
       }
     },
-    getAll: async (filters: any = {}) => {
+    getAll: async (filters = {}) => {
       try {
         const token = getAuthToken();
         // ⭐ VÉRIFICATION CRITIQUE
@@ -907,7 +908,7 @@ const GarageQuoteSystem: React.FC = () => {
         throw new Error(error.response?.data?.message || "Erreur lors de la récupération des devis");
       }
     },
-    updateStatus: async (devisId: string, status: string) => {
+    updateStatus: async (devisId, status) => {
       try {
         const token = getAuthToken();
         // ⭐ VÉRIFICATION CRITIQUE
@@ -935,7 +936,7 @@ const GarageQuoteSystem: React.FC = () => {
         throw new Error(error.response?.data?.message || "Erreur lors du changement de statut");
       }
     },
-    update: async (devisId: string, devisData: any) => {
+    update: async (devisId, devisData) => {
       try {
         const token = getAuthToken();
         // ⭐ VÉRIFICATION CRITIQUE
@@ -963,7 +964,7 @@ const GarageQuoteSystem: React.FC = () => {
         throw new Error(error.response?.data?.message || "Erreur lors de la mise à jour du devis");
       }
     },
-    delete: async (devisId: string) => {
+    delete: async (devisId) => {
       try {
         const token = getAuthToken();
         // ⭐ VÉRIFICATION CRITIQUE
@@ -992,7 +993,7 @@ const GarageQuoteSystem: React.FC = () => {
     }
   };
 
-  const startEditQuote = async (quote: any) => {
+  const startEditQuote = async (quote) => {
     // Vérifier si le devis peut être modifié
     if (quote.status === "accepte" || quote.status === "refuse") {
       const isConfirmed = await confirm({
@@ -1013,7 +1014,7 @@ const GarageQuoteSystem: React.FC = () => {
     setNewQuote({
       vehicleInfo: quote.vehicleInfo,
       inspectionDate: quote.inspectionDate,
-      services: quote.services.map((service: any) => ({
+      services: quote.services.map(service => ({
         piece: service.piece,
         quantity: service.quantity,
         unitPrice: service.unitPrice,
@@ -1037,11 +1038,11 @@ const GarageQuoteSystem: React.FC = () => {
   };
 
 
-  const removeNotification = (id: string) => {
-    setNotifications((prev: any[]) => prev.filter((notif: any) => notif.id !== id));
+  const removeNotification = (id) => {
+    setNotifications(prev => prev.filter(notif => notif.id !== id));
   };
 
-  const createWorkOrder = async (quote: any) => {
+  const createWorkOrder = async (quote) => {
     try {
       const token = getAuthToken();
       // ⭐ VÉRIFICATION CRITIQUE
@@ -1161,7 +1162,7 @@ const GarageQuoteSystem: React.FC = () => {
         await createNewFacture(devis);
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('❌ Erreur:', error);
 
       // ⭐ NE PAS afficher d'erreur si c'est 401/403 (déjà géré)
@@ -1183,7 +1184,7 @@ const GarageQuoteSystem: React.FC = () => {
   };
 
   const showImprovedFactureModal = (existingFacture: any, devis: any) => {
-    return new Promise<string>((resolve) => {
+    return new Promise((resolve) => {
       const modal = document.createElement('div');
       modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
       modal.innerHTML = `
@@ -1240,18 +1241,18 @@ const GarageQuoteSystem: React.FC = () => {
         }
       };
 
-      modal.addEventListener('click', (e: MouseEvent) => {
-        if ((e.target as HTMLElement) === modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
           cleanup();
           resolve('cancel');
           return;
         }
 
-        const button = (e.target as HTMLElement).closest('.modal-btn');
+        const button = e.target.closest('.modal-btn');
         if (button) {
           const action = button.getAttribute('data-action');
           cleanup();
-          resolve(action || 'cancel');
+          resolve(action);
         }
       });
     });
@@ -1412,7 +1413,7 @@ const GarageQuoteSystem: React.FC = () => {
         </div>
         {/* Notifications */}
         <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
-          {notifications.map((notif: any) => (
+          {notifications.map(notif => (
             <Alert
               key={notif.id}
               variant={notif.variant}
@@ -1651,7 +1652,7 @@ const GarageQuoteSystem: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {currentDevis.map((quote: any) => {
+                      {currentDevis.map((quote) => {
                         // Normaliser le status pour qu'il corresponde aux clés de statusIcons
                         const normalizedStatus = quote.status?.toLowerCase() || 'brouillon';
                         const StatusIcon = statusIcons[normalizedStatus] || FileText;
@@ -1660,117 +1661,117 @@ const GarageQuoteSystem: React.FC = () => {
                           <tr key={quote.id} className="hover:bg-gray-50">
                             <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900">
                               {quote.id}
-                            </td>
-                            <td className="px-3 sm:px-6 py-4">
-                              <div className="flex items-center">
-                                <User className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
-                                <span className="text-sm text-gray-900 truncate"> {getClientName(quote)}</span>
-                              </div>
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 hidden md:table-cell">
-                              <div className="flex items-center">
-                                <Car className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
-                                <span className="text-sm text-gray-900 truncate">{quote.vehicleInfo}</span>
-                              </div>
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 hidden lg:table-cell">
-                              <div className="flex items-center">
-                                <Calendar className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
-                                <span className="text-sm text-gray-900">{quote.inspectionDate}</span>
-                              </div>
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 hidden xl:table-cell">
-                              <span className="text-sm font-medium text-gray-900">
-                                {quote.totalTTC?.toFixed(3) || '0.000'}
-                              </span>
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 hidden xl:table-cell">
-                              <span className="text-sm font-medium text-gray-900">
-                                {quote.finalTotalTTC?.toFixed(3) || '0.000'}
-                              </span>
-                            </td>
-                            <td className="px-3 sm:px-6 py-4">
-                              <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}`}>
-                                <StatusIcon className="h-3 w-3 mr-1 flex-shrink-0" />
-                                <span className="hidden sm:inline">{quote.status?.charAt(0).toUpperCase() + quote.status?.slice(1) || 'Brouillon'}</span>
-                                <span className="sm:hidden">{quote.status?.charAt(0).toUpperCase() || 'B'}</span>
-                              </span>
-                            </td>
+                          </td>
+                          <td className="px-3 sm:px-6 py-4">
+                            <div className="flex items-center">
+                              <User className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                              <span className="text-sm text-gray-900 truncate"> {getClientName(quote)}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 sm:px-6 py-4 hidden md:table-cell">
+                            <div className="flex items-center">
+                              <Car className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                              <span className="text-sm text-gray-900 truncate">{quote.vehicleInfo}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 sm:px-6 py-4 hidden lg:table-cell">
+                            <div className="flex items-center">
+                              <Calendar className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                              <span className="text-sm text-gray-900">{quote.inspectionDate}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 sm:px-6 py-4 hidden xl:table-cell">
+                            <span className="text-sm font-medium text-gray-900">
+                              {quote.totalTTC?.toFixed(3) || '0.000'}
+                            </span>
+                          </td>
+                          <td className="px-3 sm:px-6 py-4 hidden xl:table-cell">
+                            <span className="text-sm font-medium text-gray-900">
+                              {quote.finalTotalTTC?.toFixed(3) || '0.000'}
+                            </span>
+                          </td>
+                          <td className="px-3 sm:px-6 py-4">
+                            <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}`}>
+                              <StatusIcon className="h-3 w-3 mr-1 flex-shrink-0" />
+                              <span className="hidden sm:inline">{quote.status?.charAt(0).toUpperCase() + quote.status?.slice(1) || 'Brouillon'}</span>
+                              <span className="sm:hidden">{quote.status?.charAt(0).toUpperCase() || 'B'}</span>
+                            </span>
+                          </td>
 
 
-                            <td className="px-3 sm:px-6 py-4 text-sm font-medium">
-                              <div className="flex items-center space-x-1 sm:space-x-2">
-                                <button
-                                  onClick={() => setSelectedQuote(quote)}
-                                  className="text-blue-600 hover:text-blue-900 p-1 sm:p-0"
-                                  title="Voir détails"
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </button>
+                          <td className="px-3 sm:px-6 py-4 text-sm font-medium">
+                            <div className="flex items-center space-x-1 sm:space-x-2">
+                            <button
+                              onClick={() => setSelectedQuote(quote)}
+                              className="text-blue-600 hover:text-blue-900 p-1 sm:p-0"
+                              title="Voir détails"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
 
-                                <button
-                                  onClick={() => startEditQuote(quote)}
-                                  className="text-green-600 hover:text-green-900 p-1 sm:p-0"
-                                  title="Modifier"
-                                >
-                                  <Edit2 className="h-4 w-4" />
-                                </button>
+                            <button
+                              onClick={() => startEditQuote(quote)}
+                              className="text-green-600 hover:text-green-900 p-1 sm:p-0"
+                              title="Modifier"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </button>
 
-                                {/* Bouton Send - visible seulement pour les devis en brouillon */}
-                                {quote.status === 'brouillon' && (
-                                  <button
-                                    onClick={() => sendDevisByEmail(quote.id)}
-                                    className="text-indigo-600 hover:text-indigo-900 p-1 sm:p-0"
-                                    disabled={loading}
-                                    title="Envoyer par email"
-                                  >
-                                    <Send className="h-4 w-4" />
-                                  </button>
-                                )}
+                            {/* Bouton Send - visible seulement pour les devis en brouillon */}
+                            {quote.status === 'brouillon' && (
+                              <button
+                                onClick={() => sendDevisByEmail(quote.id)}
+                                className="text-indigo-600 hover:text-indigo-900 p-1 sm:p-0"
+                                disabled={loading}
+                                title="Envoyer par email"
+                              >
+                                <Send className="h-4 w-4" />
+                              </button>
+                            )}
 
-                                <button
-                                  onClick={() => createFactureFromDevis(quote)}
-                                  className="text-blue-600 hover:text-blue-900 p-1 sm:p-0"
-                                  title="Créer facture"
-                                >
-                                  <Plus className="h-4 w-4" />
-                                </button>
+                            <button
+                              onClick={() => createFactureFromDevis(quote)}
+                              className="text-blue-600 hover:text-blue-900 p-1 sm:p-0"
+                              title="Créer facture"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </button>
 
-                                <button
-                                  onClick={() => deleteQuote(quote.id)}
-                                  className="text-red-600 hover:text-red-900 p-1 sm:p-0"
-                                  title="Supprimer"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 text-sm font-medium hidden lg:table-cell">
-                              {quote.status === 'accepte' ? (
-                                <button
-                                  onClick={() => createWorkOrder(quote)}
-                                  className="bg-orange-600 text-white px-2 sm:px-3 py-1 rounded-lg hover:bg-orange-700 transition-colors flex items-center space-x-1 text-xs sm:text-sm"
-                                  title="Créer ordre de travail"
-                                >
-                                  <FileText className="h-4 w-4" />
-                                  <span className="hidden sm:inline">Ordre</span>
-                                </button>
-                              ) : (
-                                <button
-                                  disabled
-                                  className="bg-gray-300 text-gray-500 px-3 py-1 rounded-lg cursor-not-allowed flex items-center space-x-1"
-                                  title="Devis doit être accepté"
-                                >
-                                  <FileText className="h-4 w-4" />
-                                  <span className="hidden sm:inline">Ordre</span>
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                            <button
+                              onClick={() => deleteQuote(quote.id)}
+                              className="text-red-600 hover:text-red-900 p-1 sm:p-0"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                            </div>
+                          </td>
+                          <td className="px-3 sm:px-6 py-4 text-sm font-medium hidden lg:table-cell">
+                            {quote.status === 'accepte' ? (
+                              <button
+                                onClick={() => createWorkOrder(quote)}
+                                className="bg-orange-600 text-white px-2 sm:px-3 py-1 rounded-lg hover:bg-orange-700 transition-colors flex items-center space-x-1 text-xs sm:text-sm"
+                                title="Créer ordre de travail"
+                              >
+                                <FileText className="h-4 w-4" />
+                                <span className="hidden sm:inline">Ordre</span>
+                              </button>
+                            ) : (
+                              <button
+                                disabled
+                                className="bg-gray-300 text-gray-500 px-3 py-1 rounded-lg cursor-not-allowed flex items-center space-x-1"
+                                title="Devis doit être accepté"
+                              >
+                                <FileText className="h-4 w-4" />
+                                <span className="hidden sm:inline">Ordre</span>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
                 </div>
               </div>
               {totalPages > 1 && (
@@ -1790,7 +1791,7 @@ const GarageQuoteSystem: React.FC = () => {
                       </button>
 
                       <div className="flex items-center space-x-1">
-                        {[...Array(totalPages)].map((_: any, index: number) => {
+                        {[...Array(totalPages)].map((_, index) => {
                           const pageNumber = index + 1;
                           const isCurrentPage = pageNumber === currentPage;
 
@@ -1850,7 +1851,7 @@ const GarageQuoteSystem: React.FC = () => {
                 {showClientDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                     {filteredClients.length > 0 ? (
-                      filteredClients.map((client: any) => (
+                      filteredClients.map((client) => (
                         <div
                           key={client._id}
                           onClick={() => {
@@ -1917,7 +1918,7 @@ const GarageQuoteSystem: React.FC = () => {
                           : "-- Sélectionner un véhicule --"
                     }
                   </option>
-                  {vehicules.map((vehicule: any) => (
+                  {vehicules.map((vehicule) => (
                     <option
                       key={vehicule._id}
                       value={vehicule._id}  // ✅ CORRECT - utilise l'ID comme value
@@ -1971,7 +1972,7 @@ const GarageQuoteSystem: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                {newQuote.services.map((service: any, index: number) => (
+                {newQuote.services.map((service, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4 relative">
                     {/* Bouton de suppression - visible seulement s'il y a plus d'un service */}
                     {newQuote.services.length > 1 && (
@@ -2256,108 +2257,110 @@ const GarageQuoteSystem: React.FC = () => {
                   <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <div className="inline-block min-w-full align-middle sm:px-0">
                       <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Piéce</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qté</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Prix Unit.</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Piéce</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qté</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Prix Unit.</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {selectedQuote.services.map((service, index) => (
+                          <tr key={index}>
+                            <td className="px-4 py-2 text-sm text-gray-900">{service.piece}</td>
+                            <td className="px-4 py-2 text-sm text-gray-900">{service.quantity}</td>
+                            <td className="px-4 py-2 text-sm text-gray-900">{(service.unitPrice || 0).toFixed(3)} Dinnar</td>
+                            <td className="px-4 py-2 text-sm font-medium text-gray-900">
+                              {((service.quantity || 0) * (service.unitPrice || 0)).toFixed(3)} Dinnar
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                          {selectedQuote.services.map((service: any, index: number) => (
-                            <tr key={index}>
-                              <td className="px-4 py-2 text-sm text-gray-900">{service.piece}</td>
-                              <td className="px-4 py-2 text-sm text-gray-900">{service.quantity}</td>
-                              <td className="px-4 py-2 text-sm text-gray-900">{(service.unitPrice || 0).toFixed(3)} Dinnar</td>
-                              <td className="px-4 py-2 text-sm font-medium text-gray-900">
-                                {((service.quantity || 0) * (service.unitPrice || 0)).toFixed(3)} Dinnar
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                        ))}
+                      </tbody>
+                    </table>
 
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                    <div className="space-y-2">
-                      {/* Détail des composants */}
-                      <div className="flex justify-between text-gray-600">
-                        <span>Total pièces HT:</span>
-                        <span>{((selectedQuote.totalServicesHT || 0)).toFixed(3)} Dinnar</span>
-                      </div>
-
-                      <div className="flex justify-between text-gray-600">
-                        <span>Main d'œuvre:</span>
-                        <span>{(selectedQuote.maindoeuvre || 0).toFixed(3)} Dinnar</span>
-                      </div>
-
-                      {/* Sous-total */}
-                      <div className="flex justify-between font-medium border-t pt-2">
-                        <span>Total HT:</span>
-                        <span>{((selectedQuote.totalServicesHT || 0) + (selectedQuote.maindoeuvre || 0)).toFixed(3)} Dinnar</span>
-                      </div>
-
-                      {/* TVA */}
-                      <div className="flex justify-between text-blue-600">
-                        <span>TVA ({selectedQuote.tvaRate || 20}%):</span>
-                        <span>
-                          {(
-                            ((selectedQuote.montantTVA || 0))
-                          ).toFixed(3)} Dinnar
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between text-red-600">
-                        <span>REMISE ({selectedQuote.remiseRate || 0}%):</span>
-                        <span>
-                          {(
-                            ((selectedQuote.montantRemise || 0))
-                          ).toFixed(3)} Dinnar
-                        </span>
-                      </div>
-
-                      {/* Total final */}
-                      <div className="flex justify-between text-lg font-bold border-t pt-2 text-green-700">
-                        <span>Total TTC:</span>
-                        <span>
-                          {(
-                            (selectedQuote.totalServicesHT || 0) +
-                            (selectedQuote.maindoeuvre || 0) +
-                            ((selectedQuote.montantTVA || 0))
-                          ).toFixed(3)} Dinnar
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between text-lg font-bold border-t pt-2 text-yellow-700">
-                        <span>Total TTC aprés remise :</span>
-                        <span>
-                          {(
-                            ((selectedQuote.totalTTC || 0) - ((selectedQuote.montantRemise || 0)))
-                          ).toFixed(3)} Dinnar
-                        </span>
-                      </div>
-
-                    </div>
                   </div>
                 </div>
-                <div className="p-6 border-t border-gray-200">
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={printInvoice}
-                      disabled={isGeneratingPDF}
-                      className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
-                    >
-                      {isGeneratingPDF ? 'Génération...' : 'Télécharger PDF'}
-                    </button>
+
+                <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                  <div className="space-y-2">
+                    {/* Détail des composants */}
+                    <div className="flex justify-between text-gray-600">
+                      <span>Total pièces HT:</span>
+                      <span>{((selectedQuote.totalServicesHT || 0)).toFixed(3)} Dinnar</span>
+                    </div>
+
+                    <div className="flex justify-between text-gray-600">
+                      <span>Main d'œuvre:</span>
+                      <span>{(selectedQuote.maindoeuvre || 0).toFixed(3)} Dinnar</span>
+                    </div>
+
+                    {/* Sous-total */}
+                    <div className="flex justify-between font-medium border-t pt-2">
+                      <span>Total HT:</span>
+                      <span>{((selectedQuote.totalServicesHT || 0) + (selectedQuote.maindoeuvre || 0)).toFixed(3)} Dinnar</span>
+                    </div>
+
+                    {/* TVA */}
+                    <div className="flex justify-between text-blue-600">
+                      <span>TVA ({selectedQuote.tvaRate || 20}%):</span>
+                      <span>
+                        {(
+                          ((selectedQuote.montantTVA || 0))
+                        ).toFixed(3)} Dinnar
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-red-600">
+                      <span>REMISE ({selectedQuote.remiseRate || 0}%):</span>
+                      <span>
+                        {(
+                          ((selectedQuote.montantRemise || 0))
+                        ).toFixed(3)} Dinnar
+                      </span>
+                    </div>
+
+                    {/* Total final */}
+                    <div className="flex justify-between text-lg font-bold border-t pt-2 text-green-700">
+                      <span>Total TTC:</span>
+                      <span>
+                        {(
+                          (selectedQuote.totalServicesHT || 0) +
+                          (selectedQuote.maindoeuvre || 0) +
+                          ((selectedQuote.montantTVA || 0))
+                        ).toFixed(3)} Dinnar
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-lg font-bold border-t pt-2 text-yellow-700">
+                      <span>Total TTC aprés remise :</span>
+                      <span>
+                        {(
+                          ((selectedQuote.totalTTC || 0) - ((selectedQuote.montantRemise || 0)))
+                        ).toFixed(3)} Dinnar
+                      </span>
+                    </div>
+
                   </div>
+                </div>
+              </div>
+              <div className="p-6 border-t border-gray-200">
+                <div className="flex space-x-4">
+                  <button
+                    onClick={printInvoice}
+                    disabled={isGeneratingPDF}
+                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+                  >
+                    {isGeneratingPDF ? 'Génération...' : 'Télécharger PDF'}
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         )}
+
+
+      </div>
       </div>
     </div>
   );

@@ -228,20 +228,20 @@ const OrdreTravailSystem = () => {
   };
 
   return (
-    <div className="min-h-screen  p-6">
-      <div className="max-w-20xl mx-auto">
+    <div className="min-h-screen p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Ordres de Travail</h1>
-              <p className="text-gray-600">Gestion des ordres de travail pour l'atelier</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Ordres de Travail</h1>
+              <p className="text-sm sm:text-base text-gray-600">Gestion des ordres de travail pour l'atelier</p>
             </div>
             <button
               onClick={() => window.history?.back()}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors text-sm sm:text-base"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               <span>Retour</span>
             </button>
           </div>
@@ -249,36 +249,36 @@ const OrdreTravailSystem = () => {
 
         {/* Messages d'état */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 flex items-center">
-            <AlertCircle className="h-4 w-4 mr-2" />
-            {error}
+          <div className="bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded mb-4 sm:mb-6 flex items-center text-sm sm:text-base">
+            <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 flex items-center">
-            <CheckCircle className="h-4 w-4 mr-2" />
-            {success}
+          <div className="bg-green-100 border border-green-400 text-green-700 px-3 sm:px-4 py-2 sm:py-3 rounded mb-4 sm:mb-6 flex items-center text-sm sm:text-base">
+            <CheckCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+            <span>{success}</span>
           </div>
         )}
 
         {/* Navigation Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
           <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
+            <nav className="flex space-x-2 sm:space-x-4 lg:space-x-8 px-4 sm:px-6 overflow-x-auto">
               <button
                 onClick={() => handleTabChange('create')}
-                className={`py-4 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-3 sm:py-4 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                   activeTab === 'create'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Créer Ordre de Travail
+                Créer Ordre
               </button>
               <button
                 onClick={() => handleTabChange('list')}
-                className={`py-4 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-3 sm:py-4 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                   activeTab === 'list'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
