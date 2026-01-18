@@ -324,7 +324,7 @@ if (view === 'list') {
         onDeleteGarage={handleDeleteGarage}
       />
 
-      <ConfirmDialog
+     <ConfirmDialog
         {...confirmDialog}
         onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
         onConfirm={confirmDialog.onConfirm}
@@ -519,7 +519,6 @@ if (view === 'list') {
       />
     );
   }
-
 
   return null;
 }

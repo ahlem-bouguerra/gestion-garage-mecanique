@@ -62,4 +62,3 @@ const seedRoles = async () => {
 };
 
 seedRoles();
-

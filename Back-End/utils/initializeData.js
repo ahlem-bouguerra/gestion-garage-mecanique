@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { Garage } from "../models/Garage.js";
 import { Garagiste } from "../models/Garagiste.js";
+import { Users } from "../models/Users.js";
+import { UserRole } from "../models/UserRole.js";
+import { GaragisteRole } from "../models/GaragisteRole.js";
+import { Role } from "../models/Role.js";
 import Service from "../models/Service.js";
 import GarageService from "../models/GarageService.js";
 
@@ -13,7 +17,74 @@ export const initializeDefaultData = async () => {
   try {
     console.log("🔍 Vérification des données initiales...");
 
-    // Vérifier si le garagiste existe
+    // ========== 1. CRÉER LE SUPER ADMIN ==========
+    const superAdminEmail = "ahlembouguerra@outlook.fr";
+    let superAdmin = await Users.findOne({ email: superAdminEmail });
+
+    if (!superAdmin) {
+      console.log("📝 Création du Super Admin...");
+      
+      const hashedPassword = await bcrypt.hash("Admin@123", 10);
+
+      superAdmin = await Users.create({
+        _id: new mongoose.Types.ObjectId("696bb4af0cfa67bf00359af3"),
+        username: "super ahlem",
+        email: superAdminEmail,
+        password: hashedPassword,
+        phone: "24563333",
+        isVerified: true,
+        isSuperAdmin: true,
+        verificationToken: null,
+        verificationTokenExpiry: null,
+        resetPasswordToken: null,
+        resetPasswordExpires: null
+      });
+
+      console.log("✅ Super Admin créé");
+    } else {
+      console.log("ℹ️ Super Admin déjà existant");
+    }
+
+    // ========== 2. CRÉER LE RÔLE SUPER ADMIN ==========
+    const superAdminRoleId = new mongoose.Types.ObjectId("696bb4af0cfa67bf00359af6");
+    let superAdminRole = await Role.findById(superAdminRoleId);
+
+    if (!superAdminRole) {
+      console.log("📝 Création du rôle Super Admin...");
+      
+      superAdminRole = await Role.create({
+        _id: superAdminRoleId,
+        name: "Super Admin",
+        description: "Accès complet à toutes les fonctionnalités du système",
+        isSystem: true
+      });
+
+      console.log("✅ Rôle Super Admin créé");
+    } else {
+      console.log("ℹ️ Rôle Super Admin déjà existant");
+    }
+
+    // ========== 3. ASSIGNER LE RÔLE AU SUPER ADMIN ==========
+    const existingUserRole = await UserRole.findOne({
+      userId: superAdmin._id,
+      roleId: superAdminRole._id
+    });
+
+    if (!existingUserRole) {
+      console.log("📝 Attribution du rôle Super Admin...");
+      
+      await UserRole.create({
+        _id: new mongoose.Types.ObjectId("696bb4af0cfa67bf00359af8"),
+        userId: superAdmin._id,
+        roleId: superAdminRole._id
+      });
+
+      console.log("✅ Rôle Super Admin attribué");
+    } else {
+      console.log("ℹ️ Rôle déjà attribué au Super Admin");
+    }
+
+    // ========== 4. CRÉER LE GARAGISTE ==========
     const garagisteEmail = "ahlembouguerra20@gmail.com";
     let garagiste = await Garagiste.findOne({ email: garagisteEmail });
 
@@ -41,7 +112,46 @@ export const initializeDefaultData = async () => {
       console.log("ℹ️ Garagiste déjà existant");
     }
 
-    // Vérifier si le garage existe
+    // ========== 4.1 CRÉER LE RÔLE GARAGISTE ==========
+    const garagisteRoleId = new mongoose.Types.ObjectId("6968e71c011b240013eb0ed3");
+    let garagisteRole = await Role.findById(garagisteRoleId);
+
+    if (!garagisteRole) {
+      console.log("📝 Création du rôle Garagiste...");
+      
+      garagisteRole = await Role.create({
+        _id: garagisteRoleId,
+        name: "Admin Garage",
+        description: "Administrateur de garage avec accès complet à la gestion du garage",
+        isSystem: true
+      });
+
+      console.log("✅ Rôle Garagiste créé");
+    } else {
+      console.log("ℹ️ Rôle Garagiste déjà existant");
+    }
+
+    // ========== 4.2 ASSIGNER LE RÔLE AU GARAGISTE ==========
+    const existingGaragisteRole = await GaragisteRole.findOne({
+      garagisteId: garagiste._id,
+      roleId: garagisteRole._id
+    });
+
+    if (!existingGaragisteRole) {
+      console.log("📝 Attribution du rôle au Garagiste...");
+      
+      await GaragisteRole.create({
+        _id: new mongoose.Types.ObjectId("696a15afcac4ef4e3a8de666"),
+        garagisteId: garagiste._id,
+        roleId: garagisteRole._id
+      });
+
+      console.log("✅ Rôle Garagiste attribué");
+    } else {
+      console.log("ℹ️ Rôle déjà attribué au Garagiste");
+    }
+
+    // ========== 5. CRÉER LE GARAGE ==========
     const garageMatricule = "987654321777";
     let garage = await Garage.findOne({ matriculeFiscal: garageMatricule });
 
@@ -76,7 +186,7 @@ export const initializeDefaultData = async () => {
       console.log("ℹ️ Garage déjà existant");
     }
 
-    // Mettre à jour le garagiste si nécessaire
+    // ========== 6. LIER LE GARAGISTE AU GARAGE ==========
     if (!garagiste.garage || garagiste.garage.toString() !== garage._id.toString()) {
       await Garagiste.findByIdAndUpdate(
         garagiste._id,
@@ -87,13 +197,13 @@ export const initializeDefaultData = async () => {
 
     console.log("✅ Données initiales prêtes\n");
     
-    // Initialiser les services par défaut
+    // ========== 7. INITIALISER LES SERVICES ==========
     await initializeServices(garagiste._id);
     
-    // Associer les services au garage
+    // ========== 8. ASSOCIER LES SERVICES AU GARAGE ==========
     await initializeGarageServices(garage._id);
     
-    return { garage, garagiste };
+    return { garage, garagiste, superAdmin };
 
   } catch (error) {
     console.error("❌ Erreur lors de l'initialisation des données:", error);

@@ -8,6 +8,7 @@ import authGarageRoutes from "./routes/authGarage.js";
 import authClientRoutes from "./routes/authClient.js";
 import authSuperAdminRoutes from "./routes/authSuperAdmin.js";
 import session from "express-session";
+import { initializeDefaultData } from './utils/initializeData.js';
 
 
 dotenv.config();
@@ -30,6 +31,8 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connecté"))
   .catch((err) => console.error("Erreur MongoDB :", err));
+
+  await initializeDefaultData();
 
 
 // Sessions (obligatoire pour Passport)
