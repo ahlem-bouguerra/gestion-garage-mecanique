@@ -8,7 +8,7 @@ interface Rating {
   comment: string;
   recommande: boolean;
   createdAt: string;
-  status: 'active' | 'signale' | 'masque'; // ✅ Ajout
+  status: 'active' | 'signale' | 'masque';
   ficheClientId: { nom: string };
   ordreSnapshot: {
     numeroOrdre?: string;
@@ -32,7 +32,7 @@ interface Statistics {
 }
 
 interface GarageRatingsProps {
-  selectedGarage: { _id: string; nom: string };
+  selectedGarage?: { _id: string; nom: string } | null;
   apiBase?: string;
 }
 
@@ -48,6 +48,18 @@ const GarageRatings: React.FC<GarageRatingsProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ rating: 5, comment: '', recommande: true, status: 'active' as 'active' | 'signale' | 'masque' });
   const [minRating, setMinRating] = useState<number | null>(null);
+
+  // ✅ Vérification de sécurité au début du composant
+  if (!selectedGarage) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+          <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-600 text-lg">Veuillez sélectionner un garage</p>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     loadRatings();
@@ -90,7 +102,7 @@ const GarageRatings: React.FC<GarageRatingsProps> = ({
       rating: rating.rating,
       comment: rating.comment,
       recommande: rating.recommande,
-      status: rating.status // ✅ Ajout
+      status: rating.status
     });
   };
 
@@ -177,7 +189,7 @@ const GarageRatings: React.FC<GarageRatingsProps> = ({
   }
 
   return (
-  <div className="min-h-screen  p-3">
+    <div className="min-h-screen p-3">
       <div className="w-full">
         {/* Header avec statistiques */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
@@ -297,7 +309,7 @@ const GarageRatings: React.FC<GarageRatingsProps> = ({
                       />
                       <label className="text-gray-700">Je recommande ce garage</label>
                     </div>
-                    {/* Dans le mode édition, après la checkbox "Je recommande" */}
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
                       <select

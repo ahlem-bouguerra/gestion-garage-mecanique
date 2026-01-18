@@ -1,7 +1,7 @@
 
 import { createTimeFrameExtractor } from "@/utils/timeframe-extractor";
 import { Metadata } from "next";
-import CreateGarageForm from "@/components/CreateGarageForm/index.tsx";
+import CreateGarageForm from "@/components/CreateGarageForm";
 
 
 export const metadata: Metadata = {

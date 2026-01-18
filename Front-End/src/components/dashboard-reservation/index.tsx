@@ -84,33 +84,39 @@ const isDatePassed = (dateString) => {
   return reservationDate < today;
 };
 
-  useEffect(() => {
-    const fetchReservations = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/reservations", {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-        
-        // Filtrer les réservations avec dates non passées
-        const filteredReservations = res.data.filter(reservation => 
-          !isDatePassed(reservation.creneauDemande.date)
-        );
-        
-        setReservations(filteredReservations);
-        filterReservations(filteredReservations);
-        setLoading(false);
-      } catch (err) {
-        console.error("Erreur fetch reservations:", err);
-        setLoading(false);
-      }
-    };
-    
-    fetchReservations();
-    
-    // Actualiser toutes les 5 minutes
-    const interval = setInterval(fetchReservations, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+useEffect(() => {
+  const fetchReservations = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        "http://localhost:5000/api/reservations",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const filteredReservations = res.data.filter(reservation =>
+        !isDatePassed(reservation.creneauDemande.date)
+      );
+
+      setReservations(filteredReservations);
+      filterReservations(filteredReservations);
+      setLoading(false);
+
+    } catch (err) {
+      console.error("❌ Erreur fetch reservations:", err);
+      setLoading(false);
+    }
+  };
+
+  fetchReservations();
+  const interval = setInterval(fetchReservations, 5 * 60 * 1000);
+  return () => clearInterval(interval);
+}, []);
+
 
 
 

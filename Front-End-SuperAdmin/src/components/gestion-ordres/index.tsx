@@ -2,13 +2,52 @@
 
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Filter, AlertCircle, Plus, Eye, Edit,Trash2 ,FileText} from 'lucide-react';
-import { getAllGarages, getOrdresByGarage, getStatistiques, getDevisDetails,deleteOrdre } from './api';
+import { Filter, AlertCircle, Plus, Eye, Edit, Trash2, FileText } from 'lucide-react';
+import { getAllGarages, getOrdresByGarage, getStatistiques, getDevisDetails, deleteOrdre } from './api';
 import CreateOrderModal from './AjouterOrdre';
 import EditOrderModal from './EditOrderModal';
 import OrderDetailsModal from './details-ordre';
 
-const getClientName = (ordre) => {
+// Types
+interface Garage {
+  _id: string;
+  nom: string;
+  matriculeFiscal: string;
+  phone?: string;
+  email?: string;
+}
+
+interface OrdreTravail {
+  _id: string;
+  numeroOrdre: string;
+  devisId: any;
+  status: 'en_attente' | 'en_cours' | 'termine' | 'suspendu' | 'supprime';
+  priorite: 'faible' | 'normale' | 'elevee' | 'urgente';
+  dateCommence: string;
+  dateFinPrevue?: string;
+  totalHeuresEstimees?: number;
+  atelierNom?: string;
+  description?: string;
+  clientInfo?: {
+    nom?: string;
+    ClientId?: {
+      nom?: string;
+      clientId?: {
+        username?: string;
+      };
+    };
+  };
+  vehiculedetails?: { nom: string };
+  taches?: any[];
+}
+
+interface SuperAdminDashboardProps {
+  selectedGarage?: Garage;
+  onNavigate?: () => void;
+}
+
+// Fonction utilitaire pour obtenir le nom du client
+const getClientName = (ordre: OrdreTravail): string => {
   // Priorité 1 : clientInfo avec Client lié
   if (ordre.clientInfo?.ClientId?.clientId?.username) {
     return ordre.clientInfo.ClientId.clientId.username;
@@ -32,39 +71,14 @@ const getClientName = (ordre) => {
   return 'N/A';
 };
 
-
-interface Garage {
-  _id: string;
-  nom: string;
-  matriculeFiscal: string;
-  phone?: string;
-  email?: string;
-}
-
-interface OrdreTravail {
-  _id: string;
-  numeroOrdre: string;
-  devisId: any;
-  status: string;
-  priorite: string;
-  dateCommence: string;
-  clientInfo?: { nom: string };
-  vehiculedetails?: { nom: string };
-  taches?: any[];
-}
-interface SuperAdminDashboardProps {
-  selectedGarage?: Garage;  // Ajout
-  onNavigate?: () => void;  // Ajout
-}
-
 const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ 
   selectedGarage: garageFromProps,
   onNavigate 
 }) => {
   const [garages, setGarages] = useState<Garage[]>([]);
-   const [selectedGarage, setSelectedGarage] = useState<Garage | null>(garageFromProps || null);
+  const [selectedGarage, setSelectedGarage] = useState<Garage | null>(garageFromProps || null);
   const [ordres, setOrdres] = useState<OrdreTravail[]>([]);
-    const showGarageList = !garageFromProps;
+  const showGarageList = !garageFromProps;
   
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -74,7 +88,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   // Données sélectionnées
   const [selectedOrdre, setSelectedOrdre] = useState<OrdreTravail | null>(null);
   const [selectedDevisDetails, setSelectedDevisDetails] = useState<any>(null);
-  const [success,setSuccess] = useState("");
+  const [success, setSuccess] = useState("");
   
   const [filters, setFilters] = useState({
     status: '',
@@ -245,38 +259,34 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     }
   };
 
-  const handleDeleteOrdre = async (ordre: any) => {
-  // Demander confirmation avec détails
-  const confirmed = window.confirm(
-    `⚠️ ATTENTION : Suppression définitive !\n\n` +
-    `Ordre: ${ordre.numeroOrdre}\n` +
-    `Client: ${ordre.clientInfo?.nom || 'N/A'}\n` +
-    `Véhicule: ${ordre.vehiculedetails?.nom || 'N/A'}\n\n` +
-    `Cette action est IRRÉVERSIBLE.\n` +
-    `Êtes-vous absolument sûr ?`
-  );
-  
-  if (!confirmed) return;
+  const handleDeleteOrdre = async (ordre: OrdreTravail) => {
+    const confirmed = window.confirm(
+      `⚠️ ATTENTION : Suppression définitive !\n\n` +
+      `Ordre: ${ordre.numeroOrdre}\n` +
+      `Client: ${ordre.clientInfo?.nom || 'N/A'}\n` +
+      `Véhicule: ${ordre.vehiculedetails?.nom || 'N/A'}\n\n` +
+      `Cette action est IRRÉVERSIBLE.\n` +
+      `Êtes-vous absolument sûr ?`
+    );
+    
+    if (!confirmed) return;
 
-  try {
-    setLoading(true);
-    
-    // Appeler l'API avec le garageId pour SuperAdmin
-    await deleteOrdre(ordre._id, selectedGarage);
-    
-    // Message de succès
-    setSuccess('✅ Ordre supprimé définitivement');
-    
-    // Recharger la liste des ordres
-    await loadOrdres();
-    
-  } catch (error: any) {
-    console.error('❌ Erreur suppression ordre:', error);
-    setError(error.message || 'Erreur lors de la suppression');
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      
+      await deleteOrdre(ordre._id, selectedGarage?._id);
+      
+      setSuccess('✅ Ordre supprimé définitivement');
+      
+      await loadOrdres();
+      
+    } catch (error: any) {
+      console.error('❌ Erreur suppression ordre:', error);
+      setError(error.message || 'Erreur lors de la suppression');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOrderCreated = () => {
     setShowCreateModal(false);
@@ -307,7 +317,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     setFilters(prev => ({ ...prev, page: newPage }));
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string): string => {
     const badges: Record<string, string> = {
       en_attente: 'bg-yellow-100 text-yellow-800',
       en_cours: 'bg-blue-100 text-blue-800',
@@ -317,7 +327,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     return badges[status] || 'bg-gray-100 text-gray-800';
   };
 
-  const getPrioriteBadge = (priorite: string) => {
+  const getPrioriteBadge = (priorite: string): string => {
     const badges: Record<string, string> = {
       urgente: 'bg-red-100 text-red-800',
       elevee: 'bg-orange-100 text-orange-800',
@@ -327,37 +337,35 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     return badges[priorite] || 'bg-gray-100 text-gray-800';
   };
 
-  const formatStatus = (status: string) => {
+  const formatStatus = (status: string): string => {
     return status.replace('_', ' ').charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
   };
 
-  const formatPriorite = (priorite: string) => {
+  const formatPriorite = (priorite: string): string => {
     return priorite.charAt(0).toUpperCase() + priorite.slice(1);
   };
 
   return (
- <div className="min-h-screen  p-3">
+    <div className="min-h-screen p-3">
       <div className="w-full">
         {/* Header */}
-       
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-3">
-          <FileText className="h-8 w-8" />
-          Gestion des Ordres - Super Admin
-        </h1>
-        <p className="text-blue-100 mt-2">Consultez tous les ordres de vos garages</p>
-      </div>
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <FileText className="h-8 w-8" />
+            Gestion des Ordres - Super Admin
+          </h1>
+          <p className="text-blue-100 mt-2">Consultez tous les ordres de vos garages</p>
+        </div>
 
-          {selectedGarage && (
-            <button
-              onClick={handleCreateOrder}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition mb-4"
-            >
-              <Plus className="w-5 h-5" />
-              Créer un Ordre
-            </button>
-          )}
-        
+        {selectedGarage && (
+          <button
+            onClick={handleCreateOrder}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition mb-4"
+          >
+            <Plus className="w-5 h-5" />
+            Créer un Ordre
+          </button>
+        )}
 
         {/* Message d'erreur */}
         {error && (
@@ -375,39 +383,39 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
- {showGarageList && (
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                Garages ({garages.length})
-              </h2>
+          {showGarageList && (
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-semibold mb-4">
+                  Garages ({garages.length})
+                </h2>
 
-              {loading && garages.length === 0 ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-                  <p className="text-gray-600 mt-4 text-sm">Chargement...</p>
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-[calc(100vh-250px)] overflow-y-auto">
-                  {garages.map((garage) => (
-                    <button
-                      key={garage._id}
-                      onClick={() => handleGarageSelect(garage)}
-                      className={`w-full text-left p-4 rounded-lg border-2 transition ${
-                        selectedGarage?._id === garage._id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <h3 className="font-semibold text-gray-900">{garage.nom}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{garage.matriculeFiscal}</p>
-                    </button>
-                  ))}
-                </div>
-              )}
+                {loading && garages.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                    <p className="text-gray-600 mt-4 text-sm">Chargement...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-[calc(100vh-250px)] overflow-y-auto">
+                    {garages.map((garage) => (
+                      <button
+                        key={garage._id}
+                        onClick={() => handleGarageSelect(garage)}
+                        className={`w-full text-left p-4 rounded-lg border-2 transition ${
+                          selectedGarage?._id === garage._id
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <h3 className="font-semibold text-gray-900">{garage.nom}</h3>
+                        <p className="text-sm text-gray-600 mt-1">{garage.matriculeFiscal}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
- )}
+          )}
 
           {/* Ordres de travail */}
           <div className="lg:col-span-7">
@@ -509,7 +517,6 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                           
                           {/* Boutons Actions */}
                           <div className="flex items-center gap-2 shrink-0">
-                            {/* Bouton Modifier - Visible si pas terminé ou supprimé */}
                             {ordre.status !== 'termine' && ordre.status !== 'supprime' && (
                               <button
                                 onClick={() => handleEditOrder(ordre)}
@@ -522,7 +529,6 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                               </button>
                             )}
 
-                            {/* Bouton Voir Détails */}
                             <button
                               onClick={() => handleViewDetails(ordre)}
                               disabled={loading}
@@ -532,6 +538,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                               <Eye className="w-4 h-4" />
                               <span className="text-sm font-medium">Détails</span>
                             </button>
+                            
                             <button
                               onClick={() => handleDeleteOrdre(ordre)}
                               disabled={loading}

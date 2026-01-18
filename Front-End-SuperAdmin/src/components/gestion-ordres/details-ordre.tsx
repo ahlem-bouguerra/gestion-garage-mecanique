@@ -1,8 +1,69 @@
 import React, { useState } from 'react';
 import { X, User, MapPin, Wrench, UserCheck, Clock, FileText, Edit2, Play, CheckCircle, Package, DollarSign, Calendar, AlertCircle } from 'lucide-react';
 
+// Types
+interface Tache {
+  _id?: string;
+  description: string;
+  quantite: number;
+  estimationHeures: number;
+  heuresReelles?: number;
+  status?: 'en_attente' | 'en_cours' | 'terminee';
+  serviceNom?: string;
+  mecanicienNom?: string;
+  notes?: string;
+  dateDebut?: string;
+  dateFin?: string;
+}
+
+interface Ordre {
+  _id?: string;
+  numeroOrdre?: string;
+  devisId: string;
+  status: 'en_attente' | 'en_cours' | 'termine' | 'suspendu' | 'supprime';
+  priorite: 'faible' | 'normale' | 'elevee' | 'urgente';
+  dateCommence?: string;
+  dateFinPrevue?: string;
+  totalHeuresEstimees?: number;
+  atelierNom?: string;
+  description?: string;
+  taches?: Tache[];
+  clientInfo?: {
+    nom?: string;
+  };
+  vehiculedetails?: {
+    nom?: string;
+  };
+}
+
+interface DevisDetails {
+  id?: string;
+  clientName?: string;
+  clientPhone?: string;
+  clientEmail?: string;
+  vehicleInfo?: string;
+  vehiclePlate?: string;
+  createdAt?: string;
+  estimatedTime?: number;
+  services?: any[];
+  pieces?: any[];
+  totalHT?: number;
+  totalTTC?: number;
+  tvaRate?: number;
+}
+
+interface OrderDetailsModalProps {
+  ordre: Ordre;
+  devisDetails?: DevisDetails;
+  onClose: () => void;
+  onEdit?: () => void;
+  onDemarrer?: () => void;
+  onTerminer?: () => void;
+  loading?: boolean;
+}
+
 // Composant principal du modal de détails
-const OrderDetailsModal = ({ 
+const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ 
   ordre, 
   devisDetails, 
   onClose, 
@@ -28,7 +89,7 @@ const OrderDetailsModal = ({
     urgente: { label: 'Urgente', color: 'bg-red-100 text-red-800' }
   };
 
-  const formatDate = (date) => {
+  const formatDate = (date?: string): string => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('fr-FR', {
       day: '2-digit',
@@ -39,7 +100,7 @@ const OrderDetailsModal = ({
     });
   };
 
-  const formatPrice = (price) => {
+  const formatPrice = (price?: number): string => {
     return new Intl.NumberFormat('fr-TN', {
       style: 'currency',
       currency: 'TND'
@@ -161,14 +222,6 @@ const OrderDetailsModal = ({
             <TachesTab taches={ordre?.taches} formatDate={formatDate} />
           )}
           
-          {activeTab === 'services' && (
-            <ServicesTab services={devisDetails?.services} formatPrice={formatPrice} />
-          )}
-          
-          {activeTab === 'pieces' && (
-            <PiecesTab pieces={devisDetails?.pieces} formatPrice={formatPrice} />
-          )}
-          
           {activeTab === 'financier' && (
             <FinancierTab devisDetails={devisDetails} formatPrice={formatPrice} />
           )}
@@ -176,8 +229,6 @@ const OrderDetailsModal = ({
 
         {/* Footer */}
         <div className="border-t bg-gray-50 p-4 flex justify-between items-center">
-        
-          
           <button
             onClick={onClose}
             className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
@@ -191,7 +242,7 @@ const OrderDetailsModal = ({
 };
 
 // Tab: Informations Générales
-const GeneralTab = ({ ordre, devisDetails, formatDate }) => (
+const GeneralTab: React.FC<{ ordre: Ordre; devisDetails?: DevisDetails; formatDate: (date?: string) => string }> = ({ ordre, devisDetails, formatDate }) => (
   <div className="space-y-6">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Client */}
@@ -290,7 +341,7 @@ const GeneralTab = ({ ordre, devisDetails, formatDate }) => (
 );
 
 // Tab: Tâches
-const TachesTab = ({ taches, formatDate }) => (
+const TachesTab: React.FC<{ taches?: Tache[]; formatDate: (date?: string) => string }> = ({ taches, formatDate }) => (
   <div className="space-y-4">
     {taches && taches.length > 0 ? (
       <>
@@ -338,7 +389,6 @@ const TachesTab = ({ taches, formatDate }) => (
                     <Clock className="w-4 h-4" />
                     Estimation: {tache.estimationHeures}h
                   </span>
-               
                 </div>
                 {tache.serviceNom && (
                   <p className="text-sm text-blue-600 mt-2">📦 Service: {tache.serviceNom}</p>
@@ -394,9 +444,8 @@ const TachesTab = ({ taches, formatDate }) => (
   </div>
 );
 
-
 // Tab: Financier
-const FinancierTab = ({ devisDetails, formatPrice }) => (
+const FinancierTab: React.FC<{ devisDetails?: DevisDetails; formatPrice: (price?: number) => string }> = ({ devisDetails, formatPrice }) => (
   <div className="max-w-2xl mx-auto">
     <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-8">
       <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
@@ -424,7 +473,6 @@ const FinancierTab = ({ devisDetails, formatPrice }) => (
           </span>
         </div>
       </div>
-
     </div>
   </div>
 );

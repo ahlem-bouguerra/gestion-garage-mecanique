@@ -1,7 +1,7 @@
 
 import { createTimeFrameExtractor } from "@/utils/timeframe-extractor";
 import { Metadata } from "next";
-import RolePermissionManager from "@/components/GestionRolesEtPermisions/index.tsx";
+import RolePermissionManager from "@/components/GestionRolesEtPermisions";
 
 
 export const metadata: Metadata = {

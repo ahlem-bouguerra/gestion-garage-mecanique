@@ -1,95 +1,109 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import { Garagiste } from '../../models/Garagiste.js';
 import { Garage } from '../../models/Garage.js';
+import { GaragisteRole } from "../../models/GaragisteRole.js";
+import { RolePermission } from "../../models/RolePermission.js";
+import { Role } from "../../models/Role.js";
+import { Permission } from "../../models/Permission.js";
 
 export const login = async (req, res) => {
+  console.log("🔐 Login appelé");
   const { email, password } = req.body;
-  
-  console.log("🔐 Tentative de connexion - Email:", email);
-  console.log("🔐 Password reçu:", password ? "***" : "VIDE");
-  
+
   try {
-    // ✅ 1. Trouver le garagiste et peupler les infos du garage
+    // 1️⃣ Trouver le garagiste et peupler le garage
     const garagiste = await Garagiste.findOne({ email })
-      .populate('garage', 'nom matriculeFiscal governorateName cityName streetAddress location  horaires services isActive');
-    
-    if (!garagiste) {
-      console.log("❌ Garagiste non trouvé pour:", email);
-      return res.status(401).json({ message: "Utilisateur non trouvé" });
-    }
-    
-    console.log("✅ Garagiste trouvé:", garagiste.email);
-    console.log("   isVerified:", garagiste.isVerified);
-    console.log("   isActive:", garagiste.isActive);
-    
-    // ✅ 2. Vérifier si le compte est vérifié
-    if (!garagiste.isVerified) {
-      return res.status(403).json({ 
-        message: "Compte non vérifié. Vérifiez votre email." 
-      });
-    }
+      .populate('garage', 'nom matriculeFiscal governorateName cityName streetAddress location horaires services isActive');
 
-     if (!garagiste.isActive) {
-      return res.status(403).json({ 
-        message: "Compte non Active. Contacter votre admin." 
-      });
-    }
-    
-    // ✅ 3. Vérifier le mot de passe
-    if (!password) {
-      console.log("❌ Mot de passe manquant");
-      return res.status(401).json({ message: "Mot de passe requis" });
-    }
-    
+    if (!garagiste) return res.status(401).json({ message: "Utilisateur non trouvé" });
+
+    // 2️⃣ Vérifications
+    if (!garagiste.isVerified) return res.status(403).json({ message: "Compte non vérifié." });
+    if (!garagiste.isActive) return res.status(403).json({ message: "Compte non actif." });
+    if (!password) return res.status(401).json({ message: "Mot de passe requis" });
+
     const passwordMatch = await bcrypt.compare(password, garagiste.password);
-    if (!passwordMatch) {
-      console.log("❌ Mot de passe incorrect pour:", email);
-      console.log("   Longueur password reçu:", password?.length);
-      console.log("   Premiers caractères:", password?.substring(0, 3));
-      // Ne pas exposer le hash complet pour sécurité
-      return res.status(401).json({ message: "Mot de passe incorrect" });
-    }
-    
-    console.log("✅ Mot de passe correct");
+    if (!passwordMatch) return res.status(401).json({ message: "Mot de passe incorrect" });
 
-    // ✅ 4. Vérifier si le garage est actif
     if (garagiste.garage && !garagiste.garage.isActive) {
-      return res.status(403).json({ 
-        message: "Votre garage est actuellement désactivé. Contactez l'administrateur." 
-      });
+      return res.status(403).json({ message: "Votre garage est désactivé." });
     }
 
+    console.log('👤 Garagiste ID:', garagiste._id);
+    console.log('👤 Garagiste ID type:', typeof garagiste._id);
 
+    // 3️⃣ Récupérer les rôles du garagiste avec populate
+    const garagisteRoles = await GaragisteRole.find({ 
+      garagisteId: garagiste._id 
+    }).populate('roleId').lean();
 
-    // ✅ 6. Créer le token JWT
+    console.log('🔍 GaragisteRoles trouvés:', garagisteRoles.length);
+    console.log('🔍 Premier GaragisteRole:', JSON.stringify(garagisteRoles[0], null, 2));
+
+    if (garagisteRoles.length === 0) {
+      console.log('⚠️ Aucun rôle trouvé pour ce garagiste');
+    }
+
+    // 4️⃣ Extraire les rôles populés
+    const roles = garagisteRoles
+      .filter(gr => gr.roleId) // Filtrer les rôles null
+      .map(gr => ({
+        id: gr.roleId._id,
+        name: gr.roleId.name,
+        description: gr.roleId.description
+      }));
+
+    console.log('✅ Rôles extraits:', roles);
+
+    // 5️⃣ Récupérer les IDs des rôles
+    const roleIds = garagisteRoles
+      .filter(gr => gr.roleId)
+      .map(gr => gr.roleId._id);
+
+    console.log('🎭 RoleIds pour permissions:', roleIds);
+
+    // 6️⃣ Récupérer les permissions via RolePermission avec populate
+    const rolePermissions = await RolePermission.find({ 
+      roleId: { $in: roleIds } 
+    }).populate('permissionId').lean();
+
+    console.log('🔑 RolePermissions trouvées:', rolePermissions.length);
+    console.log('🔑 Premier RolePermission:', JSON.stringify(rolePermissions[0], null, 2));
+
+    // 7️⃣ Extraire les permissions uniques
+    const permissions = [...new Set(
+      rolePermissions
+        .filter(rp => rp.permissionId)
+        .map(rp => rp.permissionId.name)
+    )];
+
+    console.log('🎯 Permissions finales:', permissions);
+
+    // 8️⃣ Générer le token JWT
     const token = jwt.sign(
       { 
         userId: garagiste._id,
         email: garagiste.email,
         garageId: garagiste.garage?._id || null,
-        garagenom: garagiste.garage?.nom || null,
-        matriculefiscal: garagiste.garage?.matriculeFiscal || null
+        roles: roles.map(r => r.name),
+        permissions
       },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
-    
-    console.log(`✅ Utilisateur connecté : ${garagiste.email} `);
-    
-    // ✅ 7. Renvoyer la réponse avec token et infos utilisateur
-    res.json({ 
-      message: "Connexion réussie", 
+
+    // 9️⃣ Réponse
+    res.json({
+      message: "Connexion réussie",
       token,
-    
       user: {
         id: garagiste._id,
         username: garagiste.username,
         email: garagiste.email,
         phone: garagiste.phone,
         img: garagiste.img || "/images/user/user-03.png",
-        
-        // Infos du garage
         garage: garagiste.garage ? {
           id: garagiste.garage._id,
           nom: garagiste.garage.nom,
@@ -101,9 +115,12 @@ export const login = async (req, res) => {
           horaires: garagiste.garage.horaires,
           services: garagiste.garage.services,
           isActive: garagiste.garage.isActive
-        } : null
+        } : null,
+        roles,
+        permissions
       }
     });
+
   } catch (error) {
     console.error('❌ Erreur login:', error);
     res.status(500).json({ message: "Erreur serveur" });

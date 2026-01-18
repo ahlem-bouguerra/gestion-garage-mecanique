@@ -4,7 +4,10 @@ import mongoose from "mongoose";
 const CitySchema = new mongoose.Schema({
   name: String,
   nameAr: String,
-  governorateId: mongoose.Schema.Types.ObjectId,
+  governorateId: { 
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Governorate'  // ✅ AJOUTEZ CETTE LIGNE
+  },
   postalCode: String,
   location: {
     type: { type: String, enum: ['Point'], default: 'Point' },

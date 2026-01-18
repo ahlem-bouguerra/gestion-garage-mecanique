@@ -38,10 +38,12 @@ const clientSchema = new mongoose.Schema({
   },
   
   // ✅ CORRECTION: googleId avec sparse index (sparse défini dans l'index explicite ci-dessous)
-  googleId: {
-    type: String,
-    default: null,
-  },
+googleId: {
+  type: String,
+  unique: true,
+  sparse: true
+}
+,
   
   resetPasswordToken: { 
     type: String, 

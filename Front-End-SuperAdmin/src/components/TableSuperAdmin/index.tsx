@@ -3,8 +3,22 @@ import React, { useState, useEffect } from 'react';
 import { UserCheck, UserX, Users } from 'lucide-react';
 import axios from 'axios';
 
+interface ApiError {
+  message?: string;
+}
+
+interface User {
+  _id?: string;
+  id?: string;
+  username: string;
+  email: string;
+  name?: string;
+  isSuperAdmin: boolean;
+  createdAt?: string;
+}
+
 function SuperAdminTable() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -13,9 +27,9 @@ function SuperAdminTable() {
 
   // Configuration axios avec le token
   const axiosInstance = axios.create({
-    baseURL: 'http://localhost:5000/api', // Ajustez selon votre URL
+    baseURL: 'http://localhost:5000/api',
     headers: {
-      'Authorization': `Bearer ${localStorage.getItem('token')}` // ou sessionStorage
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
     }
   });
 
@@ -31,7 +45,11 @@ function SuperAdminTable() {
       const response = await axiosInstance.get('/getAllUsers');
       setUsers(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Erreur lors du chargement des utilisateurs');
+      if (axios.isAxiosError(err)) {
+        setError((err.response?.data as ApiError)?.message || 'Erreur lors du chargement des utilisateurs');
+      } else {
+        setError('Erreur lors du chargement des utilisateurs');
+      }
       console.error('Erreur:', err);
     } finally {
       setLoading(false);
@@ -39,30 +57,36 @@ function SuperAdminTable() {
   };
 
   // Promouvoir un utilisateur en SuperAdmin
-  const promoteToSuperAdmin = async (userId) => {
+  const promoteToSuperAdmin = async (userId: string) => {
     try {
       await axiosInstance.patch(`/users/${userId}/promote`);
-      // Rafraîchir la liste
       await fetchUsers();
       alert('Utilisateur promu avec succès !');
     } catch (err) {
-      alert('Erreur: ' + (err.response?.data?.message || err.message));
+      if (axios.isAxiosError(err)) {
+        alert('Erreur: ' + ((err.response?.data as ApiError)?.message || err.message));
+      } else {
+        alert('Erreur lors de la promotion de l\'utilisateur');
+      }
     }
   };
 
   // Rétrograder un SuperAdmin
-  const demoteSuperAdmin = async (userId) => {
+  const demoteSuperAdmin = async (userId: string) => {
     if (!window.confirm('Êtes-vous sûr de vouloir rétrograder cet utilisateur ?')) {
       return;
     }
 
     try {
       await axiosInstance.patch(`/users/${userId}/demote`);
-      // Rafraîchir la liste
       await fetchUsers();
       alert('Utilisateur rétrogradé avec succès !');
     } catch (err) {
-      alert('Erreur: ' + (err.response?.data?.message || err.message));
+      if (axios.isAxiosError(err)) {
+        alert('Erreur: ' + ((err.response?.data as ApiError)?.message || err.message));
+      } else {
+        alert('Erreur lors de la rétrogradation de l\'utilisateur');
+      }
     }
   };
 
@@ -71,10 +95,8 @@ function SuperAdminTable() {
   const paginatedUsers = users.slice((page - 1) * resultsPerPage, page * resultsPerPage);
 
   return (
-    <div className="min-h-screen  p-3">
+    <div className="min-h-screen p-3">
       <div className="w-full">
-
-
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Users className="h-8 w-8" />
@@ -121,7 +143,7 @@ function SuperAdminTable() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {paginatedUsers.length === 0 ? (
                       <tr>
-                        <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                        <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
                           Aucun utilisateur trouvé
                         </td>
                       </tr>
@@ -137,7 +159,6 @@ function SuperAdminTable() {
                               </div>
                               <div className="ml-4">
                                 <div className="text-sm font-medium text-gray-900">{user.username || 'N/A'}</div>
-
                               </div>
                             </div>
                           </td>
@@ -161,24 +182,26 @@ function SuperAdminTable() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex items-center space-x-2">
                               <button
-                                onClick={() => promoteToSuperAdmin(user._id || user.id)}
+                                onClick={() => promoteToSuperAdmin(user._id || user.id || '')}
                                 disabled={user.isSuperAdmin}
-                                className={`inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${user.isSuperAdmin
+                                className={`inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${
+                                  user.isSuperAdmin
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
-                                  }`}
+                                }`}
                                 title={user.isSuperAdmin ? 'Déjà activé' : 'Activer SuperAdmin'}
                               >
                                 <UserCheck className="w-4 h-4 mr-1" />
                                 Activer
                               </button>
                               <button
-                                onClick={() => demoteSuperAdmin(user._id || user.id)}
+                                onClick={() => demoteSuperAdmin(user._id || user.id || '')}
                                 disabled={!user.isSuperAdmin}
-                                className={`inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${!user.isSuperAdmin
+                                className={`inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${
+                                  !user.isSuperAdmin
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
-                                  }`}
+                                }`}
                                 title={!user.isSuperAdmin ? 'Déjà désactivé' : 'Désactiver SuperAdmin'}
                               >
                                 <UserX className="w-4 h-4 mr-1" />
@@ -233,10 +256,11 @@ function SuperAdminTable() {
                           <button
                             key={i}
                             onClick={() => setPage(i + 1)}
-                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${page === i + 1
+                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                              page === i + 1
                                 ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
                                 : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                              }`}
+                            }`}
                           >
                             {i + 1}
                           </button>

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 
-export default function GoogleCallbackPage() {
+function GoogleCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState("Connexion en cours...");
@@ -49,5 +49,20 @@ export default function GoogleCallbackPage() {
         <p className="text-orange-200">{status}</p>
       </div>
     </div>
+  );
+}
+
+export default function GoogleCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-900 via-red-900 to-pink-900">
+        <div className="text-center p-8 bg-white/10 backdrop-blur-lg rounded-2xl">
+          <h2 className="text-2xl font-bold text-white mb-3">Connexion Google</h2>
+          <p className="text-orange-200">Chargement...</p>
+        </div>
+      </div>
+    }>
+      <GoogleCallbackContent />
+    </Suspense>
   );
 }

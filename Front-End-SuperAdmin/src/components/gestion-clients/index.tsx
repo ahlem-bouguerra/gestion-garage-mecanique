@@ -4,8 +4,7 @@ import { Users, Search, Mail, Phone, Calendar, CheckCircle, XCircle, Loader, Arr
 import axios from 'axios';
 
 const SuperAdminClientsPage = () => {
-  const [clients, setClients] = useState([]);
-  const [filteredClients, setFilteredClients] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterVerified, setFilterVerified] = useState('all');
@@ -15,13 +14,13 @@ const SuperAdminClientsPage = () => {
     unverified: 0,
     google: 0
   });
-
-  // États pour la vue détaillée
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [clientDetails, setClientDetails] = useState(null);
-  const [vehicules, setVehicules] = useState([]);
-  const [selectedVehicule, setSelectedVehicule] = useState(null);
-  const [carnetEntretien, setCarnetEntretien] = useState([]);
+  const [clients, setClients] = useState<any[]>([]);
+  const [filteredClients, setFilteredClients] = useState<any[]>([]);
+  const [selectedClient, setSelectedClient] = useState<any | null>(null);
+  const [clientDetails, setClientDetails] = useState<any | null>(null);
+  const [vehicules, setVehicules] = useState<any[]>([]);
+  const [selectedVehicule, setSelectedVehicule] = useState<any | null>(null);
+  const [carnetEntretien, setCarnetEntretien] = useState<any[]>([]);
   const [detailsLoading, setDetailsLoading] = useState(false);
 
   // Fonction pour récupérer les clients depuis l'API
@@ -49,7 +48,7 @@ const SuperAdminClientsPage = () => {
   };
 
   // Fonction pour récupérer les détails d'un client
-  const fetchClientDetails = async (clientId) => {
+  const fetchClientDetails = async (clientId:string) => {
     try {
       setDetailsLoading(true);
       const response = await axios.get(`http://localhost:5000/api/clients/${clientId}`, {
@@ -76,7 +75,7 @@ const SuperAdminClientsPage = () => {
 
 
   // Fonction pour récupérer les véhicules d'un client
-  const fetchVehicules = async (clientId) => {
+  const fetchVehicules = async (clientId:string) => {
     try {
       console.log('Fetching vehicules for client:', clientId);
       const response = await fetch(`http://localhost:5000/api/clients/${clientId}/vehicules`, {
@@ -102,7 +101,7 @@ const SuperAdminClientsPage = () => {
   };
 
   // Fonction pour récupérer le carnet d'entretien d'un véhicule
-  const fetchCarnetEntretien = async (vehiculeId) => {
+  const fetchCarnetEntretien = async (vehiculeId : string) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/clients/vehicules/${vehiculeId}/carnet-entretien`, {
         headers: {
@@ -120,7 +119,7 @@ const SuperAdminClientsPage = () => {
   };
 
   // Gérer le clic sur un client
-  const handleClientClick = async (client) => {
+const handleClientClick = async (client: any) => {
     setSelectedClient(client);
     await fetchClientDetails(client._id);
     await fetchVehicules(client._id);
@@ -129,7 +128,7 @@ const SuperAdminClientsPage = () => {
   };
 
   // Gérer le clic sur un véhicule
-  const handleVehiculeClick = async (vehicule) => {
+  const handleVehiculeClick = async (vehicule :any) => {
     setSelectedVehicule(vehicule);
     await fetchCarnetEntretien(vehicule._id);
   };
@@ -144,34 +143,35 @@ const SuperAdminClientsPage = () => {
   };
 
   // Calculer les statistiques
-  const calculateStats = (clientsData) => {
-    const verified = clientsData.filter(c => c.isVerified).length;
-    const google = clientsData.filter(c => c.googleId).length;
-    
-    setStats({
-      total: clientsData.length,
-      verified: verified,
-      unverified: clientsData.length - verified,
-      google: google
-    });
-  };
+const calculateStats = (clientsData: any) => {
+  const verified = clientsData.filter((c: any) => c.isVerified).length;
+  const google = clientsData.filter((c: any) => c.googleId).length;
+  
+  setStats({
+    total: clientsData.length,
+    verified: verified,
+    unverified: clientsData.length - verified,
+    google: google
+  });
+};
+
 
   // Filtrer les clients
   useEffect(() => {
     let filtered = clients;
 
     if (searchTerm) {
-      filtered = filtered.filter(client =>
-        client.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.phone?.includes(searchTerm)
-      );
+filtered = filtered.filter((client: any) =>
+  client.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  client.phone?.includes(searchTerm)
+);
     }
 
     if (filterVerified === 'verified') {
-      filtered = filtered.filter(c => c.isVerified);
+      filtered = filtered.filter((c: any)  => c.isVerified);
     } else if (filterVerified === 'unverified') {
-      filtered = filtered.filter(c => !c.isVerified);
+      filtered = filtered.filter((c: any)  => !c.isVerified);
     }
 
     setFilteredClients(filtered);
@@ -181,7 +181,7 @@ const SuperAdminClientsPage = () => {
     fetchClients();
   }, []);
 
-  const formatDate = (date) => {
+  const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString('fr-FR', {
       day: '2-digit',
       month: '2-digit',
@@ -274,7 +274,7 @@ const SuperAdminClientsPage = () => {
               <p className="text-gray-500 text-center py-8">Aucun véhicule enregistré</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {vehicules.map((vehicule) => (
+                {vehicules.map((vehicule:any) => (
                   <div
                     key={vehicule._id}
                     onClick={() => handleVehiculeClick(vehicule)}
@@ -318,7 +318,7 @@ const SuperAdminClientsPage = () => {
       <p className="text-gray-500 text-center py-8">Aucun entretien enregistré</p>
     ) : (
       <div className="space-y-4">
-        {carnetEntretien.map((entretien) => (
+        {carnetEntretien.map((entretien:any) => (
           <div key={entretien._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
@@ -339,7 +339,7 @@ const SuperAdminClientsPage = () => {
               </div>
               {entretien.totalTTC && (
                 <span className="text-xl font-bold text-blue-600">
-                 {formatPrice (entretien.totalTTC)}
+                 {formatPrice(entretien.totalTTC)}
                 </span>
               )}
             </div>
@@ -374,7 +374,7 @@ const SuperAdminClientsPage = () => {
               <div className="mt-3 pt-3 border-t">
                 <p className="font-semibold text-sm text-gray-700 mb-2">Services effectués:</p>
                 <div className="space-y-1">
-                  {entretien.services.map((service) => (
+                  {entretien.services.map((service:any) => (
                     <div key={service._id} className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
                       Tache :<span className="font-medium">{service.nom}</span>
                       <br/>
@@ -393,7 +393,7 @@ const SuperAdminClientsPage = () => {
               <div className="mt-3 pt-3 border-t">
                 <p className="font-semibold text-sm text-gray-700 mb-2">Pièces utilisées:</p>
                 <div className="space-y-1">
-                  {entretien.pieces.map((piece, index) => (
+                  {entretien.pieces.map((piece: any, index:any) => (
                     <div key={index} className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
                       {piece.nom || piece.reference}
                       {piece.quantite && ` (x${piece.quantite})`}
@@ -542,12 +542,12 @@ const SuperAdminClientsPage = () => {
               <tbody className="divide-y divide-gray-200">
                 {filteredClients.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                       Aucun client trouvé
                     </td>
                   </tr>
                 ) : (
-                  filteredClients.map((client) => (
+                  filteredClients.map((client:any) => (
                     <tr key={client._id} className="hover:bg-blue-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">

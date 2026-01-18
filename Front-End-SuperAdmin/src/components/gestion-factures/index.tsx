@@ -17,8 +17,8 @@ export interface Garage {
 
 interface Facture {
   _id: string;
-  numeroFacture: number;
-  clientInfo: {
+  numeroFacture: string; // ← Changé de number à string (car c'est "FAC-002")
+  clientId?: {  // ← Renommé de clientInfo à clientId
     nom: string;
     email: string;
     telephone: string;
@@ -73,10 +73,11 @@ const GestionFacturesSuperAdmin: React.FC<GestionFacturesSuperAdminProps> = ({
   const [loadingDetails, setLoadingDetails] = useState(false);
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-const [factureDetails, setFactureDetails] = useState(null);
+const [factureDetails, setFactureDetails] = useState<any>(null);
+
 
 const [showCreditNoteModal, setShowCreditNoteModal] = useState(false);
-const [creditNoteDetails, setCreditNoteDetails] = useState(null);
+const [creditNoteDetails, setCreditNoteDetails] = useState<any>(null);
 
 const showGarageList = !garageFromProps;
 
@@ -96,30 +97,39 @@ const getAuthToken = () => {
   }, [factureDetails, selectedFacture,creditNoteDetails]);
 
   // 1️⃣ Charger tous les garages au montage du composant
-  useEffect(() => {
-    const fetchGarages = async () => {
-      try {
-        setLoadingGarages(true);
-        console.log("🚀 Début fetch garages...");
+// 1️⃣ Charger tous les garages au montage du composant
+useEffect(() => {
+  // ✅ AJOUTER CETTE CONDITION
+  if (garageFromProps) {
+    // Si on a déjà un garage en props, pas besoin de charger la liste
+    setSelectedGarageId(garageFromProps._id);
+    setLoadingGarages(false);
+    return;
+  }
 
-        const data = await getAllGarages();
+  const fetchGarages = async () => {
+    try {
+      setLoadingGarages(true);
+      console.log("🚀 Début fetch garages...");
 
-        console.log('✅ Garages reçus:', data);
-        console.log('✅ Type:', typeof data, 'Length:', data?.length);
+      const data = await getAllGarages();
 
-        setGarages(data);
-      } catch (error) {
-        console.error('❌ Erreur complète:', error);
-        console.error('❌ Response:', error.response?.data);
-        console.error('❌ Status:', error.response?.status);
-        alert(`Erreur: ${error.response?.data?.message || error.message}`);
-      } finally {
-        setLoadingGarages(false);
-      }
-    };
+      console.log('✅ Garages reçus:', data);
+      console.log('✅ Type:', typeof data, 'Length:', data?.length);
 
-    fetchGarages();
-  }, []);
+      setGarages(data);
+    } catch (error:any) {
+      console.error('❌ Erreur complète:', error);
+      console.error('❌ Response:', error.response?.data);
+      console.error('❌ Status:', error.response?.status);
+      alert(`Erreur: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setLoadingGarages(false);
+    }
+  };
+
+  fetchGarages();
+}, [garageFromProps]); // ← Ajoute garageFromProps aux dépendances
 
   // 2️⃣ Charger factures et stats quand un garage est sélectionné
   useEffect(() => {
@@ -131,24 +141,31 @@ const getAuthToken = () => {
       return;
     }
 
-    const fetchFacturesAndStats = async () => {
-      try {
-        setLoadingFactures(true);
+const fetchFacturesAndStats = async () => {
+  try {
+    setLoadingFactures(true);
 
-        // Appels parallèles pour optimiser
-        const [facturesData, statsData] = await Promise.all([
-          getFacturesByGarage(selectedGarageId),
-          getStatsByGarage(selectedGarageId)
-        ]);
+    const [facturesData, statsData] = await Promise.all([
+      getFacturesByGarage(selectedGarageId),
+      getStatsByGarage(selectedGarageId)
+    ]);
 
-        console.log('✅ Factures chargées:', facturesData);
-        console.log('✅ Stats chargées:', statsData);
+    console.log('✅ Factures chargées:', facturesData);
+    console.log('📊 Type facturesData:', typeof facturesData);
+    console.log('📊 facturesData.data:', facturesData.data);
+    console.log('📊 Type facturesData.data:', typeof facturesData.data);
+    console.log('📊 Est array?', Array.isArray(facturesData.data));
+    console.log('📊 Longueur:', facturesData.data?.length);
+    console.log('📋 Première facture:', facturesData.data?.[0]);
+    
+    console.log('✅ Stats chargées:', statsData);
+    console.log('📊 statsData.data:', statsData.data);
 
-        setFactures(facturesData.data);
-        setFilteredFactures(facturesData.data);
-        setStats(statsData.data);
+    setFactures(facturesData.data);
+    setFilteredFactures(facturesData.data);
+    setStats(statsData.data);
 
-      } catch (error) {
+      } catch (error:any) {
         console.error('❌ Erreur chargement factures/stats:', error);
         alert('Erreur lors du chargement des données du garage');
       } finally {
@@ -165,10 +182,10 @@ const getAuthToken = () => {
 
     // Filtre par recherche
     if (searchTerm) {
-      filtered = filtered.filter(facture =>
-        facture.clientInfo.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        facture.vehicleInfo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        facture.numeroFacture.toString().includes(searchTerm)
+      filtered = filtered.filter((facture: any) =>
+        facture?.clientId?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        facture?.vehicleInfo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        facture?.numeroFacture?.toString().includes(searchTerm)
       );
     }
 
@@ -335,27 +352,31 @@ return (
         </div>
       </div>
 
-      {/* 🏢 Sélecteur de Garage */}
-      {showGarageList && (
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
-            🏢 Sélectionner un garage
-          </label>
-          <select
-            value={selectedGarageId}
-            onChange={(e) => setSelectedGarageId(e.target.value)}
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-white shadow-sm font-medium cursor-pointer"
-          >
-            <option value="">-- Choisir un garage --</option>
-            {garages.map((garage) => (
-              <option key={garage._id} value={garage._id}>
-                {garage.nom}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
+{showGarageList && (
+  loadingGarages ? (
+    <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
+      <p>Chargement des garages...</p>
+    </div>
+  ) : garages.length > 0 ? (
+    <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
+      <label className="block text-sm font-semibold text-gray-700 mb-3">
+        🏢 Sélectionner un garage
+      </label>
+      <select
+        value={selectedGarageId}
+        onChange={(e) => setSelectedGarageId(e.target.value)}
+        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-white shadow-sm font-medium cursor-pointer"
+      >
+        <option value="">-- Choisir un garage --</option>
+        {garages.map((garage) => (
+          <option key={garage._id} value={garage._id}>
+            {garage.nom}
+          </option>
+        ))}
+      </select>
+    </div>
+  ) : null
+)}
       {/* 📭 Message si aucun garage sélectionné */}
       {!selectedGarageId && (
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-12 text-center shadow-lg">
@@ -519,7 +540,7 @@ return (
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
-                  {filteredFactures.map((facture) => (
+                  {filteredFactures.filter(f => f && f.clientId).map((facture:any) => (
                     <tr
                       key={facture._id}
                       className={`transition-all duration-200 ${
@@ -529,10 +550,12 @@ return (
                       }`}
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                        #{facture.numeroFacture.toString().padStart(4, '0')}
+                        #{facture.numeroFacture}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-gray-900">{facture.clientInfo.nom}</div>
+                        <div className="text-sm font-semibold text-gray-900">
+                          {facture.clientId?.nom || 'Client non renseigné'}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{facture.vehicleInfo}</div>
@@ -734,7 +757,7 @@ return (
                       </tr>
                     </thead>
                     <tbody>
-                      {factureDetails.services.map((service, index) => (
+                      {factureDetails.services.map((service:any, index:any) => (
                         <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                           <td className="border border-gray-300 px-4 py-3">
                             <div>
@@ -933,9 +956,9 @@ return (
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Montant payé
                 </label>
-                {selectedFacture.paymentAmount > 0 && (
+                {(selectedFacture.paymentAmount ?? 0) > 0 && (
                   <p className="text-sm text-gray-600 mb-2">
-                    Déjà payé: {formatCurrency(selectedFacture.paymentAmount)}
+                    Déjà payé: {formatCurrency(selectedFacture.paymentAmount ?? 0)}
                   </p>
                 )}
                 <input
@@ -1078,7 +1101,7 @@ return (
                       </tr>
                     </thead>
                     <tbody>
-                      {creditNoteDetails.services.map((service, index) => (
+                      {creditNoteDetails.services.map((service:any, index:any) => (
                         <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                           <td className="border border-gray-300 px-4 py-3">{service.piece}</td>
                           <td className="border border-gray-300 px-4 py-3 text-center">{service.quantity}</td>

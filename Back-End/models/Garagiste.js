@@ -97,4 +97,4 @@ const garagisteSchema = new mongoose.Schema({
 });
 
 
-export const Garagiste = mongoose.model("Garagiste", garagisteSchema);
+export const Garagiste = mongoose.model("Garagiste", garagisteSchema,"garagistes");

@@ -137,6 +137,7 @@ export default function ClientForm() {
 
   useEffect(() => {
     const header = document.querySelector('header');
+    console.log('user : ', router);
     if (!header) return;
 
     if (loadingHistory || selectedClient) {

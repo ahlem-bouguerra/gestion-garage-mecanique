@@ -1,4 +1,4 @@
-import SuperAdminClientsPage from "@/components/gesrion-clients";
+import SuperAdminClientsPage from "@/components/gestion-clients";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

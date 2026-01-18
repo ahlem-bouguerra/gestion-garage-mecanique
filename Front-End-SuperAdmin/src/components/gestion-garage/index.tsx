@@ -16,7 +16,7 @@ interface UnifiedGarageDashboardProps {
     DevisComponent: React.ComponentType<{ selectedGarage: string; onNavigate?: () => void }>;
     OrdresComponent: React.ComponentType<{ selectedGarage: Garage; onNavigate?: () => void }>;
     FactureComponent: React.ComponentType<{ selectedGarage: Garage; onNavigate?: () => void }>;
-    RatingsComponent: React.ComponentType<{ selectedGarage: Garage }>;
+    RatingsComponent: React.ComponentType<{ selectedGarage: Garage | null }>;
     GarageEtGaragiteTableStatusComponent: React.ComponentType;
 
     apiBase?: string;
@@ -384,7 +384,7 @@ if (activeSection === 'devis') {
             </div>
             
             <DevisComponent
-                selectedGarage={selectedGarage._id}
+                selectedGarage={selectedGarage!._id}
                 onNavigate={handleBackToMenu}
             />
         </div>

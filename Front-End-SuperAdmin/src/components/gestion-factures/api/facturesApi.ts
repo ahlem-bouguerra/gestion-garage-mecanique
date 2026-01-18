@@ -1,4 +1,4 @@
-// api.tsx - VERSION COMPLÈTE ET CORRIGÉE
+// api.tsx - VERSION AVEC LOGS DÉTAILLÉS POUR DEBUG
 
 import axios from 'axios';
 
@@ -11,10 +11,6 @@ const getAuthToken = () => {
 };
 
 // ========== TYPES ==========
-
-
-
-
 export interface PaginationParams {
   page?: number;
   limit?: number;
@@ -39,22 +35,34 @@ export const getAllGarages = async () => {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    console.log("📦 Réponse complète:", response);
+    console.log("📦 Réponse getAllGarages complète:", response);
     console.log("📦 Status:", response.status);
-    console.log("📦 Data:", response.data);
+    console.log("📦 Data brute:", response.data);
+    console.log("📦 Type de data:", typeof response.data);
+    console.log("📦 Keys de data:", Object.keys(response.data));
 
     // ⚠️ Vérifier la structure de la réponse
     if (!response.data) {
       throw new Error("Réponse vide du serveur");
     }
 
-    if (!response.data.garages) {
-      console.warn("⚠️ Pas de propriété 'garages' dans la réponse:", response.data);
-      // Si le backend renvoie directement un array
-      return Array.isArray(response.data) ? response.data : [];
+    // 👇 VÉRIFICATION DÉTAILLÉE
+    if (response.data.garages) {
+      console.log("✅ Propriété 'garages' trouvée");
+      console.log("📊 Nombre de garages:", response.data.garages.length);
+      console.log("📋 Premier garage:", response.data.garages[0]);
+      return response.data.garages;
     }
 
-    return response.data.garages;
+    // Si pas de propriété 'garages', vérifier si c'est un array direct
+    if (Array.isArray(response.data)) {
+      console.log("✅ Data est un array direct");
+      console.log("📊 Nombre d'éléments:", response.data.length);
+      return response.data;
+    }
+
+    console.warn("⚠️ Structure inattendue:", response.data);
+    return [];
 
   } catch (error: any) {
     console.error("❌ Erreur getAllGarages:");
@@ -71,15 +79,30 @@ export const getFacturesByGarage = async (garageId: string) => {
   try {
     const token = getAuthToken();
     
-    // 👇 garageId passé en query parameter
+    console.log("🔍 getFacturesByGarage - garageId:", garageId);
+    
     const response = await axios.get(`${API_BASE}/getFactures`, {
-      params: { garageId }, // 👈 Important: params pas dans l'URL
+      params: { garageId },
       headers: { Authorization: `Bearer ${token}` }
     });
+
+    console.log("📦 Réponse getFacturesByGarage:", response.data);
+    console.log("📦 Type de response.data:", typeof response.data);
+    console.log("📦 Keys:", Object.keys(response.data));
+    
+    // 👇 AJOUT DE LOGS DÉTAILLÉS
+    if (response.data.data) {
+      console.log("✅ Propriété 'data' trouvée");
+      console.log("📊 Type de data.data:", typeof response.data.data);
+      console.log("📊 Est un array?", Array.isArray(response.data.data));
+      console.log("📊 Nombre de factures:", response.data.data?.length);
+      console.log("📋 Première facture:", response.data.data?.[0]);
+    }
 
     return response.data;
   } catch (error: any) {
     console.error('❌ Erreur getFacturesByGarage:', error);
+    console.error('❌ Response:', error.response?.data);
     throw error;
   }
 };
@@ -88,10 +111,19 @@ export const getStatsByGarage = async (garageId: string) => {
   try {
     const token = getAuthToken();
     
+    console.log("🔍 getStatsByGarage - garageId:", garageId);
+    
     const response = await axios.get(`${API_BASE}/stats/summary`, {
-      params: { garageId }, // 👈 Pareil ici
+      params: { garageId },
       headers: { Authorization: `Bearer ${token}` }
     });
+
+    console.log("📊 Réponse stats:", response.data);
+    console.log("📊 Keys:", Object.keys(response.data));
+    
+    if (response.data.data) {
+      console.log("✅ Stats détaillées:", response.data.data);
+    }
 
     return response.data;
   } catch (error: any) {
@@ -100,19 +132,22 @@ export const getStatsByGarage = async (garageId: string) => {
   }
 };
 
-export const getFacturesDetails = async (factureId: string, garageId:string) => {
+export const getFacturesDetails = async (factureId: string, garageId: string) => {
   try {
     const token = getAuthToken();
     
-    // 👇 garageId passé en query parameter
+    console.log("🔍 getFacturesDetails - factureId:", factureId, "garageId:", garageId);
+    
     const response = await axios.get(`${API_BASE}/getFacture/${factureId}`, {
-      params: { garageId }, // 👈 Important: params pas dans l'URL
+      params: { garageId },
       headers: { Authorization: `Bearer ${token}` }
     });
 
+    console.log("📦 Détails facture:", response.data);
+
     return response.data;
   } catch (error: any) {
-    console.error('❌ Erreur getFacturesByid:', error);
+    console.error('❌ Erreur getFacturesDetails:', error);
     throw error;
   }
 };
@@ -144,7 +179,7 @@ export const payFacture = async (factureId: string, paymentData: any) => {
       }
     );
 
-    console.log("✅ Réponse:", response.data);
+    console.log("✅ Réponse paiement:", response.data);
     return response.data;
     
   } catch (error: any) {

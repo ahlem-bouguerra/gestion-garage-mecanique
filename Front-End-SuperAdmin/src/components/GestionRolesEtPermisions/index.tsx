@@ -2,14 +2,43 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Check, X, Shield, Key, Link } from 'lucide-react';
 import axiosInstance from './axiosConfig';
+import { AxiosError } from 'axios';
+// ✅ Interfaces TypeScript
+interface Role {
+  _id: string;
+  name: string;
+  description?: string;
+}
 
+interface Permission {
+  _id: string;
+  name: string;
+  description?: string;
+}
 
+interface RolePermission {
+  _id: string;
+  roleId?: Role;
+  permissionId?: Permission;
+}
+
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof AxiosError) {
+    return error.response?.data?.message || 'Une erreur est survenue';
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'Une erreur inconnue est survenue';
+};
 
 export default function RolePermissionManager() {
-  const [activeTab, setActiveTab] = useState('roles');
-  const [roles, setRoles] = useState([]);
-  const [permissions, setPermissions] = useState([]);
-  const [rolePermissions, setRolePermissions] = useState([]);
+   const [activeTab, setActiveTab] = useState('roles');
+  
+  // ✅ States typés
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [permissions, setPermissions] = useState<Permission[]>([]);
+  const [rolePermissions, setRolePermissions] = useState<RolePermission[]>([]);
   const [loading, setLoading] = useState(false);
   
   // États pour les modales
@@ -20,12 +49,11 @@ export default function RolePermissionManager() {
   // États pour les formulaires
   const [roleForm, setRoleForm] = useState({ name: '', description: '' });
   const [permissionForm, setPermissionForm] = useState({ name: '', description: '' });
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState('');
-  const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
 
-
-    useEffect(() => {
+  useEffect(() => {
     const header = document.querySelector("header");
     if (!header) return;
 
@@ -122,12 +150,12 @@ const handleSaveRole = async () => {
     setRoleForm({ name: '', description: '' });
     setEditingId(null);
   } catch (error) {
-    alert(error.response?.data?.message || 'Erreur lors de la sauvegarde');
+    alert(getErrorMessage(error));
   }
   setLoading(false);
 };
 
-const handleDeleteRole = async (id) => {
+const handleDeleteRole = async (id: string) => {
   if (!confirm('Êtes-vous sûr de vouloir supprimer ce rôle ?')) return;
 
   try {
@@ -137,7 +165,7 @@ const handleDeleteRole = async (id) => {
     loadRoles();
     loadRolePermissions();
   } catch (error) {
-    alert(error.response?.data?.message || 'Erreur lors de la suppression');
+    alert(getErrorMessage(error));
   }
 };
 
@@ -165,12 +193,12 @@ const handleSavePermission = async () => {
     setPermissionForm({ name: '', description: '' });
     setEditingId(null);
   } catch (error) {
-    alert(error.response?.data?.message || 'Erreur lors de la sauvegarde');
+    alert(getErrorMessage(error));
   }
   setLoading(false);
 };
 
-const handleDeletePermission = async (id) => {
+const handleDeletePermission = async (id: string) => {
   if (!confirm('Êtes-vous sûr de vouloir supprimer cette permission ?')) return;
 
   try {
@@ -180,7 +208,7 @@ const handleDeletePermission = async (id) => {
     loadPermissions();
     loadRolePermissions();
   } catch (error) {
-    alert(error.response?.data?.message || 'Erreur lors de la suppression');
+    alert(getErrorMessage(error));
   }
 };
 
@@ -225,29 +253,29 @@ const handleAssignPermissions = async () => {
     
   } catch (error) {
     console.error('❌ Erreur:', error);
-    alert(error.response?.data?.message || 'Erreur lors de l\'affectation');
+    alert(getErrorMessage(error));
   } finally {
     setLoading(false);
   }
 };
-  const openAssignModal = (roleId) => {
-    setSelectedRole(roleId);
-    const currentPermissions = rolePermissions
-      .filter(rp => rp.roleId && rp.roleId._id === roleId && rp.permissionId)
-      .map(rp => rp.permissionId._id);
-    setSelectedPermissions(currentPermissions);
-    setShowAssignModal(true);
-  };
+const openAssignModal = (roleId: string) => {
+  setSelectedRole(roleId);
+  const currentPermissions = rolePermissions
+    .filter(rp => rp.roleId && rp.roleId._id === roleId && rp.permissionId)
+    .map(rp => rp.permissionId!._id); // ✅ Le ! indique qu'on est sûr qu'il existe après le filter
+  setSelectedPermissions(currentPermissions);
+  setShowAssignModal(true);
+};
 
-  const togglePermission = (permId) => {
-    setSelectedPermissions(prev => 
-      prev.includes(permId) 
-        ? prev.filter(id => id !== permId)
-        : [...prev, permId]
-    );
-  };
+const togglePermission = (permId: string) => {
+  setSelectedPermissions(prev => 
+    prev.includes(permId) 
+      ? prev.filter(id => id !== permId)
+      : [...prev, permId]
+  );
+};
 
-  const getRolePermissions = (roleId) => {
+  const getRolePermissions = (roleId:string) => {
     return rolePermissions
       .filter(rp => rp.roleId && rp.roleId._id === roleId)
       .map(rp => rp.permissionId?.name || 'Permission supprimée')
@@ -320,7 +348,7 @@ const handleAssignPermissions = async () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => {
-                            setRoleForm({ name: role.name, description: role.description });
+                            setRoleForm({ name: role.name, description: role.description || '' });
                             setEditingId(role._id);
                             setShowRoleModal(true);
                           }}
@@ -371,7 +399,7 @@ const handleAssignPermissions = async () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => {
-                            setPermissionForm({ name: perm.name, description: perm.description });
+                            setPermissionForm({ name: perm.name, description: perm.description || '' });
                             setEditingId(perm._id);
                             setShowPermissionModal(true);
                           }}
@@ -459,7 +487,7 @@ const handleAssignPermissions = async () => {
                   value={roleForm.description}
                   onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })}
                   className="w-full px-4 py-2 bg-white text-gray-800 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
-                  rows="3"
+                  rows={3}
                   placeholder="Description du rôle..."
                 />
               </div>
@@ -516,7 +544,7 @@ const handleAssignPermissions = async () => {
                   value={permissionForm.description}
                   onChange={(e) => setPermissionForm({ ...permissionForm, description: e.target.value })}
                   className="w-full px-4 py-2 bg-white text-gray-800 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
-                  rows="3"
+                  rows={3}
                   placeholder="Description de la permission..."
                 />
               </div>

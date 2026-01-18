@@ -1,19 +1,41 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { UserCheck, UserX, Users, X ,FileText} from 'lucide-react';
-import axios from 'axios';
+import { UserCheck, UserX, Users, X, FileText } from 'lucide-react';
+import axios, { AxiosError } from 'axios';
+
+interface Garage {
+  _id?: string;
+  id?: string;
+  nom: string;
+  matriculeFiscal: string;
+  isActive: boolean;
+  createdAt?: string;
+}
+
+interface Garagiste {
+  _id?: string;
+  id?: string;
+  username: string;
+  email: string;
+  phone?: string;
+  isActive: boolean;
+}
+
+// ✅ Interface pour les erreurs API
+interface ApiError {
+  message?: string;
+}
 
 function GarageEtGaragiteTableStatus() {
-  const [garages, setGarages] = useState([]);
+  const [garages, setGarages] = useState<Garage[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // ✅ NOUVEAU: États pour le modal des garagistes
   const [showGaragistesModal, setShowGaragistesModal] = useState(false);
-  const [selectedGarageId, setSelectedGarageId] = useState(null);
-  const [garagistes, setGaragistes] = useState({});
-  const [loadingGaragistes, setLoadingGaragistes] = useState({});
+  const [selectedGarageId, setSelectedGarageId] = useState<string | null>(null);
+  const [garagistes, setGaragistes] = useState<Record<string, Garagiste[]>>({});
+  const [loadingGaragistes, setLoadingGaragistes] = useState<Record<string, boolean>>({});
   
   const resultsPerPage = 10;
 
@@ -47,7 +69,12 @@ function GarageEtGaragiteTableStatus() {
         setGarages([]);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Erreur lors du chargement des garages');
+      // ✅ Type guard pour Axios errors
+      if (axios.isAxiosError(err)) {
+        setError((err.response?.data as ApiError)?.message || 'Erreur lors du chargement des garages');
+      } else {
+        setError('Erreur lors du chargement des garages');
+      }
       console.error('Erreur:', err);
       setGarages([]);
     } finally {
@@ -56,13 +83,12 @@ function GarageEtGaragiteTableStatus() {
   };
 
   // ✅ NOUVEAU: Récupérer les garagistes d'un garage
-  const fetchGaragistes = async (garageId) => {
+  const fetchGaragistes = async (garageId: string) => {
     setLoadingGaragistes(prev => ({ ...prev, [garageId]: true }));
     try {
       const response = await axiosInstance.get(`/garage/${garageId}/garagistes`);
       const data = response.data;
       
-      // Gérer différents formats de réponse
       const garagistesList = Array.isArray(data) ? data : 
                             data.garagistes ? data.garagistes : [];
       
@@ -70,37 +96,44 @@ function GarageEtGaragiteTableStatus() {
       return garagistesList;
     } catch (err) {
       console.error('Erreur chargement garagistes:', err);
-      alert('Erreur: ' + (err.response?.data?.message || err.message));
+      if (axios.isAxiosError(err)) {
+        alert('Erreur: ' + ((err.response?.data as ApiError)?.message || err.message));
+      } else {
+        alert('Erreur lors du chargement des garagistes');
+      }
       return [];
     } finally {
       setLoadingGaragistes(prev => ({ ...prev, [garageId]: false }));
     }
   };
 
-  // ✅ NOUVEAU: Ouvrir le modal des garagistes
-  const openGaragistesModal = async (garageId) => {
+  // ✅ Ouvrir le modal des garagistes
+  const openGaragistesModal = async (garageId: string) => {
     setSelectedGarageId(garageId);
     setShowGaragistesModal(true);
     
-    // Charger les garagistes si pas déjà chargés
     if (!garagistes[garageId]) {
       await fetchGaragistes(garageId);
     }
   };
 
-  // ✅ NOUVEAU: Activer un garagiste
-  const activateGaragiste = async (garageId, garagisteId) => {
+  // ✅ Activer un garagiste
+  const activateGaragiste = async (garageId: string, garagisteId: string) => {
     try {
       await axiosInstance.patch(`/garagiste/${garagisteId}/activate`);
       await fetchGaragistes(garageId);
       alert('Garagiste activé avec succès !');
     } catch (err) {
-      alert('Erreur: ' + (err.response?.data?.message || err.message));
+      if (axios.isAxiosError(err)) {
+        alert('Erreur: ' + ((err.response?.data as ApiError)?.message || err.message));
+      } else {
+        alert('Erreur lors de l\'activation du garagiste');
+      }
     }
   };
 
-  // ✅ NOUVEAU: Désactiver un garagiste
-  const deactivateGaragiste = async (garageId, garagisteId) => {
+  // ✅ Désactiver un garagiste
+  const deactivateGaragiste = async (garageId: string, garagisteId: string) => {
     if (!window.confirm('Êtes-vous sûr de vouloir désactiver ce garagiste ?')) {
       return;
     }
@@ -110,23 +143,31 @@ function GarageEtGaragiteTableStatus() {
       await fetchGaragistes(garageId);
       alert('Garagiste désactivé avec succès !');
     } catch (err) {
-      alert('Erreur: ' + (err.response?.data?.message || err.message));
+      if (axios.isAxiosError(err)) {
+        alert('Erreur: ' + ((err.response?.data as ApiError)?.message || err.message));
+      } else {
+        alert('Erreur lors de la désactivation du garagiste');
+      }
     }
   };
 
   // Activer un garage
-  const activateGarage = async (garageId) => {
+  const activateGarage = async (garageId: string) => {
     try {
       await axiosInstance.patch(`/garage/${garageId}/activate`);
       await fetchGarages();
       alert('Garage activé avec succès !');
     } catch (err) {
-      alert('Erreur: ' + (err.response?.data?.message || err.message));
+      if (axios.isAxiosError(err)) {
+        alert('Erreur: ' + ((err.response?.data as ApiError)?.message || err.message));
+      } else {
+        alert('Erreur lors de l\'activation du garage');
+      }
     }
   };
 
   // Désactiver un garage
-  const deactivateGarage = async (garageId) => {
+  const deactivateGarage = async (garageId: string) => {
     if (!window.confirm('Êtes-vous sûr de vouloir désactiver ce garage ?')) {
       return;
     }
@@ -136,7 +177,11 @@ function GarageEtGaragiteTableStatus() {
       await fetchGarages();
       alert('Garage désactivé avec succès !');
     } catch (err) {
-      alert('Erreur: ' + (err.response?.data?.message || err.message));
+      if (axios.isAxiosError(err)) {
+        alert('Erreur: ' + ((err.response?.data as ApiError)?.message || err.message));
+      } else {
+        alert('Erreur lors de la désactivation du garage');
+      }
     }
   };
 
@@ -147,20 +192,19 @@ function GarageEtGaragiteTableStatus() {
     page * resultsPerPage
   );
 
-  // ✅ NOUVEAU: Variables pour le modal
   const currentGaragistes = selectedGarageId ? garagistes[selectedGarageId] || [] : [];
   const selectedGarage = garages.find(g => (g._id || g.id) === selectedGarageId);
 
   return (
-  <div className="min-h-screen  p-3">
+    <div className="min-h-screen p-3">
       <div className="w-full">
-                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-3">
-          <FileText className="h-8 w-8" />
-          Gestion des Statut - Super Admin
-        </h1>
-        <p className="text-blue-100 mt-2">Consultez tous les statut de vos garages et garagistes</p>
-      </div>
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <FileText className="h-8 w-8" />
+            Gestion des Statut - Super Admin
+          </h1>
+          <p className="text-blue-100 mt-2">Consultez tous les statut de vos garages et garagistes</p>
+        </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
@@ -200,7 +244,7 @@ function GarageEtGaragiteTableStatus() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {paginatedGarages.length === 0 ? (
                       <tr>
-                        <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                        <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
                           Aucun garage trouvé
                         </td>
                       </tr>
@@ -237,10 +281,9 @@ function GarageEtGaragiteTableStatus() {
                             {garage.createdAt ? new Date(garage.createdAt).toLocaleDateString('fr-FR') : 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            {/* ✅ MODIFIÉ: Ajout du bouton Garagistes */}
                             <div className="flex items-center space-x-2">
                               <button
-                                onClick={() => openGaragistesModal(garage._id || garage.id)}
+                                onClick={() => openGaragistesModal(garage._id || garage.id || '')}
                                 className="inline-flex items-center px-3 py-1.5 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                                 title="Voir les garagistes"
                               >
@@ -248,7 +291,7 @@ function GarageEtGaragiteTableStatus() {
                                 Garagistes
                               </button>
                               <button
-                                onClick={() => activateGarage(garage._id || garage.id)}
+                                onClick={() => activateGarage(garage._id || garage.id || '')}
                                 disabled={garage.isActive}
                                 className={`inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${
                                   garage.isActive
@@ -261,7 +304,7 @@ function GarageEtGaragiteTableStatus() {
                                 Activer
                               </button>
                               <button
-                                onClick={() => deactivateGarage(garage._id || garage.id)}
+                                onClick={() => deactivateGarage(garage._id || garage.id || '')}
                                 disabled={!garage.isActive}
                                 className={`inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${
                                   !garage.isActive
@@ -348,7 +391,7 @@ function GarageEtGaragiteTableStatus() {
         </div>
       </div>
 
-      {/* ✅ NOUVEAU: Modal des Garagistes */}
+      {/* Modal des Garagistes */}
       {showGaragistesModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
@@ -368,7 +411,7 @@ function GarageEtGaragiteTableStatus() {
             </div>
 
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              {loadingGaragistes[selectedGarageId] ? (
+              {selectedGarageId && loadingGaragistes[selectedGarageId] ? (
                 <div className="text-center py-12">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
                   <p className="mt-2 text-gray-600">Chargement des garagistes...</p>
@@ -413,7 +456,7 @@ function GarageEtGaragiteTableStatus() {
                           
                           <div className="flex space-x-2">
                             <button
-                              onClick={() => activateGaragiste(selectedGarageId, garagiste._id || garagiste.id)}
+                              onClick={() => activateGaragiste(selectedGarageId || '', garagiste._id || garagiste.id || '')}
                               disabled={garagiste.isActive}
                               className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                                 garagiste.isActive
@@ -425,7 +468,7 @@ function GarageEtGaragiteTableStatus() {
                               Activer
                             </button>
                             <button
-                              onClick={() => deactivateGaragiste(selectedGarageId, garagiste._id || garagiste.id)}
+                              onClick={() => deactivateGaragiste(selectedGarageId || '', garagiste._id || garagiste.id || '')}
                               disabled={!garagiste.isActive}
                               className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                                 !garagiste.isActive

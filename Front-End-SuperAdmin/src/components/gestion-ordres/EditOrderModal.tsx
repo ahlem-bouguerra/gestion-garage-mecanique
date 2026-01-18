@@ -10,7 +10,7 @@ import {
   getMecaniciensByService
 } from './api';
 
-const getClientName = (ordre) => {
+const getClientName = (ordre: any) => {
   // Priorité 1 : clientInfo avec Client lié
   if (ordre.clientInfo?.ClientId?.clientId?.username) {
     return ordre.clientInfo.ClientId.clientId.username;

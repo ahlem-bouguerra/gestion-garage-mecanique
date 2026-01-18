@@ -94,11 +94,12 @@ const [garageData, setGarageData] = useState({
     }
   };
 
-  const handleGarageChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setGarageData(prev => ({ ...prev, [name]: value }));
-  };
-
+const handleGarageChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => {
+  const { name, value } = e.target;
+  setGarageData(prev => ({ ...prev, [name]: value }));
+};
   const handleGaragisteChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setGaragisteData(prev => ({ ...prev, [name]: value }));
@@ -246,7 +247,7 @@ const resetForm = () => {
     email: '',
     password: '',
     phone: '',
-    roleId: roles.find((r: any) => r.name === 'Admin Garage')?._id || ''
+    roleId: (roles.find((r: any) => r.name === 'Admin Garage') as any)?._id || ''
   });
   setError('');
   setSuccess('');
@@ -265,7 +266,7 @@ const resetForm = () => {
       email: '',
       password: '',
       phone: '',
-      roleId: roles.find((r: any) => r.name === 'Admin Garage')?._id || ''
+      roleId: (roles.find((r: any) => r.name === 'Admin Garage') as any)?._id || ''
     });
     setError('');
     setSuccess('');
@@ -392,20 +393,18 @@ if (view === 'list') {
               loading={loading}
             />
           )}
-
-          {step === 2 && createdGarage && (
-            <GaragisteForm
-              garagisteData={garagisteData}
-              roles={roles}
-              onChange={handleGaragisteChange}
-              onSubmit={handleCreateGaragiste}
-              onBack={() => setStep(1)}
-              onCancel={resetForm}
-              loading={loading}
-              showBackButton={true}
-              successMessage={`Garage "${(createdGarage as any).nom}" créé avec succès. Ajoutez maintenant un administrateur pour ce garage.`}
-            />
-          )}
+{step === 2 && createdGarage && (
+  <GaragisteForm
+    garagisteData={garagisteData}
+    roles={roles}
+    onChange={handleGaragisteChange}
+    onSubmit={handleCreateGaragiste}
+    onBack={() => setStep(1)}
+    loading={loading}
+    showBackButton={true}
+    successMessage={`Garage "${(createdGarage as any).nom}" créé avec succès. Ajoutez maintenant un administrateur pour ce garage.`}
+  />
+)}
         </div>
       </div>
     );
@@ -500,7 +499,6 @@ if (view === 'list') {
             roles={roles}
             onChange={handleGaragisteChange}
             onSubmit={handleCreateGaragiste}
-            onCancel={resetForm}
             loading={loading}
           />
         </div>
@@ -521,14 +519,6 @@ if (view === 'list') {
       />
     );
   }
-
-  <ConfirmDialog
-  {...confirmDialog}
-  onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
-  onInputChange={(val: string) =>
-    setConfirmDialog(prev => ({ ...prev, inputValue: val }))
-  }
-/>
 
 
   return null;

@@ -4,13 +4,40 @@ import { Plus, X, Check, User, Car, Calendar, Euro } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getAllGarageClients, loadVehiculesByClient, createDevisForGarage } from "../devis/api";
 
+interface Client {
+  _id: string;
+  nom?: string;
+  nomEffectif?: string;
+  type?: string;
+}
+
+interface Vehicule {
+  _id: string;
+  marque: string;
+  modele: string;
+  immatriculation: string;
+  annee: number;
+}
+
+interface Service {
+  piece: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+interface EstimatedTime {
+  days: number;
+  hours: number;
+  minutes: number;
+}
+
 export default function DevisCreateForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const garageId = searchParams.get('garageId'); // Récupérer garageId depuis l'URL
+  const garageId = searchParams.get('garageId'); // Type: string | null
 
-  const [clients, setClients] = useState([]);
-  const [vehicules, setVehicules] = useState([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [vehicules, setVehicules] = useState<Vehicule[]>([]);
   const [selectedClient, setSelectedClient] = useState("");
   const [selectedVehiculeId, setSelectedVehiculeId] = useState("");
   const [loadingClients, setLoadingClients] = useState(false);
@@ -21,11 +48,11 @@ export default function DevisCreateForm() {
     clientName: "",
     vehicleInfo: "",
     inspectionDate: new Date().toISOString().split('T')[0],
-    services: [{ piece: "", quantity: 1, unitPrice: 0 }],
+    services: [{ piece: "", quantity: 1, unitPrice: 0 }] as Service[],
     maindoeuvre: 0,
     tvaRate: 19,
     remiseRate: 0,
-    estimatedTime: { days: 0, hours: 0, minutes: 0 }
+    estimatedTime: { days: 0, hours: 0, minutes: 0 } as EstimatedTime
   });
 
   // Charger les clients au montage du composant
@@ -36,12 +63,15 @@ export default function DevisCreateForm() {
       return;
     }
     loadClients();
-  }, [garageId]);
+  }, [garageId, router]);
 
   const loadClients = async () => {
+    if (!garageId) return; // Protection supplémentaire
+    
     setLoadingClients(true);
     try {
-      const clientsData = await getAllGarageClients(garageId);
+      // ✅ Conversion de null en undefined
+      const clientsData = await getAllGarageClients(garageId || undefined);
       setClients(clientsData || []);
     } catch (error) {
       console.error("Erreur chargement clients:", error);
@@ -50,39 +80,40 @@ export default function DevisCreateForm() {
     setLoadingClients(false);
   };
 
-
-const handleClientChange = async (clientId: string) => {
-  setSelectedClient(clientId);
-  setSelectedVehiculeId("");
-  setVehicules([]);
-  
-  const client = clients.find((c: any) => c._id === clientId);
-  if (client) {
-    // ✅ Utiliser nomEffectif au lieu de nom
-    const nomClient = client.nomEffectif || client.nom || 'Client inconnu';
+  const handleClientChange = async (clientId: string) => {
+    if (!garageId) return;
     
-    setFormData(prev => ({ 
-      ...prev, 
-      clientName: nomClient,  // ✅ Changé ici
-      vehicleInfo: ""
-    }));
+    setSelectedClient(clientId);
+    setSelectedVehiculeId("");
+    setVehicules([]);
     
-    setLoadingVehicules(true);
-    try {
-      const vehs = await loadVehiculesByClient(clientId, garageId);
-      setVehicules(vehs || []);
-    } catch (error) {
-      console.error("Erreur chargement véhicules:", error);
-      alert("❌ Erreur lors du chargement des véhicules");
+    const client = clients.find((c) => c._id === clientId);
+    if (client) {
+      const nomClient = client.nomEffectif || client.nom || 'Client inconnu';
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        clientName: nomClient,
+        vehicleInfo: ""
+      }));
+      
+      setLoadingVehicules(true);
+      try {
+        // ✅ Conversion de null en undefined
+        const vehs = await loadVehiculesByClient(clientId, garageId || undefined);
+        setVehicules(vehs || []);
+      } catch (error) {
+        console.error("Erreur chargement véhicules:", error);
+        alert("❌ Erreur lors du chargement des véhicules");
+      }
+      setLoadingVehicules(false);
     }
-    setLoadingVehicules(false);
-  }
-};
+  };
 
   // Sélectionner un véhicule
   const handleVehicleChange = (vehicleId: string) => {
     setSelectedVehiculeId(vehicleId);
-    const veh = vehicules.find((v: any) => v._id === vehicleId);
+    const veh = vehicules.find((v) => v._id === vehicleId);
     setFormData(prev => ({
       ...prev,
       vehicleInfo: veh ? `${veh.marque} ${veh.modele} (${veh.immatriculation})` : ""
@@ -106,7 +137,7 @@ const handleClientChange = async (clientId: string) => {
     }
   };
 
-  const updateService = (index: number, field: string, value: any) => {
+  const updateService = (index: number, field: keyof Service, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       services: prev.services.map((service, i) =>
@@ -140,6 +171,11 @@ const handleClientChange = async (clientId: string) => {
 
   // Sauvegarder le devis
   const handleSaveDevis = async () => {
+    if (!garageId) {
+      alert("⚠️ Aucun garage sélectionné");
+      return;
+    }
+
     if (!selectedClient || !selectedVehiculeId) {
       alert("⚠️ Veuillez sélectionner un client et un véhicule");
       return;
@@ -170,11 +206,10 @@ const handleClientChange = async (clientId: string) => {
         montantRemise: totals.montantRemise
       };
 
+      // ✅ garageId est garanti non-null ici grâce au check ci-dessus
       await createDevisForGarage(garageId, devisData);
       
       alert("✅ Devis créé avec succès !");
-      
-      // Rediriger vers la liste des devis
       router.push('/gestion-centrale');
       
     } catch (error) {
@@ -237,8 +272,7 @@ const handleClientChange = async (clientId: string) => {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">-- Sélectionner un client --</option>
-                    {clients.map((c: any) => (
-                      // ✅ Modifier l'affichage dans le select - ligne ~246
+                    {clients.map((c) => (
                       <option key={c._id} value={c._id}>
                         {c.nomEffectif || c.nom} {c.type && `(${c.type})`}
                       </option>
@@ -268,7 +302,7 @@ const handleClientChange = async (clientId: string) => {
                         : "-- Sélectionner un véhicule --"
                       }
                     </option>
-                    {vehicules.map((v: any) => (
+                    {vehicules.map((v) => (
                       <option key={v._id} value={v._id}>
                         {v.marque} {v.modele} - {v.immatriculation} ({v.annee})
                       </option>

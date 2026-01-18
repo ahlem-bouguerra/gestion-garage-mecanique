@@ -1,9 +1,7 @@
 
 import { createTimeFrameExtractor } from "@/utils/timeframe-extractor";
 import { Metadata } from "next";
-import SuperAdminTable from "@/components/TableSuperAdmin/inex.tsx";
-
-
+import SuperAdminTable from "@/components/TableSuperAdmin"
 export const metadata: Metadata = {
   title: "Basic Chart",
 };

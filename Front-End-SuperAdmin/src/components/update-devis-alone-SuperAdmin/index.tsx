@@ -10,8 +10,8 @@ export default function DevisUpdateForm() {
   const garageId = searchParams.get('garageId');
   const devisId = searchParams.get('devisId'); // 🆕 ID du devis à modifier
 
-  const [clients, setClients] = useState([]);
-  const [vehicules, setVehicules] = useState([]);
+const [clients, setClients] = useState<any[]>([]);
+const [vehicules, setVehicules] = useState<any[]>([]);
   const [selectedClient, setSelectedClient] = useState("");
   const [selectedVehiculeId, setSelectedVehiculeId] = useState("");
   const [loadingClients, setLoadingClients] = useState(false);
@@ -44,14 +44,14 @@ export default function DevisUpdateForm() {
   const loadDevisData = async () => {
     setLoadingDevis(true);
     try {
-      const devis = await getDevisById(devisId);
+      const devis = await getDevisById(devisId as string);
       
       // Remplir le formulaire avec les données existantes
       setFormData({
         clientName: devis.clientName || "",
         vehicleInfo: devis.vehicleInfo || "",
         inspectionDate: devis.inspectionDate?.split('T')[0] || new Date().toISOString().split('T')[0],
-        services: devis.services?.length > 0 ? devis.services.map(s => ({
+        services: devis.services?.length > 0 ? devis.services.map((s: any) => ({
           piece: s.piece || "",
           quantity: s.quantity || 1,
           unitPrice: s.unitPrice || 0
@@ -67,7 +67,7 @@ export default function DevisUpdateForm() {
 
       // Charger les véhicules du client
       if (devis.clientId) {
-        const vehs = await loadVehiculesByClient(devis.clientId, garageId);
+        const vehs = await loadVehiculesByClient(devis.clientId, garageId as string);
         setVehicules(vehs || []);
       }
 
@@ -82,7 +82,7 @@ export default function DevisUpdateForm() {
   const loadClients = async () => {
     setLoadingClients(true);
     try {
-      const clientsData = await getAllGarageClients(garageId);
+      const clientsData = await getAllGarageClients(garageId as string);
       setClients(clientsData || []);
     } catch (error) {
       console.error("Erreur chargement clients:", error);
@@ -106,7 +106,7 @@ export default function DevisUpdateForm() {
       
       setLoadingVehicules(true);
       try {
-        const vehs = await loadVehiculesByClient(clientId, garageId);
+        const vehs = await loadVehiculesByClient(clientId, garageId as string);
         setVehicules(vehs || []);
       } catch (error) {
         console.error("Erreur chargement véhicules:", error);
@@ -202,7 +202,7 @@ export default function DevisUpdateForm() {
         montantRemise: totals.montantRemise
       };
 
-      await updateDevis(devisId, devisData);
+      await updateDevis(devisId as string, devisData);
       
       alert("✅ Devis mis à jour avec succès !");
       router.push('/gestion-centrale');

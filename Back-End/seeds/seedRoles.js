@@ -19,7 +19,11 @@ const roles = [
   },
   {
     name: "Super Admin",
-    description: "Administrateur principale de toute l'application, accès complet"
+    description: "Administrateur principal de toute l'application, accès complet"
+  },
+  {
+    name: "Client",
+    description: "Client du garage"
   }
 ];
 
@@ -28,25 +32,34 @@ const seedRoles = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("✅ Connecté à MongoDB");
 
-    // Vérifier si les rôles existent déjà
-    const existingRoles = await Role.find({});
-    if (existingRoles.length > 0) {
-      console.log("ℹ️ Les rôles existent déjà :", existingRoles.map(r => r.name));
-      process.exit(0);
+    let created = 0;
+    let updated = 0;
+
+    for (const role of roles) {
+      const result = await Role.findOneAndUpdate(
+        { name: role.name },   // clé unique
+        { $set: role },        // données à créer / mettre à jour
+        { upsert: true, new: true }
+      );
+
+      if (result) {
+        created++; // MongoDB ne dit pas directement créé vs update, on compte logiquement
+      }
     }
 
-    // Créer les rôles
-    const createdRoles = await Role.insertMany(roles);
-    console.log("✅ Rôles créés avec succès :");
-    createdRoles.forEach(role => {
-      console.log(`  - ${role.name} (ID: ${role._id})`);
-    });
+    console.log(`✅ Seeder terminé : ${roles.length} rôles vérifiés / créés`);
+
+    // Affichage final
+    const allRoles = await Role.find({});
+    console.log("📋 Rôles en base :");
+    allRoles.forEach(r => console.log(`  - ${r.name}`));
 
     process.exit(0);
   } catch (error) {
-    console.error("❌ Erreur :", error.message);
+    console.error("❌ Erreur :", error);
     process.exit(1);
   }
 };
 
 seedRoles();
+

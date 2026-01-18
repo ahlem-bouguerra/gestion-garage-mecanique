@@ -38,9 +38,39 @@ async function seedRolePermissions() {
         ...permissions.map(p => p.name)
       ],
 
+      'Client': [
+        // Véhicules (gestion de ses propres véhicules)
+        'view_vehicule',
+        'create_vehicule',
+        'update_vehicule',
+        'client_delete_vehicule',
+        
+        // Carnet d'entretien (consultation et création pour ses véhicules)
+        'view_carnet',
+        'create_carnet',
+        
+        // Devis (consultation uniquement)
+        'view_devis',
+        
+        // Factures (consultation uniquement)
+        'view_facture',
+        'view_credit_note',
+        
+        // Services (consultation des services disponibles)
+        'view_service',
+        
+        // Réservations (gestion complète de ses réservations)
+        'client_create_reservation',
+        'client_view_reservation',
+        'client_update_reservation',
+        'client_cancel_reservation',
+        
+        // Ordres de travail (consultation de ses ordres uniquement)
+        'get_ordres',
+      ],
+
+
       'Admin Garage': [
-        
-        
         // Clients
         'create_client',
         'view_client',

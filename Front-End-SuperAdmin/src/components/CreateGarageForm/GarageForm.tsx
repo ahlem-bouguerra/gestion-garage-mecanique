@@ -14,6 +14,10 @@ interface GarageFormProps {
   loading: boolean;
   onLocationChange?: (location: [number, number]) => void;
 }
+interface HoraireGroup {
+  jours: string[];
+  horaire: string;
+}
 
 export default function GarageForm({ garageData, onChange, onSubmit, loading, onLocationChange }: GarageFormProps) {
   const [phoneError, setPhoneError] = useState("");
@@ -233,44 +237,48 @@ const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
   };
 
   // ✅ Générer la chaîne horaires pour le backend
-  const generateHorairesString = (horaireData: typeof horaires) => {
-    const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-    const joursAbrev: Record<string, string> = {
-      lundi: 'Lun', mardi: 'Mar', mercredi: 'Mer', jeudi: 'Jeu',
-      vendredi: 'Ven', samedi: 'Sam', dimanche: 'Dim'
-    };
-
-    let result: string[] = [];
-    let tempGroup: { jours: string[], horaire: string } | null = null;
-
-    jours.forEach((jour) => {
-      const h = horaireData[jour as keyof typeof horaires];
-      const horaire = h.ferme 
-        ? 'Fermé' 
-        : `${h.debut.replace(':', 'h')}-${h.fin.replace(':', 'h')}`;
-
-      if (tempGroup && tempGroup.horaire === horaire) {
-        tempGroup.jours.push(joursAbrev[jour]);
-      } else {
-        if (tempGroup) {
-          const joursStr = tempGroup.jours.length > 1 
-            ? `${tempGroup.jours[0]}-${tempGroup.jours[tempGroup.jours.length - 1]}`
-            : tempGroup.jours[0];
-          result.push(`${joursStr}: ${tempGroup.horaire}`);
-        }
-        tempGroup = { jours: [joursAbrev[jour]], horaire };
-      }
-    });
-
-    if (tempGroup) {
-      const joursStr = tempGroup.jours.length > 1 
-        ? `${tempGroup.jours[0]}-${tempGroup.jours[tempGroup.jours.length - 1]}`
-        : tempGroup.jours[0];
-      result.push(`${joursStr}: ${tempGroup.horaire}`);
-    }
-
-    return result.join(', ');
+const generateHorairesString = (horaireData: typeof horaires): string => {
+  const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+  const joursAbrev: Record<string, string> = {
+    lundi: 'Lun', mardi: 'Mar', mercredi: 'Mer', jeudi: 'Jeu',
+    vendredi: 'Ven', samedi: 'Sam', dimanche: 'Dim'
   };
+
+  const result: string[] = [];
+  let tempGroup: HoraireGroup | null = null;
+
+  jours.forEach((jour) => {
+    const h = horaireData[jour as keyof typeof horaires];
+    const horaire = h.ferme 
+      ? 'Fermé' 
+      : `${h.debut.replace(':', 'h')}-${h.fin.replace(':', 'h')}`;
+
+    if (tempGroup && tempGroup.horaire === horaire) {
+      tempGroup.jours.push(joursAbrev[jour]);
+    } else {
+      if (tempGroup) {
+        // 🔥 Utiliser l'assertion de type ici aussi
+        const group = tempGroup as HoraireGroup;
+        const joursStr = group.jours.length > 1 
+          ? `${group.jours[0]}-${group.jours[group.jours.length - 1]}`
+          : group.jours[0];
+        result.push(`${joursStr}: ${group.horaire}`);
+      }
+      tempGroup = { jours: [joursAbrev[jour]], horaire } as HoraireGroup;
+    }
+  });
+
+  // 🔥 Et ici aussi !
+  if (tempGroup) {
+    const group = tempGroup as HoraireGroup;
+    const joursStr = group.jours.length > 1 
+      ? `${group.jours[0]}-${group.jours[group.jours.length - 1]}`
+      : group.jours[0];
+    result.push(`${joursStr}: ${group.horaire}`);
+  }
+
+  return result.join(', ');
+};
 
   // ✅ Gérer le changement d'horaires
   const handleHoraireChange = (jour: string, field: 'debut' | 'fin' | 'ferme', value: string | boolean) => {

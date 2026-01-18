@@ -31,6 +31,7 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connecté"))
   .catch((err) => console.error("Erreur MongoDB :", err));
 
+
 // Sessions (obligatoire pour Passport)
 app.use(
   session({

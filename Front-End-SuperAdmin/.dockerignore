@@ -1,5 +1,9 @@
 node_modules
+.next
+out
 npm-debug.log
+.env
+.env*.local
 .git
 .gitignore
 .DS_Store
@@ -8,4 +12,5 @@ npm-debug.log
 .idea
 coverage
 .nyc_output
+README.md
 

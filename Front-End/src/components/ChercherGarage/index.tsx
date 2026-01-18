@@ -416,8 +416,8 @@ const handleReservation = (garage) => {
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Header de recherche */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
           Trouvez un garage près de chez vous
         </h1>
         
@@ -427,7 +427,7 @@ const handleReservation = (garage) => {
           <input
             type="text"
             placeholder="Rechercher un garage par nom..."
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -483,12 +483,12 @@ const handleReservation = (garage) => {
         {/* Toggle vue liste/carte */}
         <div className="flex justify-between items-center">
           <div className="flex flex-col gap-4">
-  <p className="text-gray-600">
+  <p className="text-gray-600 dark:text-gray-300">
     {garages.length} garage{garages.length > 1 ? 's' : ''} trouvé{garages.length > 1 ? 's' : ''}
   </p>
   
   {userLocation && (
-    <div className="text-sm bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+    <div className="text-sm bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg border border-green-200 dark:border-green-800">
       <div className="flex items-center gap-2 text-green-700">
         <span className="text-green-600">📍</span>
         <span className="font-medium">Position détectée</span>
@@ -513,7 +513,7 @@ const handleReservation = (garage) => {
             <button
               onClick={() => setViewMode('list')}
               className={`px-4 py-2 rounded-md flex items-center gap-2 ${
-                viewMode === 'list' ? 'bg-white shadow' : 'text-gray-600'
+                viewMode === 'list' ? 'bg-white shadow' : 'text-gray-600 dark:text-gray-300'
               }`}
             >
               <List className="h-4 w-4" />
@@ -522,7 +522,7 @@ const handleReservation = (garage) => {
             <button
               onClick={() => setViewMode('map')}
               className={`px-4 py-2 rounded-md flex items-center gap-2 ${
-                viewMode === 'map' ? 'bg-white shadow' : 'text-gray-600'
+                viewMode === 'map' ? 'bg-white shadow' : 'text-gray-600 dark:text-gray-300'
               }`}
             >
               <Map className="h-4 w-4" />
@@ -551,7 +551,7 @@ const handleReservation = (garage) => {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {garages.map((garage) => (
-                <div key={garage._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div key={garage._id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-3">
                       <div>
@@ -563,7 +563,7 @@ const handleReservation = (garage) => {
 
                       <div className="flex flex-col items-end gap-1">
                         {garage.distance && (
-                          <span className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">
+                          <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm px-2 py-1 rounded-full">
                             📏 {garage.distance.toFixed(1)} km
                           </span>
                         )}
@@ -576,7 +576,7 @@ const handleReservation = (garage) => {
                       </div>
                     </div>
                     
-                    <div className="space-y-2 text-gray-600">
+                    <div className="space-y-2 text-gray-600 dark:text-gray-300">
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />
                         <span className="text-sm">
@@ -618,7 +618,7 @@ const handleReservation = (garage) => {
                       </button>
                       <button 
                         onClick={() => getDirections(garage)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1"
+                        className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1 dark:text-white"
                       >
                         <Navigation className="h-4 w-4" />
                         Itinéraire
@@ -632,12 +632,12 @@ const handleReservation = (garage) => {
         </>  
       )}
 {selectedGarage && (
-  <div className="bg-white rounded-lg shadow-lg p-6 mt-6 border-l-4 border-blue-500">
+  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mt-6 border-l-4 border-blue-500">
     <div className="flex justify-between items-start mb-4">
       <h2 className="text-2xl font-bold text-gray-800">{selectedGarage.garagenom}</h2>
       <button 
         onClick={() => setSelectedGarage(null)}
-        className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200"
+        className="text-gray-400 hover:text-gray-600 dark:text-gray-300 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200"
         aria-label="Fermer"
       >
         ×
@@ -652,14 +652,14 @@ const handleReservation = (garage) => {
         </h3>
         
         <div className="space-y-3">
-          <div className="flex items-center gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+          <div className="flex items-center gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
               <span className="text-blue-600">👤</span>
             </div>
             <span className="font-medium">{selectedGarage.username || 'Propriétaire non spécifié'}</span>
           </div>
           
-          <div className="flex items-start gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+          <div className="flex items-start gap-3 text-gray-700 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
               <span className="text-blue-600">📍</span>
             </div>
@@ -731,7 +731,7 @@ const handleReservation = (garage) => {
                 </div>
                 
                 {service.description && (
-                  <p className="text-gray-600 text-sm leading-relaxed">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                     {service.description}
                   </p>
                 )}
@@ -743,7 +743,7 @@ const handleReservation = (garage) => {
             <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
               <span className="text-gray-400 text-2xl">🔧</span>
             </div>
-            <p className="text-gray-500 font-medium">Aucun service disponible</p>
+            <p className="text-gray-500 dark:text-gray-400 font-medium">Aucun service disponible</p>
             <p className="text-gray-400 text-sm mt-1">Ce garage n'a pas encore ajouté de services.</p>
           </div>
         )}
@@ -766,7 +766,7 @@ const handleReservation = (garage) => {
       {/* Message si aucun résultat */}
       {garages.length === 0 && !loading && (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">Aucun garage trouvé pour votre recherche.</p>
+          <p className="text-gray-500 dark:text-gray-400 text-lg">Aucun garage trouvé pour votre recherche.</p>
           <p className="text-gray-400 mt-2">Essayez d'élargir vos critères de recherche ou augmenter le rayon.</p>
           {userLocation && (
             <p className="text-blue-500 mt-2 text-sm">
